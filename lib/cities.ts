@@ -28,3 +28,34 @@ export const CITIES: City[] = [
 export function cityKey(c: City): string {
   return `${c.name}, ${c.country}`;
 }
+
+function haversineKm(a: City, lat: number, lng: number): number {
+  const R = 6371;
+  const dLat = ((lat - a.lat) * Math.PI) / 180;
+  const dLng = ((lng - a.lng) * Math.PI) / 180;
+  const s1 = Math.sin(dLat / 2);
+  const s2 = Math.sin(dLng / 2);
+  const h =
+    s1 * s1 +
+    Math.cos((a.lat * Math.PI) / 180) * Math.cos((lat * Math.PI) / 180) * s2 * s2;
+  return 2 * R * Math.asin(Math.min(1, Math.sqrt(h)));
+}
+
+/** Nearest curated city to a lat/lng — for “Use my location”. */
+export function nearestCity(lat: number, lng: number): City {
+  let best = CITIES[0];
+  let bestD = Infinity;
+  for (const c of CITIES) {
+    const d = haversineKm(c, lat, lng);
+    if (d < bestD) {
+      bestD = d;
+      best = c;
+    }
+  }
+  return best;
+}
+
+export function indexOfCity(city: City): number {
+  const i = CITIES.findIndex((c) => cityKey(c) === cityKey(city));
+  return i >= 0 ? i : 0;
+}

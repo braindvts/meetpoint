@@ -4,12 +4,13 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Nav from "@/components/Nav";
+import Avatar from "@/components/Avatar";
 import { PEOPLE } from "@/lib/data";
 import { distanceKm, formatDistance, midpointRestaurants, restaurantsInCity } from "@/lib/match";
 import { getConnection, loadProfile, setMeetup } from "@/lib/store";
 import type { MeetMode, MyProfile, Restaurant } from "@/lib/types";
 
-const PRICE = ["$", "$$", "$$$"];
+const PRICE = ["$$$", "$$$$", "$$$$$"];
 
 export default function Planner({ peerId }: { peerId: string }) {
   const router = useRouter();
@@ -93,12 +94,17 @@ export default function Planner({ peerId }: { peerId: string }) {
     return (
       <>
         <Nav />
-        <main className="mx-auto max-w-xl px-6 py-20 pb-24 text-center">
-          <div className="text-6xl">🎉</div>
-          <h1 className="mt-4 text-3xl font-extrabold tracking-tight">It&apos;s happening!</h1>
-          <p className="mt-3 text-slate-400">
-            You and <span className="font-semibold text-slate-200">{person.name}</span> are meeting at{" "}
-            <span className="font-semibold text-slate-200">{r?.name}</span> in {r?.city} on{" "}
+        <main className="mx-auto max-w-xl px-6 py-24 pb-24 text-center">
+          <div className="lux-divider mx-auto mb-10 max-w-48">
+            <span className="text-accent" aria-hidden>◆</span>
+          </div>
+          <p className="font-display text-6xl italic text-accent-2">Confirmed</p>
+          <h1 className="mt-5 text-[11px] font-semibold uppercase tracking-[0.32em] text-muted">
+            The table is set
+          </h1>
+          <p className="mt-6 font-display text-xl leading-relaxed text-ivory/90">
+            You and <span className="font-semibold text-ivory">{person.name}</span> are meeting at{" "}
+            <span className="font-semibold text-ivory">{r?.name}</span> in {r?.city} on{" "}
             {new Date(date + "T12:00:00").toLocaleDateString(undefined, {
               weekday: "long",
               month: "long",
@@ -106,11 +112,14 @@ export default function Planner({ peerId }: { peerId: string }) {
             })}
             .
           </p>
+          <div className="lux-divider mx-auto mt-10 max-w-48">
+            <span className="text-accent" aria-hidden>◆</span>
+          </div>
           <Link
             href="/connections"
-            className="mt-8 inline-block rounded-xl bg-accent px-8 py-3.5 font-semibold text-white transition hover:bg-accent-2"
+            className="mt-10 inline-block rounded-full bg-gradient-to-b from-accent-2 to-accent px-8 py-3.5 text-sm font-semibold text-ink transition hover:brightness-110"
           >
-            Back to connections
+            Back to your circle
           </Link>
         </main>
       </>
@@ -120,23 +129,37 @@ export default function Planner({ peerId }: { peerId: string }) {
   return (
     <>
       <Nav />
-      <main className="mx-auto max-w-3xl px-4 py-8 pb-24 sm:px-6">
-        <Link href="/connections" className="text-sm text-slate-400 hover:text-slate-200">
-          ← Connections
+      <main className="mx-auto max-w-3xl px-4 py-10 pb-24 sm:px-6">
+        <Link
+          href="/connections"
+          className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted transition hover:text-accent-2"
+        >
+          ← Your circle
         </Link>
 
-        <div className="mt-4 mb-8 flex items-center gap-4">
-          <span className="grid h-14 w-14 place-items-center rounded-2xl bg-panel-2 text-3xl">{person.emoji}</span>
+        <div className="mt-8 mb-12 flex items-center gap-5">
+          <Avatar src={person.photoUrl} name={person.name} sizeCls="h-16 w-16" rounded="rounded-full" />
           <div>
-            <h1 className="text-2xl font-extrabold tracking-tight">Plan your meetup with {person.name.split(" ")[0]}</h1>
-            <p className="text-sm text-slate-400">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.42em] text-accent">
+              Curate the table
+            </p>
+            <h1 className="mt-2 font-display text-3xl font-semibold tracking-tight sm:text-4xl">
+              Dinner with {person.name.split(" ")[0]}
+              <span className="italic text-accent-2">.</span>
+            </h1>
+            <p className="mt-1 text-sm text-muted">
               {person.city.name}, {person.city.country} · {formatDistance(km)}
             </p>
           </div>
         </div>
 
-        <section className="mb-8">
-          <h2 className="mb-3 text-sm font-semibold text-slate-300">1. Who travels?</h2>
+        <section className="mb-12 border-t border-line/70 pt-8">
+          <div className="mb-6 flex items-baseline gap-4">
+            <span className="font-display text-sm italic text-accent">01</span>
+            <h2 className="font-display text-2xl font-semibold tracking-tight text-ivory">
+              Who travels?
+            </h2>
+          </div>
           <div className="grid gap-3 sm:grid-cols-3">
             {modes.map((m) => (
               <button
@@ -145,21 +168,28 @@ export default function Planner({ peerId }: { peerId: string }) {
                   setMode(m.value);
                   setRestaurantId("");
                 }}
-                className={`rounded-2xl border p-4 text-left transition ${
-                  mode === m.value ? "border-accent bg-accent/10" : "border-line bg-panel hover:bg-panel-2"
+                className={`border p-5 text-left transition ${
+                  mode === m.value
+                    ? "border-accent/60 bg-accent/10"
+                    : "border-line/70 bg-panel/60 hover:border-accent/30"
                 }`}
               >
-                <p className="font-semibold">{m.title}</p>
-                <p className="mt-1 text-xs leading-relaxed text-slate-400">{m.text}</p>
+                <p className="font-display text-lg font-semibold text-ivory">{m.title}</p>
+                <p className="mt-1.5 text-xs leading-relaxed text-muted">{m.text}</p>
               </button>
             ))}
           </div>
         </section>
 
-        <section className="mb-8">
-          <h2 className="mb-3 text-sm font-semibold text-slate-300">2. Pick the restaurant</h2>
+        <section className="mb-12 border-t border-line/70 pt-8">
+          <div className="mb-6 flex items-baseline gap-4">
+            <span className="font-display text-sm italic text-accent">02</span>
+            <h2 className="font-display text-2xl font-semibold tracking-tight text-ivory">
+              Choose the restaurant
+            </h2>
+          </div>
           {options.length === 0 ? (
-            <p className="rounded-xl border border-line bg-panel p-5 text-sm text-slate-400">
+            <p className="border border-line bg-panel/60 p-6 text-sm text-muted">
               No listed restaurants here yet — try another option above.
             </p>
           ) : (
@@ -168,55 +198,74 @@ export default function Planner({ peerId }: { peerId: string }) {
                 <button
                   key={r.id}
                   onClick={() => setRestaurantId(r.id)}
-                  className={`rounded-2xl border p-4 text-left transition ${
-                    restaurantId === r.id ? "border-accent bg-accent/10" : "border-line bg-panel hover:bg-panel-2"
+                  className={`group border p-5 text-left transition ${
+                    restaurantId === r.id
+                      ? "border-accent/60 bg-accent/10"
+                      : "border-line/70 bg-panel/60 hover:border-accent/30"
                   }`}
                 >
-                  <div className="flex items-center justify-between">
-                    <p className="font-semibold">{r.name}</p>
-                    <span className="text-xs text-slate-500">{PRICE[r.priceLevel - 1]}</span>
+                  <div className="flex items-baseline justify-between gap-3">
+                    <p className="font-display text-lg font-semibold text-ivory">{r.name}</p>
+                    <span className="text-xs tracking-[0.2em] text-accent-2">
+                      {PRICE[r.priceLevel - 1]}
+                    </span>
                   </div>
-                  <p className="mt-0.5 text-xs text-slate-400">
+                  <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted">
                     {r.cuisine} · {r.city}, {r.country}
                   </p>
-                  <p className="mt-2 text-xs italic text-slate-500">“{r.vibe}”</p>
+                  <p className="mt-3 font-display text-sm italic leading-relaxed text-ivory/70">
+                    “{r.vibe}”
+                  </p>
                 </button>
               ))}
             </div>
           )}
         </section>
 
-        <section className="mb-8 grid gap-4 sm:grid-cols-2">
+        <section className="mb-12 grid gap-8 border-t border-line/70 pt-8 sm:grid-cols-2">
           <div>
-            <h2 className="mb-3 text-sm font-semibold text-slate-300">3. When?</h2>
+            <div className="mb-5 flex items-baseline gap-4">
+              <span className="font-display text-sm italic text-accent">03</span>
+              <h2 className="font-display text-2xl font-semibold tracking-tight text-ivory">
+                The date
+              </h2>
+            </div>
             <input
               type="date"
               value={date}
               min={new Date().toISOString().slice(0, 10)}
               onChange={(e) => setDate(e.target.value)}
-              className="w-full rounded-xl border border-line bg-panel px-4 py-3 text-sm outline-none focus:border-accent"
+              className="w-full border-0 border-b border-line bg-transparent px-0 py-3 text-base text-ivory outline-none transition focus:border-accent"
             />
           </div>
           <div>
-            <h2 className="mb-3 text-sm font-semibold text-slate-300">
-              Note <span className="font-normal text-slate-500">(optional)</span>
-            </h2>
+            <div className="mb-5 flex items-baseline gap-4">
+              <span className="font-display text-sm italic text-accent">04</span>
+              <h2 className="font-display text-2xl font-semibold tracking-tight text-ivory">
+                A note <span className="text-base font-normal text-muted">(optional)</span>
+              </h2>
+            </div>
             <input
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              placeholder="e.g. Bringing my pitch deck!"
-              className="w-full rounded-xl border border-line bg-panel px-4 py-3 text-sm outline-none focus:border-accent"
+              placeholder="Bringing my pitch deck…"
+              className="w-full border-0 border-b border-line bg-transparent px-0 py-3 text-base text-ivory outline-none transition placeholder:text-muted/45 focus:border-accent"
             />
           </div>
         </section>
 
-        <button
-          onClick={confirm}
-          disabled={!restaurantId || !date}
-          className="w-full rounded-xl bg-accent py-3.5 font-semibold text-white shadow-lg shadow-accent/25 transition enabled:hover:bg-accent-2 disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto sm:px-10"
-        >
-          Confirm meetup
-        </button>
+        <div className="flex flex-col items-stretch gap-4 border-t border-line/70 pt-8 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-xs tracking-wide text-muted">
+            Both of you will see the reservation details.
+          </p>
+          <button
+            onClick={confirm}
+            disabled={!restaurantId || !date}
+            className="rounded-full bg-gradient-to-b from-accent-2 to-accent px-10 py-3.5 text-sm font-semibold tracking-wide text-ink shadow-[0_8px_28px_rgba(255,255,255,0.12)] transition enabled:hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            Confirm the table
+          </button>
+        </div>
       </main>
     </>
   );

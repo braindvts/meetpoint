@@ -1,40 +1,74 @@
-# MeetPoint 📍
+# Conclave
 
 **Networking that ends at a real dinner table.**
 
-MeetPoint connects you with people who share your business idea or your profession —
-in your city or across the world. When two people connect, they plan a meetup at a
-restaurant: one person flies to the other, the host picks the spot, or both fly and
-meet in the middle.
+Conclave introduces people matched by ambition or profession, then settles it over dinner.
 
-## Features (MVP)
+## What’s working now
 
-- **Profile** — your job, business ideas, city, and how far you'll travel (near me / my country / worldwide)
-- **Discover** — ranked matches scored by shared ideas, same job, and distance, with filters
-- **Connect** — send a connect request (auto-accepted in this demo)
-- **Plan a meetup** — choose who travels, pick a restaurant, set a date, add a note
+- Landing, splash (first open only), mobile bottom dock
+- LinkedIn OAuth (when env configured) + membership profile
+- **SQLite + Prisma** — profiles, connections, chats persist server-side
+- Discover merges seed members + live `/api/members`
+- Circle with Accept / Decline; DB sync when signed in
+- Private chats (localStorage + server poll every ~4s)
+- Table proposals, booking UI, SMS hook (Twilio optional)
+- Premier / tiers UI; Stripe Checkout when `STRIPE_SECRET_KEY` is set
+- Restaurant suggestions: Google Places when keyed, else curated
+- Geolocation → nearest city, browser notification prompt, report member
+- Error boundary, hardened SMS rate limits
+- Demo entry off in production unless `NEXT_PUBLIC_ENABLE_DEMO=1`
 
-Everything runs in the browser with demo data and `localStorage` — no backend yet.
+## What’s still missing for a real launch
 
-## Getting started
+See **[MISSING.md](./MISSING.md)** for the full list. Short version:
 
+1. **Hosted Postgres** (SQLite is local-dev only)
+2. **True realtime chat** (polling, not WebSockets)
+3. **Your Stripe / Places / Twilio / LinkedIn keys** for live services
+4. **Email verification** (not wired — needs Resend/SendGrid)
+5. **Cloud photo storage**, push (FCM/APNs), analytics, block list
+
+## Getting started / launch
+
+Local:
 ```bash
 npm install
+cp .env.example .env.local
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). Works on desktop and phone browsers.
+**To launch for real people + payments**, follow **[LAUNCH.md](./LAUNCH.md)**  
+(Hosting + Postgres + Stripe + Google Places + Twilio).
 
-## Tech stack
+Check config after deploy: `/api/health`
 
-- [Next.js 15](https://nextjs.org) (App Router) + React 19 + TypeScript
-- [Tailwind CSS v4](https://tailwindcss.com)
-- Demo data + `localStorage` (swap for a real backend later)
+### Env vars
 
-## Roadmap ideas
+Copy from `.env.example`. Important ones:
 
-- Real accounts, real-time chat, and mutual accept flow
-- Live restaurant search (Google Places / Yelp API)
-- Geolocation instead of a city picker
-- Flight-price hints for long-distance meetups
-- Safety features: verified profiles, public-place-only suggestions
+| Variable | Purpose |
+|----------|---------|
+| `DATABASE_URL` | SQLite path (`file:./dev.db`) or Postgres URL |
+| `NEXT_PUBLIC_APP_URL` | App base URL |
+| `AUTH_SECRET` | Session cookie signing |
+| `LINKEDIN_CLIENT_ID` / `SECRET` | LinkedIn OpenID |
+| `STRIPE_SECRET_KEY` | Real Premier / booking checkout |
+| `GOOGLE_PLACES_API_KEY` | Live restaurant search |
+| `TWILIO_*` | Optional booking SMS |
+| `NOTIFY_SECRET` | Optional SMS API lock |
+
+### LinkedIn
+
+1. [LinkedIn Developers](https://www.linkedin.com/developers/apps) → create app  
+2. Redirect: `{NEXT_PUBLIC_APP_URL}/api/auth/linkedin/callback`  
+3. Product: **Sign In with LinkedIn using OpenID Connect**  
+4. Paste Client ID / Secret into `.env.local` and restart
+
+Without LinkedIn keys you can still use **Enter demo** (dev) or create a profile manually.
+
+## Tech
+
+- Next.js 15 · React 19 · TypeScript · Tailwind CSS v4 · Prisma 5  
+- LinkedIn OIDC + signed cookies + member cookie  
+- Hybrid: `localStorage` + SQLite APIs for multi-device

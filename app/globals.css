@@ -1,27 +1,861 @@
 @import "tailwindcss";
 
 @theme {
-  --color-ink: #0b0e14;
-  --color-panel: #131824;
-  --color-panel-2: #1a2131;
-  --color-line: #253048;
-  --color-accent: #f97316;
-  --color-accent-2: #fb923c;
-  --color-mint: #34d399;
-  --color-sky: #38bdf8;
-  --font-sans: "Segoe UI", system-ui, -apple-system, sans-serif;
+  --color-ink: #050505;
+  --color-panel: #0c0b0a;
+  --color-panel-2: #161412;
+  --color-line: #2e2a24;
+  --color-accent: #d4c4a8;
+  --color-accent-2: #efe6d6;
+  --color-ivory: #f3efe6;
+  --color-muted: #8f877a;
+  --color-mint: #b8b0a4;
+  --color-sky: #9c9488;
+  --font-sans: var(--font-source), "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-display: var(--font-source), "Segoe UI", system-ui, -apple-system, sans-serif;
 }
 
 html {
   color-scheme: dark;
+  -webkit-text-size-adjust: 100%;
+  text-rendering: optimizeLegibility;
+}
+
+@media (min-width: 640px) {
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 body {
   background: var(--color-ink);
-  color: #e7ecf5;
+  color: var(--color-ivory);
   font-family: var(--font-sans);
+  font-feature-settings: "ss01", "cv11", "kern";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Quiet, consistent focus — a thin ivory ring, not the browser default */
+:focus-visible {
+  outline: 1px solid rgba(255, 255, 255, 0.55);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+button,
+a {
+  touch-action: manipulation;
+}
+
+/* Warm club atmosphere — champagne wash + grain (desktop) */
+body {
+  background:
+    radial-gradient(ellipse 90% 55% at 50% -20%, rgba(212, 196, 168, 0.08), transparent 55%),
+    radial-gradient(ellipse 40% 35% at 100% 0%, rgba(212, 196, 168, 0.04), transparent 50%),
+    var(--color-ink);
+}
+
+@media (min-width: 640px) {
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.03;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
+
+/* Brass corner frame used on screens + cards */
+.mp-frame {
+  position: relative;
+}
+.mp-frame::before,
+.mp-frame::after {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-color: color-mix(in srgb, var(--color-accent) 55%, transparent);
+  pointer-events: none;
+  z-index: 2;
+}
+.mp-frame::before {
+  top: 10px;
+  left: 10px;
+  border-top: 1px solid;
+  border-left: 1px solid;
+}
+.mp-frame::after {
+  bottom: 10px;
+  right: 10px;
+  border-bottom: 1px solid;
+  border-right: 1px solid;
+}
+
+/* Cinematic room banner */
+.mp-room-banner {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--color-line) 80%, transparent);
+  background:
+    linear-gradient(135deg, rgba(212, 196, 168, 0.08), transparent 42%),
+    linear-gradient(to bottom, #12100e, #080706);
+}
+.mp-room-banner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 80% 20%, rgba(212, 196, 168, 0.12), transparent 55%);
+  pointer-events: none;
+}
+
+/* Floating mobile dock — pinned to the real viewport via portal */
+.mp-mobile-dock {
+  position: fixed !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  pointer-events: none;
+}
+.mp-mobile-dock a {
+  pointer-events: auto;
+}
+.mp-dock {
+  border: 1px solid rgba(212, 196, 168, 0.18);
+  background: rgba(8, 7, 6, 0.92);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+  pointer-events: auto;
+}
+
+/* Segmented filter control */
+.mp-seg {
+  display: inline-flex;
+  padding: 3px;
+  border: 1px solid color-mix(in srgb, var(--color-line) 90%, transparent);
+  background: rgba(0, 0, 0, 0.35);
+}
+.mp-seg button {
+  min-width: 5.5rem;
+  padding: 0.55rem 1rem;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  transition:
+    color 0.25s ease,
+    background 0.25s ease;
+}
+.mp-seg button[aria-pressed="true"] {
+  background: linear-gradient(180deg, rgba(239, 230, 214, 0.95), rgba(212, 196, 168, 0.92));
+  color: #14110e;
+}
+
+/* Native-feeling scroll regions in the mobile app */
+.mp-scroll {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Freeze page chrome under open sheets (phones) */
+@media (max-width: 639px) {
+  html.mp-sheet-open header,
+  html.mp-sheet-open nav[aria-label="App"] {
+    visibility: hidden;
+  }
+}
+
+/*
+ * Chat thread lock — kills the iOS black-gap + document scroll.
+ * Shell is position:fixed inset:0 (NOT 100dvh). Only the message pane scrolls.
+ */
+html.mp-chat-lock,
+html.mp-chat-lock body {
+  height: 100%;
+  overflow: hidden !important;
+  overscroll-behavior: none;
+}
+
+html.mp-chat-lock body {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  touch-action: none;
+}
+
+.mp-chat-shell {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-ink);
+  /* fill the layout viewport; interactive-widget=resizes-content shrinks this with keyboard */
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
+}
+
+.mp-chat-messages {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+  /* column-reverse = new messages don't yank the viewport */
+  display: flex;
+  flex-direction: column-reverse;
+}
+
+.mp-chat-composer {
+  flex: 0 0 auto;
+  background: var(--color-ink);
+  border-top: 1px solid color-mix(in srgb, var(--color-line) 60%, transparent);
+  padding: 0.625rem 0 max(0.5rem, env(safe-area-inset-bottom));
+}
+
+@media (min-width: 640px) {
+  html.mp-chat-lock,
+  html.mp-chat-lock body {
+    height: auto;
+    overflow: auto !important;
+    overscroll-behavior: auto;
+  }
+
+  html.mp-chat-lock body {
+    position: static;
+    inset: auto;
+    width: auto;
+    touch-action: auto;
+  }
+
+  .mp-chat-shell {
+    position: static;
+    z-index: 0;
+    height: calc(100dvh - 4.25rem);
+    max-height: calc(100dvh - 4.25rem);
+    max-width: 48rem;
+    margin-left: auto;
+    margin-right: auto;
+    background: transparent;
+  }
+}
+
+img,
+svg {
+  max-width: 100%;
+}
+
+svg {
+  shape-rendering: geometricPrecision;
 }
 
 ::selection {
-  background: rgba(249, 115, 22, 0.35);
+  background: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-ink);
+}
+::-webkit-scrollbar-thumb {
+  background: #2a2a2a;
+  border-radius: 4px;
+}
+
+.lux-divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.lux-divider::before,
+.lux-divider::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: linear-gradient(to var(--dir, right), transparent, rgba(255, 255, 255, 0.35));
+}
+.lux-divider::before {
+  --dir: right;
+}
+.lux-divider::after {
+  --dir: left;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes softGlow {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.75;
+  }
+}
+
+@keyframes kenburns {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.08);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+@keyframes lineDraw {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes messageIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes tabUnderline {
+  from {
+    transform: scaleX(0.35);
+    opacity: 0;
+  }
+  to {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+/* —— Premium motion utilities (transform/opacity only) —— */
+.mp-reveal {
+  animation: fadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.mp-reveal-delay-1 {
+  animation-delay: 0.06s;
+}
+.mp-reveal-delay-2 {
+  animation-delay: 0.12s;
+}
+.mp-reveal-delay-3 {
+  animation-delay: 0.18s;
+}
+.mp-reveal-delay-4 {
+  animation-delay: 0.24s;
+}
+
+.mp-stagger > * {
+  animation: fadeUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.mp-stagger > *:nth-child(1) {
+  animation-delay: 0.02s;
+}
+.mp-stagger > *:nth-child(2) {
+  animation-delay: 0.07s;
+}
+.mp-stagger > *:nth-child(3) {
+  animation-delay: 0.12s;
+}
+.mp-stagger > *:nth-child(4) {
+  animation-delay: 0.17s;
+}
+.mp-stagger > *:nth-child(5) {
+  animation-delay: 0.22s;
+}
+.mp-stagger > *:nth-child(6) {
+  animation-delay: 0.27s;
+}
+.mp-stagger > *:nth-child(7) {
+  animation-delay: 0.32s;
+}
+.mp-stagger > *:nth-child(8) {
+  animation-delay: 0.37s;
+}
+.mp-stagger > *:nth-child(n + 9) {
+  animation-delay: 0.4s;
+}
+
+.mp-backdrop-in {
+  animation: fadeIn 0.28s ease-out both;
+}
+
+.mp-modal-in {
+  animation: scaleIn 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.mp-toast-in {
+  animation: toastIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.mp-msg-in {
+  animation: messageIn 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.mp-line {
+  transform-origin: left center;
+  animation: lineDraw 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.mp-tab-active {
+  transform-origin: center bottom;
+  animation: tabUnderline 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Primary CTA — soft light sweep (not neon) */
+.mp-btn-lux {
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.25s ease;
+}
+.mp-btn-lux::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.22) 50%,
+    transparent 60%
+  );
+  transform: translateX(-120%);
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+.mp-btn-lux:hover::after,
+.mp-btn-lux:focus-visible::after {
+  transform: translateX(120%);
+}
+.mp-btn-lux:active {
+  transform: scale(0.98);
+}
+
+/* Cards — hover lift on desktop, press on touch */
+.mp-card-motion {
+  transition:
+    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.35s ease,
+    box-shadow 0.45s ease;
+  will-change: transform;
+}
+@media (hover: hover) and (pointer: fine) {
+  .mp-card-motion:hover {
+    transform: translateY(-4px);
+  }
+  .mp-card-motion:hover .mp-card-photo {
+    transform: scale(1.04);
+  }
+}
+.mp-card-motion:active {
+  transform: scale(0.985);
+}
+.mp-card-photo {
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+/* —— Splash / loading seal —— */
+@keyframes splashSealIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.88);
+  }
+  55% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes splashRing {
+  0% {
+    opacity: 0;
+    transform: scale(0.7) rotate(-8deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes splashWord {
+  from {
+    opacity: 0;
+    letter-spacing: 0.35em;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    letter-spacing: 0.02em;
+    transform: translateY(0);
+  }
+}
+
+@keyframes splashTag {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes splashOut {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@keyframes splashLine {
+  from {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+  to {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+.mp-splash {
+  animation: fadeIn 0.2s ease-out both;
+}
+.mp-splash-out {
+  animation: splashOut 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  pointer-events: none;
+}
+.mp-splash-seal {
+  animation: splashSealIn 1.05s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.mp-splash-ring {
+  position: absolute;
+  inset: -28% -18%;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  animation: splashRing 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
+  pointer-events: none;
+}
+.mp-splash-ring::after {
+  content: "";
+  position: absolute;
+  inset: 10%;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+.mp-splash-word {
+  animation: splashWord 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.35s both;
+}
+.mp-splash-tag {
+  animation: splashTag 0.7s ease-out 0.7s both;
+}
+.mp-splash-line {
+  transform-origin: center;
+  animation: splashLine 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.55s both;
+}
+
+/* Route enter */
+/* Opacity only — transform on this wrapper breaks position:fixed nav */
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.mp-page-enter {
+  animation: pageEnter 0.35s ease-out both;
+}
+
+/* List row press */
+.mp-row {
+  transition:
+    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.28s ease,
+    background-color 0.28s ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .mp-row:hover {
+    border-color: rgba(255, 255, 255, 0.22);
+    background-color: rgba(255, 255, 255, 0.02);
+  }
+}
+.mp-row:active {
+  transform: scale(0.99);
+}
+
+/* Skeleton shimmer */
+@keyframes skeletonShimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+.mp-skeleton {
+  position: relative;
+  overflow: hidden;
+}
+.mp-skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.05) 48%,
+    transparent 66%
+  );
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Soft ambient pulse for loading screens */
+@keyframes ambientPulse {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+.mp-ambient {
+  animation: ambientPulse 2.4s ease-in-out infinite;
+}
+
+@keyframes loadingDots {
+  0%,
+  20% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.2;
+  }
+}
+.mp-loading-dots {
+  display: inline-block;
+  animation: loadingDots 1.2s ease-in-out infinite;
+  letter-spacing: 0.08em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mp-reveal,
+  .mp-stagger > *,
+  .mp-backdrop-in,
+  .mp-modal-in,
+  .mp-toast-in,
+  .mp-msg-in,
+  .mp-line,
+  .mp-tab-active,
+  .mp-btn-lux::after,
+  .mp-splash-seal,
+  .mp-splash-ring,
+  .mp-splash-word,
+  .mp-splash-tag,
+  .mp-splash-line,
+  .mp-page-enter,
+  .mp-skeleton::after,
+  .mp-ambient {
+    animation: none !important;
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    visibility: visible !important;
+  }
+  /* Allow splash to actually dismiss under reduced motion */
+  .mp-splash-out {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+  .mp-card-motion,
+  .mp-card-photo,
+  .mp-row {
+    transition: none !important;
+  }
+  .mp-card-motion:hover,
+  .mp-card-motion:active,
+  .mp-row:active {
+    transform: none !important;
+  }
+}
+
+/* Centurion black — Amex-style Elite aura */
+@keyframes eliteSheen {
+  0% {
+    transform: translateX(-120%) skewX(-12deg);
+  }
+  100% {
+    transform: translateX(220%) skewX(-12deg);
+  }
+}
+
+.elite-centurion {
+  --elite-metal: linear-gradient(
+    135deg,
+    #f2f2f2 0%,
+    #9a9a9a 22%,
+    #3a3a3a 45%,
+    #d4d4d4 58%,
+    #5a5a5a 78%,
+    #ececec 100%
+  );
+  position: relative;
+  background: #000000 !important;
+  isolation: isolate;
+  border: none !important;
+  box-shadow:
+    0 0 0 1px #1a1a1a,
+    0 0 0 2px #8a8a8a,
+    0 0 0 3px #000,
+    0 0 28px rgba(200, 200, 200, 0.22),
+    0 0 56px rgba(255, 255, 255, 0.08),
+    0 20px 50px rgba(0, 0, 0, 0.85);
+}
+.elite-centurion::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  padding: 1.5px;
+  background: var(--elite-metal);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+.elite-centurion > *:not([aria-hidden]) {
+  position: relative;
+  z-index: 1;
+}
+.elite-centurion .elite-sheen {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow: hidden;
+}
+.elite-centurion .elite-sheen::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 45%;
+  background: linear-gradient(
+    105deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.14) 48%,
+    transparent 72%
+  );
+  animation: eliteSheen 4.5s ease-in-out infinite;
+}
+.elite-centurion:hover {
+  box-shadow:
+    0 0 0 1px #1a1a1a,
+    0 0 0 2px #c8c8c8,
+    0 0 0 3px #000,
+    0 0 36px rgba(220, 220, 220, 0.32),
+    0 0 72px rgba(255, 255, 255, 0.12),
+    0 24px 56px rgba(0, 0, 0, 0.9);
+}
+
+/* Elite profile sheet shell */
+.elite-profile-shell {
+  background: #000000 !important;
+  border-color: #8a8a8a !important;
+  box-shadow:
+    0 0 0 1px #000,
+    0 0 40px rgba(200, 200, 200, 0.2),
+    0 24px 80px rgba(0, 0, 0, 0.85);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .elite-centurion .elite-sheen::after {
+    animation: none !important;
+  }
 }

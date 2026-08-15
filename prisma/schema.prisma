@@ -1,0 +1,122 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Member {
+  id             String   @id @default(cuid())
+  linkedInId     String?  @unique
+  email          String?
+  name           String
+  jobTitle       String   @default("")
+  bio            String   @default("")
+  photo          String   @default("")
+  cityName       String   @default("New York")
+  cityCountry    String   @default("USA")
+  cityLat        Float    @default(40.7128)
+  cityLng        Float    @default(-74.006)
+  travel         String   @default("worldwide")
+  meetPreference String   @default("open")
+  lookingForJson String   @default("[]")
+  ideaTagsJson   String   @default("[]")
+  verificationsJson String @default("[]")
+  phone          String?
+  elite          Boolean  @default(false)
+  premierActive  Boolean  @default(false)
+  premierInterval String?
+  premierStartedAt String?
+  premierTrialEndsAt String?
+  emailVerifiedAt String?
+  meetingsAttended Int    @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  connectionsFrom Connection[] @relation("from")
+  connectionsTo   Connection[] @relation("to")
+  chatMembers     ChatMember[]
+  messages        Message[]
+  blocksFrom      Block[]      @relation("blocker")
+  blocksTo        Block[]      @relation("blocked")
+}
+
+model Block {
+  id        String   @id @default(cuid())
+  blockerId String
+  blockedId String
+  createdAt DateTime @default(now())
+  blocker   Member   @relation("blocker", fields: [blockerId], references: [id], onDelete: Cascade)
+  blocked   Member   @relation("blocked", fields: [blockedId], references: [id], onDelete: Cascade)
+
+  @@unique([blockerId, blockedId])
+  @@index([blockedId])
+}
+
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  name      String
+  path      String   @default("")
+  memberId  String?
+  metaJson  String   @default("{}")
+  createdAt DateTime @default(now())
+
+  @@index([name, createdAt])
+}
+
+model Connection {
+  id         String   @id @default(cuid())
+  fromId     String
+  toId       String
+  status     String   @default("requested")
+  meetupJson String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  from       Member   @relation("from", fields: [fromId], references: [id])
+  to         Member   @relation("to", fields: [toId], references: [id])
+
+  @@unique([fromId, toId])
+  @@index([toId])
+}
+
+model Chat {
+  id        String       @id @default(cuid())
+  name      String
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  members   ChatMember[]
+  messages  Message[]
+}
+
+model ChatMember {
+  id       String @id @default(cuid())
+  chatId   String
+  memberId String
+  chat     Chat   @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  member   Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([chatId, memberId])
+}
+
+model Message {
+  id         String   @id @default(cuid())
+  chatId     String
+  senderId   String
+  text       String   @default("")
+  system     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  chat       Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  sender     Member   @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([chatId, createdAt])
+}
+
+model Report {
+  id         String   @id @default(cuid())
+  reporterId String
+  peerId     String
+  reason     String
+  createdAt  DateTime @default(now())
+}
