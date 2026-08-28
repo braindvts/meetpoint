@@ -90,11 +90,11 @@ export default function ConnectionsPage() {
       <main className="mx-auto max-w-3xl px-3 py-4 pb-28 sm:px-6 sm:py-10">
         <section className="mp-reveal mp-room-banner mb-6 p-5 sm:mb-10 sm:p-8">
           <div className="relative z-[1]">
-            <p className="text-[9px] font-semibold uppercase tracking-[0.4em] text-accent">
+            <p className="mp-kicker">
               Your circle
             </p>
-            <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-5xl">
-              Introductions<span className="text-accent">.</span>
+            <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight sm:text-5xl">
+              Introductions<span className="italic text-accent">.</span>
             </h1>
             <p className="mt-2 text-[12px] text-muted sm:text-sm">
               Curate a table and make it real
@@ -133,10 +133,8 @@ export default function ConnectionsPage() {
               return (
                 <div
                   key={conn.peerId}
-                  className={`mp-row mp-frame border p-3 sm:p-5 ${
-                    isInbound
-                      ? "border-accent/35 bg-accent/[0.06]"
-                      : "border-line/70 bg-panel/70"
+                  className={`mp-row mp-frame mp-card-poster p-3 sm:p-5 ${
+                    isInbound ? "bg-accent/[0.06]" : ""
                   }`}
                 >
                   <div className="relative flex flex-wrap items-center justify-between gap-3">
@@ -152,7 +150,7 @@ export default function ConnectionsPage() {
                         rounded="rounded-none"
                       />
                       <div className="min-w-0">
-                        <h3 className="truncate text-xl font-semibold text-ivory sm:text-2xl">
+                        <h3 className="truncate font-display text-xl font-semibold text-ivory sm:text-2xl">
                           {person.name}
                         </h3>
                         <p className="mt-0.5 truncate text-[11px] text-muted">
@@ -191,7 +189,7 @@ export default function ConnectionsPage() {
                           <button
                             type="button"
                             onClick={() => messagePeer(person.id, person.name)}
-                            className="border border-line px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-ivory transition hover:border-accent/40"
+                            className="border border-accent/30 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-ivory transition hover:border-accent/60"
                           >
                             Message
                           </button>

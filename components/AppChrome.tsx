@@ -2,11 +2,12 @@
 
 import SplashScreen from "@/components/SplashScreen";
 
-/** Global chrome: splash only when the app first opens (once per session). */
+/** Global chrome: splash on first open, invitation frame on every screen. */
 export default function AppChrome({ children }: { children: React.ReactNode }) {
   return (
     <>
       <SplashScreen />
+      <div className="mp-invite" aria-hidden />
       {children}
     </>
   );

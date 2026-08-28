@@ -49,44 +49,75 @@ a {
   touch-action: manipulation;
 }
 
-/* Warm club atmosphere — champagne wash + grain (desktop) */
+/* Warm club atmosphere — champagne wash + grain */
 body {
   background:
-    radial-gradient(ellipse 90% 55% at 50% -20%, rgba(212, 196, 168, 0.08), transparent 55%),
-    radial-gradient(ellipse 40% 35% at 100% 0%, rgba(212, 196, 168, 0.04), transparent 50%),
+    radial-gradient(ellipse 90% 55% at 50% -20%, rgba(212, 196, 168, 0.09), transparent 55%),
+    radial-gradient(ellipse 40% 35% at 100% 0%, rgba(212, 196, 168, 0.045), transparent 50%),
     var(--color-ink);
 }
 
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.045;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/*
+ * Invitation overlay — the poster look, on every screen:
+ * outer gold line, inner gold line, L-shaped corners.
+ */
+.mp-invite {
+  pointer-events: none;
+  position: fixed;
+  z-index: 105;
+  inset: 8px;
+}
+.mp-invite::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 1px solid color-mix(in srgb, var(--color-accent) 50%, transparent);
+  box-shadow:
+    inset 0 0 0 5px var(--color-ink),
+    inset 0 0 0 6px color-mix(in srgb, var(--color-accent) 24%, transparent),
+    inset 0 0 90px rgba(212, 196, 168, 0.045);
+}
+.mp-invite::after {
+  content: "";
+  position: absolute;
+  inset: 14px;
+  background:
+    linear-gradient(var(--color-accent), var(--color-accent)) top left / 22px 1px no-repeat,
+    linear-gradient(var(--color-accent), var(--color-accent)) top left / 1px 22px no-repeat,
+    linear-gradient(var(--color-accent), var(--color-accent)) top right / 22px 1px no-repeat,
+    linear-gradient(var(--color-accent), var(--color-accent)) top right / 1px 22px no-repeat,
+    linear-gradient(var(--color-accent), var(--color-accent)) bottom left / 22px 1px no-repeat,
+    linear-gradient(var(--color-accent), var(--color-accent)) bottom left / 1px 22px no-repeat,
+    linear-gradient(var(--color-accent), var(--color-accent)) bottom right / 22px 1px no-repeat,
+    linear-gradient(var(--color-accent), var(--color-accent)) bottom right / 1px 22px no-repeat;
+  opacity: 0.85;
+}
 @media (min-width: 640px) {
-  body::after {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: 1;
-    pointer-events: none;
-    opacity: 0.03;
-    mix-blend-mode: overlay;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  .mp-invite {
+    inset: 14px;
+  }
+  .mp-invite::before {
+    box-shadow:
+      inset 0 0 0 7px var(--color-ink),
+      inset 0 0 0 8px color-mix(in srgb, var(--color-accent) 26%, transparent),
+      inset 0 0 110px rgba(212, 196, 168, 0.05);
   }
 }
 
-/* Invitation-card stage — the poster frame, on landing + login */
+/* Pages that used to draw their own frame */
 .mp-stage {
   position: relative;
-}
-.mp-stage::before {
-  content: "";
-  pointer-events: none;
-  position: fixed;
-  z-index: 60;
-  inset: 10px;
-  border: 1px solid color-mix(in srgb, var(--color-accent) 48%, transparent);
-  box-shadow: inset 0 0 80px rgba(212, 196, 168, 0.04);
-}
-@media (min-width: 640px) {
-  .mp-stage::before {
-    inset: 18px;
-  }
 }
 
 /* Poster labels */
@@ -100,9 +131,16 @@ body {
 
 /* Hairline gold cards like the promo phones */
 .mp-card-poster {
-  border: 1px solid color-mix(in srgb, var(--color-accent) 28%, transparent);
-  background: color-mix(in srgb, var(--color-panel) 88%, transparent);
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+  border: 1px solid color-mix(in srgb, var(--color-accent) 32%, transparent);
+  background: color-mix(in srgb, var(--color-panel) 92%, transparent);
+  box-shadow:
+    0 18px 50px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(212, 196, 168, 0.08);
+}
+
+.mp-panel {
+  border: 1px solid color-mix(in srgb, var(--color-accent) 26%, transparent);
+  background: color-mix(in srgb, var(--color-panel) 80%, transparent);
 }
 .mp-frame {
   position: relative;

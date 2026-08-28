@@ -58,7 +58,7 @@ export default function Landing() {
             className="absolute inset-0"
             style={{
               background:
-                "linear-gradient(105deg, rgba(5,5,5,0.98) 0%, rgba(5,5,5,0.86) 38%, rgba(5,5,5,0.42) 100%), linear-gradient(to top, rgba(5,5,5,0.98) 0%, transparent 48%)",
+                "linear-gradient(105deg, rgba(5,5,5,0.99) 0%, rgba(5,5,5,0.9) 34%, rgba(5,5,5,0.38) 100%), linear-gradient(to top, rgba(5,5,5,0.98) 0%, transparent 52%)",
             }}
             aria-hidden
           />
@@ -80,16 +80,19 @@ export default function Landing() {
           <p className="mp-reveal mp-reveal-delay-1 mp-kicker">
             By introduction only
           </p>
-          <h1 className="mp-reveal mp-reveal-delay-2 mt-6 font-display text-[clamp(3.75rem,13vw,8.5rem)] font-semibold leading-[0.88] tracking-tight">
+          <h1 className="mp-reveal mp-reveal-delay-2 mt-7 font-display text-[clamp(4.15rem,14vw,9rem)] font-semibold leading-[0.84] tracking-tight">
             Con<span className="text-accent">clave</span>
           </h1>
-          <p className="mp-reveal mp-reveal-delay-3 mt-8 max-w-md font-display text-xl italic leading-snug text-ivory/88 sm:text-2xl">
+          <p className="mp-reveal mp-reveal-delay-3 mt-8 max-w-lg font-display text-[1.35rem] italic leading-snug text-ivory/90 sm:text-[1.75rem]">
+            Networking that ends at a dinner table.
+          </p>
+          <p className="mp-reveal mp-reveal-delay-3 mt-4 max-w-md text-[11px] font-medium uppercase tracking-[0.28em] text-muted">
             {line}
           </p>
-          <div className="mp-reveal mp-reveal-delay-4 mt-12 flex flex-col items-center gap-5">
+          <div className="mp-reveal mp-reveal-delay-4 mt-14 flex flex-col items-center gap-5">
             <Link
               href="/login"
-              className="mp-btn-lux inline-flex rounded-none bg-gradient-to-b from-accent-2 to-accent px-14 py-4 text-[11px] font-semibold uppercase tracking-[0.34em] text-ink shadow-[0_16px_48px_rgba(212,196,168,0.22)]"
+              className="mp-btn-lux inline-flex rounded-none bg-gradient-to-b from-accent-2 to-accent px-16 py-4 text-[11px] font-semibold uppercase tracking-[0.42em] text-ink shadow-[0_16px_48px_rgba(212,196,168,0.22)]"
             >
               Request entry
             </Link>
@@ -111,7 +114,7 @@ export default function Landing() {
         </div>
       </section>
 
-      <section className="relative overflow-hidden border-y border-line/60 py-16">
+      <section className="relative overflow-hidden border-y border-accent/20 py-16">
         <div className="mx-auto max-w-3xl px-6 text-center">
           <p className="font-display text-2xl italic leading-relaxed text-ivory/90 sm:text-3xl">
             Not a feed. Not a marketplace.
@@ -123,15 +126,15 @@ export default function Landing() {
 
       <section className="px-6 py-24 sm:px-10 lg:px-16">
         <div className="mx-auto max-w-5xl">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.48em] text-accent">
+          <p className="mp-kicker">
             How one enters
           </p>
-          <div className="mp-stagger mt-12 grid gap-0 border border-line/70 sm:grid-cols-3">
+          <div className="mp-stagger mt-12 grid gap-0 border border-accent/25 sm:grid-cols-3">
             {STEPS.map((s, i) => (
               <div
                 key={s.num}
                 className={`group relative bg-panel/40 p-8 transition hover:bg-panel-2/60 sm:p-10 ${
-                  i < STEPS.length - 1 ? "border-b border-line/70 sm:border-b-0 sm:border-r" : ""
+                  i < STEPS.length - 1 ? "border-b border-accent/25 sm:border-b-0 sm:border-r" : ""
                 }`}
               >
                 <p className="font-display text-4xl font-medium text-accent/40 transition group-hover:text-accent/70">
@@ -146,9 +149,9 @@ export default function Landing() {
       </section>
 
       <section className="relative px-0 py-0">
-        <div className="border-t border-line/60 px-6 pb-10 pt-20 sm:px-10 lg:px-16">
+        <div className="border-t border-accent/20 px-6 pb-10 pt-20 sm:px-10 lg:px-16">
           <div className="mx-auto max-w-6xl">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.48em] text-accent">
+            <p className="mp-kicker">
               The setting
             </p>
             <h2 className="mt-4 font-display text-4xl font-semibold tracking-tight sm:text-6xl">
@@ -185,7 +188,7 @@ export default function Landing() {
         </div>
       </section>
 
-      <section className="mp-frame border-t border-line/60 px-6 py-24 sm:px-10">
+      <section className="mp-frame border-t border-accent/20 px-6 py-24 sm:px-10">
         <div className="mx-auto flex max-w-lg flex-col items-center text-center">
           <h2 className="font-display text-4xl font-semibold tracking-tight sm:text-5xl">
             Take your seat<span className="italic text-accent">.</span>
@@ -202,11 +205,12 @@ export default function Landing() {
         </div>
       </section>
 
-      <footer className="border-t border-line/60 px-6 py-14 sm:px-10">
+      <footer className="border-t border-accent/20 px-6 py-14 sm:px-10">
         <div className="mx-auto flex max-w-5xl flex-col items-center gap-3">
-          <p className="font-display text-xl font-semibold text-ivory">
+          <p className="font-display text-2xl font-semibold text-ivory">
             Con<span className="text-accent">clave</span>
           </p>
+          <p className="mp-kicker">Est. MMXXVI</p>
           <p className="text-[10px] font-semibold uppercase tracking-[0.36em] text-muted/80">
             Powered by Montevere Co.
           </p>

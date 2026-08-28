@@ -108,9 +108,9 @@ export default function ChatsPage() {
         <section className="mp-reveal mp-room-banner mb-6 p-5 sm:mb-10 sm:p-8">
           <div className="relative z-[1] flex flex-wrap items-end justify-between gap-4">
             <div>
-              <p className="text-[9px] font-semibold uppercase tracking-[0.4em] text-accent">
-                Members only
-              </p>
+            <p className="mp-kicker">
+              Members only
+            </p>
               <h1 className="mt-2 font-display text-3xl font-semibold tracking-tight sm:text-5xl">
                 Private<span className="italic text-accent">.</span>
               </h1>
@@ -128,7 +128,7 @@ export default function ChatsPage() {
         </section>
 
         {creating && (
-          <div className="mp-modal-in mb-8 border border-accent/20 bg-panel/80 p-5 sm:p-6">
+          <div className="mp-modal-in mp-card-poster mb-8 p-5 sm:p-6">
             <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-accent">
               Start a private chat
             </p>
@@ -194,7 +194,7 @@ export default function ChatsPage() {
             actionLabel="Enter the room"
           />
         ) : (
-          <div className="mp-stagger divide-y divide-line/60 border border-line/70 bg-panel/40">
+          <div className="mp-stagger divide-y divide-accent/15 border border-accent/25 bg-panel/40">
             {sorted.map((chat) => {
               const members = directory.filter((p) => chat.memberIds.includes(p.id));
               const last = [...chat.messages].reverse().find((m) => m.senderId !== "system");

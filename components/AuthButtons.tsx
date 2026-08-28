@@ -4,25 +4,19 @@ interface Props {
   className?: string;
 }
 
+const btn =
+  "inline-flex w-full items-center justify-center gap-2.5 border border-accent/30 bg-ink/60 px-5 py-3.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-ivory transition hover:border-accent hover:bg-accent/10";
+
 export default function AuthButtons({ className = "" }: Props) {
   return (
     <div className={`grid gap-2.5 ${className}`}>
-      <a
-        href="/api/auth/linkedin"
-        className="inline-flex w-full items-center justify-center gap-2.5 border border-line/80 bg-[#0a66c2] px-5 py-3 text-[12px] font-semibold tracking-wide text-white transition hover:brightness-110"
-      >
+      <a href="/api/auth/linkedin" className={btn}>
         Continue with LinkedIn
       </a>
-      <a
-        href="/api/auth/google"
-        className="inline-flex w-full items-center justify-center gap-2.5 border border-line bg-panel px-5 py-3.5 text-[12px] font-semibold tracking-wide text-ivory transition hover:border-accent/50"
-      >
+      <a href="/api/auth/google" className={btn}>
         Continue with Google
       </a>
-      <a
-        href="/api/auth/apple"
-        className="inline-flex w-full items-center justify-center gap-2.5 border border-ivory/20 bg-black px-5 py-3 text-[12px] font-semibold tracking-wide text-white transition hover:bg-white/5"
-      >
+      <a href="/api/auth/apple" className={btn}>
         Continue with Apple
       </a>
     </div>

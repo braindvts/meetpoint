@@ -95,7 +95,7 @@ function TagChip({
       type="button"
       onClick={onClick}
       title={remove ? "Click to remove" : undefined}
-      className={`rounded-sm border px-2 py-1 text-left text-[11px] transition sm:px-3 sm:py-1.5 sm:text-sm ${
+      className={`border px-2 py-1 text-left text-[11px] transition sm:px-3 sm:py-1.5 sm:text-sm ${
         selected || remove
           ? "border-accent/50 bg-accent/10 text-accent-2"
           : "border-line/80 bg-transparent text-muted hover:border-accent/35 hover:text-ivory"
@@ -648,7 +648,7 @@ export default function ProfileForm({ initial }: { initial?: MyProfile | null })
         </p>
         <button
           type="submit"
-          className="rounded-full bg-gradient-to-b from-accent-2 to-accent px-10 py-3.5 text-sm font-semibold tracking-wide text-ink shadow-[0_8px_28px_rgba(255,255,255,0.12)] transition hover:brightness-110"
+          className="mp-btn-lux rounded-none bg-gradient-to-b from-accent-2 to-accent px-10 py-3.5 text-[11px] font-semibold uppercase tracking-[0.28em] text-ink shadow-[0_8px_28px_rgba(212,196,168,0.18)]"
         >
           {initial?.jobTitle || initial?.ideaTags?.length ? "Save profile" : "Start discovering"}
         </button>

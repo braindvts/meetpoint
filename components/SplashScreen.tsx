@@ -80,14 +80,18 @@ export default function SplashScreen() {
         window.setTimeout(() => setVisible(false), 280);
       }}
     >
-      <div className="mp-splash-seal relative flex flex-col items-center px-8 text-center">
+      <div className="pointer-events-none absolute inset-8 border border-accent/45 sm:inset-14" aria-hidden />
+      <div className="mp-splash-seal mp-frame relative flex flex-col items-center px-10 py-12 text-center">
         <p className="mp-kicker">
           By introduction only
         </p>
-        <p className="mp-splash-word mt-5 font-display text-5xl font-semibold tracking-tight text-ivory sm:text-6xl">
+        <p className="mp-splash-word mt-6 font-display text-6xl font-semibold tracking-tight text-ivory sm:text-7xl">
           Con<span className="text-accent">clave</span>
         </p>
-        <p className="mt-5 max-w-sm font-display text-xl italic leading-snug text-ivory/80 sm:text-2xl">
+        <p className="mt-6 max-w-sm font-display text-xl italic leading-snug text-ivory/85 sm:text-2xl">
+          Networking that ends at a dinner table.
+        </p>
+        <p className="mt-4 max-w-sm text-[11px] font-medium uppercase tracking-[0.28em] text-muted">
           {line}
         </p>
       </div>

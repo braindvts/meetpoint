@@ -39,7 +39,7 @@ export default function MembershipPlans({
 
       <div className="grid gap-2 sm:grid-cols-2 sm:gap-3">
         {/* Free */}
-        <div className="flex items-center justify-between gap-3 border border-line/60 bg-panel/50 px-3 py-2.5 sm:block sm:p-5">
+        <div className="flex items-center justify-between gap-3 border border-accent/25 bg-panel/50 px-3 py-2.5 sm:block sm:p-5">
           <div>
             <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-muted">Included</p>
             <p className="mt-0.5 font-display text-base font-semibold text-ivory sm:text-xl">
@@ -61,7 +61,7 @@ export default function MembershipPlans({
           className={`border px-3 py-2.5 sm:p-5 ${
             premier
               ? "border-white/25 bg-black elite-centurion"
-              : "border-line/60 bg-panel/70"
+              : "border-accent/30 bg-panel/70"
           }`}
         >
           <div className="relative z-[1]">

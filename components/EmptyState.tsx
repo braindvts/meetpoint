@@ -18,7 +18,7 @@ export default function EmptyState({
   onAction,
 }: Props) {
   return (
-    <div className="mp-reveal mp-frame relative overflow-hidden border border-line/80 bg-panel/60 px-6 py-16 text-center sm:py-20">
+    <div className="mp-reveal mp-frame mp-card-poster relative overflow-hidden px-6 py-16 text-center sm:py-20">
       <span
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(212,196,168,0.08),transparent_55%)]"
         aria-hidden

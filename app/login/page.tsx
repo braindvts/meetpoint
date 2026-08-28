@@ -78,13 +78,13 @@ function LoginContent() {
       </div>
 
       <div className="relative mx-auto flex w-full max-w-lg flex-col justify-center px-6 py-16 sm:px-10">
-        <div className="relative">
+        <div className="mp-frame mp-card-poster relative px-6 py-10 sm:px-10 sm:py-12">
           <Wordmark href="/" size="md" />
 
           <p className="mt-12 mp-kicker">
             Members&apos; entrance
           </p>
-          <h1 className="mt-5 font-display text-5xl font-semibold tracking-tight sm:text-6xl">
+          <h1 className="mt-5 font-display text-5xl font-semibold tracking-tight sm:text-7xl">
             Enter<span className="italic text-accent">.</span>
           </h1>
           <p className="mt-4 leading-[1.7] text-muted">

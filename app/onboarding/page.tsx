@@ -65,7 +65,7 @@ function OnboardingContent() {
   }, []);
 
   return (
-    <main className="relative min-h-dvh pb-24">
+    <main className="mp-stage relative min-h-dvh pb-24">
       <div
         className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.06),transparent_70%)]"
         aria-hidden
@@ -75,7 +75,7 @@ function OnboardingContent() {
         <Wordmark href="/" size="md" />
 
         <header className="mp-reveal mp-reveal-delay-1 mt-10 mb-12">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.42em] text-accent">
+          <p className="mp-kicker">
             Membership petition
           </p>
           <h1 className="mt-3 font-display text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
@@ -91,7 +91,7 @@ function OnboardingContent() {
           <>
             {!linkedInUser && (
               <div className="mp-reveal mp-reveal-delay-2 mb-12 space-y-5">
-                <div className="border border-line/80 bg-panel/60 px-5 py-5">
+                <div className="mp-card-poster px-5 py-6">
                   <p className="font-display text-lg font-semibold text-ivory">Sign in first</p>
                   <p className="mt-0.5 text-sm text-muted">
                     Email, Google, Apple, or LinkedIn — so we can keep your seat.

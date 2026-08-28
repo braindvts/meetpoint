@@ -130,7 +130,7 @@ function ProfileContent() {
                 </span>
               </button>
               <div>
-                <p className="text-[9px] font-semibold uppercase tracking-[0.36em] text-accent">
+                <p className="mp-kicker">
                   Membership
                 </p>
                 <h1 className="mt-1 font-display text-2xl font-semibold tracking-tight sm:text-4xl">
@@ -159,7 +159,7 @@ function ProfileContent() {
 
         <EliteInviteCard elite={profile.elite === true} />
 
-        <section className="mb-5 border border-line/70 bg-panel/60 p-4 sm:mb-8 sm:p-5">
+        <section className="mb-5 mp-card-poster p-4 sm:mb-8 sm:p-5">
           <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-accent">
             Alerts
           </p>
@@ -178,10 +178,7 @@ function ProfileContent() {
 
         <MembershipTiers input={tierInput} missing={strength.missing} />
 
-        <p
-          id="edit-details"
-          className="mb-2.5 scroll-mt-20 text-[9px] font-semibold uppercase tracking-[0.22em] text-accent sm:mb-5 sm:text-[11px] sm:tracking-[0.32em]"
-        >
+        <p className="mp-kicker mb-2.5 scroll-mt-20 sm:mb-5" id="edit-details">
           Edit details
         </p>
         <ProfileForm initial={profile} />

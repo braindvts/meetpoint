@@ -99,12 +99,17 @@ export default function Nav() {
   return (
     <>
       <header
-        className={`sticky top-0 z-40 border-b border-accent/20 bg-ink/92 backdrop-blur-xl ${
+        className={`sticky top-0 z-40 border-b border-accent/25 bg-ink/94 backdrop-blur-xl ${
           inChatThread ? "hidden sm:block" : ""
         }`}
       >
         <div className="mx-auto flex h-12 max-w-5xl items-center justify-between px-3 sm:h-[4.25rem] sm:px-6">
-          <Wordmark href="/discover" size="sm" />
+          <div className="flex items-baseline gap-4">
+            <Wordmark href="/discover" size="sm" />
+            <span className="hidden text-[9px] font-semibold uppercase tracking-[0.42em] text-accent/80 sm:inline">
+              Est. MMXXVI
+            </span>
+          </div>
           <nav className="hidden items-center gap-8 sm:flex">
             {LINKS.map((l) => {
               const active = pathname.startsWith(l.href);
