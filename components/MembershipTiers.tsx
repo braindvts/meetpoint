@@ -5,6 +5,7 @@ import { TIER_DEFINITIONS, nextTierProgress, type TierInput } from "@/lib/tiers"
 
 interface Props {
   input: TierInput;
+  missing?: string[];
 }
 
 const ROW: Record<1 | 2 | 3 | 4, string> = {
@@ -14,7 +15,7 @@ const ROW: Record<1 | 2 | 3 | 4, string> = {
   4: "border-white/15 bg-black relative overflow-hidden elite-centurion",
 };
 
-export default function MembershipTiers({ input }: Props) {
+export default function MembershipTiers({ input, missing }: Props) {
   const progress = nextTierProgress(input);
 
   return (
@@ -25,8 +26,11 @@ export default function MembershipTiers({ input }: Props) {
         </p>
         <div className="flex items-center gap-2">
           <TierBadge tier={progress.current} size="sm" />
-          <p className="max-w-[14rem] truncate text-[10px] text-muted sm:max-w-none sm:text-xs">
+          <p className="max-w-[16rem] text-[10px] text-muted sm:max-w-none sm:text-xs">
             {progress.hint}
+            {typeof input.profileStrength === "number"
+              ? ` · Profile ${input.profileStrength}/100`
+              : ""}
           </p>
         </div>
       </div>
@@ -82,6 +86,11 @@ export default function MembershipTiers({ input }: Props) {
           );
         })}
       </div>
+      {missing && missing.length > 0 && (
+        <p className="mt-3 text-[11px] leading-relaxed text-muted">
+          Add to raise your tier: {missing.slice(0, 4).join(" · ")}.
+        </p>
+      )}
     </section>
   );
 }

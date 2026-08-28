@@ -236,6 +236,13 @@ function scheduleDemoAccept(peerId: string) {
         },
       })
     );
+    void import("./notify").then(({ pushAppNotification }) =>
+      pushAppNotification(
+        "Introduction accepted",
+        `${first} accepted. Open Circle to message them.`,
+        { url: "/connections", tag: "conclave-intro" }
+      )
+    );
   }, delay);
 }
 

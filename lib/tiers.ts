@@ -1,4 +1,4 @@
-import type { MyProfile, Person, ReputationSummary } from "./types";
+import type { MyProfile, Person, PersonWork, ReputationSummary, Verification } from "./types";
 
 /** Membership standing in the Conclave. */
 export type MemberTier = 1 | 2 | 3 | 4;
@@ -14,34 +14,36 @@ export const TIER_DEFINITIONS: TierDefinition[] = [
   {
     tier: 1,
     name: "Verified",
-    meaning: "Identity and professional profile verified",
-    howToEarn: "Verify identity, LinkedIn/company, complete profile",
+    meaning: "Identity and a complete professional profile",
+    howToEarn: "Verify + finish the basics (photo, role, what you’re looking for)",
   },
   {
     tier: 2,
     name: "Trusted",
-    meaning: "Has attended meetings and received positive feedback",
-    howToEarn: "Attend 5+ meetings with high ratings",
+    meaning: "A fuller profile — work email, projects, links — or real dinners",
+    howToEarn: "Add work email, projects, and links — or attend 5+ meetings",
   },
   {
     tier: 3,
     name: "Connector",
-    meaning: "Regularly builds valuable connections",
-    howToEarn: "20+ successful meetings, excellent reviews",
+    meaning: "A rich public record of what you build",
+    howToEarn: "Work email + several projects and credentials — or 20+ meetings",
   },
   {
     tier: 4,
     name: "Elite",
     meaning: "Highly respected community member",
-    howToEarn: "Exceptional reputation, invited or earned",
+    howToEarn: "Exceptional standing, or an Elite invite",
   },
 ];
 
 export const TIER_THRESHOLDS = {
   trustedMeetings: 5,
   trustedScore: 80,
+  trustedProfile: 55,
   connectorMeetings: 20,
   connectorScore: 90,
+  connectorProfile: 80,
   eliteScore: 95,
 } as const;
 
@@ -67,11 +69,19 @@ const SEED_MEETINGS: Record<string, number> = {
   p18: 40,
 };
 
+export interface ProfileStrength {
+  score: number;
+  max: number;
+  extras: string[];
+  missing: string[];
+}
+
 export interface TierInput {
   verified: boolean;
   profileComplete: boolean;
   meetingsAttended: number;
   reputationScore: number;
+  profileStrength?: number;
   /** Explicit Elite invite (or earned flag). */
   elite?: boolean;
 }
@@ -94,20 +104,94 @@ export function isProfileComplete(profile: Pick<
   );
 }
 
+function hasMethod(vers: Verification[] | undefined, method: string): boolean {
+  return (vers || []).some((v) => v.method === method && String(v.value || "").trim());
+}
+
+function workList(profile: Pick<MyProfile, "work"> | Person): PersonWork[] {
+  if ("work" in profile && profile.work) return profile.work.filter((w) => w.title?.trim());
+  return [];
+}
+
+/** 0–100 based on work email, projects, links, bio — extras beyond the basics. */
+export function scoreProfileStrength(
+  profile: Pick<MyProfile, "verifications" | "bio" | "phone" | "work" | "ideaTags" | "lookingFor">
+): ProfileStrength {
+  const extras: string[] = [];
+  const missing: string[] = [];
+  let score = 0;
+  const max = 100;
+
+  if (hasMethod(profile.verifications, "company-email")) {
+    score += 22;
+    extras.push("Work email");
+  } else missing.push("Work email");
+
+  if (hasMethod(profile.verifications, "linkedin")) {
+    score += 12;
+    extras.push("LinkedIn");
+  } else missing.push("LinkedIn");
+
+  if (hasMethod(profile.verifications, "website")) {
+    score += 12;
+    extras.push("Website");
+  } else missing.push("Website");
+
+  if (hasMethod(profile.verifications, "portfolio")) {
+    score += 12;
+    extras.push("Portfolio");
+  } else missing.push("Portfolio");
+
+  if (hasMethod(profile.verifications, "registration")) {
+    score += 8;
+    extras.push("Registration");
+  }
+
+  const bio = (profile.bio || "").trim();
+  if (bio.length >= 40) {
+    score += 10;
+    extras.push("About you");
+  } else missing.push("A longer about (40+ characters)");
+
+  if (profile.phone?.trim()) {
+    score += 6;
+    extras.push("Phone");
+  }
+
+  const projects = workList(profile);
+  const projectPts = Math.min(24, projects.length * 8);
+  score += projectPts;
+  if (projects.length > 0) extras.push(`${projects.length} project${projects.length === 1 ? "" : "s"}`);
+  else missing.push("Projects you’ve built");
+
+  if ((profile.ideaTags?.length ?? 0) >= 3) score += 4;
+  if ((profile.lookingFor?.length ?? 0) >= 2) score += 4;
+
+  return { score: Math.min(max, score), max, extras, missing };
+}
+
 /**
  * Highest tier the member currently qualifies for.
- * Tier 1 requires verification + complete profile.
- * Higher tiers require meeting count + reputation score (or Elite invite).
+ * Tier 1 = verified + basics.
+ * Higher tiers from a richer profile (email, projects, links) and/or real dinners.
  */
 export function computeMemberTier(input: TierInput): MemberTier | null {
   if (!input.verified || !input.profileComplete) return null;
 
   const { meetingsAttended: m, reputationScore: score, elite } = input;
+  const strength = input.profileStrength ?? 0;
   const T = TIER_THRESHOLDS;
 
-  if (elite || (m >= T.connectorMeetings && score >= T.eliteScore)) return 4;
-  if (m >= T.connectorMeetings && score >= T.connectorScore) return 3;
-  if (m >= T.trustedMeetings && score >= T.trustedScore) return 2;
+  if (elite || (m >= T.connectorMeetings && score >= T.eliteScore && strength >= 70)) return 4;
+  if (
+    (m >= T.connectorMeetings && score >= T.connectorScore) ||
+    strength >= T.connectorProfile
+  ) {
+    return 3;
+  }
+  if ((m >= T.trustedMeetings && score >= T.trustedScore) || strength >= T.trustedProfile) {
+    return 2;
+  }
   return 1;
 }
 
@@ -121,7 +205,7 @@ export function nextTierProgress(input: TierInput): {
     return {
       current: null,
       next: TIER_DEFINITIONS[0],
-      hint: "Complete your profile and verify with LinkedIn or company credentials.",
+      hint: "Complete your profile and add a verification to enter Tier 1.",
     };
   }
   if (current === 4) {
@@ -129,32 +213,31 @@ export function nextTierProgress(input: TierInput): {
   }
   const next = TIER_DEFINITIONS[current];
   const T = TIER_THRESHOLDS;
+  const strength = input.profileStrength ?? 0;
   if (current === 1) {
-    const need = Math.max(0, T.trustedMeetings - input.meetingsAttended);
     return {
       current,
       next,
       hint:
-        need > 0
-          ? `${need} more meeting${need === 1 ? "" : "s"} with strong feedback unlocks Trusted.`
-          : "Keep high ratings to unlock Trusted.",
+        strength < T.trustedProfile
+          ? "Add a work email, projects, and links to reach Trusted — or attend 5 dinners."
+          : "Keep high ratings from dinners to stay Trusted.",
     };
   }
   if (current === 2) {
-    const need = Math.max(0, T.connectorMeetings - input.meetingsAttended);
     return {
       current,
       next,
       hint:
-        need > 0
-          ? `${need} more successful meeting${need === 1 ? "" : "s"} with excellent reviews unlocks Connector.`
-          : "Excellent reviews unlock Connector.",
+        strength < T.connectorProfile
+          ? "Add more projects and credentials (work email, site, portfolio) to reach Connector."
+          : "Excellent reviews from dinners keep Connector standing.",
     };
   }
   return {
     current,
     next,
-    hint: "Exceptional reputation — or an Elite invitation — unlocks Elite.",
+    hint: "An Elite invitation — or exceptional dinners and a full profile — unlocks Elite.",
   };
 }
 
@@ -163,11 +246,24 @@ export function tierForPerson(
   reputation: ReputationSummary
 ): MemberTier | null {
   const meetings = SEED_MEETINGS[person.id] ?? reputation.ratingCount;
+  const fakeVers = (person.verifications || []).map((method) => ({
+    method,
+    value: "seed",
+    verifiedAt: "",
+  }));
+  const strength = scoreProfileStrength({
+    verifications: fakeVers,
+    bio: person.bio,
+    work: person.work,
+    ideaTags: person.ideaTags,
+    lookingFor: person.lookingFor,
+  }).score;
   return computeMemberTier({
     verified: (person.verifications?.length ?? 0) > 0,
     profileComplete: true,
     meetingsAttended: meetings,
     reputationScore: reputation.score,
+    profileStrength: strength,
     elite: person.id === "p11" || person.id === "p18",
   });
 }
@@ -185,6 +281,7 @@ export function tierForProfile(
     profileComplete: isProfileComplete(profile),
     meetingsAttended,
     reputationScore: score,
+    profileStrength: scoreProfileStrength(profile).score,
     elite: profile.elite === true,
   });
 }

@@ -186,6 +186,8 @@ export interface MyProfile {
   linkedInId?: string;
   /** Successful table bookings / meetings attended. */
   meetingsAttended?: number;
+  /** Projects, companies, and work shown on your public card. */
+  work?: PersonWork[];
   /** Elite invite or earned flag. */
   elite?: boolean;
   /** Conclave Premier — monthly $20 or yearly $100 (3-day trial on yearly). */

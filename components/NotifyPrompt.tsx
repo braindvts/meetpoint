@@ -12,7 +12,7 @@ export default function NotifyPrompt() {
   useEffect(() => {
     if (typeof window === "undefined" || typeof Notification === "undefined") return;
     try {
-      if (sessionStorage.getItem(KEY) === "1") return;
+      if (localStorage.getItem(KEY) === "1") return;
     } catch {
       return;
     }
@@ -25,7 +25,7 @@ export default function NotifyPrompt() {
 
   async function enable() {
     try {
-      sessionStorage.setItem(KEY, "1");
+      localStorage.setItem(KEY, "1");
     } catch {
       /* ignore */
     }
@@ -35,7 +35,7 @@ export default function NotifyPrompt() {
 
   function dismiss() {
     try {
-      sessionStorage.setItem(KEY, "1");
+      localStorage.setItem(KEY, "1");
     } catch {
       /* ignore */
     }

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
-import ConclaveLogo from "@/components/ConclaveLogo";
+import Wordmark from "@/components/Wordmark";
 
 const ICONS: Record<string, React.ReactNode> = {
   search: (
@@ -104,14 +104,7 @@ export default function Nav() {
         }`}
       >
         <div className="mx-auto flex h-12 max-w-5xl items-center justify-between px-3 sm:h-[4.25rem] sm:px-6">
-          <Link href="/discover" className="flex items-center transition active:scale-[0.98]">
-            <span className="sm:hidden">
-              <ConclaveLogo size={28} withWordmark />
-            </span>
-            <span className="hidden sm:inline-flex">
-              <ConclaveLogo size={36} withWordmark />
-            </span>
-          </Link>
+          <Wordmark href="/discover" size="sm" />
           <nav className="hidden items-center gap-8 sm:flex">
             {LINKS.map((l) => {
               const active = pathname.startsWith(l.href);

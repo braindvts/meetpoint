@@ -1,5 +1,13 @@
 import type { Member } from "@prisma/client";
-import type { LookingFor, MeetPreference, MyProfile, Person, TravelRange, Verification } from "./types";
+import type {
+  LookingFor,
+  MeetPreference,
+  MyProfile,
+  Person,
+  PersonWork,
+  TravelRange,
+  Verification,
+} from "./types";
 
 export function memberToProfile(m: Member): MyProfile {
   return {
@@ -18,6 +26,10 @@ export function memberToProfile(m: Member): MyProfile {
     lookingFor: safeJson<LookingFor[]>(m.lookingForJson, []),
     ideaTags: safeJson<string[]>(m.ideaTagsJson, []),
     verifications: safeJson<Verification[]>(m.verificationsJson, []),
+    work: safeJson<PersonWork[]>(
+      "workJson" in m ? String((m as { workJson?: string }).workJson || "[]") : "[]",
+      []
+    ),
     phone: m.phone || undefined,
     linkedInId: m.linkedInId || undefined,
     elite: m.elite || undefined,
@@ -51,7 +63,15 @@ export function memberToPerson(m: Member): Person {
     lookingFor: safeJson<LookingFor[]>(m.lookingForJson, []),
     ideaTags: safeJson<string[]>(m.ideaTagsJson, []),
     verifications: vers.map((v) => v.method),
-    linkedInUrl: m.linkedInId ? `https://www.linkedin.com/in/${m.linkedInId}` : undefined,
+    linkedInUrl:
+      vers.find((v) => v.method === "linkedin" && v.value.startsWith("http"))?.value ||
+      (m.linkedInId ? `https://www.linkedin.com/in/${m.linkedInId}` : undefined),
+    websiteUrl: vers.find((v) => v.method === "website")?.value,
+    portfolioUrl: vers.find((v) => v.method === "portfolio")?.value,
+    work: safeJson<PersonWork[]>(
+      "workJson" in m ? String((m as { workJson?: string }).workJson || "[]") : "[]",
+      []
+    ),
   };
 }
 
@@ -70,6 +90,7 @@ export function profileToMemberData(profile: MyProfile) {
     lookingForJson: JSON.stringify(profile.lookingFor || []),
     ideaTagsJson: JSON.stringify(profile.ideaTags || []),
     verificationsJson: JSON.stringify(profile.verifications || []),
+    workJson: JSON.stringify(profile.work || []),
     phone: profile.phone || null,
     linkedInId: profile.linkedInId || null,
     elite: profile.elite === true,

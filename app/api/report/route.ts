@@ -5,7 +5,12 @@ import { getCurrentMember } from "@/lib/memberAuth";
 /** Safety: report a member. */
 export async function POST(req: Request) {
   const me = await getCurrentMember();
-  if (!me) return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+  if (!me) {
+    return NextResponse.json(
+      { ok: false, error: "Sign in so we can attach your report." },
+      { status: 401 }
+    );
+  }
 
   const body = (await req.json()) as { peerId?: string; reason?: string };
   if (!body.peerId || !body.reason?.trim()) {

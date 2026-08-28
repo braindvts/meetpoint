@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import ConclaveLogo from "@/components/ConclaveLogo";
 import { BOOKING_FEE_PER_PERSON_USD, formatUsd } from "@/lib/pricing";
 
 export type PaymentMethod = "apple-pay" | "card";
@@ -113,11 +112,11 @@ export default function BookingPaymentSheet({
           </div>
 
           <div className="px-6 pb-2 pt-4 text-center sm:pt-6">
-            <div className="mx-auto mb-3 flex justify-center">
-              <ConclaveLogo size={44} />
-            </div>
-            <p className="text-[12px] font-semibold tracking-tight text-white/50">
-              Conclave · Table fee
+            <p className="font-display text-xl font-semibold text-white">
+              Con<span className="text-accent">clave</span>
+            </p>
+            <p className="mt-2 text-[12px] font-semibold tracking-tight text-white/50">
+              Table fee
             </p>
             <h2 className="mt-1 font-display text-[26px] font-semibold text-white">{amount}</h2>
             <p className="mt-2 text-[14px] leading-snug text-white/60">

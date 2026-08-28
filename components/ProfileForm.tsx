@@ -6,7 +6,15 @@ import { CITIES, cityKey, indexOfCity, nearestCity } from "@/lib/cities";
 import { IDEA_TAGS, POPULAR_TAGS } from "@/lib/data";
 import { formatPhoneDisplay, isValidPhone } from "@/lib/phone";
 import { saveProfile } from "@/lib/store";
-import type { MyProfile, LookingFor, TravelRange, Verification, VerificationMethod } from "@/lib/types";
+import { makeVerification, validateVerification } from "@/lib/verifyRules";
+import type {
+  MyProfile,
+  LookingFor,
+  PersonWork,
+  TravelRange,
+  Verification,
+  VerificationMethod,
+} from "@/lib/types";
 import { LOOKING_FOR_OPTIONS, VERIFICATION_OPTIONS } from "@/lib/types";
 
 const PHOTO_SIZE = 320;
@@ -114,16 +122,21 @@ export default function ProfileForm({ initial }: { initial?: MyProfile | null })
   const [travel, setTravel] = useState<TravelRange>(initial?.travel ?? "worldwide");
   const [lookingFor, setLookingFor] = useState<LookingFor[]>(initial?.lookingFor ?? []);
   const [ideaTags, setIdeaTags] = useState<string[]>(initial?.ideaTags ?? []);
-  const [verifyMethod, setVerifyMethod] = useState<VerificationMethod | null>(
-    initial?.verifications?.[0]?.method ?? (initial?.linkedInId ? "linkedin" : null)
+  const [verifyValues, setVerifyValues] = useState<Partial<Record<VerificationMethod, string>>>(
+    () => {
+      const next: Partial<Record<VerificationMethod, string>> = {};
+      for (const v of initial?.verifications || []) next[v.method] = v.value;
+      if (initial?.linkedInId && !next.linkedin) next.linkedin = `linkedin:${initial.linkedInId}`;
+      return next;
+    }
   );
-  const [verifyValue, setVerifyValue] = useState(initial?.verifications?.[0]?.value ?? "");
+  const [work, setWork] = useState<PersonWork[]>(() =>
+    initial?.work?.length ? initial.work : [{ title: "", kind: "project", description: "", url: "" }]
+  );
   const [phone, setPhone] = useState(initial?.phone ?? "");
   const [tagSearch, setTagSearch] = useState("");
   const [showAllTags, setShowAllTags] = useState(false);
   const [error, setError] = useState("");
-
-  const personalEmail = /@(gmail|yahoo|hotmail|outlook|icloud|aol|mail|proton)\./i;
 
   function toggleTag(tag: string) {
     setIdeaTags((tags) =>
@@ -171,7 +184,7 @@ export default function ProfileForm({ initial }: { initial?: MyProfile | null })
     }
   }
 
-  function submit(e: React.FormEvent) {
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!photo) return setError("Please add a real photo of yourself.");
     if (!name.trim()) return setError("Please enter your name.");
@@ -179,39 +192,32 @@ export default function ProfileForm({ initial }: { initial?: MyProfile | null })
     if (ideaTags.length === 0) return setError("Pick at least one business idea or interest.");
     if (lookingFor.length === 0)
       return setError("Choose what you’re looking for — co-founder, investor, clients, etc.");
-    if (!verifyMethod) return setError("Choose at least one way to verify yourself.");
     if (phone.trim() && !isValidPhone(phone))
       return setError("Enter a valid mobile number (at least 10 digits), or leave it blank.");
 
-    let value = verifyValue.trim();
-    if (verifyMethod === "linkedin" && initial?.linkedInId && !value) {
-      value = `linkedin:${initial.linkedInId}`;
+    const verifications: Verification[] = [];
+    for (const opt of VERIFICATION_OPTIONS) {
+      let raw = (verifyValues[opt.method] || "").trim();
+      if (opt.method === "linkedin" && initial?.linkedInId && !raw) {
+        raw = `linkedin:${initial.linkedInId}`;
+      }
+      if (!raw) continue;
+      const checked = validateVerification(opt.method, raw);
+      if (!checked.ok) return setError(checked.error);
+      verifications.push(makeVerification(opt.method, checked.value));
     }
-    if (!value) return setError("Enter your verification detail.");
-
-    if (verifyMethod === "company-email") {
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))
-        return setError("Enter a valid company email address.");
-      if (personalEmail.test(value))
-        return setError("Use a company email — personal addresses aren’t accepted.");
-    }
-    if (
-      (verifyMethod === "website" ||
-        verifyMethod === "portfolio" ||
-        verifyMethod === "linkedin") &&
-      !value.startsWith("linkedin:") &&
-      !/^https?:\/\//i.test(value)
-    ) {
-      return setError("Enter a full URL starting with https://");
+    if (verifications.length === 0) {
+      return setError("Add at least one verification — work email, LinkedIn, website, or portfolio.");
     }
 
-    const verifications: Verification[] = [
-      {
-        method: verifyMethod,
-        value,
-        verifiedAt: new Date().toISOString(),
-      },
-    ];
+    const projects = work
+      .map((w) => ({
+        title: w.title.trim(),
+        kind: w.kind || "project",
+        description: w.description.trim(),
+        url: w.url?.trim() || undefined,
+      }))
+      .filter((w) => w.title);
 
     saveProfile({
       name: name.trim(),
@@ -224,12 +230,26 @@ export default function ProfileForm({ initial }: { initial?: MyProfile | null })
       lookingFor,
       ideaTags,
       verifications,
+      work: projects,
       phone: phone.trim() ? formatPhoneDisplay(phone) : undefined,
       linkedInId: initial?.linkedInId,
       meetingsAttended: initial?.meetingsAttended,
       elite: initial?.elite,
       premierPlan: initial?.premierPlan,
     });
+
+    for (const v of verifications) {
+      try {
+        await fetch("/api/verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ method: v.method, value: v.value }),
+        });
+      } catch {
+        /* local profile still saved */
+      }
+    }
+
     router.push("/discover");
   }
 
@@ -456,52 +476,29 @@ export default function ProfileForm({ initial }: { initial?: MyProfile | null })
       <Section
         num="04"
         title="Verification"
-        subtitle="Required. Prove you’re real with at least one professional credential."
+        subtitle="Add as many as you have. Work email, LinkedIn, and a site raise your tier."
       >
-        <div className="grid grid-cols-2 gap-1.5 sm:gap-3">
+        <div className="space-y-3">
           {VERIFICATION_OPTIONS.map((o) => (
-            <button
-              key={o.method}
-              type="button"
-              onClick={() => setVerifyMethod(o.method)}
-              className={`border px-2.5 py-2 text-left transition sm:p-4 ${
-                verifyMethod === o.method
-                  ? "border-accent/50 bg-accent/10"
-                  : "border-line/70 bg-panel/40 hover:border-accent/30"
-              }`}
-            >
-              <p className="font-display text-[13px] font-semibold text-ivory sm:text-lg">
-                {o.label}
-              </p>
-              <p className="mt-0.5 hidden text-xs leading-relaxed text-muted sm:mt-1 sm:block">
-                {o.hint}
-              </p>
-            </button>
+            <label key={o.method} className="block">
+              <span className={labelCls}>{o.label}</span>
+              {o.method === "linkedin" && initial?.linkedInId && !verifyValues.linkedin?.startsWith("http") ? (
+                <p className="mt-1 border border-accent/30 bg-accent/5 px-3 py-2 text-[11px] text-accent-2">
+                  LinkedIn connected — that counts. Add your public URL to show it on your card.
+                </p>
+              ) : null}
+              <input
+                className={field}
+                value={verifyValues[o.method] || ""}
+                onChange={(e) =>
+                  setVerifyValues((prev) => ({ ...prev, [o.method]: e.target.value }))
+                }
+                placeholder={o.placeholder}
+              />
+              <p className="mt-1 hidden text-[11px] text-muted sm:block">{o.hint}</p>
+            </label>
           ))}
         </div>
-        {verifyMethod && (
-          <div className="mt-3 sm:mt-6">
-            {verifyMethod === "linkedin" && initial?.linkedInId ? (
-              <p className="border border-accent/30 bg-accent/5 px-3 py-2 text-[11px] text-accent-2 sm:px-4 sm:py-3 sm:text-sm">
-                LinkedIn already connected — that counts as verification.
-              </p>
-            ) : (
-              <label className="block">
-                <span className={labelCls}>
-                  {VERIFICATION_OPTIONS.find((o) => o.method === verifyMethod)?.label}
-                </span>
-                <input
-                  className={field}
-                  value={verifyValue}
-                  onChange={(e) => setVerifyValue(e.target.value)}
-                  placeholder={
-                    VERIFICATION_OPTIONS.find((o) => o.method === verifyMethod)?.placeholder
-                  }
-                />
-              </label>
-            )}
-          </div>
-        )}
       </Section>
 
       <Section num="05" title="Place" subtitle="Where you are — and how far you’ll go to meet.">
@@ -578,7 +575,59 @@ export default function ProfileForm({ initial }: { initial?: MyProfile | null })
         </div>
       </Section>
 
-      <Section num="07" title="About" subtitle="A short note on what you’re building.">
+      <Section
+        num="07"
+        title="Projects"
+        subtitle="What you’ve built. Each project raises your standing in the room."
+      >
+        <div className="space-y-4">
+          {work.map((item, i) => (
+            <div key={i} className="border border-line/60 bg-panel/30 p-3 sm:p-4">
+              <input
+                className={field}
+                value={item.title}
+                onChange={(e) =>
+                  setWork((list) =>
+                    list.map((w, idx) => (idx === i ? { ...w, title: e.target.value } : w))
+                  )
+                }
+                placeholder="Project or company name"
+              />
+              <input
+                className={`${field} mt-2`}
+                value={item.url || ""}
+                onChange={(e) =>
+                  setWork((list) =>
+                    list.map((w, idx) => (idx === i ? { ...w, url: e.target.value } : w))
+                  )
+                }
+                placeholder="https://…"
+              />
+              <textarea
+                className={`${field} mt-2 min-h-16 resize-none`}
+                value={item.description}
+                onChange={(e) =>
+                  setWork((list) =>
+                    list.map((w, idx) => (idx === i ? { ...w, description: e.target.value } : w))
+                  )
+                }
+                placeholder="What it is — one or two lines."
+              />
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={() =>
+              setWork((list) => [...list, { title: "", kind: "project", description: "", url: "" }])
+            }
+            className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent"
+          >
+            Add another project
+          </button>
+        </div>
+      </Section>
+
+      <Section num="08" title="About" subtitle="A short note on what you’re building.">
         <textarea
           className={`${field} min-h-20 resize-none leading-relaxed sm:min-h-28`}
           value={bio}

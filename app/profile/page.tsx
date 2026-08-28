@@ -20,7 +20,7 @@ import {
   switchPremierInterval,
 } from "@/lib/store";
 import { readClientProfile } from "@/lib/clientProfile";
-import { isProfileComplete, reputationScoreForMeetings } from "@/lib/tiers";
+import { isProfileComplete, reputationScoreForMeetings, scoreProfileStrength } from "@/lib/tiers";
 import type { MyProfile, PremierInterval } from "@/lib/types";
 
 function ProfileContent() {
@@ -88,11 +88,13 @@ function ProfileContent() {
 
   if (!profile) return null;
 
+  const strength = scoreProfileStrength(profile);
   const tierInput = {
     verified: (profile.verifications?.length ?? 0) > 0,
     profileComplete: isProfileComplete(profile),
     meetingsAttended: meetings,
     reputationScore: reputationScoreForMeetings(meetings),
+    profileStrength: strength.score,
     elite: profile.elite === true,
   };
 
@@ -174,7 +176,7 @@ function ProfileContent() {
           </button>
         </section>
 
-        <MembershipTiers input={tierInput} />
+        <MembershipTiers input={tierInput} missing={strength.missing} />
 
         <p
           id="edit-details"

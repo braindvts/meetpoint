@@ -1,6 +1,5 @@
 "use client";
 
-import ConclaveLogo from "@/components/ConclaveLogo";
 import SkeletonCard from "@/components/SkeletonCard";
 
 interface Props {
@@ -17,14 +16,17 @@ export default function LoadingRoom({
   return (
     <div className="mx-auto max-w-5xl px-3 py-16 sm:px-6 sm:py-24">
       <div className="flex flex-col items-center text-center">
-        <div className="mp-ambient relative">
-          <ConclaveLogo size={48} />
-        </div>
-        <p className="mt-6 text-[10px] font-semibold uppercase tracking-[0.42em] text-muted">
+        <p className="font-display text-4xl font-semibold text-ivory">
+          Con<span className="text-accent">clave</span>
+        </p>
+        <p className="mt-5 max-w-xs font-display text-lg italic text-ivory/75">
           {label}
           <span className="mp-loading-dots" aria-hidden>
             …
           </span>
+        </p>
+        <p className="mt-8 text-[10px] font-semibold uppercase tracking-[0.32em] text-muted/70">
+          Powered by Montevere Co.
         </p>
       </div>
       {withCards && (

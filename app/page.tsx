@@ -1,7 +1,7 @@
 import Link from "next/link";
-import ConclaveLogo from "@/components/ConclaveLogo";
 import DemoEnterButton from "@/components/DemoEnterButton";
 import { demoEntryEnabled } from "@/lib/demoFlag";
+import { pickConclaveLine } from "@/lib/lines";
 
 const TABLES = [
   {
@@ -40,9 +40,10 @@ const STEPS = [
 ];
 
 export default function Landing() {
+  const line = pickConclaveLine(new Date().getDate());
+
   return (
     <main className="bg-ink text-ivory">
-      {/* Full-bleed hero — brand is the hero */}
       <section className="relative min-h-dvh overflow-hidden">
         <div className="absolute inset-0">
           <div
@@ -61,14 +62,6 @@ export default function Landing() {
             }}
             aria-hidden
           />
-          <div
-            className="absolute inset-0 opacity-40"
-            style={{
-              background:
-                "radial-gradient(ellipse at 30% 70%, rgba(212,196,168,0.18), transparent 50%)",
-            }}
-            aria-hidden
-          />
         </div>
 
         <header className="relative z-10 flex items-center justify-between px-5 py-7 sm:px-10 lg:px-16">
@@ -84,21 +77,18 @@ export default function Landing() {
         </header>
 
         <div className="relative z-10 flex min-h-[calc(100dvh-5rem)] flex-col items-center justify-center px-6 pb-20 text-center">
-          <div className="mp-reveal mb-8">
-            <ConclaveLogo size={72} />
-          </div>
           <p className="mp-reveal mp-reveal-delay-1 text-[10px] font-semibold uppercase tracking-[0.5em] text-accent">
             By introduction only
           </p>
-          <h1 className="mp-reveal mp-reveal-delay-2 mt-5 text-[clamp(3.5rem,12vw,8rem)] font-semibold leading-[0.9] tracking-tight">
+          <h1 className="mp-reveal mp-reveal-delay-2 mt-5 font-display text-[clamp(3.5rem,12vw,8rem)] font-semibold leading-[0.9] tracking-tight">
             Con<span className="text-accent">clave</span>
           </h1>
-          <p className="mp-reveal mp-reveal-delay-3 mt-8 max-w-md text-lg leading-snug text-ivory/90 sm:text-xl">
-            Private introductions. Settled over dinner.
+          <p className="mp-reveal mp-reveal-delay-3 mt-8 max-w-md font-display text-xl italic leading-snug text-ivory/90 sm:text-2xl">
+            {line}
           </p>
           <div className="mp-reveal mp-reveal-delay-4 mt-12 flex flex-col items-center gap-5">
             <Link
-              href="/onboarding"
+              href="/login"
               className="mp-btn-lux inline-flex rounded-none bg-gradient-to-b from-accent-2 to-accent px-12 py-4 text-[11px] font-semibold uppercase tracking-[0.3em] text-ink shadow-[0_16px_48px_rgba(212,196,168,0.22)]"
             >
               Request entry
@@ -110,18 +100,14 @@ export default function Landing() {
                   className="text-[10px] font-semibold uppercase tracking-[0.28em] text-muted underline decoration-accent/30 underline-offset-8 transition hover:text-accent-2"
                 />
               )}
-              <a
-                href="/api/auth/linkedin"
+              <Link
+                href="/login"
                 className="text-[10px] font-semibold uppercase tracking-[0.28em] text-muted underline decoration-accent/30 underline-offset-8 transition hover:text-accent-2"
               >
-                LinkedIn
-              </a>
+                Sign in
+              </Link>
             </div>
           </div>
-        </div>
-
-        <div className="absolute bottom-0 left-0 right-0 z-10 flex justify-center pb-6">
-          <span className="h-px w-24 bg-gradient-to-r from-transparent via-accent/50 to-transparent" />
         </div>
       </section>
 
@@ -172,7 +158,10 @@ export default function Landing() {
         </div>
         <div className="mp-stagger grid sm:grid-cols-3">
           {TABLES.map((t) => (
-            <figure key={t.city} className="mp-card-motion group relative min-h-[70vw] overflow-hidden sm:min-h-[70vh]">
+            <figure
+              key={t.city}
+              className="mp-card-motion group relative min-h-[70vw] overflow-hidden sm:min-h-[70vh]"
+            >
               <div
                 className="mp-card-photo absolute inset-0 bg-cover bg-center"
                 style={{ backgroundImage: `url(${t.img})` }}
@@ -191,37 +180,21 @@ export default function Landing() {
                 </p>
                 <p className="mt-2 font-display text-xl italic text-ivory">{t.line}</p>
               </figcaption>
-              <span
-                className="pointer-events-none absolute inset-4 border border-accent/0 transition duration-500 group-hover:border-accent/35"
-                aria-hidden
-              />
             </figure>
           ))}
         </div>
       </section>
 
-      <section className="px-6 py-28 sm:px-10">
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="font-display text-3xl italic leading-[1.35] text-ivory sm:text-[2.75rem]">
-            &ldquo;If you have to ask what it is,
-            <br />
-            it wasn&apos;t meant for you.&rdquo;
-          </p>
-          <span className="mx-auto mt-12 block h-px w-16 bg-accent/40" />
-        </div>
-      </section>
-
       <section className="mp-frame border-t border-line/60 px-6 py-24 sm:px-10">
         <div className="mx-auto flex max-w-lg flex-col items-center text-center">
-          <ConclaveLogo size={44} />
-          <h2 className="mt-8 font-display text-4xl font-semibold tracking-tight sm:text-5xl">
+          <h2 className="font-display text-4xl font-semibold tracking-tight sm:text-5xl">
             Take your seat<span className="italic text-accent">.</span>
           </h2>
           <p className="mt-4 text-sm leading-relaxed text-muted">
             Present yourself. We handle the introductions.
           </p>
           <Link
-            href="/onboarding"
+            href="/login"
             className="mp-btn-lux mt-10 inline-flex rounded-none bg-gradient-to-b from-accent-2 to-accent px-12 py-4 text-[11px] font-semibold uppercase tracking-[0.28em] text-ink"
           >
             Request entry
@@ -231,10 +204,12 @@ export default function Landing() {
 
       <footer className="border-t border-line/60 px-6 py-14 sm:px-10">
         <div className="mx-auto flex max-w-5xl flex-col items-center gap-3">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.48em] text-muted/80">
-            Conclave · Private society
+          <p className="font-display text-xl font-semibold text-ivory">
+            Con<span className="text-accent">clave</span>
           </p>
-          <p className="text-xs text-muted/50">Introductions that end at a table.</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.36em] text-muted/80">
+            Powered by Montevere Co.
+          </p>
         </div>
       </footer>
     </main>

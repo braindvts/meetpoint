@@ -33,12 +33,26 @@ export async function clearMemberCookie(): Promise<void> {
   jar.delete(MEMBER_COOKIE);
 }
 
-/** Resolve the signed-in Conclave member (LinkedIn session and/or member cookie). */
+/** Resolve the signed-in Conclave member (OAuth session and/or member cookie). */
 export async function getCurrentMember(): Promise<Member | null> {
   const session = await getSession();
   if (session?.id) {
-    const byLi = await prisma.member.findUnique({ where: { linkedInId: session.id } });
-    if (byLi) return byLi;
+    if (session.provider === "linkedin") {
+      const byLi = await prisma.member.findFirst({ where: { linkedInId: session.id } });
+      if (byLi) return byLi;
+    }
+    if (session.provider === "google") {
+      const byG = await prisma.member.findFirst({ where: { googleId: session.id } });
+      if (byG) return byG;
+    }
+    if (session.provider === "apple") {
+      const byA = await prisma.member.findFirst({ where: { appleId: session.id } });
+      if (byA) return byA;
+    }
+    if (session.email) {
+      const byEmail = await prisma.member.findFirst({ where: { email: session.email } });
+      if (byEmail) return byEmail;
+    }
   }
 
   const cookieId = await getMemberIdFromCookie();

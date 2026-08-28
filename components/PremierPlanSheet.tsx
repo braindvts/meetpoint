@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import ConclaveLogo from "@/components/ConclaveLogo";
 import { PREMIER_PLAN, formatPremierPrice } from "@/lib/plans";
 import type { PremierInterval } from "@/lib/types";
 
@@ -75,11 +74,11 @@ export default function PremierPlanSheet({
           </div>
 
           <div className="px-6 pb-2 pt-4 text-center sm:pt-6">
-            <div className="mx-auto mb-4 flex justify-center">
-              <ConclaveLogo size={56} />
-            </div>
-            <p className="text-[13px] font-semibold tracking-tight text-white/55">
-              Conclave Membership
+            <p className="font-display text-2xl font-semibold text-white">
+              Con<span className="text-accent">clave</span>
+            </p>
+            <p className="mt-2 text-[13px] font-semibold tracking-tight text-white/55">
+              Membership
             </p>
             <h2 className="mt-1 font-display text-[28px] font-semibold leading-tight tracking-tight text-white">
               {PREMIER_PLAN.name}

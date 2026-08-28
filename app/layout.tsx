@@ -1,16 +1,22 @@
 import type { Metadata, Viewport } from "next";
-import { Source_Sans_3 } from "next/font/google";
+import { Cormorant_Garamond, Outfit } from "next/font/google";
 import AnalyticsBeacon from "@/components/AnalyticsBeacon";
 import AppChrome from "@/components/AppChrome";
 import PlausibleScript from "@/components/PlausibleScript";
 import ToastHost from "@/components/ToastHost";
 import "./globals.css";
 
-/** One clean, readable sans for the whole app. */
-const sourceSans = Source_Sans_3({
+const outfit = Outfit({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
-  variable: "--font-source",
+  variable: "--font-outfit",
+});
+
+const cormorant = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  style: ["normal", "italic"],
+  variable: "--font-cormorant",
 });
 
 export const metadata: Metadata = {
@@ -32,7 +38,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={sourceSans.variable}>
+    <html lang="en" className={`${outfit.variable} ${cormorant.variable}`}>
       <body className="min-h-screen antialiased [text-rendering:optimizeLegibility]">
         <AppChrome>{children}</AppChrome>
         <ToastHost />

@@ -23,6 +23,7 @@ export function profileToPerson(profile: MyProfile): Person {
     linkedInUrl: linkedIn?.startsWith("http") ? linkedIn : undefined,
     websiteUrl: website?.startsWith("http") ? website : undefined,
     portfolioUrl: portfolio?.startsWith("http") ? portfolio : undefined,
+    work: profile.work,
   };
 }
 

@@ -408,18 +408,27 @@ export default function PersonProfileSheet({
                     const reason = window.prompt("Why are you reporting this member?");
                     if (!reason?.trim()) return;
                     try {
-                      await fetch("/api/report", {
+                      const res = await fetch("/api/report", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ peerId: person.id, reason }),
                       });
+                      const data = (await res.json()) as { ok?: boolean; error?: string };
                       window.dispatchEvent(
                         new CustomEvent("meetpoint:toast", {
-                          detail: { message: "Report received. Thank you." },
+                          detail: {
+                            message: data.ok
+                              ? "Report received. We’ll review it."
+                              : data.error || "Could not send report. Sign in and try again.",
+                          },
                         })
                       );
                     } catch {
-                      /* ignore */
+                      window.dispatchEvent(
+                        new CustomEvent("meetpoint:toast", {
+                          detail: { message: "Could not send report." },
+                        })
+                      );
                     }
                     onClose();
                   }}

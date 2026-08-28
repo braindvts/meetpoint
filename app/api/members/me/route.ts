@@ -41,48 +41,53 @@ export async function PUT(req: Request) {
       linkedInId: body.profile.linkedInId || session?.id,
     });
 
-    // LinkedIn session counts as verification
     if (session?.id) {
       const verifications = JSON.parse(data.verificationsJson || "[]") as {
         method: string;
         value: string;
         verifiedAt: string;
       }[];
-      if (!verifications.some((v) => v.method === "linkedin")) {
+      if (session.provider === "linkedin" && !verifications.some((v) => v.method === "linkedin")) {
         verifications.push({
           method: "linkedin",
           value: `linkedin:${session.id}`,
           verifiedAt: new Date().toISOString(),
         });
         data.verificationsJson = JSON.stringify(verifications);
-      }
-      data.linkedInId = session.id;
-      if (session.email && !data.phone) {
-        /* keep phone as-is */
+        data.linkedInId = session.id;
       }
     }
+
+    const extra = {
+      linkedInId: session?.provider === "linkedin" ? session.id : data.linkedInId,
+      googleId: session?.provider === "google" ? session.id : undefined,
+      appleId: session?.provider === "apple" ? session.id : undefined,
+    };
 
     let member;
     if (existing) {
       member = await prisma.member.update({
         where: { id: existing.id },
-        data,
+        data: {
+          ...data,
+          email: session?.email || existing.email,
+          linkedInId: extra.linkedInId || existing.linkedInId,
+          googleId: extra.googleId || existing.googleId,
+          appleId: extra.appleId || existing.appleId,
+        },
       });
-    } else if (session?.id) {
-      const byLi = await prisma.member.findUnique({ where: { linkedInId: session.id } });
-      member = byLi
-        ? await prisma.member.update({ where: { id: byLi.id }, data })
-        : await prisma.member.create({
-            data: {
-              ...data,
-              linkedInId: session.id,
-              email: session.email || null,
-              photo: data.photo || session.picture || "",
-              name: data.name || session.name,
-            },
-          });
     } else {
-      member = await prisma.member.create({ data });
+      member = await prisma.member.create({
+        data: {
+          ...data,
+          email: session?.email || null,
+          linkedInId: extra.linkedInId || null,
+          googleId: extra.googleId || null,
+          appleId: extra.appleId || null,
+          photo: data.photo || session?.picture || "",
+          name: data.name || session?.name || "Member",
+        },
+      });
     }
 
     const res = NextResponse.json({

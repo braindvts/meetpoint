@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import ConclaveLogo from "@/components/ConclaveLogo";
+import { pickConclaveLine } from "@/lib/lines";
 
 const SESSION_KEY = "conclave.splash.seen";
 
@@ -9,7 +9,7 @@ function alreadySeen(): boolean {
   try {
     return sessionStorage.getItem(SESSION_KEY) === "1";
   } catch {
-    return true; // if storage blocked, skip splash so the app never sticks
+    return true;
   }
 }
 
@@ -22,11 +22,12 @@ function markSeen() {
 }
 
 /**
- * First open only. Always dismisses — never blocks the app underneath.
+ * First open only. Word + unique line + Montevere Co.
  */
 export default function SplashScreen() {
   const [visible, setVisible] = useState(false);
   const [leaving, setLeaving] = useState(false);
+  const [line] = useState(() => pickConclaveLine());
   const finished = useRef(false);
 
   useEffect(() => {
@@ -40,7 +41,7 @@ export default function SplashScreen() {
       finished.current = true;
       markSeen();
       setLeaving(true);
-      hideTimer = window.setTimeout(() => setVisible(false), 320);
+      hideTimer = window.setTimeout(() => setVisible(false), 380);
     };
 
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -51,10 +52,9 @@ export default function SplashScreen() {
       };
     }
 
-    const tOut = window.setTimeout(() => setLeaving(true), 1100);
-    const tDone = window.setTimeout(finish, 1500);
-    /** Hard failsafe — never leave the user stuck on splash */
-    const tFailsafe = window.setTimeout(finish, 2800);
+    const tOut = window.setTimeout(() => setLeaving(true), 2200);
+    const tDone = window.setTimeout(finish, 2700);
+    const tFailsafe = window.setTimeout(finish, 4200);
 
     return () => {
       window.clearTimeout(tOut);
@@ -80,13 +80,20 @@ export default function SplashScreen() {
         window.setTimeout(() => setVisible(false), 280);
       }}
     >
-      <div className="mp-splash-seal relative flex flex-col items-center">
-        <span className="mp-splash-ring" aria-hidden />
-        <ConclaveLogo size={72} variant="hero" />
-        <p className="mp-splash-word mt-6 text-3xl font-semibold tracking-tight text-ivory">
+      <div className="mp-splash-seal relative flex flex-col items-center px-8 text-center">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.48em] text-accent">
+          By introduction only
+        </p>
+        <p className="mp-splash-word mt-5 font-display text-5xl font-semibold tracking-tight text-ivory sm:text-6xl">
           Con<span className="text-accent">clave</span>
         </p>
+        <p className="mt-5 max-w-sm font-display text-xl italic leading-snug text-ivory/80 sm:text-2xl">
+          {line}
+        </p>
       </div>
+      <p className="absolute bottom-10 text-[10px] font-semibold uppercase tracking-[0.36em] text-muted/70">
+        Powered by Montevere Co.
+      </p>
     </div>
   );
 }

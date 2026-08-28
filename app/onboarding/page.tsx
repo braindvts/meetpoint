@@ -3,9 +3,9 @@
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import ConclaveLogo from "@/components/ConclaveLogo";
-import LinkedInButton from "@/components/LinkedInButton";
+import AuthButtons from "@/components/AuthButtons";
 import ProfileForm from "@/components/ProfileForm";
+import Wordmark from "@/components/Wordmark";
 import { loadProfile } from "@/lib/store";
 import type { MyProfile } from "@/lib/types";
 
@@ -72,9 +72,7 @@ function OnboardingContent() {
       />
 
       <div className="relative mx-auto max-w-3xl px-6 pt-10 sm:pt-14">
-        <Link href="/" className="mp-reveal inline-flex transition hover:opacity-90">
-          <ConclaveLogo size={34} withWordmark />
-        </Link>
+        <Wordmark href="/" size="md" />
 
         <header className="mp-reveal mp-reveal-delay-1 mt-10 mb-12">
           <p className="text-[10px] font-semibold uppercase tracking-[0.42em] text-accent">
@@ -93,23 +91,19 @@ function OnboardingContent() {
           <>
             {!linkedInUser && (
               <div className="mp-reveal mp-reveal-delay-2 mb-12 space-y-5">
-                <div className="flex flex-col gap-4 border border-line/80 bg-panel/60 px-5 py-5 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <p className="font-display text-lg font-semibold text-ivory">
-                      Begin with LinkedIn
-                    </p>
-                    <p className="mt-0.5 text-sm text-muted">
-                      Import your name and photograph — preferred for trust.
-                    </p>
-                  </div>
-                  <LinkedInButton label="Enter with LinkedIn" />
+                <div className="border border-line/80 bg-panel/60 px-5 py-5">
+                  <p className="font-display text-lg font-semibold text-ivory">Sign in first</p>
+                  <p className="mt-0.5 text-sm text-muted">
+                    Email, Google, Apple, or LinkedIn — so we can keep your seat.
+                  </p>
+                  <AuthButtons className="mt-4" />
                 </div>
 
                 <a
                   href="#profile-form"
-                  className="mp-btn-lux inline-flex items-center justify-center rounded-full bg-gradient-to-b from-accent-2 to-accent px-8 py-3.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-ink shadow-[0_8px_24px_rgba(255,255,255,0.12)]"
+                  className="inline-flex items-center justify-center text-[11px] font-semibold uppercase tracking-[0.22em] text-muted underline decoration-accent/30 underline-offset-6"
                 >
-                  Continue without LinkedIn
+                  Continue without an account
                 </a>
               </div>
             )}

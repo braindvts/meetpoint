@@ -2,12 +2,14 @@ import { createHmac, randomBytes, timingSafeEqual } from "crypto";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
+export type AuthProvider = "linkedin" | "google" | "apple" | "email";
+
 export interface AuthSession {
   id: string;
   name: string;
   email?: string;
   picture?: string;
-  provider: "linkedin";
+  provider: AuthProvider;
 }
 
 const COOKIE = "meetpoint_session";
@@ -119,4 +121,16 @@ export function linkedInConfigured(): boolean {
   const id = process.env.LINKEDIN_CLIENT_ID?.trim();
   const secret = process.env.LINKEDIN_CLIENT_SECRET?.trim();
   return !!(id && secret);
+}
+
+export function googleConfigured(): boolean {
+  return !!(
+    process.env.GOOGLE_CLIENT_ID?.trim() && process.env.GOOGLE_CLIENT_SECRET?.trim()
+  );
+}
+
+export function appleConfigured(): boolean {
+  return !!(
+    process.env.APPLE_CLIENT_ID?.trim() && process.env.APPLE_CLIENT_SECRET?.trim()
+  );
 }

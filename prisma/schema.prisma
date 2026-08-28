@@ -10,7 +10,10 @@ datasource db {
 model Member {
   id             String   @id @default(cuid())
   linkedInId     String?  @unique
-  email          String?
+  googleId       String?  @unique
+  appleId        String?  @unique
+  email          String?  @unique
+  passwordHash   String?
   name           String
   jobTitle       String   @default("")
   bio            String   @default("")
@@ -24,6 +27,7 @@ model Member {
   lookingForJson String   @default("[]")
   ideaTagsJson   String   @default("[]")
   verificationsJson String @default("[]")
+  workJson       String   @default("[]")
   phone          String?
   elite          Boolean  @default(false)
   premierActive  Boolean  @default(false)

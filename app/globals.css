@@ -11,8 +11,8 @@
   --color-muted: #8f877a;
   --color-mint: #b8b0a4;
   --color-sky: #9c9488;
-  --font-sans: var(--font-source), "Segoe UI", system-ui, -apple-system, sans-serif;
-  --font-display: var(--font-source), "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-sans: var(--font-outfit), "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-display: var(--font-cormorant), "Iowan Old Style", "Palatino Linotype", Georgia, serif;
 }
 
 html {
