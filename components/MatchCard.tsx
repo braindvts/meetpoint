@@ -70,7 +70,7 @@ export default function MatchCard({
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <h3 className="truncate font-display text-[1.15rem] font-semibold leading-tight text-ivory">
+            <h3 className="truncate text-[1.05rem] font-medium leading-tight text-ivory">
               {person.name}
             </h3>
             <p className="mt-0.5 truncate text-[12px] font-medium text-accent">{role}</p>

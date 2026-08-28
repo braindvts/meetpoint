@@ -1,5 +1,6 @@
 "use client";
 
+import StarRating, { cuisineLine } from "@/components/StarRating";
 import type { FoodSuggestion } from "@/lib/foodAi";
 import { restaurantPhoto } from "@/lib/restaurantPhotos";
 
@@ -135,17 +136,15 @@ export default function FoodSuggestPopup({
                     </p>
                   </div>
                   <div className="px-3 py-2.5">
-                    <div className="flex items-baseline justify-between gap-2">
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/55">
-                        {s.restaurant.cuisine}
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-[11px] text-white/55">
+                        {cuisineLine(s.restaurant.cuisine)}
                       </p>
-                      <span className="text-[9px] font-semibold uppercase tracking-[0.14em] text-white/40">
-                        $$$$$
-                      </span>
+                      <StarRating restaurant={s.restaurant} className="shrink-0" />
                     </div>
                     <p className="mt-1 text-[11px] text-white/45">{s.reason}</p>
-                    <p className="mt-1 font-display text-[12px] italic text-white/55">
-                      “{s.restaurant.vibe}”
+                    <p className="mt-1 text-[12px] text-white/55">
+                      {s.restaurant.vibe}
                     </p>
                     <button
                       type="button"

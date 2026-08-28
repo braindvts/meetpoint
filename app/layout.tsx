@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Cormorant_Garamond, Outfit } from "next/font/google";
+import { Outfit } from "next/font/google";
 import AnalyticsBeacon from "@/components/AnalyticsBeacon";
 import AppChrome from "@/components/AppChrome";
 import PlausibleScript from "@/components/PlausibleScript";
@@ -10,13 +10,6 @@ const outfit = Outfit({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   variable: "--font-outfit",
-});
-
-const cormorant = Cormorant_Garamond({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  style: ["normal", "italic"],
-  variable: "--font-cormorant",
 });
 
 export const metadata: Metadata = {
@@ -38,7 +31,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${outfit.variable} ${cormorant.variable}`}>
+    <html lang="en" className={outfit.variable}>
       <body className="min-h-screen antialiased [text-rendering:optimizeLegibility]">
         <AppChrome>{children}</AppChrome>
         <ToastHost />

@@ -9,6 +9,7 @@ import Avatar from "@/components/Avatar";
 import EmptyState from "@/components/EmptyState";
 import PersonProfileSheet from "@/components/PersonProfileSheet";
 import RateMeeting from "@/components/RateMeeting";
+import StarRating, { cuisineLine } from "@/components/StarRating";
 import { RESTAURANTS } from "@/lib/data";
 import {
   acceptConnection,
@@ -91,7 +92,7 @@ export default function ConnectionsPage() {
       <main className="mp-app pb-24">
         <PageHeader title="Circle" />
         <div className="px-4 pt-2">
-          <p className="font-display text-[1.05rem] text-ivory/85">Your introductions</p>
+          <p className="text-[14px] text-ivory/70">Your introductions</p>
           <p className="mt-1 text-[12px] text-muted">
             {connections.length > 0
               ? `${connected.length} connected${
@@ -217,10 +218,13 @@ export default function ConnectionsPage() {
                       <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-accent">
                         The table is set
                       </p>
-                      <p className="mt-2 text-lg text-ivory">
-                        {restaurant.name}{" "}
-                        <span className="text-ivory/70">({restaurant.cuisine})</span>
-                      </p>
+                      <p className="mt-2 text-lg text-ivory">{restaurant.name}</p>
+                      <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <StarRating restaurant={restaurant} />
+                        <span className="text-[13px] text-ivory/55">
+                          {cuisineLine(restaurant.cuisine)}
+                        </span>
+                      </div>
                       <p className="mt-1 text-muted">
                         {new Date(conn.meetup.date + "T12:00:00").toLocaleDateString(undefined, {
                           weekday: "long",

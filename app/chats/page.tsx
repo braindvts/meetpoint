@@ -118,7 +118,7 @@ export default function ChatsPage() {
           }
         />
         <div className="px-4 pt-2">
-          <p className="font-display text-[1.05rem] text-ivory/85">Private messages</p>
+          <p className="text-[14px] text-ivory/70">Private messages</p>
         </div>
 
         <div className="px-4 pb-6 pt-4">

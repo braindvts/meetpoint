@@ -16,10 +16,10 @@ export default function GlobalError({
 
   return (
     <main className="flex min-h-dvh flex-col items-center justify-center bg-ink px-6 text-center text-ivory">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.4em] text-accent">
+      <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-accent">
         Something went wrong
       </p>
-      <h1 className="mt-4 font-display text-3xl font-semibold tracking-tight">The room had a fault.</h1>
+      <h1 className="mt-4 text-2xl font-semibold tracking-tight">The room had a fault.</h1>
       <p className="mt-3 max-w-sm text-sm text-muted">
         Try again. If it keeps happening, refresh or re-enter from login.
       </p>

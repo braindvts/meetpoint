@@ -64,9 +64,9 @@ function Section({
   return (
     <section className="relative border-t border-line/70 pt-3.5 sm:pt-8">
       <div className="mb-2.5 flex items-baseline gap-2 sm:mb-6 sm:gap-4">
-        <span className="font-display text-[10px] italic text-accent sm:text-sm">{num}</span>
+        <span className="text-[10px] font-medium tabular-nums text-accent sm:text-sm">{num}</span>
         <div>
-          <h2 className="font-display text-base font-semibold tracking-tight text-ivory sm:text-2xl">
+          <h2 className="text-base font-semibold tracking-tight text-ivory sm:text-xl">
             {title}
           </h2>
           {subtitle && (

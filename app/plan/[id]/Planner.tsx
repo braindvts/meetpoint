@@ -5,12 +5,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Nav from "@/components/Nav";
 import Avatar from "@/components/Avatar";
+import StarRating, { cuisineLine } from "@/components/StarRating";
 import { PEOPLE } from "@/lib/data";
 import { distanceKm, formatDistance, midpointRestaurants, restaurantsInCity } from "@/lib/match";
 import { getConnection, loadProfile, setMeetup } from "@/lib/store";
 import type { MeetMode, MyProfile, Restaurant } from "@/lib/types";
-
-const PRICE = ["$$$", "$$$$", "$$$$$"];
 
 export default function Planner({ peerId }: { peerId: string }) {
   const router = useRouter();
@@ -98,11 +97,11 @@ export default function Planner({ peerId }: { peerId: string }) {
           <div className="lux-divider mx-auto mb-10 max-w-48">
             <span className="text-accent" aria-hidden>◆</span>
           </div>
-          <p className="font-display text-6xl italic text-accent-2">Confirmed</p>
-          <h1 className="mt-5 text-[11px] font-semibold uppercase tracking-[0.32em] text-muted">
+          <p className="text-3xl font-semibold tracking-tight text-accent-2">Confirmed</p>
+          <h1 className="mt-3 text-[12px] font-medium uppercase tracking-[0.12em] text-muted">
             The table is set
           </h1>
-          <p className="mt-6 font-display text-xl leading-relaxed text-ivory/90">
+          <p className="mt-5 text-base leading-relaxed text-ivory/85">
             You and <span className="font-semibold text-ivory">{person.name}</span> are meeting at{" "}
             <span className="font-semibold text-ivory">{r?.name}</span> in {r?.city} on{" "}
             {new Date(date + "T12:00:00").toLocaleDateString(undefined, {
@@ -140,12 +139,11 @@ export default function Planner({ peerId }: { peerId: string }) {
         <div className="mt-8 mb-12 flex items-center gap-5">
           <Avatar src={person.photoUrl} name={person.name} sizeCls="h-16 w-16" rounded="rounded-full" />
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.42em] text-accent">
+            <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-accent">
               Curate the table
             </p>
-            <h1 className="mt-2 font-display text-3xl font-semibold tracking-tight sm:text-4xl">
+            <h1 className="mt-1.5 text-2xl font-semibold tracking-tight sm:text-3xl">
               Dinner with {person.name.split(" ")[0]}
-              <span className="italic text-accent-2">.</span>
             </h1>
             <p className="mt-1 text-sm text-muted">
               {person.city.name}, {person.city.country} · {formatDistance(km)}
@@ -155,8 +153,8 @@ export default function Planner({ peerId }: { peerId: string }) {
 
         <section className="mb-12 border-t border-line/70 pt-8">
           <div className="mb-6 flex items-baseline gap-4">
-            <span className="font-display text-sm italic text-accent">01</span>
-            <h2 className="font-display text-2xl font-semibold tracking-tight text-ivory">
+            <span className="text-[11px] font-medium tabular-nums text-accent">01</span>
+            <h2 className="text-lg font-semibold tracking-tight text-ivory">
               Who travels?
             </h2>
           </div>
@@ -174,7 +172,7 @@ export default function Planner({ peerId }: { peerId: string }) {
                     : "border-line/70 bg-panel/60 hover:border-accent/30"
                 }`}
               >
-                <p className="font-display text-lg font-semibold text-ivory">{m.title}</p>
+                <p className="text-base font-semibold text-ivory">{m.title}</p>
                 <p className="mt-1.5 text-xs leading-relaxed text-muted">{m.text}</p>
               </button>
             ))}
@@ -183,8 +181,8 @@ export default function Planner({ peerId }: { peerId: string }) {
 
         <section className="mb-12 border-t border-line/70 pt-8">
           <div className="mb-6 flex items-baseline gap-4">
-            <span className="font-display text-sm italic text-accent">02</span>
-            <h2 className="font-display text-2xl font-semibold tracking-tight text-ivory">
+            <span className="text-[11px] font-medium tabular-nums text-accent">02</span>
+            <h2 className="text-lg font-semibold tracking-tight text-ivory">
               Choose the restaurant
             </h2>
           </div>
@@ -204,17 +202,15 @@ export default function Planner({ peerId }: { peerId: string }) {
                       : "border-line/70 bg-panel/60 hover:border-accent/30"
                   }`}
                 >
-                  <div className="flex items-baseline justify-between gap-3">
-                    <p className="font-display text-lg font-semibold text-ivory">{r.name}</p>
-                    <span className="text-xs tracking-[0.2em] text-accent-2">
-                      {PRICE[r.priceLevel - 1]}
-                    </span>
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="text-base font-semibold text-ivory">{r.name}</p>
+                    <StarRating restaurant={r} className="shrink-0" />
                   </div>
-                  <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted">
-                    {r.cuisine} · {r.city}, {r.country}
+                  <p className="mt-1 text-[11px] text-muted">
+                    {cuisineLine(r.cuisine)} · {r.city}, {r.country}
                   </p>
-                  <p className="mt-3 font-display text-sm italic leading-relaxed text-ivory/70">
-                    “{r.vibe}”
+                  <p className="mt-3 text-sm leading-relaxed text-ivory/70">
+                    {r.vibe}
                   </p>
                 </button>
               ))}
@@ -225,8 +221,8 @@ export default function Planner({ peerId }: { peerId: string }) {
         <section className="mb-12 grid gap-8 border-t border-line/70 pt-8 sm:grid-cols-2">
           <div>
             <div className="mb-5 flex items-baseline gap-4">
-              <span className="font-display text-sm italic text-accent">03</span>
-              <h2 className="font-display text-2xl font-semibold tracking-tight text-ivory">
+              <span className="text-[11px] font-medium tabular-nums text-accent">03</span>
+              <h2 className="text-lg font-semibold tracking-tight text-ivory">
                 The date
               </h2>
             </div>
@@ -240,8 +236,8 @@ export default function Planner({ peerId }: { peerId: string }) {
           </div>
           <div>
             <div className="mb-5 flex items-baseline gap-4">
-              <span className="font-display text-sm italic text-accent">04</span>
-              <h2 className="font-display text-2xl font-semibold tracking-tight text-ivory">
+              <span className="text-[11px] font-medium tabular-nums text-accent">04</span>
+              <h2 className="text-lg font-semibold tracking-tight text-ivory">
                 A note <span className="text-base font-normal text-muted">(optional)</span>
               </h2>
             </div>

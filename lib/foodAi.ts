@@ -1,5 +1,6 @@
 import { searchPlaces } from "./apiClient";
 import { distanceKm, midpointRestaurants, restaurantsInCity } from "./match";
+import { prestigeRank } from "./restaurantRating";
 import type { City, Person, Restaurant } from "./types";
 
 /**
@@ -77,11 +78,7 @@ export function suggestSpotsForChat(
   }
 
   return merged
-    .sort((a, b) => {
-      const stars = (r: Restaurant) =>
-        (r.cuisine.match(/★/g) || []).length + (r.cuisine.includes("Five-star") ? 2 : 0);
-      return stars(b.restaurant) - stars(a.restaurant);
-    })
+    .sort((a, b) => prestigeRank(b.restaurant) - prestigeRank(a.restaurant))
     .slice(0, limit);
 }
 

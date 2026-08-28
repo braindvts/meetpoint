@@ -137,6 +137,8 @@ export interface Restaurant {
   lng: number;
   priceLevel: 1 | 2 | 3;
   vibe: string;
+  /** Guest rating 0–5 when known (Google Places, etc.). */
+  rating?: number;
   /** Optional dining photo; otherwise a cuisine-matched image is used. */
   photoUrl?: string;
 }

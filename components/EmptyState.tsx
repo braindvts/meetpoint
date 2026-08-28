@@ -25,9 +25,8 @@ export default function EmptyState({
       />
       <div className="relative">
         <span className="mx-auto mb-6 block h-px w-12 bg-accent/50" />
-        <p className="font-display text-3xl font-semibold text-ivory sm:text-4xl">
+        <p className="text-2xl font-medium tracking-tight text-ivory sm:text-3xl">
           {title}
-          <span className="italic text-accent">.</span>
         </p>
         <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-muted">{body}</p>
         {(actionHref || onAction) && actionLabel && (

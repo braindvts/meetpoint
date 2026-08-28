@@ -12,7 +12,9 @@ import {
 } from "@/lib/pricing";
 import { formatPhoneDisplay, isValidPhone, maskPhone } from "@/lib/phone";
 import { restaurantPhoto } from "@/lib/restaurantPhotos";
+import { displayCuisine } from "@/lib/restaurantRating";
 import { allAgreed } from "@/lib/store";
+import StarRating from "@/components/StarRating";
 import type { GroupChat } from "@/lib/types";
 
 const PENDING_BOOKING_KEY = "conclave.pendingBooking";
@@ -156,6 +158,12 @@ export default function TableProposalCard({
     setStep("idle");
   }
 
+  const restaurantMatch = RESTAURANTS.find((r) => r.id === proposal.restaurantId);
+  const ratingSource = restaurantMatch || {
+    cuisine: proposal.cuisine,
+    priceLevel: 3 as const,
+  };
+
   // After booking, replace the big card with a quiet reminder
   if (proposal.booked) {
     return (
@@ -230,10 +238,13 @@ export default function TableProposalCard({
       </div>
 
       <div className="p-3.5">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">
-          {proposal.cuisine} · {proposal.city}
+        <p className="text-[11px] text-muted">
+          {displayCuisine(proposal.cuisine)} · {proposal.city}
         </p>
-        <p className="mt-1 font-display text-sm italic text-ivory/70">“{proposal.vibe}”</p>
+        <div className="mt-1.5">
+          <StarRating restaurant={ratingSource} />
+        </div>
+        <p className="mt-1 text-sm text-ivory/70">{proposal.vibe}</p>
 
         <div className="mt-3 flex flex-wrap gap-1.5">
           {voters.map((id) => {

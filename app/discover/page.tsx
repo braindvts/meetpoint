@@ -140,7 +140,7 @@ export default function DiscoverPage() {
         />
 
         <div className="px-4 pt-2">
-          <p className="font-display text-[1.05rem] text-ivory/85">People you might connect with</p>
+          <p className="text-[14px] text-ivory/70">People you might connect with</p>
           {myTier === 1 && !premier && (
             <button
               type="button"

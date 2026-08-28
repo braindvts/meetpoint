@@ -17,7 +17,7 @@ export default function RoomNote() {
   }, []);
 
   return (
-    <p className="mp-reveal mp-reveal-delay-1 mb-5 border-l border-accent/55 pl-4 font-display text-[1.05rem] italic leading-relaxed text-ivory/75 sm:mb-7 sm:text-xl">
+    <p className="mp-reveal mp-reveal-delay-1 mb-5 border-l border-accent/40 pl-4 text-[0.95rem] font-normal leading-relaxed text-ivory/70 sm:mb-7 sm:text-base">
       {note}
     </p>
   );

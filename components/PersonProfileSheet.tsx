@@ -240,16 +240,16 @@ export default function PersonProfileSheet({
               )}
               <div className="absolute inset-x-0 bottom-0 px-4 pb-4">
                 {owner && (
-                  <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-accent">
+                  <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-accent">
                     Owner
                   </p>
                 )}
                 {elite && !owner && (
-                  <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-white/55">
+                  <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/55">
                     Elite
                   </p>
                 )}
-                <h2 className="font-display text-3xl font-semibold tracking-tight text-white">
+                <h2 className="text-2xl font-semibold tracking-tight text-white">
                   {person.name}
                 </h2>
                 <p className="mt-1 text-[14px] font-medium text-accent-2">{person.jobTitle}</p>

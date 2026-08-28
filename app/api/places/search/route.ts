@@ -47,6 +47,7 @@ export async function GET(req: Request) {
           lat: r.geometry?.location.lat ?? lat,
           lng: r.geometry?.location.lng ?? lng,
           priceLevel: 3 as const,
+          rating: r.rating,
           vibe: r.rating ? `Rated ${r.rating}` : "Recommended nearby",
           photoUrl: r.photos?.[0]
             ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photo_reference=${r.photos[0].photo_reference}&key=${key}`

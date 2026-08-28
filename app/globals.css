@@ -12,7 +12,7 @@
   --color-mint: #b8b0a4;
   --color-sky: #9c9488;
   --font-sans: var(--font-outfit), "Segoe UI", system-ui, -apple-system, sans-serif;
-  --font-display: var(--font-cormorant), "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --font-display: var(--font-outfit), "Segoe UI", system-ui, -apple-system, sans-serif;
 }
 
 html {
@@ -90,11 +90,11 @@ body::after {
   position: relative;
 }
 
-/* Poster labels */
+/* Quiet labels — tight tracking, one typeface */
 .mp-kicker {
   font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.46em;
+  font-weight: 500;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--color-accent);
 }
