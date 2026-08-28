@@ -81,7 +81,7 @@ export default function SplashScreen() {
       }}
     >
       <div className="mp-splash-seal relative flex flex-col items-center px-8 text-center">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.48em] text-accent">
+        <p className="mp-kicker">
           By introduction only
         </p>
         <p className="mp-splash-word mt-5 font-display text-5xl font-semibold tracking-tight text-ivory sm:text-6xl">

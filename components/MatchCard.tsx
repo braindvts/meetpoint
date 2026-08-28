@@ -58,12 +58,12 @@ export default function MatchCard({
           onOpenProfile(person.id);
         }
       }}
-      className={`mp-card-motion group relative flex flex-col overflow-hidden ${
+        className={`mp-card-motion group relative flex flex-col overflow-hidden ${
         onOpenProfile || preview ? "cursor-pointer [-webkit-tap-highlight-color:transparent]" : ""
       } ${
         elite
           ? "elite-centurion"
-          : "mp-frame border border-line/80 bg-panel/80 hover:border-accent/40"
+          : "mp-card-poster"
       }`}
     >
       {elite && <span className="elite-sheen" aria-hidden />}
@@ -114,7 +114,7 @@ export default function MatchCard({
 
           {!elite && (
             <div className="absolute left-3 top-3 z-10 sm:left-4 sm:top-4">
-              <span className="border border-accent/40 bg-ink/70 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-accent backdrop-blur-sm">
+              <span className="border border-accent/45 bg-ink/75 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.22em] text-accent backdrop-blur-sm">
                 {reason}
               </span>
             </div>
@@ -130,7 +130,7 @@ export default function MatchCard({
 
           <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5">
             <h3
-              className={`truncate text-xl font-semibold leading-tight sm:text-2xl ${
+              className={`truncate font-display text-2xl font-semibold leading-tight sm:text-[1.65rem] ${
                 elite ? "text-white" : "text-ivory"
               }`}
             >

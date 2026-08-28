@@ -15,7 +15,7 @@ export default function AuthButtons({ className = "" }: Props) {
       </a>
       <a
         href="/api/auth/google"
-        className="inline-flex w-full items-center justify-center gap-2.5 border border-line bg-panel px-5 py-3 text-[12px] font-semibold tracking-wide text-ivory transition hover:border-accent/40"
+        className="inline-flex w-full items-center justify-center gap-2.5 border border-line bg-panel px-5 py-3.5 text-[12px] font-semibold tracking-wide text-ivory transition hover:border-accent/50"
       >
         Continue with Google
       </a>

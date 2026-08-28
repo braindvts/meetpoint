@@ -126,13 +126,13 @@ export default function DiscoverPage() {
     <>
       <Nav />
       <main className="mx-auto max-w-5xl px-3 py-4 pb-28 sm:px-6 sm:py-10">
-        <section className="mp-reveal mp-room-banner mb-5 p-4 sm:mb-8 sm:p-8">
+        <section className="mp-reveal mp-frame mp-room-banner mb-5 p-5 sm:mb-8 sm:p-8">
           <div className="relative z-[1] flex items-end justify-between gap-4">
             <div className="min-w-0">
-              <p className="text-[9px] font-semibold uppercase tracking-[0.36em] text-accent sm:tracking-[0.48em]">
+              <p className="mp-kicker">
                 The room · tonight
               </p>
-              <h1 className="mt-2 font-display text-3xl font-semibold leading-none tracking-tight sm:text-5xl">
+              <h1 className="mt-3 font-display text-3xl font-semibold leading-[0.92] tracking-tight sm:text-5xl">
                 {greeting},{" "}
                 <span className="italic text-accent">{profile.name.split(" ")[0]}</span>
               </h1>

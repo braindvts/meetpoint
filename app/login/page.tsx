@@ -49,7 +49,7 @@ function LoginContent() {
   }, [router]);
 
   return (
-    <main className="relative grid min-h-dvh lg:grid-cols-2">
+    <main className="mp-stage relative grid min-h-dvh lg:grid-cols-2">
       <div className="relative hidden overflow-hidden lg:block">
         <div
           className="absolute inset-0 bg-cover bg-center animate-[kenburns_22s_ease-out_both]"
@@ -81,11 +81,11 @@ function LoginContent() {
         <div className="relative">
           <Wordmark href="/" size="md" />
 
-          <p className="mt-12 text-[10px] font-semibold uppercase tracking-[0.48em] text-accent">
+          <p className="mt-12 mp-kicker">
             Members&apos; entrance
           </p>
-          <h1 className="mt-4 font-display text-5xl font-semibold tracking-tight">
-            Enter<span className="italic text-accent-2">.</span>
+          <h1 className="mt-5 font-display text-5xl font-semibold tracking-tight sm:text-6xl">
+            Enter<span className="italic text-accent">.</span>
           </h1>
           <p className="mt-4 leading-[1.7] text-muted">
             Sign in to keep your seat. Email, Google, Apple, or LinkedIn — your session stays on
@@ -111,7 +111,7 @@ function LoginContent() {
 
             <Link
               href="/onboarding"
-              className="inline-flex w-full items-center justify-center border border-line py-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted transition hover:text-ivory"
+              className="inline-flex w-full items-center justify-center border border-accent/30 py-3.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-muted transition hover:border-accent/60 hover:text-ivory"
             >
               Continue to profile
             </Link>

@@ -43,7 +43,7 @@ export default function Landing() {
   const line = pickConclaveLine(new Date().getDate());
 
   return (
-    <main className="bg-ink text-ivory">
+    <main className="mp-stage bg-ink text-ivory">
       <section className="relative min-h-dvh overflow-hidden">
         <div className="absolute inset-0">
           <div
@@ -58,38 +58,38 @@ export default function Landing() {
             className="absolute inset-0"
             style={{
               background:
-                "linear-gradient(105deg, rgba(5,5,5,0.97) 0%, rgba(5,5,5,0.82) 42%, rgba(5,5,5,0.35) 100%), linear-gradient(to top, rgba(5,5,5,0.98) 0%, transparent 50%)",
+                "linear-gradient(105deg, rgba(5,5,5,0.98) 0%, rgba(5,5,5,0.86) 38%, rgba(5,5,5,0.42) 100%), linear-gradient(to top, rgba(5,5,5,0.98) 0%, transparent 48%)",
             }}
             aria-hidden
           />
         </div>
 
-        <header className="relative z-10 flex items-center justify-between px-5 py-7 sm:px-10 lg:px-16">
-          <span className="text-[10px] font-semibold uppercase tracking-[0.42em] text-accent">
+        <header className="relative z-10 flex items-center justify-between px-7 py-8 sm:px-12 lg:px-20">
+          <span className="mp-kicker">
             Est. MMXXVI
           </span>
           <Link
             href="/login"
-            className="border border-accent/30 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.32em] text-accent-2 transition hover:border-accent hover:bg-accent/10"
+            className="border border-accent/40 px-5 py-2 text-[10px] font-semibold uppercase tracking-[0.36em] text-accent-2 transition hover:border-accent hover:bg-accent/10"
           >
             Members
           </Link>
         </header>
 
         <div className="relative z-10 flex min-h-[calc(100dvh-5rem)] flex-col items-center justify-center px-6 pb-20 text-center">
-          <p className="mp-reveal mp-reveal-delay-1 text-[10px] font-semibold uppercase tracking-[0.5em] text-accent">
+          <p className="mp-reveal mp-reveal-delay-1 mp-kicker">
             By introduction only
           </p>
-          <h1 className="mp-reveal mp-reveal-delay-2 mt-5 font-display text-[clamp(3.5rem,12vw,8rem)] font-semibold leading-[0.9] tracking-tight">
+          <h1 className="mp-reveal mp-reveal-delay-2 mt-6 font-display text-[clamp(3.75rem,13vw,8.5rem)] font-semibold leading-[0.88] tracking-tight">
             Con<span className="text-accent">clave</span>
           </h1>
-          <p className="mp-reveal mp-reveal-delay-3 mt-8 max-w-md font-display text-xl italic leading-snug text-ivory/90 sm:text-2xl">
+          <p className="mp-reveal mp-reveal-delay-3 mt-8 max-w-md font-display text-xl italic leading-snug text-ivory/88 sm:text-2xl">
             {line}
           </p>
           <div className="mp-reveal mp-reveal-delay-4 mt-12 flex flex-col items-center gap-5">
             <Link
               href="/login"
-              className="mp-btn-lux inline-flex rounded-none bg-gradient-to-b from-accent-2 to-accent px-12 py-4 text-[11px] font-semibold uppercase tracking-[0.3em] text-ink shadow-[0_16px_48px_rgba(212,196,168,0.22)]"
+              className="mp-btn-lux inline-flex rounded-none bg-gradient-to-b from-accent-2 to-accent px-14 py-4 text-[11px] font-semibold uppercase tracking-[0.34em] text-ink shadow-[0_16px_48px_rgba(212,196,168,0.22)]"
             >
               Request entry
             </Link>

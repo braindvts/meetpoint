@@ -99,7 +99,7 @@ export default function Nav() {
   return (
     <>
       <header
-        className={`sticky top-0 z-40 border-b border-accent/10 bg-ink/90 backdrop-blur-xl ${
+        className={`sticky top-0 z-40 border-b border-accent/20 bg-ink/92 backdrop-blur-xl ${
           inChatThread ? "hidden sm:block" : ""
         }`}
       >
