@@ -67,6 +67,17 @@ Copy from `.env.example`. Important ones:
 
 Without LinkedIn keys you can still use **Enter demo** (dev) or create a profile manually.
 
+## Open in Xcode (iPhone)
+
+The website stays in Cursor. An iOS wrapper lives in `ios/` so you can run Conclave in the iPhone Simulator.
+
+1. Start the site: `npm run dev`
+2. Open `ios/Conclave.xcodeproj` in Xcode
+3. Signing & Capabilities → your Apple ID (Personal Team)
+4. Pick an iPhone simulator → press **▶**
+
+Full steps: **[ios/README.md](./ios/README.md)**
+
 ## Tech
 
 - Next.js 15 · React 19 · TypeScript · Tailwind CSS v4 · Prisma 5  

@@ -29,3 +29,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .vercel
+
+# Xcode
+ios/**/xcuserdata/
+*.xcuserstate
+*.xccheckout
+*.moved-aside
+DerivedData/
