@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Nav from "@/components/Nav";
+import PageHeader from "@/components/PageHeader";
 import Avatar from "@/components/Avatar";
 import EmptyState from "@/components/EmptyState";
 import PersonProfileSheet from "@/components/PersonProfileSheet";
@@ -87,33 +88,26 @@ export default function ConnectionsPage() {
   return (
     <>
       <Nav />
-      <main className="mx-auto max-w-3xl px-3 py-4 pb-28 sm:px-6 sm:py-10">
-        <section className="mp-reveal mp-room-banner mb-6 p-5 sm:mb-10 sm:p-8">
-          <div className="relative z-[1]">
-            <p className="mp-kicker">
-              Your circle
-            </p>
-            <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight sm:text-5xl">
-              Introductions<span className="italic text-accent">.</span>
-            </h1>
-            <p className="mt-2 text-[12px] text-muted sm:text-sm">
-              Curate a table and make it real
-              {connections.length > 0
-                ? ` · ${connected.length} seated${
-                    inbound.length ? `, ${inbound.length} to review` : ""
-                  }${outbound.length ? `, ${outbound.length} waiting` : ""}`
-                : ""}
-              .
-            </p>
-          </div>
-        </section>
+      <main className="mp-app pb-24">
+        <PageHeader title="Circle" />
+        <div className="px-4 pt-2">
+          <p className="font-display text-[1.05rem] text-ivory/85">Your introductions</p>
+          <p className="mt-1 text-[12px] text-muted">
+            {connections.length > 0
+              ? `${connected.length} connected${
+                  inbound.length ? ` · ${inbound.length} to review` : ""
+                }${outbound.length ? ` · ${outbound.length} waiting` : ""}`
+              : "Introductions you accept live here."}
+          </p>
+        </div>
 
+        <div className="px-4 pb-6 pt-4">
         {connections.length === 0 ? (
           <EmptyState
             title="Your circle awaits"
             body="Step into the room and connect with someone who shares your ambition."
             actionHref="/discover"
-            actionLabel="Enter the room"
+            actionLabel="Discover"
           />
         ) : (
           <div className="mp-stagger space-y-3">
@@ -133,7 +127,7 @@ export default function ConnectionsPage() {
               return (
                 <div
                   key={conn.peerId}
-                  className={`mp-row mp-frame mp-card-poster p-3 sm:p-5 ${
+                  className={`mp-row mp-person-card p-3 ${
                     isInbound ? "bg-accent/[0.06]" : ""
                   }`}
                 >
@@ -147,7 +141,7 @@ export default function ConnectionsPage() {
                         src={person.photoUrl}
                         name={person.name}
                         sizeCls="h-14 w-14 sm:h-16 sm:w-16"
-                        rounded="rounded-none"
+                        rounded="rounded-[12px]"
                       />
                       <div className="min-w-0">
                         <h3 className="truncate font-display text-xl font-semibold text-ivory sm:text-2xl">
@@ -168,7 +162,7 @@ export default function ConnectionsPage() {
                           <button
                             type="button"
                             onClick={() => accept(person.id)}
-                            className="mp-btn-lux bg-gradient-to-b from-accent-2 to-accent px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-ink"
+                            className="rounded-md bg-gradient-to-b from-accent-2 to-accent px-3 py-1.5 text-[11px] font-medium text-ink"
                           >
                             Accept
                           </button>
@@ -245,6 +239,7 @@ export default function ConnectionsPage() {
             })}
           </div>
         )}
+        </div>
       </main>
 
       <PersonProfileSheet

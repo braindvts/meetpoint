@@ -6,7 +6,6 @@ import { Suspense, useEffect } from "react";
 import AuthButtons from "@/components/AuthButtons";
 import DemoEnterButton from "@/components/DemoEnterButton";
 import EmailAuthForm from "@/components/EmailAuthForm";
-import Wordmark from "@/components/Wordmark";
 import { demoEntryEnabled } from "@/lib/demoFlag";
 import { loadProfile, saveProfile } from "@/lib/store";
 import type { MyProfile } from "@/lib/types";
@@ -49,76 +48,38 @@ function LoginContent() {
   }, [router]);
 
   return (
-    <main className="mp-stage relative grid min-h-dvh lg:grid-cols-2">
-      <div className="relative hidden overflow-hidden lg:block">
-        <div
-          className="absolute inset-0 bg-cover bg-center animate-[kenburns_22s_ease-out_both]"
-          style={{
-            backgroundImage:
-              "url(https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=2000&q=90)",
-          }}
-          aria-hidden
-        />
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "linear-gradient(to right, rgba(6,5,9,0.4), rgba(6,5,9,0.94)), linear-gradient(to top, rgba(6,5,9,0.88), transparent 55%)",
-          }}
-          aria-hidden
-        />
-        <div className="absolute bottom-0 left-0 p-14">
-          <p className="font-display max-w-sm text-3xl italic leading-[1.35] text-ivory/95">
-            Private introductions. Settled over dinner.
-          </p>
-          <p className="mt-6 text-[10px] font-semibold uppercase tracking-[0.32em] text-muted">
-            Powered by Montevere Co.
-          </p>
+    <main className="mp-app flex min-h-dvh flex-col px-6 pb-10 pt-16">
+      <p className="text-center font-display text-[0.8rem] font-semibold tracking-[0.38em] text-accent">
+        CONCLAVE
+      </p>
+      <h1 className="mt-10 font-display text-4xl font-semibold tracking-tight text-ivory">
+        Sign in
+      </h1>
+      <p className="mt-2 text-sm leading-relaxed text-muted">
+        Email, Google, Apple, or LinkedIn — your session stays on this device.
+      </p>
+
+      {error && (
+        <div className="mt-6 rounded-xl border border-accent/30 bg-accent/5 px-4 py-3 text-sm leading-relaxed text-accent-2">
+          {error}
         </div>
-      </div>
+      )}
 
-      <div className="relative mx-auto flex w-full max-w-lg flex-col justify-center px-6 py-16 sm:px-10">
-        <div className="mp-frame mp-card-poster relative px-6 py-10 sm:px-10 sm:py-12">
-          <Wordmark href="/" size="md" />
-
-          <p className="mt-12 mp-kicker">
-            Members&apos; entrance
-          </p>
-          <h1 className="mt-5 font-display text-5xl font-semibold tracking-tight sm:text-7xl">
-            Enter<span className="italic text-accent">.</span>
-          </h1>
-          <p className="mt-4 leading-[1.7] text-muted">
-            Sign in to keep your seat. Email, Google, Apple, or LinkedIn — your session stays on
-            this device.
-          </p>
-
-          {error && (
-            <div className="mt-6 border border-accent/30 bg-accent/5 px-4 py-3 text-sm leading-relaxed text-accent-2">
-              {error}
-            </div>
-          )}
-
-          <div className="mt-10 space-y-6">
-            <AuthButtons />
-
-            <div className="lux-divider">
-              <span className="text-[10px] font-semibold uppercase tracking-[0.36em] text-muted">
-                or email
-              </span>
-            </div>
-
-            <EmailAuthForm />
-
-            <Link
-              href="/onboarding"
-              className="inline-flex w-full items-center justify-center border border-accent/30 py-3.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-muted transition hover:border-accent/60 hover:text-ivory"
-            >
-              Continue to profile
-            </Link>
-
-            {demoEntryEnabled() && <DemoEnterButton />}
-          </div>
+      <div className="mt-8 space-y-5">
+        <AuthButtons />
+        <div className="lux-divider">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.28em] text-muted">
+            or email
+          </span>
         </div>
+        <EmailAuthForm />
+        <Link
+          href="/onboarding"
+          className="inline-flex w-full items-center justify-center rounded-xl border border-accent/25 py-3.5 text-[12px] font-medium text-muted"
+        >
+          Continue to profile
+        </Link>
+        {demoEntryEnabled() && <DemoEnterButton />}
       </div>
     </main>
   );

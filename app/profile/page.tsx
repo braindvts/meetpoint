@@ -8,6 +8,7 @@ import Avatar from "@/components/Avatar";
 import EditProfilePopup from "@/components/EditProfilePopup";
 import EliteInviteCard from "@/components/EliteInviteCard";
 import Nav from "@/components/Nav";
+import PageHeader from "@/components/PageHeader";
 import PremierPlanSheet from "@/components/PremierPlanSheet";
 import ProfileForm from "@/components/ProfileForm";
 import { ensureNotifyPermission } from "@/lib/notify";
@@ -101,50 +102,39 @@ function ProfileContent() {
   return (
     <>
       <Nav />
-      <main className="mx-auto max-w-3xl px-3 py-4 pb-24 sm:px-6 sm:py-10">
+      <main className="mp-app pb-24">
+        <PageHeader title="Profile" />
+        <div className="px-4 pb-6 pt-2">
         {needsVerify && (
-          <div className="mb-3 border border-accent/30 bg-accent/5 px-3 py-2 text-[11px] leading-snug text-accent-2 sm:mb-6 sm:px-4 sm:py-3 sm:text-sm">
+          <div className="mb-4 rounded-xl border border-accent/30 bg-accent/5 px-3 py-2 text-[12px] leading-snug text-accent-2">
             Verification required. Add a company email, LinkedIn, website, registration, or
             portfolio below.
           </div>
         )}
 
-        <section className="mp-reveal mp-room-banner mb-5 p-4 sm:mb-8 sm:p-7">
-          <div className="relative z-[1] flex items-end justify-between gap-3">
-            <div className="flex items-center gap-3 sm:gap-4">
-              <button
-                type="button"
-                onClick={() => setEditPopupOpen(true)}
-                className="group relative shrink-0 transition duration-300 hover:scale-[1.03] [-webkit-tap-highlight-color:transparent]"
-                aria-label="Edit profile"
-              >
-                <span className="absolute -inset-1 border border-accent/25" />
-                <Avatar
-                  src={profile.photo}
-                  name={profile.name}
-                  sizeCls="h-14 w-14 sm:h-16 sm:w-16"
-                  rounded="rounded-none"
-                />
-                <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 border border-accent/40 bg-ink px-2 py-px text-[8px] font-semibold uppercase tracking-[0.14em] text-accent">
-                  Edit
-                </span>
-              </button>
-              <div>
-                <p className="mp-kicker">
-                  Membership
-                </p>
-                <h1 className="mt-1 font-display text-2xl font-semibold tracking-tight sm:text-4xl">
-                  Your seat<span className="italic text-accent">.</span>
-                </h1>
-              </div>
-            </div>
+        <section className="mp-person-card mb-5 flex items-center justify-between gap-3 p-3">
+          <div className="flex items-center gap-3">
             <button
-              onClick={reset}
-              className="border border-red-500/50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-red-400 transition hover:border-red-400 hover:bg-red-500/10 sm:px-4 sm:py-1.5"
+              type="button"
+              onClick={() => setEditPopupOpen(true)}
+              className="shrink-0"
+              aria-label="Edit profile"
             >
-              Reset
+              <Avatar
+                src={profile.photo}
+                name={profile.name}
+                sizeCls="h-14 w-14"
+                rounded="rounded-[12px]"
+              />
             </button>
+            <div>
+              <h2 className="font-display text-xl font-semibold text-ivory">{profile.name}</h2>
+              <p className="text-[12px] text-accent">{profile.jobTitle || "Member"}</p>
+            </div>
           </div>
+          <button type="button" onClick={reset} className="text-[12px] text-red-400">
+            Reset
+          </button>
         </section>
 
         <MembershipPlans
@@ -159,18 +149,15 @@ function ProfileContent() {
 
         <EliteInviteCard elite={profile.elite === true} />
 
-        <section className="mb-5 mp-card-poster p-4 sm:mb-8 sm:p-5">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-accent">
-            Alerts
-          </p>
+        <section className="mp-person-card mb-5 p-4">
+          <p className="text-[12px] font-medium text-accent">Alerts</p>
           <p className="mt-1 text-sm text-muted">
-            Browser notifications for intros and table confirmations. Native iOS/Android push
-            needs a separate FCM/APNs setup later.
+            Browser notifications for intros and table confirmations.
           </p>
           <button
             type="button"
             onClick={() => void ensureNotifyPermission()}
-            className="mt-3 border border-accent/40 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-2"
+            className="mt-3 rounded-md border border-accent/40 px-4 py-2 text-[12px] text-accent"
           >
             Enable alerts
           </button>
@@ -178,10 +165,11 @@ function ProfileContent() {
 
         <MembershipTiers input={tierInput} missing={strength.missing} />
 
-        <p className="mp-kicker mb-2.5 scroll-mt-20 sm:mb-5" id="edit-details">
+        <p className="mb-2.5 mt-6 scroll-mt-20 text-[12px] font-medium text-accent" id="edit-details">
           Edit details
         </p>
         <ProfileForm initial={profile} />
+        </div>
       </main>
 
       <PremierPlanSheet

@@ -1,11 +1,9 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import AuthButtons from "@/components/AuthButtons";
 import ProfileForm from "@/components/ProfileForm";
-import Wordmark from "@/components/Wordmark";
 import { loadProfile } from "@/lib/store";
 import type { MyProfile } from "@/lib/types";
 
@@ -65,25 +63,17 @@ function OnboardingContent() {
   }, []);
 
   return (
-    <main className="mp-stage relative min-h-dvh pb-24">
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.06),transparent_70%)]"
-        aria-hidden
-      />
-
-      <div className="relative mx-auto max-w-3xl px-6 pt-10 sm:pt-14">
-        <Wordmark href="/" size="md" />
-
-        <header className="mp-reveal mp-reveal-delay-1 mt-10 mb-12">
-          <p className="mp-kicker">
-            Membership petition
-          </p>
-          <h1 className="mt-3 font-display text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
-            Present yourself<span className="italic text-accent-2">.</span>
+    <main className="mp-app relative min-h-dvh pb-10">
+      <div className="px-6 pt-14">
+        <p className="text-center font-display text-[0.8rem] font-semibold tracking-[0.38em] text-accent">
+          CONCLAVE
+        </p>
+        <header className="mt-10 mb-8">
+          <h1 className="font-display text-4xl font-semibold tracking-tight text-ivory">
+            Your profile
           </h1>
-          <p className="mt-4 max-w-lg leading-relaxed text-muted">
-            Present yourself, choose what you&apos;re looking for, then enter the room —
-            introductions arranged with intent.
+          <p className="mt-2 text-sm leading-relaxed text-muted">
+            Name, work, and what you&apos;re looking for — then Discover can introduce you.
           </p>
         </header>
 

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { pickConclaveLine } from "@/lib/lines";
 
 const SESSION_KEY = "conclave.splash.seen";
 
@@ -21,13 +20,9 @@ function markSeen() {
   }
 }
 
-/**
- * First open only. Word + unique line + Montevere Co.
- */
 export default function SplashScreen() {
   const [visible, setVisible] = useState(false);
   const [leaving, setLeaving] = useState(false);
-  const [line] = useState(() => pickConclaveLine());
   const finished = useRef(false);
 
   useEffect(() => {
@@ -52,9 +47,9 @@ export default function SplashScreen() {
       };
     }
 
-    const tOut = window.setTimeout(() => setLeaving(true), 2200);
-    const tDone = window.setTimeout(finish, 2700);
-    const tFailsafe = window.setTimeout(finish, 4200);
+    const tOut = window.setTimeout(() => setLeaving(true), 1800);
+    const tDone = window.setTimeout(finish, 2300);
+    const tFailsafe = window.setTimeout(finish, 4000);
 
     return () => {
       window.clearTimeout(tOut);
@@ -80,24 +75,18 @@ export default function SplashScreen() {
         window.setTimeout(() => setVisible(false), 280);
       }}
     >
-      <div className="pointer-events-none absolute inset-8 border border-accent/45 sm:inset-14" aria-hidden />
-      <div className="mp-splash-seal mp-frame relative flex flex-col items-center px-10 py-12 text-center">
-        <p className="mp-kicker">
-          By introduction only
+      <div
+        className="pointer-events-none absolute h-56 w-56 rounded-full bg-accent/20 blur-3xl"
+        aria-hidden
+      />
+      <div className="mp-splash-seal relative flex flex-col items-center px-8 text-center">
+        <p className="mp-splash-word font-display text-4xl font-semibold tracking-[0.18em] text-accent sm:text-5xl">
+          CONCLAVE
         </p>
-        <p className="mp-splash-word mt-6 font-display text-6xl font-semibold tracking-tight text-ivory sm:text-7xl">
-          Con<span className="text-accent">clave</span>
-        </p>
-        <p className="mt-6 max-w-sm font-display text-xl italic leading-snug text-ivory/85 sm:text-2xl">
-          Networking that ends at a dinner table.
-        </p>
-        <p className="mt-4 max-w-sm text-[11px] font-medium uppercase tracking-[0.28em] text-muted">
-          {line}
+        <p className="mt-5 max-w-xs font-display text-lg italic leading-snug text-ivory/80">
+          The private network for ambitious people.
         </p>
       </div>
-      <p className="absolute bottom-10 text-[10px] font-semibold uppercase tracking-[0.36em] text-muted/70">
-        Powered by Montevere Co.
-      </p>
     </div>
   );
 }

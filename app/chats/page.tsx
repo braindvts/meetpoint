@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Nav from "@/components/Nav";
+import PageHeader from "@/components/PageHeader";
 import Avatar from "@/components/Avatar";
 import EmptyState from "@/components/EmptyState";
 import {
@@ -104,31 +105,25 @@ export default function ChatsPage() {
   return (
     <>
       <Nav />
-      <main className="mx-auto max-w-3xl px-3 py-4 pb-28 sm:px-6 sm:py-10">
-        <section className="mp-reveal mp-room-banner mb-6 p-5 sm:mb-10 sm:p-8">
-          <div className="relative z-[1] flex flex-wrap items-end justify-between gap-4">
-            <div>
-            <p className="mp-kicker">
-              Members only
-            </p>
-              <h1 className="mt-2 font-display text-3xl font-semibold tracking-tight sm:text-5xl">
-                Private<span className="italic text-accent">.</span>
-              </h1>
-              <p className="mt-2 hidden text-sm text-muted sm:block">
-                Quiet threads with people you&apos;ve been introduced to.
-              </p>
-            </div>
+      <main className="mp-app pb-24">
+        <PageHeader
+          title="Chats"
+          action={
             <button
               onClick={() => setCreating((c) => !c)}
-              className="mp-btn-lux bg-gradient-to-b from-accent-2 to-accent px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-ink"
+              className="text-[13px] font-medium text-accent"
             >
-              {creating ? "Cancel" : "New thread"}
+              {creating ? "Cancel" : "New"}
             </button>
-          </div>
-        </section>
+          }
+        />
+        <div className="px-4 pt-2">
+          <p className="font-display text-[1.05rem] text-ivory/85">Private messages</p>
+        </div>
 
+        <div className="px-4 pb-6 pt-4">
         {creating && (
-          <div className="mp-modal-in mp-card-poster mb-8 p-5 sm:p-6">
+          <div className="mp-modal-in mp-person-card mb-6 p-4">
             <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-accent">
               Start a private chat
             </p>
@@ -160,7 +155,7 @@ export default function ChatsPage() {
                           on ? "border-accent/50 bg-accent/10" : "border-line/60 bg-ink/40"
                         }`}
                       >
-                        <Avatar src={p.photoUrl} name={p.name} sizeCls="h-10 w-10" rounded="rounded-none" />
+                        <Avatar src={p.photoUrl} name={p.name} sizeCls="h-10 w-10" rounded="rounded-[12px]" />
                         <div className="min-w-0 flex-1">
                           <p className="font-display text-lg font-semibold text-ivory">{p.name}</p>
                           <p className="truncate text-[10px] uppercase tracking-[0.16em] text-muted">
@@ -191,43 +186,41 @@ export default function ChatsPage() {
             title="No private chats yet"
             body="Connect in the room, then open a quiet thread here."
             actionHref="/discover"
-            actionLabel="Enter the room"
+            actionLabel="Discover"
           />
         ) : (
-          <div className="mp-stagger divide-y divide-accent/15 border border-accent/25 bg-panel/40">
+          <div className="mp-stagger space-y-3">
             {sorted.map((chat) => {
               const members = directory.filter((p) => chat.memberIds.includes(p.id));
               const last = [...chat.messages].reverse().find((m) => m.senderId !== "system");
               const when = relativeTime(last?.createdAt || chat.messages.at(-1)?.createdAt);
               const lead = members[0];
               return (
-                <div key={chat.id} className="group flex items-stretch">
+                <div key={chat.id} className="mp-person-card group flex items-stretch">
                   <Link
                     href={`/chats/${chat.id}`}
-                    className="flex min-w-0 flex-1 items-center gap-3 px-3 py-3.5 transition hover:bg-accent/[0.04] sm:gap-4 sm:px-5 sm:py-4"
+                    className="flex min-w-0 flex-1 items-center gap-3 px-3 py-3"
                   >
                     <Avatar
                       src={lead?.photoUrl}
                       name={lead?.name || chat.name}
-                      sizeCls="h-12 w-12 sm:h-14 sm:w-14"
-                      rounded="rounded-none"
+                      sizeCls="h-12 w-12"
+                      rounded="rounded-[12px]"
                     />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-baseline justify-between gap-2">
-                        <h2 className="truncate font-display text-lg font-semibold text-ivory sm:text-xl">
+                        <h2 className="truncate font-display text-lg font-semibold text-ivory">
                           {chat.name}
                         </h2>
                         {when && (
-                          <span className="shrink-0 text-[10px] uppercase tracking-wider text-accent/70">
-                            {when}
-                          </span>
+                          <span className="shrink-0 text-[11px] text-muted">{when}</span>
                         )}
                       </div>
-                      <p className="mt-0.5 truncate text-[10px] uppercase tracking-[0.14em] text-muted">
+                      <p className="mt-0.5 truncate text-[12px] text-muted">
                         {members.map((m) => m.name.split(" ")[0]).join(" · ") || "You"}
                       </p>
                       {last && (
-                        <p className="mt-1 truncate text-[12px] text-muted/90 sm:text-sm">
+                        <p className="mt-1 truncate text-[12px] text-muted/90">
                           {last.senderId === "me" ? "You: " : ""}
                           {last.attachment && !last.text
                             ? last.attachment.kind === "image"
@@ -241,7 +234,7 @@ export default function ChatsPage() {
                   <button
                     title="Close"
                     onClick={() => setChats(deleteChat(chat.id))}
-                    className="border-l border-line/50 px-3 text-muted transition hover:bg-white/[0.03] hover:text-ivory sm:px-4"
+                    className="px-3 text-muted"
                   >
                     ✕
                   </button>
@@ -250,6 +243,7 @@ export default function ChatsPage() {
             })}
           </div>
         )}
+        </div>
       </main>
     </>
   );

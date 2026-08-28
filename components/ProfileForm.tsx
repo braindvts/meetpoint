@@ -648,7 +648,7 @@ export default function ProfileForm({ initial }: { initial?: MyProfile | null })
         </p>
         <button
           type="submit"
-          className="mp-btn-lux rounded-none bg-gradient-to-b from-accent-2 to-accent px-10 py-3.5 text-[11px] font-semibold uppercase tracking-[0.28em] text-ink shadow-[0_8px_28px_rgba(212,196,168,0.18)]"
+          className="mp-btn-lux rounded-xl bg-gradient-to-b from-accent-2 to-accent px-10 py-3.5 text-[13px] font-semibold text-ink"
         >
           {initial?.jobTitle || initial?.ideaTags?.length ? "Save profile" : "Start discovering"}
         </button>

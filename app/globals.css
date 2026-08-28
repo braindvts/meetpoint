@@ -68,54 +68,24 @@ body::after {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-/*
- * Invitation overlay — the poster look, on every screen:
- * outer gold line, inner gold line, L-shaped corners.
- */
-.mp-invite {
-  pointer-events: none;
-  position: fixed;
-  z-index: 105;
-  inset: 8px;
-}
-.mp-invite::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border: 1px solid color-mix(in srgb, var(--color-accent) 50%, transparent);
-  box-shadow:
-    inset 0 0 0 5px var(--color-ink),
-    inset 0 0 0 6px color-mix(in srgb, var(--color-accent) 24%, transparent),
-    inset 0 0 90px rgba(212, 196, 168, 0.045);
-}
-.mp-invite::after {
-  content: "";
-  position: absolute;
-  inset: 14px;
-  background:
-    linear-gradient(var(--color-accent), var(--color-accent)) top left / 22px 1px no-repeat,
-    linear-gradient(var(--color-accent), var(--color-accent)) top left / 1px 22px no-repeat,
-    linear-gradient(var(--color-accent), var(--color-accent)) top right / 22px 1px no-repeat,
-    linear-gradient(var(--color-accent), var(--color-accent)) top right / 1px 22px no-repeat,
-    linear-gradient(var(--color-accent), var(--color-accent)) bottom left / 22px 1px no-repeat,
-    linear-gradient(var(--color-accent), var(--color-accent)) bottom left / 1px 22px no-repeat,
-    linear-gradient(var(--color-accent), var(--color-accent)) bottom right / 22px 1px no-repeat,
-    linear-gradient(var(--color-accent), var(--color-accent)) bottom right / 1px 22px no-repeat;
-  opacity: 0.85;
+/* Phone-app column — the earlier mockup format */
+.mp-app {
+  width: 100%;
+  max-width: 430px;
+  margin-left: auto;
+  margin-right: auto;
+  min-height: 100dvh;
+  background: var(--color-ink);
 }
 @media (min-width: 640px) {
-  .mp-invite {
-    inset: 14px;
+  body {
+    background: #030303;
   }
-  .mp-invite::before {
-    box-shadow:
-      inset 0 0 0 7px var(--color-ink),
-      inset 0 0 0 8px color-mix(in srgb, var(--color-accent) 26%, transparent),
-      inset 0 0 110px rgba(212, 196, 168, 0.05);
+  .mp-app {
+    box-shadow: 0 0 0 1px rgba(212, 196, 168, 0.08), 0 24px 80px rgba(0, 0, 0, 0.55);
   }
 }
 
-/* Pages that used to draw their own frame */
 .mp-stage {
   position: relative;
 }
@@ -129,13 +99,17 @@ body::after {
   color: var(--color-accent);
 }
 
-/* Hairline gold cards like the promo phones */
+/* Person row — earlier Discover mockup */
+.mp-person-card {
+  border: 1px solid rgba(212, 196, 168, 0.16);
+  background: #12110f;
+  border-radius: 14px;
+}
+
 .mp-card-poster {
-  border: 1px solid color-mix(in srgb, var(--color-accent) 32%, transparent);
-  background: color-mix(in srgb, var(--color-panel) 92%, transparent);
-  box-shadow:
-    0 18px 50px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(212, 196, 168, 0.08);
+  border: 1px solid color-mix(in srgb, var(--color-accent) 22%, transparent);
+  background: #12110f;
+  border-radius: 14px;
 }
 
 .mp-panel {
@@ -197,11 +171,10 @@ body::after {
   pointer-events: auto;
 }
 .mp-dock {
-  border: 1px solid color-mix(in srgb, var(--color-accent) 32%, transparent);
-  background: rgba(8, 7, 6, 0.94);
+  border-top: 1px solid rgba(243, 239, 230, 0.08);
+  background: rgba(5, 5, 5, 0.94);
   backdrop-filter: blur(22px);
   -webkit-backdrop-filter: blur(22px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
   pointer-events: auto;
 }
 

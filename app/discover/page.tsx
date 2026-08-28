@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Nav from "@/components/Nav";
-import Avatar from "@/components/Avatar";
+import PageHeader from "@/components/PageHeader";
 import MatchCard from "@/components/MatchCard";
 import PersonProfileSheet from "@/components/PersonProfileSheet";
 import PremierPlanSheet from "@/components/PremierPlanSheet";
@@ -26,11 +26,8 @@ import { syncProfileToServer } from "@/lib/apiClient";
 import { readClientConnections, readClientProfile } from "@/lib/clientProfile";
 import { tierForPerson, tierForProfile } from "@/lib/tiers";
 import type { Connection, MyProfile, Person } from "@/lib/types";
-import EditProfilePopup from "@/components/EditProfilePopup";
 import EmptyState from "@/components/EmptyState";
 import NotifyPrompt from "@/components/NotifyPrompt";
-import RoomNote from "@/components/RoomNote";
-import { eveningGreeting } from "@/lib/greeting";
 import { track } from "@/lib/analytics";
 
 type Filter = "open" | "local";
@@ -42,11 +39,10 @@ export default function DiscoverPage() {
   const [people, setPeople] = useState<Person[]>(() => loadDirectory());
   const [blocked, setBlocked] = useState<string[]>(() => loadBlockedIds());
   const [filter, setFilter] = useState<Filter>("open");
-  const [greeting] = useState(() => eveningGreeting());
+  const [filterOpen, setFilterOpen] = useState(false);
   const [premierOpen, setPremierOpen] = useState(false);
   const [premierPeerName, setPremierPeerName] = useState<string | undefined>();
   const [profilePerson, setProfilePerson] = useState<Person | null>(null);
-  const [editPopupOpen, setEditPopupOpen] = useState(false);
 
   const refreshConnections = useCallback(() => setConnections(loadConnections()), []);
 
@@ -125,136 +121,110 @@ export default function DiscoverPage() {
   return (
     <>
       <Nav />
-      <main className="mx-auto max-w-5xl px-3 py-4 pb-28 sm:px-6 sm:py-10">
-        <section className="mp-reveal mp-frame mp-room-banner mb-5 p-5 sm:mb-8 sm:p-8">
-          <div className="relative z-[1] flex items-end justify-between gap-4">
-            <div className="min-w-0">
-              <p className="mp-kicker">
-                The room · tonight
-              </p>
-              <h1 className="mt-3 font-display text-3xl font-semibold leading-[0.92] tracking-tight sm:text-5xl">
-                {greeting},{" "}
-                <span className="italic text-accent">{profile.name.split(" ")[0]}</span>
-              </h1>
-              <p className="mt-3 max-w-lg text-[12px] leading-relaxed text-muted sm:text-sm">
-                {filter === "open"
-                  ? "Matched by business, mutual help, or profession."
-                  : "Relevant people near you."}
-                {myTier === 1 && !premier && (
-                  <>
-                    {" "}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setPremierPeerName(undefined);
-                        setPremierOpen(true);
-                      }}
-                      className="text-accent underline decoration-accent/40 underline-offset-2"
-                    >
-                      Unlock Premier
-                    </button>
-                  </>
-                )}
-              </p>
-            </div>
+      <main className="mp-app pb-24">
+        <PageHeader
+          title="Discover"
+          action={
             <button
               type="button"
-              onClick={() => setEditPopupOpen(true)}
-              className="group relative shrink-0 transition duration-300 hover:scale-[1.03] [-webkit-tap-highlight-color:transparent]"
-              aria-label="Edit profile"
+              aria-label="Filter"
+              aria-expanded={filterOpen}
+              onClick={() => setFilterOpen((v) => !v)}
+              className="text-accent"
             >
-              <span className="absolute -inset-1 border border-accent/25 transition group-hover:border-accent/50" />
-              <Avatar
-                src={profile.photo}
-                name={profile.name}
-                sizeCls="h-14 w-14 sm:h-20 sm:w-20"
-                rounded="rounded-none"
-              />
-              <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 border border-accent/40 bg-ink px-2 py-px text-[8px] font-semibold uppercase tracking-[0.16em] text-accent">
-                Edit
-              </span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" className="h-5 w-5">
+                <path d="M4 5h16l-5.5 7.2V19l-5 2v-8.8L4 5z" strokeLinejoin="round" />
+              </svg>
             </button>
-          </div>
-        </section>
+          }
+        />
 
-        <RoomNote />
-
-        <div className="mp-reveal mp-reveal-delay-2 mb-5 flex justify-center sm:mb-8 sm:justify-start">
-          <div className="mp-seg">
-            <button type="button" onClick={() => setFilter("open")} aria-pressed={filter === "open"}>
-              For you
-              <span className="ml-1.5 opacity-60">{forYou.length}</span>
+        <div className="px-4 pt-2">
+          <p className="font-display text-[1.05rem] text-ivory/85">People you might connect with</p>
+          {myTier === 1 && !premier && (
+            <button
+              type="button"
+              onClick={() => {
+                setPremierPeerName(undefined);
+                setPremierOpen(true);
+              }}
+              className="mt-1 text-[12px] text-accent"
+            >
+              Unlock Premier
             </button>
-            <button type="button" onClick={() => setFilter("local")} aria-pressed={filter === "local"}>
-              Nearby
-              <span className="ml-1.5 opacity-60">{nearby.length}</span>
-            </button>
-          </div>
+          )}
         </div>
 
-        {filtered.length === 0 ? (
-          <EmptyState
-            title={
-              visiblePeople.length === 0
-                ? "The room is quiet"
-                : "No introductions for this filter"
-            }
-            body={
-              visiblePeople.length === 0 ? (
-                <>
-                  No other members yet. Share Conclave with people you want at the table — profiles
-                  appear here when they join this same app.
-                </>
-              ) : profile.lookingFor?.length === 0 ? (
-                <>
-                  Choose what you&apos;re looking for on{" "}
-                  <Link
-                    href="/profile"
-                    className="text-accent-2 underline decoration-accent/40 underline-offset-4"
-                  >
-                    your membership
-                  </Link>{" "}
-                  — co-founder, investor, clients, and more — so introductions stay intentional.
-                </>
-              ) : filter === "local" ? (
-                <>
-                  No relevant people nearby yet. Try For you for matches farther out, or refine your
-                  ideas in membership.
-                </>
-              ) : (
-                <>
-                  Add more business ideas or refine what you&apos;re looking for in membership so we
-                  can find stronger fits.
-                </>
-              )
-            }
-            actionHref="/profile"
-            actionLabel="Open membership"
-          />
-        ) : (
-          <div
-            key={filter}
-            className="mp-stagger grid gap-3 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3"
-          >
-            {filtered.map((m) => {
-              const allowed = canIntroduceToTier(myTier, m.tier, premier);
-              return (
-                <MatchCard
-                  key={m.person.id}
-                  match={m}
-                  status={connections.find((c) => c.peerId === m.person.id)?.status}
-                  canConnect={allowed}
-                  onConnect={connect}
-                  onNeedPremier={needPremier}
-                  onOpenProfile={(id) => {
-                    const p = people.find((x) => x.id === id) || null;
-                    setProfilePerson(p);
-                  }}
-                />
-              );
-            })}
+        {filterOpen && (
+          <div className="mx-4 mt-3 overflow-hidden rounded-xl border border-accent/20 bg-[#12110f]">
+            {(["open", "local"] as Filter[]).map((key) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => {
+                  setFilter(key);
+                  setFilterOpen(false);
+                }}
+                className={`flex w-full items-center justify-between px-4 py-3 text-left text-sm ${
+                  filter === key ? "text-accent" : "text-ivory"
+                }`}
+              >
+                <span>{key === "open" ? "For you" : "Nearby"}</span>
+                <span className="text-muted">{key === "open" ? forYou.length : nearby.length}</span>
+              </button>
+            ))}
           </div>
         )}
+
+        <div className="px-4 pb-6 pt-4">
+          {filtered.length === 0 ? (
+            <EmptyState
+              title={visiblePeople.length === 0 ? "The room is quiet" : "No matches for this filter"}
+              body={
+                visiblePeople.length === 0 ? (
+                  <>
+                    No other members yet. Share Conclave — profiles appear here when they join this
+                    same app.
+                  </>
+                ) : profile.lookingFor?.length === 0 ? (
+                  <>
+                    Choose what you&apos;re looking for in{" "}
+                    <Link href="/profile" className="text-accent underline underline-offset-2">
+                      Profile
+                    </Link>{" "}
+                    so introductions stay intentional.
+                  </>
+                ) : filter === "local" ? (
+                  <>No relevant people nearby yet. Try For you, or refine your ideas in Profile.</>
+                ) : (
+                  <>Add more business ideas in Profile so we can find stronger fits.</>
+                )
+              }
+              actionHref="/profile"
+              actionLabel="Open profile"
+            />
+          ) : (
+            <div key={filter} className="mp-stagger space-y-3">
+              {filtered.map((m) => {
+                const allowed = canIntroduceToTier(myTier, m.tier, premier);
+                return (
+                  <MatchCard
+                    key={m.person.id}
+                    match={m}
+                    status={connections.find((c) => c.peerId === m.person.id)?.status}
+                    canConnect={allowed}
+                    onConnect={connect}
+                    onNeedPremier={needPremier}
+                    onOpenProfile={(id) => {
+                      const p = people.find((x) => x.id === id) || null;
+                      setProfilePerson(p);
+                    }}
+                  />
+                );
+              })}
+            </div>
+          )}
+        </div>
       </main>
 
       <PersonProfileSheet
@@ -277,13 +247,6 @@ export default function DiscoverPage() {
         }
         onConnect={connect}
         onNeedPremier={needPremier}
-      />
-
-      <EditProfilePopup
-        open={editPopupOpen}
-        profile={profile}
-        onClose={() => setEditPopupOpen(false)}
-        editHref="/profile"
       />
 
       <PremierPlanSheet
