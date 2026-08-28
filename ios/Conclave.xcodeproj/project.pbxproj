@@ -9,8 +9,10 @@
 /* Begin PBXBuildFile section */
 		A10000000000000000000001 /* ConclaveApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000001 /* ConclaveApp.swift */; };
 		A10000000000000000000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000002 /* ContentView.swift */; };
+		A10000000000000000000008 /* AppConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000012 /* AppConfig.swift */; };
 		A10000000000000000000005 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000005 /* Assets.xcassets */; };
 		A10000000000000000000006 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A20000000000000000000006 /* WebKit.framework */; };
+		A10000000000000000000010 /* ConclaveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000010 /* ConclaveTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -20,6 +22,9 @@
 		A20000000000000000000006 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		A20000000000000000000008 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A20000000000000000000009 /* Conclave.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Conclave.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A20000000000000000000010 /* ConclaveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConclaveTests.swift; sourceTree = "<group>"; };
+		A20000000000000000000011 /* ConclaveTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ConclaveTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		A20000000000000000000012 /* AppConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfig.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -31,6 +36,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A30000000000000000000002 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -38,6 +50,7 @@
 			isa = PBXGroup;
 			children = (
 				A40000000000000000000002 /* Conclave */,
+				A40000000000000000000005 /* ConclaveTests */,
 				A40000000000000000000003 /* Frameworks */,
 				A40000000000000000000004 /* Products */,
 			);
@@ -48,6 +61,7 @@
 			children = (
 				A20000000000000000000001 /* ConclaveApp.swift */,
 				A20000000000000000000002 /* ContentView.swift */,
+				A20000000000000000000012 /* AppConfig.swift */,
 				A20000000000000000000005 /* Assets.xcassets */,
 				A20000000000000000000008 /* Info.plist */,
 			);
@@ -62,10 +76,19 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		A40000000000000000000005 /* ConclaveTests */ = {
+			isa = PBXGroup;
+			children = (
+				A20000000000000000000010 /* ConclaveTests.swift */,
+			);
+			path = ConclaveTests;
+			sourceTree = "<group>";
+		};
 		A40000000000000000000004 /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				A20000000000000000000009 /* Conclave.app */,
+				A20000000000000000000011 /* ConclaveTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -90,6 +113,24 @@
 			productReference = A20000000000000000000009 /* Conclave.app */;
 			productType = "com.apple.product-type.application";
 		};
+		A50000000000000000000002 /* ConclaveTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A70000000000000000000005 /* Build configuration list for PBXNativeTarget "ConclaveTests" */;
+			buildPhases = (
+				A60000000000000000000003 /* Sources */,
+				A30000000000000000000002 /* Frameworks */,
+				A60000000000000000000004 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A80000000000000000000003 /* PBXTargetDependency */,
+			);
+			name = ConclaveTests;
+			productName = ConclaveTests;
+			productReference = A20000000000000000000011 /* ConclaveTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -102,6 +143,10 @@
 				TargetAttributes = {
 					A50000000000000000000001 = {
 						CreatedOnToolsVersion = 16.0;
+					};
+					A50000000000000000000002 = {
+						CreatedOnToolsVersion = 16.0;
+						TestTargetID = A50000000000000000000001;
 					};
 				};
 			};
@@ -119,6 +164,7 @@
 			projectRoot = "";
 			targets = (
 				A50000000000000000000001 /* Conclave */,
+				A50000000000000000000002 /* ConclaveTests */,
 			);
 		};
 /* End PBXProject section */
@@ -132,6 +178,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A60000000000000000000004 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -141,10 +194,37 @@
 			files = (
 				A10000000000000000000001 /* ConclaveApp.swift in Sources */,
 				A10000000000000000000002 /* ContentView.swift in Sources */,
+				A10000000000000000000008 /* AppConfig.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A60000000000000000000003 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000000000000000000010 /* ConclaveTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		A80000000000000000000003 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A50000000000000000000001 /* Conclave */;
+			targetProxy = A80000000000000000000002 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXContainerItemProxy section */
+		A80000000000000000000002 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A80000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A50000000000000000000001;
+			remoteInfo = Conclave;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin XCBuildConfiguration section */
 		A90000000000000000000001 /* Debug */ = {
@@ -332,6 +412,58 @@
 			};
 			name = Release;
 		};
+		A90000000000000000000005 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.braindvts.conclave.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Conclave.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Conclave";
+			};
+			name = Debug;
+		};
+		A90000000000000000000006 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.braindvts.conclave.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Conclave.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Conclave";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -349,6 +481,15 @@
 			buildConfigurations = (
 				A90000000000000000000003 /* Debug */,
 				A90000000000000000000004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A70000000000000000000005 /* Build configuration list for PBXNativeTarget "ConclaveTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A90000000000000000000005 /* Debug */,
+				A90000000000000000000006 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -75,6 +75,7 @@ The website stays in Cursor. An iOS wrapper lives in `ios/` so you can run Concl
 2. Open `ios/Conclave.xcodeproj` in Xcode
 3. Signing & Capabilities → your Apple ID (Personal Team)
 4. Pick an iPhone simulator → press **▶**
+5. **Product → Test** (⌘U) runs the unit tests in `ios/ConclaveTests`
 
 Full steps: **[ios/README.md](./ios/README.md)**
 

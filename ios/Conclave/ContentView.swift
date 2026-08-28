@@ -3,7 +3,7 @@ import WebKit
 
 struct ContentView: View {
     var body: some View {
-        WebView(url: URL(string: "http://127.0.0.1:3000")!)
+        WebView(url: AppConfig.devServerURL)
             .ignoresSafeArea()
     }
 }
