@@ -9,21 +9,15 @@
 /* Begin PBXBuildFile section */
 		A10000000000000000000001 /* ConclaveApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000001 /* ConclaveApp.swift */; };
 		A10000000000000000000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000002 /* ContentView.swift */; };
-		A10000000000000000000003 /* ConclaveWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000003 /* ConclaveWebView.swift */; };
-		A10000000000000000000004 /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000004 /* Config.swift */; };
 		A10000000000000000000005 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000005 /* Assets.xcassets */; };
 		A10000000000000000000006 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A20000000000000000000006 /* WebKit.framework */; };
-		A10000000000000000000007 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A20000000000000000000007 /* CoreLocation.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		A20000000000000000000001 /* ConclaveApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConclaveApp.swift; sourceTree = "<group>"; };
 		A20000000000000000000002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		A20000000000000000000003 /* ConclaveWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConclaveWebView.swift; sourceTree = "<group>"; };
-		A20000000000000000000004 /* Config.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Config.swift; sourceTree = "<group>"; };
 		A20000000000000000000005 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A20000000000000000000006 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
-		A20000000000000000000007 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
 		A20000000000000000000008 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A20000000000000000000009 /* Conclave.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Conclave.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -34,7 +28,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				A10000000000000000000006 /* WebKit.framework in Frameworks */,
-				A10000000000000000000007 /* CoreLocation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -55,8 +48,6 @@
 			children = (
 				A20000000000000000000001 /* ConclaveApp.swift */,
 				A20000000000000000000002 /* ContentView.swift */,
-				A20000000000000000000003 /* ConclaveWebView.swift */,
-				A20000000000000000000004 /* Config.swift */,
 				A20000000000000000000005 /* Assets.xcassets */,
 				A20000000000000000000008 /* Info.plist */,
 			);
@@ -67,7 +58,6 @@
 			isa = PBXGroup;
 			children = (
 				A20000000000000000000006 /* WebKit.framework */,
-				A20000000000000000000007 /* CoreLocation.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -151,8 +141,6 @@
 			files = (
 				A10000000000000000000001 /* ConclaveApp.swift in Sources */,
 				A10000000000000000000002 /* ContentView.swift in Sources */,
-				A10000000000000000000003 /* ConclaveWebView.swift in Sources */,
-				A10000000000000000000004 /* Config.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
