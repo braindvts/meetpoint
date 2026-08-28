@@ -25,3 +25,9 @@ npm run dev
 4. In Xcode pick **iPhone 16** → press **▶**.
 
 If Xcode asks for a Team, choose your Apple ID / Personal Team.
+
+## Run tests
+
+Tests live in `ConclaveTests/ConclaveTests.swift`. Add more methods named `test...` in that file.
+
+In Xcode: **Product → Test** (or **⌘U**). That runs every test in the file. Green check = pass.
