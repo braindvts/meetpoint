@@ -5,8 +5,9 @@ import Link from "next/link";
 import Avatar from "@/components/Avatar";
 import TierBadge from "@/components/TierBadge";
 import { getPeerReputation } from "@/lib/store";
-import { tierForPerson } from "@/lib/tiers";
-import type { ConnectionStatus, Person, WorkKind } from "@/lib/types";
+import { isOwner, ownedCompanies, otherWork, VERIFY_LABEL } from "@/lib/personFacts";
+import { tierDefinition, tierForPerson } from "@/lib/tiers";
+import type { ConnectionStatus, Person, PersonWork, WorkKind } from "@/lib/types";
 
 interface Props {
   person: Person | null;
@@ -40,6 +41,31 @@ function hostLabel(url: string): string {
   } catch {
     return url;
   }
+}
+
+function WorkBlock({ work, owner = false }: { work: PersonWork; owner?: boolean }) {
+  const inner = (
+    <>
+      <div className="flex items-center gap-2">
+        <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-accent">
+          {owner ? "Owns" : WORK_LABEL[work.kind]}
+        </span>
+        {work.url ? <span className="text-[10px] text-muted">Open ↗</span> : null}
+      </div>
+      <p className="mt-1 font-display text-lg font-semibold text-ivory">{work.title}</p>
+      <p className="mt-0.5 text-[13px] leading-snug text-muted">{work.description}</p>
+    </>
+  );
+  const cls = owner
+    ? "block rounded-xl border border-accent/35 bg-accent/[0.08] px-3 py-3"
+    : "block rounded-xl border border-accent/15 bg-ink/40 px-3 py-2.5";
+  return work.url ? (
+    <a href={work.url} target="_blank" rel="noopener noreferrer" className={cls}>
+      {inner}
+    </a>
+  ) : (
+    <div className={cls}>{inner}</div>
+  );
 }
 
 export default function PersonProfileSheet({
@@ -118,13 +144,17 @@ export default function PersonProfileSheet({
   if (!open || !person) return null;
 
   const elite = tier === 4;
+  const owner = isOwner(person);
+  const companies = ownedCompanies(person);
+  const projects = otherWork(person);
   const work = person.work ?? [];
   const travelLabel =
     person.travel === "local"
-      ? "Near me"
+      ? "Stays local"
       : person.travel === "country"
-        ? "Within country"
-        : "Worldwide";
+        ? "Travels in-country"
+        : "Travels worldwide";
+  const tierCopy = tier ? tierDefinition(tier) : null;
 
   return (
     <div
@@ -151,7 +181,7 @@ export default function PersonProfileSheet({
           className={`relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-t-[20px] border border-b-0 sm:rounded-[24px] sm:border-b ${
             elite
               ? "elite-profile-shell elite-centurion border-white/20"
-              : "border-white/10 bg-[#141414]"
+              : "border-accent/20 bg-[#12110f]"
           }`}
         >
           {elite && <span className="elite-sheen" aria-hidden />}
@@ -209,54 +239,123 @@ export default function PersonProfileSheet({
                 />
               )}
               <div className="absolute inset-x-0 bottom-0 px-4 pb-4">
-                {elite && (
-                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.28em] text-white/55">
-                    Centurion · Top of the room
+                {owner && (
+                  <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-accent">
+                    Owner
                   </p>
                 )}
-                <h2 className="text-3xl font-semibold tracking-tight text-white">
+                {elite && !owner && (
+                  <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-white/55">
+                    Elite
+                  </p>
+                )}
+                <h2 className="font-display text-3xl font-semibold tracking-tight text-white">
                   {person.name}
                 </h2>
-                <p className="mt-1 text-[13px] font-medium text-white/75">
-                  {person.jobTitle}
-                </p>
-                <div className="mt-2">
+                <p className="mt-1 text-[14px] font-medium text-accent-2">{person.jobTitle}</p>
+                <div className="mt-2 flex flex-wrap items-center gap-2">
                   <TierBadge tier={tier} size="md" />
+                  {tierCopy && (
+                    <span className="text-[11px] text-white/55">{tierCopy.meaning}</span>
+                  )}
                 </div>
               </div>
             </div>
 
             <div className={`px-4 pb-6 pt-4 sm:px-5 ${elite ? "bg-black" : ""}`}>
-              <p className="text-[14px] leading-relaxed text-white/75">
-                {person.bio}
-              </p>
+              <p className="text-[15px] leading-relaxed text-ivory/85">{person.bio}</p>
 
-              <p className="mt-3 text-[11px] text-white/45">
+              <p className="mt-3 text-[13px] text-muted">
                 {person.city.name}, {person.city.country}
-                <span className="mx-1.5 text-white/25">·</span>
-                Travels {travelLabel.toLowerCase()}
+                <span className="mx-1.5 text-accent/50">·</span>
+                {travelLabel}
               </p>
 
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                {person.lookingFor.map((t) => (
-                  <span
-                    key={t}
-                    className="border border-white/15 bg-white/[0.04] px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.14em] text-white/80"
-                  >
-                    Seeks {t}
-                  </span>
-                ))}
-                {person.ideaTags.map((t) => (
-                  <span
-                    key={t}
-                    className="border border-white/10 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.14em] text-white/45"
-                  >
-                    {t}
-                  </span>
-                ))}
-              </div>
+              {person.ideaTags.length > 0 && (
+                <>
+                  <p className="mt-6 text-[10px] font-semibold uppercase tracking-[0.22em] text-accent">
+                    What they do
+                  </p>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {person.ideaTags.map((t) => (
+                      <span
+                        key={t}
+                        className="rounded-md border border-accent/25 bg-accent/[0.06] px-2 py-1 text-[11px] text-accent-2"
+                      >
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                </>
+              )}
 
-              <p className="mt-5 text-[9px] font-semibold uppercase tracking-[0.22em] text-white/40">
+              {person.lookingFor.length > 0 && (
+                <>
+                  <p className="mt-5 text-[10px] font-semibold uppercase tracking-[0.22em] text-accent">
+                    Looking for
+                  </p>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {person.lookingFor.map((t) => (
+                      <span
+                        key={t}
+                        className="rounded-md border border-ivory/15 px-2 py-1 text-[11px] text-ivory/80"
+                      >
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {owner && companies.length > 0 && (
+                <>
+                  <p className="mt-6 text-[10px] font-semibold uppercase tracking-[0.22em] text-accent">
+                    What they own
+                  </p>
+                  <div className="mt-2 space-y-2">
+                    {companies.map((w) => (
+                      <WorkBlock key={`${w.title}-${w.kind}`} work={w} owner />
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {projects.length > 0 && (
+                <>
+                  <p className="mt-6 text-[10px] font-semibold uppercase tracking-[0.22em] text-accent">
+                    {owner ? "Also building" : "Work & projects"}
+                  </p>
+                  <div className="mt-2 space-y-2">
+                    {projects.map((w) => (
+                      <WorkBlock key={`${w.title}-${w.kind}`} work={w} />
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {work.length === 0 && (
+                <p className="mt-6 text-[13px] text-muted">No companies or projects listed yet.</p>
+              )}
+
+              {(person.verifications?.length ?? 0) > 0 && (
+                <>
+                  <p className="mt-6 text-[10px] font-semibold uppercase tracking-[0.22em] text-accent">
+                    Verified
+                  </p>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {person.verifications.map((method) => (
+                      <span
+                        key={method}
+                        className="rounded-md border border-accent/20 px-2 py-1 text-[11px] text-ivory/80"
+                      >
+                        {VERIFY_LABEL[method]}
+                      </span>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              <p className="mt-6 text-[10px] font-semibold uppercase tracking-[0.22em] text-accent">
                 Links
               </p>
               <div className="mt-2 space-y-1.5">
@@ -265,10 +364,10 @@ export default function PersonProfileSheet({
                     href={person.linkedInUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-between gap-3 border border-[#0a66c2]/40 bg-[#0a66c2]/10 px-3 py-2.5 text-[13px] text-white"
+                    className="flex items-center justify-between gap-3 rounded-xl border border-accent/20 bg-ink/40 px-3 py-2.5 text-[13px] text-ivory"
                   >
-                    <span className="font-semibold">LinkedIn</span>
-                    <span className="truncate text-[11px] text-white/50">
+                    <span className="font-medium">LinkedIn</span>
+                    <span className="truncate text-[11px] text-muted">
                       {hostLabel(person.linkedInUrl)}
                     </span>
                   </a>
@@ -278,10 +377,10 @@ export default function PersonProfileSheet({
                     href={person.websiteUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-between gap-3 border border-white/12 bg-white/[0.03] px-3 py-2.5 text-[13px] text-white"
+                    className="flex items-center justify-between gap-3 rounded-xl border border-accent/20 bg-ink/40 px-3 py-2.5 text-[13px] text-ivory"
                   >
-                    <span className="font-semibold">Website</span>
-                    <span className="truncate text-[11px] text-white/50">
+                    <span className="font-medium">Website</span>
+                    <span className="truncate text-[11px] text-muted">
                       {hostLabel(person.websiteUrl)}
                     </span>
                   </a>
@@ -291,66 +390,18 @@ export default function PersonProfileSheet({
                     href={person.portfolioUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-between gap-3 border border-white/12 bg-white/[0.03] px-3 py-2.5 text-[13px] text-white"
+                    className="flex items-center justify-between gap-3 rounded-xl border border-accent/20 bg-ink/40 px-3 py-2.5 text-[13px] text-ivory"
                   >
-                    <span className="font-semibold">Portfolio</span>
-                    <span className="truncate text-[11px] text-white/50">
+                    <span className="font-medium">Portfolio</span>
+                    <span className="truncate text-[11px] text-muted">
                       {hostLabel(person.portfolioUrl)}
                     </span>
                   </a>
                 )}
                 {!person.linkedInUrl && !person.websiteUrl && !person.portfolioUrl && (
-                  <p className="text-[12px] text-white/40">No public links yet.</p>
+                  <p className="text-[13px] text-muted">No public links yet.</p>
                 )}
               </div>
-
-              <p className="mt-5 text-[9px] font-semibold uppercase tracking-[0.22em] text-white/40">
-                Work & projects
-              </p>
-              {work.length === 0 ? (
-                <p className="mt-2 text-[12px] text-white/40">No work listed yet.</p>
-              ) : (
-                <div className="mt-2 space-y-2">
-                  {work.map((w) => {
-                    const inner = (
-                      <>
-                        <div className="flex items-center gap-2">
-                          <span className="text-[9px] font-semibold uppercase tracking-[0.16em] text-white/40">
-                            {WORK_LABEL[w.kind]}
-                          </span>
-                          {w.url ? (
-                            <span className="text-[10px] text-white/55">Open ↗</span>
-                          ) : null}
-                        </div>
-                        <p className="mt-1 font-display text-lg font-semibold text-white">
-                          {w.title}
-                        </p>
-                        <p className="mt-0.5 text-[12px] leading-snug text-white/55">
-                          {w.description}
-                        </p>
-                      </>
-                    );
-                    return w.url ? (
-                      <a
-                        key={`${w.title}-${w.kind}`}
-                        href={w.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block border border-white/12 bg-white/[0.03] px-3 py-2.5"
-                      >
-                        {inner}
-                      </a>
-                    ) : (
-                      <div
-                        key={`${w.title}-${w.kind}`}
-                        className="border border-white/10 bg-white/[0.02] px-3 py-2.5"
-                      >
-                        {inner}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
             </div>
           </div>
 
@@ -364,7 +415,7 @@ export default function PersonProfileSheet({
               <Link
                 href={editHref}
                 onClick={onClose}
-                className="block w-full rounded-full bg-gradient-to-b from-accent-2 to-accent py-3 text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-ink"
+                className="block w-full rounded-xl bg-gradient-to-b from-accent-2 to-accent py-3 text-center text-[13px] font-semibold text-ink"
               >
                 Edit profile
               </Link>
@@ -372,12 +423,12 @@ export default function PersonProfileSheet({
           ) : onConnect ? (
             <div className="shrink-0 border-t border-white/10 px-4 py-3 sm:px-5">
               {status === "connected" ? (
-                <p className="py-2 text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-white/55">
-                  Already introduced
+                <p className="py-2 text-center text-[13px] font-medium text-muted">
+                  Already connected
                 </p>
               ) : status === "requested" ? (
-                <p className="py-2 text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-white/45">
-                  Waiting for them to accept…
+                <p className="py-2 text-center text-[13px] font-medium text-muted">
+                  Waiting for them to accept
                 </p>
               ) : (
                 <button
@@ -391,13 +442,13 @@ export default function PersonProfileSheet({
                     onConnect(person.id);
                     onClose();
                   }}
-                  className={`w-full rounded-full py-3 text-[11px] font-semibold uppercase tracking-[0.2em] ${
+                  className={`w-full rounded-xl py-3 text-[13px] font-semibold ${
                     canConnect
                       ? "bg-gradient-to-b from-accent-2 to-accent text-ink"
                       : "border border-accent/40 text-accent-2"
                   }`}
                 >
-                  {canConnect ? "Introduce" : "Premier · Introduce"}
+                  {canConnect ? "Connect" : "Premier · Connect"}
                 </button>
               )}
               <div className="mt-2 flex gap-2">

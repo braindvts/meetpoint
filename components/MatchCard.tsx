@@ -1,7 +1,9 @@
 "use client";
 
 import Avatar from "@/components/Avatar";
+import TierBadge from "@/components/TierBadge";
 import type { MatchResult } from "@/lib/match";
+import { ownerHeadline } from "@/lib/personFacts";
 import type { ConnectionStatus } from "@/lib/types";
 
 interface Props {
@@ -23,13 +25,14 @@ export default function MatchCard({
   onOpenProfile,
   preview = false,
 }: Props) {
-  const { person, sharedIdeas, sameBusiness, canHelp, sameJob } = match;
+  const { person, sharedIdeas, sameBusiness, canHelp, sameJob, tier } = match;
 
   const industry = person.ideaTags[0] || sharedIdeas[0] || (sameBusiness ? "Same field" : "Member");
   const meta = `${industry} · ${person.city.name}`;
   const role =
     person.jobTitle ||
     (canHelp ? "Can help" : sameJob ? "Same profession" : "Member");
+  const owns = ownerHeadline(person);
 
   function connectLabel() {
     if (preview) return "Preview";
@@ -74,7 +77,7 @@ export default function MatchCard({
           </div>
           <button
             type="button"
-            aria-label="More"
+            aria-label="Open profile"
             onClick={(e) => {
               e.stopPropagation();
               onOpenProfile?.(person.id);
@@ -88,7 +91,11 @@ export default function MatchCard({
             </svg>
           </button>
         </div>
-        <p className="mt-0.5 truncate text-[11px] text-ivory/55">{meta}</p>
+        <div className="mt-1">
+          <TierBadge tier={tier} size="sm" />
+        </div>
+        <p className="mt-1 truncate text-[11px] text-ivory/55">{meta}</p>
+        {owns && <p className="mt-0.5 truncate text-[11px] font-medium text-accent-2">{owns}</p>}
         <p className="mt-1 line-clamp-1 text-[12px] leading-snug text-muted">{person.bio}</p>
         <div className="mt-2 flex justify-end">
           <button
