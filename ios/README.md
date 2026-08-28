@@ -1,57 +1,27 @@
 # Open Conclave in Xcode
 
-This folder is an iPhone app that loads your Next.js site in a full-screen web view. It does not rewrite the website in Swift.
+Do **not** open the `AI App 1` website folder in Xcode. That only lists files. It does not make an iPhone app.
 
-## On your Mac
+## Fastest path on your Mac
 
-**1. Pull the latest project** (if you cloned from GitHub):
+1. Close any Xcode window that shows `package.json` or `app/admin`.
+2. In **Terminal** (not Cursor):
 
 ```bash
-cd ~/Documents/"AI App 1"
-git pull
+python3 ~/Documents/"AI App 1"/ios/install-on-mac.py
 ```
 
-**2. Start the website** (leave this Terminal window open):
+If that says *No such file*, copy the `ios` folder from this project onto your Mac first, then run the command again.
+
+That creates **Desktop/Conclave** and opens `Conclave.xcodeproj`.
+
+3. In another Terminal window:
 
 ```bash
 cd ~/Documents/"AI App 1"
-npm install
 npm run dev
 ```
 
-Wait until you see `localhost:3000`.
+4. In Xcode pick **iPhone 16** → press **▶**.
 
-**3. Open Xcode**
-
-- Double-click `ios/Conclave.xcodeproj`
-- Or in Xcode: **File → Open…** → pick that file
-
-**4. Sign it with your Apple ID** (first time only)
-
-1. Click the blue **Conclave** project in the left sidebar.
-2. Select the **Conclave** target → **Signing & Capabilities**.
-3. Check **Automatically manage signing**.
-4. Team: **Add Account…** → sign in with your Apple ID → pick your Personal Team.
-
-School Macs can use a free Apple ID. You do not need a paid developer account for the Simulator.
-
-**5. Run it**
-
-1. Top center: pick **iPhone 16** (or any iPhone simulator).
-2. Press the **▶ Play** button (or ⌘R).
-
-The simulator opens Conclave at `http://127.0.0.1:3000`. If the site is not running, the app shows a retry screen.
-
-## Real iPhone
-
-`127.0.0.1` is the phone itself, not your Mac. In `ios/Conclave/Config.swift` change `macHost` to your Mac’s Wi-Fi IP (System Settings → Network → Wi-Fi → Details), keep both devices on the same Wi-Fi, then Run with your iPhone selected.
-
-## Live site later
-
-When Conclave is on Vercel, set this in `Config.swift`:
-
-```swift
-static let liveSiteURL: URL? = URL(string: "https://YOUR-APP.vercel.app")
-```
-
-Then the iPhone app loads the live site and you do not need `npm run dev`.
+If Xcode asks for a Team, choose your Apple ID / Personal Team.
