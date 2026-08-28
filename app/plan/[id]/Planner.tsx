@@ -61,7 +61,7 @@ export default function Planner({ peerId }: { peerId: string }) {
         <Nav />
         <main className="mx-auto max-w-3xl px-6 py-16 text-center">
           <p className="text-lg font-semibold">Person not found</p>
-          <Link href="/connections" className="mt-2 inline-block text-accent underline">
+          <Link href="/circle" className="mt-2 inline-block text-accent underline">
             Back to connections
           </Link>
         </main>
@@ -116,7 +116,7 @@ export default function Planner({ peerId }: { peerId: string }) {
             <span className="text-accent" aria-hidden>◆</span>
           </div>
           <Link
-            href="/connections"
+            href="/circle"
             className="mt-10 inline-block rounded-full bg-gradient-to-b from-accent-2 to-accent px-8 py-3.5 text-sm font-semibold text-ink transition hover:brightness-110"
           >
             Back to your circle
@@ -131,7 +131,7 @@ export default function Planner({ peerId }: { peerId: string }) {
       <Nav />
       <main className="mx-auto max-w-3xl px-4 py-10 pb-24 sm:px-6">
         <Link
-          href="/connections"
+          href="/circle"
           className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted transition hover:text-accent-2"
         >
           ← Your circle

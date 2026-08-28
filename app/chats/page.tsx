@@ -136,7 +136,7 @@ export default function ChatsPage() {
             {connectedPeers.length === 0 ? (
               <p className="mt-6 text-sm text-muted">
                 Need an introduction in your{" "}
-                <Link href="/connections" className="text-accent underline underline-offset-4">
+                <Link href="/circle" className="text-accent underline underline-offset-4">
                   circle
                 </Link>{" "}
                 first.

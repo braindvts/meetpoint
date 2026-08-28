@@ -35,7 +35,7 @@ const ICONS: Record<string, React.ReactNode> = {
 
 const LINKS = [
   { href: "/discover", label: "Discover", icon: ICONS.search },
-  { href: "/connections", label: "Circle", icon: ICONS.circle },
+  { href: "/circle", label: "Circle", icon: ICONS.circle },
   { href: "/chats", label: "Chats", icon: ICONS.chats },
   { href: "/profile", label: "Profile", icon: ICONS.profile },
 ];

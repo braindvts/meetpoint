@@ -240,7 +240,7 @@ function scheduleDemoAccept(peerId: string) {
       pushAppNotification(
         "Introduction accepted",
         `${first} accepted. Open Circle to message them.`,
-        { url: "/connections", tag: "conclave-intro" }
+        { url: "/circle", tag: "conclave-intro" }
       )
     );
   }, delay);
