@@ -38,6 +38,8 @@ cp .env.example .env.local
 npm run dev
 ```
 
+**Story flyer (Instagram / TikTok):** open `/story`, or download `public/social/conclave-story.png` (1080×1920). Early access is the website; the app is coming soon — add your site as the story link sticker.
+
 **To launch for real people + payments**, follow **[LAUNCH.md](./LAUNCH.md)**  
 (Hosting + Postgres + Stripe + Google Places + Twilio).
 

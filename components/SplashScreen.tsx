@@ -27,6 +27,7 @@ export default function SplashScreen() {
 
   useEffect(() => {
     if (alreadySeen()) return;
+    if (window.location.pathname.startsWith("/story")) return;
 
     setVisible(true);
 

@@ -77,6 +77,11 @@ body::after {
   min-height: 100dvh;
   background: var(--color-ink);
 }
+
+/* Hide Next.js dev badge when capturing the story flyer */
+body:has([data-story-export]) nextjs-portal {
+  display: none !important;
+}
 @media (min-width: 640px) {
   body {
     background: #030303;
