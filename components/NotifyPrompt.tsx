@@ -10,6 +10,7 @@ export default function NotifyPrompt() {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
+    if (window.location.search.includes("shot=1")) return;
     if (typeof window === "undefined" || typeof Notification === "undefined") return;
     try {
       if (localStorage.getItem(KEY) === "1") return;

@@ -32,6 +32,13 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={outfit.variable}>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `if(/[?&]shot=1/.test(location.search))document.documentElement.setAttribute('data-shot','1')`,
+          }}
+        />
+      </head>
       <body className="min-h-screen antialiased [text-rendering:optimizeLegibility]">
         <AppChrome>{children}</AppChrome>
         <ToastHost />

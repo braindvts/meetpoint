@@ -6,35 +6,32 @@ const POSTS = [
   {
     id: "ig",
     label: "Instagram / TikTok",
-    body: `Your next introduction shouldn’t die in a DM.
+    body: `Conclave is live — in your browser.
 
-Conclave is live — early access, in your browser.
-Matched by ambition. Settled over dinner.
+A private network for ambitious people.
+Matched by ambition. Then you take it to dinner.
 
-The app is coming.
-The table is already set.
-
-Link in bio.`,
+Website now. Native app soon.
+Beta is open. Link in bio.`,
   },
   {
     id: "story",
     label: "Story (short)",
-    body: `Early access is open.
+    body: `The website is live.
 
-Conclave — networking that ends at a dinner table.
-Website now. App soon.
+CONCLAVE — networking that ends at a dinner table.
+Open it in your browser. The app is next.
 
-Tap the link. Join in your browser.`,
+Tap the link.`,
   },
   {
     id: "x",
     label: "X / LinkedIn",
-    body: `I built Conclave for people who are actually building something.
+    body: `I shipped Conclave.
 
-Not a feed. A table.
-Early access is live on the web — the app is next.
+It’s a private network you open in the browser — introductions matched by ambition, settled over dinner. Native app is next.
 
-If you’re ambitious, you’re invited.`,
+Early access is live.`,
   },
 ];
 

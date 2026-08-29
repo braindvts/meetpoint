@@ -40,7 +40,7 @@ export default async function StoryPage({
       <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-accent">Post this</p>
       <h1 className="mt-2 text-3xl font-semibold tracking-tight text-ivory">Conclave is live.</h1>
       <p className="mt-2 text-[15px] leading-relaxed text-muted">
-        Save a graphic. Paste a caption. Add your site as the link. Website now — app soon.
+        Save a graphic. Paste a caption. Add your site as the link. These show the live Conclave site — website now, app soon.
       </p>
 
       <SocialPost variant="story" className="mx-auto mt-8 aspect-[9/16] w-full max-w-[340px] rounded-xl" />

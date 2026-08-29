@@ -26,8 +26,12 @@ export default function SplashScreen() {
   const finished = useRef(false);
 
   useEffect(() => {
+    if (window.location.search.includes("shot=1")) {
+      document.body.setAttribute("data-shot", "1");
+    }
     if (alreadySeen()) return;
     if (window.location.pathname.startsWith("/story")) return;
+    if (window.location.search.includes("shot=1")) return;
 
     setVisible(true);
 

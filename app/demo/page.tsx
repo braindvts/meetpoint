@@ -10,7 +10,8 @@ export default function DemoBypassPage() {
 
   useEffect(() => {
     enterAsDemo();
-    router.replace("/discover");
+    const shot = window.location.search.includes("shot=1") ? "?shot=1" : "";
+    router.replace(`/discover${shot}`);
   }, [router]);
 
   return (

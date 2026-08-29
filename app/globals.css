@@ -78,9 +78,15 @@ body::after {
   background: var(--color-ink);
 }
 
-/* Hide Next.js dev badge when capturing the story flyer */
-body:has([data-story-export]) nextjs-portal {
+/* Hide Next.js dev badge on story exports and product screenshots */
+html[data-shot] nextjs-portal,
+html[data-shot] [data-next-badge-root],
+html[data-shot] [data-nextjs-dialog-overlay],
+body:has([data-story-export]) nextjs-portal,
+body:has([data-shot]) nextjs-portal {
   display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 @media (min-width: 640px) {
   body {
