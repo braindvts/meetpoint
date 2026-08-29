@@ -12,9 +12,9 @@ export const metadata: Metadata = {
 type Variant = "story" | "feed" | "portrait";
 
 const DOWNLOADS: { variant: Variant; href: string; label: string; size: string }[] = [
-  { variant: "story", href: "/social/conclave-story.png", label: "Story", size: "1080×1920" },
-  { variant: "feed", href: "/social/conclave-feed.png", label: "Feed", size: "1080×1080" },
-  { variant: "portrait", href: "/social/conclave-portrait.png", label: "Post", size: "1080×1350" },
+  { variant: "feed", href: "/social/conclave-ad-feed.png", label: "Feed square", size: "1:1" },
+  { variant: "story", href: "/social/conclave-ad-story.png", label: "Story", size: "9:16" },
+  { variant: "portrait", href: "/social/conclave-ad-portrait.png", label: "Portrait", size: "4:5" },
 ];
 
 export default async function StoryPage({
@@ -40,13 +40,13 @@ export default async function StoryPage({
       <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-accent">Post this</p>
       <h1 className="mt-2 text-3xl font-semibold tracking-tight text-ivory">Conclave is live.</h1>
       <p className="mt-2 text-[15px] leading-relaxed text-muted">
-        Save a graphic. Paste a caption. Add your site as the link. These show the live Conclave site — website now, app soon.
+        Phone on the left, Conclave on the right. Save and post. Website now — app soon. Add your site as the link.
       </p>
 
-      <SocialPost variant="story" className="mx-auto mt-8 aspect-[9/16] w-full max-w-[340px] rounded-xl" />
+      <SocialPost variant="feed" className="mx-auto mt-8 aspect-square w-full max-w-[340px] rounded-xl" />
       <div className="mx-auto mt-3 grid max-w-[340px] grid-cols-2 gap-2">
-        <SocialPost variant="feed" className="aspect-square w-full rounded-lg" />
-        <SocialPost variant="portrait" className="aspect-[4/5] w-full rounded-lg" />
+        <SocialPost variant="story" className="aspect-[9/16] w-full rounded-lg" />
+        <SocialPost variant="portrait" className="aspect-[3/4] w-full rounded-lg" />
       </div>
 
       <div className="mt-5 flex flex-col gap-2">
