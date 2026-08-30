@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 /**
  * Booking confirmation SMS.
- * Uses Twilio when TWILIO_* env vars are set; otherwise demo success.
+ * Uses Twilio when TWILIO_* env vars are set; otherwise it no-ops so booking still completes.
  * If NOTIFY_SECRET is set, require header x-conclave-notify.
  */
 
@@ -98,6 +98,6 @@ export async function POST(req: Request) {
     }
   }
 
-  console.info("[conclave sms demo]", { to, body: text.slice(0, 80) });
-  return NextResponse.json({ ok: true, provider: "demo" });
+  console.info("[conclave sms skipped]", { to, body: text.slice(0, 80) });
+  return NextResponse.json({ ok: true, provider: "none" });
 }

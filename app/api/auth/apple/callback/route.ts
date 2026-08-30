@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { withMemberCookie } from "@/lib/memberAuth";
-import { ensureSeeded } from "@/lib/seed";
+import { purgeLegacySeedMembers } from "@/lib/legacySeed";
 import {
   appUrl,
   clearOAuthStateCookie,
@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
   if (!ok) return NextResponse.redirect(appUrl("/login?error=invalid_state"));
 
   try {
-    await ensureSeeded();
+    await purgeLegacySeedMembers();
     const claims = decodeJwtPayload(idToken);
     const sub = claims.sub;
     if (!sub) return NextResponse.redirect(appUrl("/login?error=profile_failed"));

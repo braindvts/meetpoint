@@ -2,12 +2,12 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getCurrentMember } from "@/lib/memberAuth";
 import { memberToProfile } from "@/lib/memberMap";
-import { ensureSeeded } from "@/lib/seed";
+import { purgeLegacySeedMembers } from "@/lib/legacySeed";
 
 /** Redeem ELITE_INVITE_CODE to mark the current member Elite (tier 4). */
 export async function POST(req: Request) {
   try {
-    await ensureSeeded();
+    await purgeLegacySeedMembers();
     const me = await getCurrentMember();
     if (!me) return NextResponse.json({ ok: false, error: "Sign in first" }, { status: 401 });
 

@@ -24,6 +24,7 @@ export function profileToPerson(profile: MyProfile): Person {
     websiteUrl: website?.startsWith("http") ? website : undefined,
     portfolioUrl: portfolio?.startsWith("http") ? portfolio : undefined,
     work: profile.work,
+    elite: profile.elite,
   };
 }
 

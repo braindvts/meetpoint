@@ -47,28 +47,6 @@ export const TIER_THRESHOLDS = {
   eliteScore: 95,
 } as const;
 
-/** Demo meeting counts so peers show a mix of tiers in The Room. */
-const SEED_MEETINGS: Record<string, number> = {
-  p1: 6,
-  p2: 22,
-  p3: 4,
-  p4: 8,
-  p5: 2,
-  p6: 28,
-  p7: 5,
-  p8: 12,
-  p9: 7,
-  p10: 3,
-  p11: 35,
-  p12: 1,
-  p13: 9,
-  p14: 6,
-  p15: 0,
-  p16: 21,
-  p17: 4,
-  p18: 40,
-};
-
 export interface ProfileStrength {
   score: number;
   max: number;
@@ -245,14 +223,14 @@ export function tierForPerson(
   person: Person,
   reputation: ReputationSummary
 ): MemberTier | null {
-  const meetings = SEED_MEETINGS[person.id] ?? reputation.ratingCount;
-  const fakeVers = (person.verifications || []).map((method) => ({
+  const meetings = reputation.ratingCount;
+  const vers = (person.verifications || []).map((method) => ({
     method,
-    value: "seed",
+    value: "verified",
     verifiedAt: "",
   }));
   const strength = scoreProfileStrength({
-    verifications: fakeVers,
+    verifications: vers,
     bio: person.bio,
     work: person.work,
     ideaTags: person.ideaTags,
@@ -264,7 +242,7 @@ export function tierForPerson(
     meetingsAttended: meetings,
     reputationScore: reputation.score,
     profileStrength: strength,
-    elite: person.id === "p11" || person.id === "p18",
+    elite: person.elite === true,
   });
 }
 

@@ -6,14 +6,14 @@ import { useRouter } from "next/navigation";
 import Nav from "@/components/Nav";
 import Avatar from "@/components/Avatar";
 import StarRating, { cuisineLine } from "@/components/StarRating";
-import { PEOPLE } from "@/lib/data";
+import { findPerson, refreshDirectory } from "@/lib/directory";
 import { distanceKm, formatDistance, midpointRestaurants, restaurantsInCity } from "@/lib/match";
 import { getConnection, loadProfile, setMeetup } from "@/lib/store";
-import type { MeetMode, MyProfile, Restaurant } from "@/lib/types";
+import type { MeetMode, MyProfile, Person, Restaurant } from "@/lib/types";
 
 export default function Planner({ peerId }: { peerId: string }) {
   const router = useRouter();
-  const person = PEOPLE.find((p) => p.id === peerId);
+  const [person, setPerson] = useState<Person | null>(null);
 
   const [profile, setProfile] = useState<MyProfile | null>(null);
   const [mode, setMode] = useState<MeetMode>("they-fly");
@@ -30,6 +30,8 @@ export default function Planner({ peerId }: { peerId: string }) {
       return;
     }
     setProfile(p);
+    setPerson(findPerson(peerId) || null);
+    void refreshDirectory().then(() => setPerson(findPerson(peerId) || null));
     const existing = getConnection(peerId)?.meetup;
     if (existing) {
       setMode(existing.mode);

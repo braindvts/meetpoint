@@ -3,9 +3,6 @@
 import { formatPhoneDisplay, isValidPhone, maskPhone } from "./phone";
 import { summarizeReputation } from "./reputation";
 import type { FoodSuggestion } from "./foodAi";
-import { PEOPLE } from "./data";
-import { DEMO_PROFILE } from "./demoAccount";
-import { demoProfilesEnabled } from "./demoFlag";
 import { findPerson } from "./directory";
 import { trialEndsAt } from "./plans";
 import {
@@ -90,25 +87,6 @@ export function saveProfile(profile: MyProfile): void {
   window.dispatchEvent(new CustomEvent("meetpoint:profile-changed"));
   // Persist to SQLite so other devices / members can see you
   void import("./apiClient").then(({ syncProfileToServer }) => syncProfileToServer(profile));
-}
-
-/** Install the demo member and enter The Room — skips onboarding. */
-export function enterAsDemo(): MyProfile {
-  const profile: MyProfile = {
-    ...DEMO_PROFILE,
-    verifications: DEMO_PROFILE.verifications.map((v) => ({
-      ...v,
-      verifiedAt: new Date().toISOString(),
-    })),
-    premierPlan: {
-      active: true,
-      startedAt: new Date().toISOString(),
-      interval: "year",
-      trialEndsAt: trialEndsAt(new Date()),
-    },
-  };
-  saveProfile(profile);
-  return profile;
 }
 
 export function activatePremierPlan(interval: PremierInterval = "month"): MyProfile | null {
@@ -197,19 +175,12 @@ export function getConnection(peerId: string): Connection | undefined {
   return loadConnections().find((c) => c.peerId === peerId);
 }
 
-/**
- * You send an introduction — it stays "requested" until they accept.
- * Demo members (seed PEOPLE) accept after a short delay.
- */
+/** You send an introduction — it stays "requested" until they accept. */
 export function requestConnection(peerId: string): Connection[] {
   const connections = loadConnections();
   if (!connections.some((c) => c.peerId === peerId)) {
     connections.push({ peerId, status: "requested", direction: "out" });
     saveConnections(connections);
-    // Seed bots still auto-accept when demo profiles are enabled
-    if (demoProfilesEnabled() && PEOPLE.some((p) => p.id === peerId)) {
-      scheduleDemoAccept(peerId);
-    }
     void import("./apiClient").then(async ({ requestServerConnection }) => {
       const remote = await requestServerConnection(peerId);
       if (remote) {
@@ -219,31 +190,6 @@ export function requestConnection(peerId: string): Connection[] {
     });
   }
   return connections;
-}
-
-function scheduleDemoAccept(peerId: string) {
-  const delay = 4000 + Math.floor(Math.random() * 4000);
-  setTimeout(() => {
-    const before = getConnection(peerId);
-    if (!before || before.status !== "requested" || before.direction === "in") return;
-    acceptConnection(peerId);
-    const first = PEOPLE.find((p) => p.id === peerId)?.name.split(" ")[0] || "They";
-    window.dispatchEvent(
-      new CustomEvent("meetpoint:toast", {
-        detail: {
-          message: `${first} accepted your introduction. Message them in Circle.`,
-          peerId,
-        },
-      })
-    );
-    void import("./notify").then(({ pushAppNotification }) =>
-      pushAppNotification(
-        "Introduction accepted",
-        `${first} accepted. Open Circle to message them.`,
-        { url: "/circle", tag: "conclave-intro" }
-      )
-    );
-  }, delay);
 }
 
 export function loadBlockedIds(): string[] {
@@ -284,56 +230,6 @@ export function unblockPeer(peerId: string): string[] {
     if (remote) saveBlockedIds(remote);
   });
   return ids;
-}
-
-/** Seed one inbound intro so Circle has Accept / Decline (demo network only). */
-export function ensureSampleInboundRequest(): void {
-  if (typeof window === "undefined") return;
-  if (!demoProfilesEnabled()) return;
-  const key = "meetpoint.inbound.seeded";
-  try {
-    if (sessionStorage.getItem(key) === "1") return;
-  } catch {
-    /* continue */
-  }
-
-  const existing = loadConnections();
-  if (existing.some((c) => c.direction === "in" && c.status === "requested")) {
-    try {
-      sessionStorage.setItem(key, "1");
-    } catch {
-      /* ignore */
-    }
-    return;
-  }
-
-  const taken = new Set(existing.map((c) => c.peerId));
-  const candidate = PEOPLE.find((p) => !taken.has(p.id));
-  if (!candidate) return;
-
-  const delay = 6000 + Math.floor(Math.random() * 5000);
-  setTimeout(() => {
-    const list = loadConnections();
-    if (list.some((c) => c.peerId === candidate.id)) return;
-    list.push({ peerId: candidate.id, status: "requested", direction: "in" });
-    saveConnections(list);
-    window.dispatchEvent(new CustomEvent("meetpoint:connections-changed"));
-    const first = candidate.name.split(" ")[0];
-    window.dispatchEvent(
-      new CustomEvent("meetpoint:toast", {
-        detail: {
-          message: `${first} wants an introduction. Open Circle to accept.`,
-          peerId: candidate.id,
-        },
-      })
-    );
-  }, delay);
-
-  try {
-    sessionStorage.setItem(key, "1");
-  } catch {
-    /* ignore */
-  }
 }
 
 export function acceptConnection(peerId: string): Connection[] {
@@ -482,31 +378,6 @@ export function sendChatMessage(
     }).catch(() => undefined);
   }
 
-  // Demo: a peer occasionally replies after a short pause.
-  if (chat.memberIds.length > 0 && Math.random() > 0.35) {
-    const peerId = chat.memberIds[Math.floor(Math.random() * chat.memberIds.length)];
-    const replies = [
-      "Agreed — let's take this further over dinner.",
-      "Interesting. I know someone who might help with that.",
-      "I'm in. When works for the table?",
-      "Same here. Happy to compare notes.",
-      "That aligns with what I'm building.",
-    ];
-    setTimeout(() => {
-      const latest = loadChats();
-      const c = latest.find((x) => x.id === chatId);
-      if (!c) return;
-      c.messages.push({
-        id: uid(),
-        senderId: peerId,
-        text: replies[Math.floor(Math.random() * replies.length)],
-        createdAt: new Date().toISOString(),
-      });
-      c.updatedAt = new Date().toISOString();
-      saveChats(latest);
-    }, 1200 + Math.random() * 1800);
-  }
-
   return chat;
 }
 
@@ -567,21 +438,6 @@ export function agreeToTable(chatId: string, voterId = "me"): GroupChat | undefi
     chat.tableProposal.agreedBy = [...chat.tableProposal.agreedBy, voterId];
     chat.updatedAt = new Date().toISOString();
     saveChats(chats);
-  }
-
-  // Demo: after you agree, peers click Agree one by one.
-  if (voterId === "me") {
-    chat.memberIds.forEach((peerId, i) => {
-      setTimeout(() => {
-        const latest = loadChats();
-        const c = latest.find((x) => x.id === chatId);
-        if (!c?.tableProposal || c.tableProposal.booked) return;
-        if (c.tableProposal.agreedBy.includes(peerId)) return;
-        c.tableProposal.agreedBy = [...c.tableProposal.agreedBy, peerId];
-        c.updatedAt = new Date().toISOString();
-        saveChats(latest);
-      }, 900 + i * 700);
-    });
   }
 
   return chat;

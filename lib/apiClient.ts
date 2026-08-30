@@ -78,7 +78,7 @@ export async function fetchServerChats(): Promise<GroupChat[] | null> {
 
 export async function startPremierCheckout(
   interval: "month" | "year"
-): Promise<{ url?: string; demo?: boolean } | null> {
+): Promise<{ url?: string; stripeConfigured?: boolean } | null> {
   try {
     const res = await fetch("/api/billing/checkout", {
       method: "POST",
@@ -87,7 +87,7 @@ export async function startPremierCheckout(
         kind: interval === "year" ? "premier_year" : "premier_month",
       }),
     });
-    return (await res.json()) as { url?: string; demo?: boolean };
+    return (await res.json()) as { url?: string; stripeConfigured?: boolean };
   } catch {
     return null;
   }
@@ -99,7 +99,7 @@ export async function startBookingCheckout(opts: {
   chatId: string;
   meetupAt: string;
   phone: string;
-}): Promise<{ url?: string; demo?: boolean; error?: string } | null> {
+}): Promise<{ url?: string; stripeConfigured?: boolean; error?: string } | null> {
   try {
     const res = await fetch("/api/billing/checkout", {
       method: "POST",
@@ -113,7 +113,7 @@ export async function startBookingCheckout(opts: {
         phone: opts.phone,
       }),
     });
-    return (await res.json()) as { url?: string; demo?: boolean; error?: string };
+    return (await res.json()) as { url?: string; stripeConfigured?: boolean; error?: string };
   } catch {
     return null;
   }

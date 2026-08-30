@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getCurrentMember } from "@/lib/memberAuth";
-import { ensureSeeded } from "@/lib/seed";
+import { purgeLegacySeedMembers } from "@/lib/legacySeed";
 
 export async function GET() {
   try {
-    await ensureSeeded();
+    await purgeLegacySeedMembers();
     const me = await getCurrentMember();
     if (!me) return NextResponse.json({ ok: true, blockedIds: [] });
 
@@ -27,7 +27,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    await ensureSeeded();
+    await purgeLegacySeedMembers();
     const me = await getCurrentMember();
     if (!me) return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
 

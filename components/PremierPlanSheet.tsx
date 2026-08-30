@@ -167,7 +167,7 @@ export default function PremierPlanSheet({
             <p className="px-2 pb-1 text-center text-[11px] leading-relaxed text-white/35">
               {yearly
                 ? "Trial is free for 3 days. After that, $100 yearly until you cancel in Membership."
-                : "Demo checkout — no real charge yet. Cancel anytime in Membership."}
+                : "No card is charged until Stripe is connected. Cancel anytime in Membership."}
             </p>
           </div>
         </div>

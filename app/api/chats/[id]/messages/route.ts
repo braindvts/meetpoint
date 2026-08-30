@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getCurrentMember } from "@/lib/memberAuth";
-import { ensureSeeded } from "@/lib/seed";
+import { purgeLegacySeedMembers } from "@/lib/legacySeed";
 
 export async function GET(
   _req: Request,
   ctx: { params: Promise<{ id: string }> }
 ) {
   try {
-    await ensureSeeded();
+    await purgeLegacySeedMembers();
     const me = await getCurrentMember();
     if (!me) return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
     const { id } = await ctx.params;
@@ -50,7 +50,7 @@ export async function POST(
   ctx: { params: Promise<{ id: string }> }
 ) {
   try {
-    await ensureSeeded();
+    await purgeLegacySeedMembers();
     const me = await getCurrentMember();
     if (!me) return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
     const { id } = await ctx.params;

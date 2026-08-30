@@ -11,7 +11,6 @@ import { filterByPreference, rankMatches } from "@/lib/match";
 import { canIntroduceToTier, hasActivePremier } from "@/lib/plans";
 import {
   activatePremierPlan,
-  ensureSampleInboundRequest,
   getMeetingsAttended,
   getPeerReputation,
   loadBlockedIds,
@@ -62,7 +61,6 @@ export default function DiscoverPage() {
     setProfile(p);
     setFilter("open");
     refreshConnections();
-    ensureSampleInboundRequest();
     void syncProfileToServer(p);
     track("discover_open");
     void refreshDirectory().then((list) => {

@@ -2,7 +2,7 @@
 
 Updated after the backend pass (Prisma SQLite, APIs, Stripe/Places hooks).
 
-**Fake profiles:** Off by default. The Room only shows real members who saved a profile on this server. To bring seed people back for demos, set `NEXT_PUBLIC_ENABLE_DEMO_PROFILES=1`.
+**Members:** Real only. There is no demo entry and no seeded profiles — Discover shows people who signed up and saved a profile on this server.
 
 **How to add keys:** put values in `.env.local` (and also `.env` for `DATABASE_URL` — Prisma reads `.env`). Restart `npm run dev` after every change.
 
@@ -19,12 +19,12 @@ npm run dev
 
 | # | Need | Status | Notes |
 |---|------|--------|-------|
-| 1 | **Database** — profiles, connections, chats server-side | **Done (local SQLite)** | Prisma + `DATABASE_URL`. Fake profiles **off by default**. Production should move to Postgres/Supabase. |
-| 2 | **Multi-user network** | **Partial** | Real members via `/api/members`. Room is empty until real people join (unless `NEXT_PUBLIC_ENABLE_DEMO_PROFILES=1`). |
-| 3 | **Mutual connect** | **Partial** | DB connections + Accept/Decline. Seed-bot auto-accept only if demo profiles are enabled. |
+| 1 | **Database** — profiles, connections, chats server-side | **Done** | Prisma + `DATABASE_URL`. No seeded profiles. Production should move to Postgres/Supabase. |
+| 2 | **Multi-user network** | **Partial** | Real members via `/api/members`. Discover is empty until real people join. |
+| 3 | **Mutual connect** | **Partial** | DB connections + Accept/Decline. Introductions stay pending until the other member accepts. |
 | 4 | **Realtime chat** | **Partial** | Server chats + **4s polling** on `/api/chats/[id]/messages`. Not WebSocket. LocalStorage chat still works offline. |
-| 5 | **Real payments** | **Hooked — needs your key** | `/api/billing/checkout` uses Stripe when `STRIPE_SECRET_KEY` is set; otherwise demo UI. |
-| 6 | **Real Premier billing** | **Hooked — needs your key** | Premier sheet tries Stripe Checkout first, then demo activate. |
+| 5 | **Real payments** | **Hooked — needs your key** | `/api/billing/checkout` uses Stripe when `STRIPE_SECRET_KEY` is set; otherwise the sheet confirms locally without charging. |
+| 6 | **Real Premier billing** | **Hooked — needs your key** | Premier sheet tries Stripe Checkout first, then activates locally without charging. |
 | 7 | **Real verification** | **Partial** | LinkedIn session auto-attaches LinkedIn verification on profile sync. No email magic-link yet (needs Resend/SendGrid). |
 | 8 | **Auth gate** | **Partial** | Member cookie + LinkedIn session bind to DB member. Pages still also use localStorage. |
 
@@ -51,7 +51,7 @@ npm run dev
 | 20 | Report / block | **Done** — report + **Block** (DB `/api/blocks`, hides from Room, drops connection) |
 | 21 | Elite invite admin | **Done** — redeem on Profile (`ELITE_INVITE_CODE`) + `/admin/elite` (`ADMIN_SECRET`) |
 | 22 | Native push (FCM/APNs) | **Partial** — browser SW notifications + Profile “Enable alerts”. True FCM/APNs still needs native shell + Firebase keys |
-| 23 | Hide demo in production | **Done** (off in prod unless `NEXT_PUBLIC_ENABLE_DEMO=1`) |
+| 23 | Remove demo entry and seeded profiles | **Done** — sign-up is the only way in |
 | 24 | Analytics | **Done** — first-party `/api/analytics` pageviews + optional Plausible (`NEXT_PUBLIC_PLAUSIBLE_DOMAIN`) |
 
 ---
@@ -60,7 +60,7 @@ npm run dev
 
 ### 1. Stripe — real Premier + booking payments
 
-**Already wired** to `POST /api/billing/checkout`. Without a key, the UI stays in demo mode.
+**Already wired** to `POST /api/billing/checkout`. Without a key, the sheets confirm locally and never charge a card.
 
 1. Create an account at [https://dashboard.stripe.com/register](https://dashboard.stripe.com/register)
 2. Open **Developers → API keys**
@@ -118,7 +118,7 @@ Billing: Google requires a billing account; there is a free monthly credit for M
    ```
 5. Restart → use **Continue with LinkedIn** on login
 
-Without LinkedIn you can still use demo entry (dev) or manual profile.
+Without LinkedIn you can still sign up with email, Google, or Apple — or fill in a profile manually.
 
 ---
 
@@ -282,7 +282,7 @@ Then two phones on that URL share the same members/chats.
 | `GET/POST/PATCH /api/connections` | Mutual intros |
 | `GET/POST /api/chats` | Private threads |
 | `GET/POST /api/chats/[id]/messages` | Messages (+ poll) |
-| `POST /api/billing/checkout` | Stripe or demo |
+| `POST /api/billing/checkout` | Stripe when keyed, otherwise no charge |
 | `GET /api/places/search` | Places or curated |
 | `POST /api/report` | Safety report |
 | `GET/POST /api/blocks` | Block / unblock |

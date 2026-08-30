@@ -2,12 +2,12 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getCurrentMember } from "@/lib/memberAuth";
 import { memberToPerson } from "@/lib/memberMap";
-import { ensureSeeded } from "@/lib/seed";
+import { purgeLegacySeedMembers } from "@/lib/legacySeed";
 
-/** List other members for The Room (real profiles; seed people only if demo flag on). */
+/** List real members for The Room. */
 export async function GET() {
   try {
-    await ensureSeeded();
+    await purgeLegacySeedMembers();
     const me = await getCurrentMember();
 
     let blocked = new Set<string>();

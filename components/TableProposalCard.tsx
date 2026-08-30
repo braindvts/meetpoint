@@ -148,9 +148,9 @@ export default function TableProposalCard({
         window.location.href = checkout.url;
         return;
       }
-      // No Stripe key → demo complete locally
+      // No Stripe key → confirm locally
     } catch {
-      /* demo fallback */
+      /* fall through to local confirm */
     }
 
     onBook(meetupAt, phoneFmt, method);

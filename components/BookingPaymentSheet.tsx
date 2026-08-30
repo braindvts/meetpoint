@@ -76,7 +76,7 @@ export default function BookingPaymentSheet({
 
   function finish(method: PaymentMethod) {
     setPaying(true);
-    // Demo authorize — real Stripe / Apple Pay would go here
+    // Local authorize — Stripe / Apple Pay takes over once keys are set
     window.setTimeout(() => {
       setDone(true);
       window.setTimeout(() => {
@@ -163,8 +163,8 @@ export default function BookingPaymentSheet({
               <div className="space-y-3">
                 {!apple && (
                   <p className="rounded-xl bg-white/[0.05] px-3 py-2.5 text-[12px] leading-relaxed text-white/45">
-                    On iPhone this uses Apple Pay. In this browser we simulate the Apple Pay sheet
-                    for demo — no real charge yet.
+                    On iPhone this uses Apple Pay. In this browser the sheet is stand-in — no card
+                    is charged until Stripe is connected.
                   </p>
                 )}
                 <button
@@ -268,7 +268,7 @@ export default function BookingPaymentSheet({
                   {paying ? "Processing…" : `Pay ${amount}`}
                 </button>
                 <p className="text-center text-[11px] text-white/35">
-                  Browser checkout · demo only (no real charge). Stripe can plug in later.
+                  Browser checkout · no card is charged until Stripe is connected.
                 </p>
               </form>
             )}

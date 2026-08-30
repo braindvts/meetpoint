@@ -15,14 +15,14 @@ export function stripeConfigured() {
 
 /**
  * Create a Stripe Checkout session for Premier or a table booking fee.
- * Without STRIPE_SECRET_KEY → { demo: true } so the UI can fall back.
+ * Without STRIPE_SECRET_KEY → { stripeConfigured: false } so the UI can fall back.
  */
 export async function POST(req: Request) {
   const stripe = stripeClient();
   if (!stripe) {
     return NextResponse.json({
       ok: true,
-      demo: true,
+      stripeConfigured: false,
       message: "Add STRIPE_SECRET_KEY to enable real checkout.",
     });
   }
@@ -98,7 +98,7 @@ export async function POST(req: Request) {
       },
     });
 
-    return NextResponse.json({ ok: true, demo: false, url: session.url });
+    return NextResponse.json({ ok: true, stripeConfigured: true, url: session.url });
   } catch (e) {
     return NextResponse.json(
       { ok: false, error: e instanceof Error ? e.message : "Stripe failed" },

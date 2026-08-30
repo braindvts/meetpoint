@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { ensureSeeded } from "@/lib/seed";
+import { purgeLegacySeedMembers } from "@/lib/legacySeed";
 
 /**
  * Admin grant Elite: POST { memberId, secret }
@@ -8,7 +8,7 @@ import { ensureSeeded } from "@/lib/seed";
  */
 export async function POST(req: Request) {
   try {
-    await ensureSeeded();
+    await purgeLegacySeedMembers();
     const admin = process.env.ADMIN_SECRET?.trim();
     if (!admin) {
       return NextResponse.json({ ok: false, error: "ADMIN_SECRET not set" }, { status: 503 });

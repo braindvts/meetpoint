@@ -2,12 +2,12 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { withMemberCookie } from "@/lib/memberAuth";
 import { hashPassword, isValidEmail, verifyPassword } from "@/lib/password";
-import { ensureSeeded } from "@/lib/seed";
+import { purgeLegacySeedMembers } from "@/lib/legacySeed";
 import { appUrl, withSession } from "@/lib/session";
 
 export async function POST(req: Request) {
   try {
-    await ensureSeeded();
+    await purgeLegacySeedMembers();
     const body = (await req.json()) as {
       email?: string;
       password?: string;

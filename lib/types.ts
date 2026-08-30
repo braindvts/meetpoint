@@ -125,6 +125,8 @@ export interface Person {
   portfolioUrl?: string;
   /** Companies, apps, products, and projects they've built. */
   work?: PersonWork[];
+  /** Elite standing — invited or granted. */
+  elite?: boolean;
 }
 
 export interface Restaurant {

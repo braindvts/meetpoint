@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-/** Lightweight toasts — e.g. when a demo member accepts an introduction. */
+/** Lightweight toasts — e.g. when someone accepts an introduction. */
 export default function ToastHost() {
   const [message, setMessage] = useState<string | null>(null);
 

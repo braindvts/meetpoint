@@ -72,6 +72,7 @@ export function memberToPerson(m: Member): Person {
       "workJson" in m ? String((m as { workJson?: string }).workJson || "[]") : "[]",
       []
     ),
+    elite: m.elite || undefined,
   };
 }
 

@@ -1,6 +1,4 @@
 import Link from "next/link";
-import DemoEnterButton from "@/components/DemoEnterButton";
-import { demoEntryEnabled } from "@/lib/demoFlag";
 
 export default function Landing() {
   return (
@@ -25,12 +23,6 @@ export default function Landing() {
         <Link href="/login" className="text-[13px] text-muted">
           Sign in
         </Link>
-        {demoEntryEnabled() && (
-          <DemoEnterButton
-            label="Enter demo"
-            className="text-[13px] text-accent"
-          />
-        )}
       </div>
     </main>
   );
