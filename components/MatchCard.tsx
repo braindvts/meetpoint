@@ -185,7 +185,7 @@ export default function MatchCard({
         ) : null}
 
         {ideas.length > 0 ? (
-          <Row label="Working on">
+          <Row label="Focus">
             <span className="flex flex-wrap gap-1.5">
               {ideas.map((tag) => {
                 const shared = sharedIdeas.includes(tag);
