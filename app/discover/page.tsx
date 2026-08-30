@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Nav from "@/components/Nav";
-import PageHeader from "@/components/PageHeader";
 import MatchCard from "@/components/MatchCard";
 import PersonProfileSheet from "@/components/PersonProfileSheet";
 import PremierPlanSheet from "@/components/PremierPlanSheet";
@@ -28,6 +27,7 @@ import { tierForPerson, tierForProfile } from "@/lib/tiers";
 import type { Connection, MyProfile, Person } from "@/lib/types";
 import EmptyState from "@/components/EmptyState";
 import NotifyPrompt from "@/components/NotifyPrompt";
+import SkeletonCard from "@/components/SkeletonCard";
 import { track } from "@/lib/analytics";
 
 type Filter = "open" | "local";
@@ -42,7 +42,10 @@ export default function DiscoverPage() {
   const [filterOpen, setFilterOpen] = useState(false);
   const [premierOpen, setPremierOpen] = useState(false);
   const [premierPeerName, setPremierPeerName] = useState<string | undefined>();
+  const [skipped, setSkipped] = useState<string[]>([]);
+  const [exiting, setExiting] = useState<string | null>(null);
   const [profilePerson, setProfilePerson] = useState<Person | null>(null);
+  const [directoryReady, setDirectoryReady] = useState(() => loadDirectory().length > 0);
 
   const refreshConnections = useCallback(() => setConnections(loadConnections()), []);
 
@@ -62,7 +65,10 @@ export default function DiscoverPage() {
     ensureSampleInboundRequest();
     void syncProfileToServer(p);
     track("discover_open");
-    void refreshDirectory().then((list) => setPeople(list));
+    void refreshDirectory().then((list) => {
+      setPeople(list);
+      setDirectoryReady(true);
+    });
 
     const onProfile = () => setProfile(loadProfile());
     const onDir = () => setPeople(loadDirectory());
@@ -91,7 +97,14 @@ export default function DiscoverPage() {
 
   const forYou = useMemo(() => filterByPreference(matches, "open"), [matches]);
   const nearby = useMemo(() => filterByPreference(matches, "local"), [matches]);
-  const filtered = filter === "open" ? forYou : nearby;
+  const pool = filter === "open" ? forYou : nearby;
+  const filtered = useMemo(
+    () => pool.filter((m) => !skipped.includes(m.person.id)),
+    [pool, skipped]
+  );
+
+  const remainingForYou = forYou.filter((m) => !skipped.includes(m.person.id)).length;
+  const remainingNearby = nearby.filter((m) => !skipped.includes(m.person.id)).length;
 
   const myTier = useMemo(() => {
     if (!profile) return null;
@@ -116,31 +129,44 @@ export default function DiscoverPage() {
     setPremierOpen(false);
   }
 
+  function skip(id: string) {
+    if (exiting) return;
+    setExiting(id);
+    window.setTimeout(() => {
+      setSkipped((s) => (s.includes(id) ? s : [...s, id]));
+      setExiting(null);
+    }, 220);
+  }
+
   if (!profile) return null;
+
+  const showSkeletons = !directoryReady && visiblePeople.length === 0;
 
   return (
     <>
       <Nav />
       <main className="mp-app pb-24">
-        <PageHeader
-          title="Discover"
-          action={
+        <header className="sticky top-0 z-40 bg-ink/95 px-5 pb-3 pt-4 backdrop-blur-xl">
+          <div className="relative flex h-7 items-center justify-center">
+            <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-accent">
+              Conclave
+            </p>
             <button
               type="button"
               aria-label="Filter"
               aria-expanded={filterOpen}
               onClick={() => setFilterOpen((v) => !v)}
-              className="text-accent"
+              className="absolute right-0 text-accent"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" className="h-5 w-5">
                 <path d="M4 5h16l-5.5 7.2V19l-5 2v-8.8L4 5z" strokeLinejoin="round" />
               </svg>
             </button>
-          }
-        />
-
-        <div className="px-4 pt-2">
-          <p className="text-[14px] text-ivory/70">People you might connect with</p>
+          </div>
+          <h1 className="mt-2 text-[1.85rem] font-semibold tracking-tight text-ivory">Discover</h1>
+          <p className="mt-1 text-[13px] leading-snug text-ivory/60">
+            Curated professionals. Meaningful connections.
+          </p>
           {myTier === 1 && !premier && (
             <button
               type="button"
@@ -148,36 +174,45 @@ export default function DiscoverPage() {
                 setPremierPeerName(undefined);
                 setPremierOpen(true);
               }}
-              className="mt-1 text-[12px] text-accent"
+              className="mt-2 text-[12px] font-medium text-accent"
             >
               Unlock Premier
             </button>
           )}
-        </div>
+        </header>
 
-        {filterOpen && (
-          <div className="mx-4 mt-3 overflow-hidden rounded-xl border border-accent/20 bg-[#12110f]">
+        <div className="px-4 pt-3">
+          <div className="flex rounded-full border border-white/12 bg-[#12110f] p-1">
             {(["open", "local"] as Filter[]).map((key) => (
               <button
                 key={key}
                 type="button"
-                onClick={() => {
-                  setFilter(key);
-                  setFilterOpen(false);
-                }}
-                className={`flex w-full items-center justify-between px-4 py-3 text-left text-sm ${
-                  filter === key ? "text-accent" : "text-ivory"
+                onClick={() => setFilter(key)}
+                className={`flex-1 rounded-full py-2 text-[12px] font-medium transition ${
+                  filter === key ? "bg-accent text-ink" : "text-ivory/70"
                 }`}
               >
-                <span>{key === "open" ? "For you" : "Nearby"}</span>
-                <span className="text-muted">{key === "open" ? forYou.length : nearby.length}</span>
+                {key === "open"
+                  ? `For you · ${remainingForYou}`
+                  : `Nearby · ${remainingNearby}`}
               </button>
             ))}
           </div>
+        </div>
+
+        {filterOpen && (
+          <p className="px-5 pt-3 text-[12px] leading-relaxed text-muted">
+            For you ranks by ambition and overlap. Nearby is people within reach of your city.
+          </p>
         )}
 
         <div className="px-4 pb-6 pt-4">
-          {filtered.length === 0 ? (
+          {showSkeletons ? (
+            <div className="space-y-3">
+              <SkeletonCard />
+              <SkeletonCard />
+            </div>
+          ) : pool.length === 0 ? (
             <EmptyState
               title={visiblePeople.length === 0 ? "The room is quiet" : "No matches for this filter"}
               body={
@@ -203,23 +238,38 @@ export default function DiscoverPage() {
               actionHref="/profile"
               actionLabel="Open profile"
             />
+          ) : filtered.length === 0 ? (
+            <EmptyState
+              title="You've seen everyone"
+              body="Skip is just for this session. Restore the list and keep going, or come back later."
+              actionLabel="Restore list"
+              onAction={() => setSkipped([])}
+            />
           ) : (
             <div key={filter} className="mp-stagger space-y-3">
               {filtered.map((m) => {
                 const allowed = canIntroduceToTier(myTier, m.tier, premier);
+                const leaving = exiting === m.person.id;
                 return (
-                  <MatchCard
+                  <div
                     key={m.person.id}
-                    match={m}
-                    status={connections.find((c) => c.peerId === m.person.id)?.status}
-                    canConnect={allowed}
-                    onConnect={connect}
-                    onNeedPremier={needPremier}
-                    onOpenProfile={(id) => {
-                      const p = people.find((x) => x.id === id) || null;
-                      setProfilePerson(p);
-                    }}
-                  />
+                    className={`transition duration-200 ease-out ${
+                      leaving ? "-translate-x-8 opacity-0" : "translate-x-0 opacity-100"
+                    }`}
+                  >
+                    <MatchCard
+                      match={m}
+                      status={connections.find((c) => c.peerId === m.person.id)?.status}
+                      canConnect={allowed}
+                      onConnect={connect}
+                      onSkip={skip}
+                      onNeedPremier={needPremier}
+                      onOpenProfile={(id) => {
+                        const p = people.find((x) => x.id === id) || null;
+                        setProfilePerson(p);
+                      }}
+                    />
+                  </div>
                 );
               })}
             </div>
