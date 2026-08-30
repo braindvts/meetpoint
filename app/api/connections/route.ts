@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getCurrentMember } from "@/lib/memberAuth";
-import { purgeLegacySeedMembers } from "@/lib/legacySeed";
+import { purgeDemoResidue } from "@/lib/purgeDemo";
 import type { Connection as ClientConnection } from "@/lib/types";
 
 function toClient(
@@ -19,7 +19,7 @@ function toClient(
 
 export async function GET() {
   try {
-    await purgeLegacySeedMembers();
+    await purgeDemoResidue();
     const me = await getCurrentMember();
     if (!me) return NextResponse.json({ ok: true, connections: [] as ClientConnection[] });
 
@@ -43,7 +43,7 @@ export async function GET() {
 /** Request an introduction to peerId. */
 export async function POST(req: Request) {
   try {
-    await purgeLegacySeedMembers();
+    await purgeDemoResidue();
     const me = await getCurrentMember();
     if (!me) return NextResponse.json({ ok: false, error: "Not signed in" }, { status: 401 });
 
@@ -81,7 +81,7 @@ export async function POST(req: Request) {
 /** Accept / decline / remove. */
 export async function PATCH(req: Request) {
   try {
-    await purgeLegacySeedMembers();
+    await purgeDemoResidue();
     const me = await getCurrentMember();
     if (!me) return NextResponse.json({ ok: false, error: "Not signed in" }, { status: 401 });
 

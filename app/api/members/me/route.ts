@@ -3,13 +3,13 @@ import { prisma } from "@/lib/db";
 import { getCurrentMember, withMemberCookie } from "@/lib/memberAuth";
 import { memberToProfile, profileToMemberData } from "@/lib/memberMap";
 import { getSession } from "@/lib/session";
-import { purgeLegacySeedMembers } from "@/lib/legacySeed";
+import { purgeDemoResidue } from "@/lib/purgeDemo";
 import type { MyProfile } from "@/lib/types";
 
 /** Current membership profile from the database. */
 export async function GET() {
   try {
-    await purgeLegacySeedMembers();
+    await purgeDemoResidue();
     const me = await getCurrentMember();
     if (!me) return NextResponse.json({ ok: true, profile: null, memberId: null });
     return NextResponse.json({
@@ -28,7 +28,7 @@ export async function GET() {
 /** Upsert the signed-in / cookie member from a Conclave profile. */
 export async function PUT(req: Request) {
   try {
-    await purgeLegacySeedMembers();
+    await purgeDemoResidue();
     const body = (await req.json()) as { profile?: MyProfile };
     if (!body.profile?.name) {
       return NextResponse.json({ ok: false, error: "Missing profile" }, { status: 400 });

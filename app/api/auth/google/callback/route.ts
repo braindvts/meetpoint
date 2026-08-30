@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { withMemberCookie } from "@/lib/memberAuth";
-import { purgeLegacySeedMembers } from "@/lib/legacySeed";
+import { purgeDemoResidue } from "@/lib/purgeDemo";
 import {
   appUrl,
   clearOAuthStateCookie,
@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
   if (!ok) return NextResponse.redirect(appUrl("/login?error=invalid_state"));
 
   try {
-    await purgeLegacySeedMembers();
+    await purgeDemoResidue();
     const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },

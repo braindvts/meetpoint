@@ -27,12 +27,28 @@ const CHATS_KEY = "meetpoint.chats";
 const RATINGS_KEY = "meetpoint.ratings";
 const BLOCKS_KEY = "meetpoint.blocked";
 
+/** The retired "Enter demo" account signed itself with this LinkedIn value. */
+const DEMO_PROFILE_MARKER = "linkedin.com/in/conclave-demo";
+
+function isRetiredDemoProfile(p: MyProfile): boolean {
+  return (p.verifications || []).some((v) =>
+    String(v.value || "").includes(DEMO_PROFILE_MARKER)
+  );
+}
+
 export function loadProfile(): MyProfile | null {
   if (typeof window === "undefined") return null;
   try {
     const raw = localStorage.getItem(PROFILE_KEY);
     if (!raw) return null;
     const p = JSON.parse(raw) as MyProfile;
+
+    // A browser that once used the demo shouldn't keep that member alive.
+    if (isRetiredDemoProfile(p)) {
+      clearProfile();
+      return null;
+    }
+
     // Discover only uses For you / Nearby — legacy split prefs map to For you
     if (
       !p.meetPreference ||

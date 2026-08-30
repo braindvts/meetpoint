@@ -2,12 +2,12 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getCurrentMember } from "@/lib/memberAuth";
 import { memberToPerson } from "@/lib/memberMap";
-import { purgeLegacySeedMembers } from "@/lib/legacySeed";
+import { purgeDemoResidue } from "@/lib/purgeDemo";
 
 /** List real members for The Room. */
 export async function GET() {
   try {
-    await purgeLegacySeedMembers();
+    await purgeDemoResidue();
     const me = await getCurrentMember();
 
     let blocked = new Set<string>();
