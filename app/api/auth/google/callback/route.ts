@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { sendWelcomeEmail } from "@/lib/email";
 import { withMemberCookie } from "@/lib/memberAuth";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
 import {
@@ -79,6 +80,7 @@ export async function GET(req: NextRequest) {
           photo: user.picture || "",
         },
       });
+      if (email) void sendWelcomeEmail(email, member.name);
     }
 
     const next = member.jobTitle && member.photo ? "/discover" : "/onboarding?google=1";

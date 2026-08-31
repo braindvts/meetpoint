@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { sendWelcomeEmail } from "@/lib/email";
 import { withMemberCookie } from "@/lib/memberAuth";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
 import {
@@ -66,6 +67,7 @@ export async function POST(req: NextRequest) {
       member = await prisma.member.create({
         data: { appleId: sub, email, name },
       });
+      if (email) void sendWelcomeEmail(email, member.name);
     }
 
     const next = member.jobTitle && member.photo ? "/discover" : "/onboarding?apple=1";

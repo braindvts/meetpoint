@@ -11,27 +11,32 @@ export async function GET() {
     appUrl: has("NEXT_PUBLIC_APP_URL"),
     database: has("DATABASE_URL"),
     authSecret: has("AUTH_SECRET"),
+    email: has("RESEND_API_KEY"),
+    emailFrom: has("EMAIL_FROM"),
+    google: has("GOOGLE_CLIENT_ID") && has("GOOGLE_CLIENT_SECRET"),
+    linkedIn: has("LINKEDIN_CLIENT_ID") && has("LINKEDIN_CLIENT_SECRET"),
+    apple: has("APPLE_CLIENT_ID") && has("APPLE_CLIENT_SECRET"),
     stripe: has("STRIPE_SECRET_KEY"),
     googlePlaces: has("GOOGLE_PLACES_API_KEY"),
     twilio:
       has("TWILIO_ACCOUNT_SID") &&
       has("TWILIO_AUTH_TOKEN") &&
       has("TWILIO_FROM_NUMBER"),
-    linkedIn: has("LINKEDIN_CLIENT_ID") && has("LINKEDIN_CLIENT_SECRET"),
   };
 
-  const required = ["appUrl", "database", "authSecret", "stripe"] as const;
-  const readyForMoney = required.every((k) => checks[k]);
-  const readyForRestaurants = readyForMoney && checks.googlePlaces;
-  const readyForSms = checks.twilio;
+  const canRun = checks.appUrl && checks.database && checks.authSecret;
+  const canSignInWithSocial = checks.google || checks.linkedIn || checks.apple;
 
   return NextResponse.json({
     ok: true,
     checks,
-    readyForMoney,
-    readyForRestaurants,
-    readyForSms,
-    launchReady: readyForMoney && readyForRestaurants,
-    tip: "See LAUNCH.md for setup steps. Add missing keys on Vercel → Settings → Environment Variables.",
+    canRun,
+    canSignInWithSocial,
+    canEmailMembers: checks.email,
+    canTakePayments: canRun && checks.stripe,
+    canSearchRestaurants: checks.googlePlaces,
+    canTextBookings: checks.twilio,
+    launchReady: canRun && canSignInWithSocial && checks.email && checks.stripe,
+    tip: "See KEYS.md for where to get each key. Add missing ones in your host's environment variables, then redeploy.",
   });
 }

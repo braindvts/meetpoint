@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { sendWelcomeEmail } from "@/lib/email";
 import { withMemberCookie } from "@/lib/memberAuth";
 import { hashPassword, isValidEmail, verifyPassword } from "@/lib/password";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
@@ -50,6 +51,10 @@ export async function POST(req: Request) {
               passwordHash: hashPassword(password),
             },
           });
+
+      if (!existing) {
+        void sendWelcomeEmail(email, member.name);
+      }
 
       const res = NextResponse.json({
         ok: true,

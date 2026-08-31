@@ -19,14 +19,20 @@ Conclave introduces people matched by ambition or profession, then settles it ov
 - Error boundary, hardened SMS rate limits
 - No demo mode: sign-up is the only way in, and every profile is a real member
 
+## Keys you still need to add
+
+**[KEYS.md](./KEYS.md)** is the checklist: every account and key the app is waiting on, what breaks without it, and how to verify it worked — database, welcome email (Resend), Google / LinkedIn / Apple sign-in, Stripe, Google Places, Twilio.
+
+Social sign-in and the welcome email do nothing until those keys exist. Email + password sign-up works with only a database.
+
 ## What’s still missing for a real launch
 
 See **[MISSING.md](./MISSING.md)** for the full list. Short version:
 
-1. **Hosted Postgres** (SQLite is local-dev only)
+1. **Hosted Postgres** (local Postgres is dev only)
 2. **True realtime chat** (polling, not WebSockets)
-3. **Your Stripe / Places / Twilio / LinkedIn keys** for live services
-4. **Email verification** (not wired — needs Resend/SendGrid)
+3. **Your Stripe / Places / Twilio / OAuth keys** for live services
+4. **Email verification + password reset** (welcome email is wired; confirm links are not)
 5. **Cloud photo storage**, push (FCM/APNs), analytics, block list
 
 ## Getting started / launch
@@ -51,14 +57,19 @@ Copy from `.env.example`. Important ones:
 
 | Variable | Purpose |
 |----------|---------|
-| `DATABASE_URL` | SQLite path (`file:./dev.db`) or Postgres URL |
-| `NEXT_PUBLIC_APP_URL` | App base URL |
+| `DATABASE_URL` | Postgres connection string |
+| `NEXT_PUBLIC_APP_URL` | App base URL (OAuth redirects are built from it) |
 | `AUTH_SECRET` | Session cookie signing |
-| `LINKEDIN_CLIENT_ID` / `SECRET` | LinkedIn OpenID |
+| `RESEND_API_KEY` / `EMAIL_FROM` | Welcome email on sign-up |
+| `GOOGLE_CLIENT_ID` / `SECRET` | Google sign-in |
+| `LINKEDIN_CLIENT_ID` / `SECRET` | LinkedIn OpenID (also verifies the member) |
+| `APPLE_CLIENT_ID` / `SECRET` | Apple sign-in |
 | `STRIPE_SECRET_KEY` | Real Premier / booking checkout |
 | `GOOGLE_PLACES_API_KEY` | Live restaurant search |
 | `TWILIO_*` | Optional booking SMS |
 | `NOTIFY_SECRET` | Optional SMS API lock |
+
+Step-by-step for each one: **[KEYS.md](./KEYS.md)**.
 
 ### LinkedIn
 
