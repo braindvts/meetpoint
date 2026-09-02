@@ -4,7 +4,7 @@ Two lists: what costs money, and the order to do it in. Prices were checked on 2
 
 Technical detail for every key lives in **[KEYS.md](./KEYS.md)**. This file is the shopping list and the running order.
 
-To track progress without reading anything, open **`/setup`** in the running app: a checklist of all twelve items with live status, cost, and a link to each provider.
+To tick items off as you go, use **[CHECKLIST.md](./CHECKLIST.md)**.
 
 ---
 

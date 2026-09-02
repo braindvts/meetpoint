@@ -123,7 +123,7 @@ Details for any line: [KEYS.md](./KEYS.md) for keys, [LAUNCH.md](./LAUNCH.md) fo
 
 ## Phase 9 — Before you invite anyone
 
-- [ ] Open `/setup` on the live site and confirm everything you paid for shows Connected
+- [ ] Open `https://yourdomain.com/api/health` and confirm everything you paid for reads `true`
 - [ ] Sign up as a second person and confirm you each appear in the other's Discover
 - [ ] Send an introduction, accept it, and exchange messages
 - [ ] Propose a table and complete a booking end to end
@@ -134,5 +134,5 @@ Details for any line: [KEYS.md](./KEYS.md) for keys, [LAUNCH.md](./LAUNCH.md) fo
 
 - [ ] Post the link on LinkedIn and X
 - [ ] Personally message 20–50 people you'd want at the table
-- [ ] Watch `/setup` and Stripe for the first week
+- [ ] Watch `/api/health` and Stripe for the first week
 - [ ] Ask me for whatever breaks
