@@ -2,6 +2,8 @@
 
 Tick these off as you go. Boxes already ticked are done in the code — you don't need to touch them.
 
+Website only, without the App Store work? Use [WEBSITE.md](./WEBSITE.md) instead.
+
 Details for any line: [KEYS.md](./KEYS.md) for keys, [LAUNCH.md](./LAUNCH.md) for the long-form version.
 
 ---

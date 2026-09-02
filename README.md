@@ -22,7 +22,8 @@ Conclave introduces people matched by ambition or profession, then settles it ov
 
 ## Launching this thing
 
-- **[CHECKLIST.md](./CHECKLIST.md)** — tick-box checklist from buying the domain to submitting the iPhone app. Start here.
+- **[WEBSITE.md](./WEBSITE.md)** — website only, no App Store: what to buy, what it costs, tick-box steps. Start here.
+- **[CHECKLIST.md](./CHECKLIST.md)** — the same but including the iPhone app.
 - **[LAUNCH.md](./LAUNCH.md)** — everything you have to buy (domain, hosting, database, Stripe, Apple's $99/year, Twilio) with costs and the order to do it in.
 - **[KEYS.md](./KEYS.md)** — every account and key the app is waiting on, what breaks without it, and how to verify it worked.
 - `/api/health` — JSON showing which keys this server can actually see.
