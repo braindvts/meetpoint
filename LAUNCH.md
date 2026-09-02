@@ -137,14 +137,18 @@ Full list with status: [MISSING.md](./MISSING.md).
 
 ---
 
-## 5. Rough monthly cost
+## 5. What it costs
 
-| Stage | Monthly |
-|-------|---------|
-| Just launched, web only | $0–20 (plus the domain once a year) |
-| Real members, email + payments live | about $20–45, plus Stripe's cut of what you charge |
-| Adding restaurants and texts | add $30–80 depending on usage |
-| With the iPhone app | add $99/year |
+| Stage | Per month | First year |
+|-------|-----------|-----------|
+| Cheapest — website only, free tiers, not charging yet | $0 | about $12 (just the domain) |
+| Launching for real — Vercel Pro, free database and email | $20 | about $252 |
+| Same, plus the iPhone app | about $29 average | about $351 |
+| Real members — paid database and email too | $59 | about $819 |
+
+On top of that: Stripe takes 2.9% + $0.30 per charge, Twilio runs $5–30/month if you enable texts, and Google Places is usage-based after its 5,000 free monthly searches.
+
+Every individual price, plus what Stripe's cut leaves you on a $20 Premier or a $5 booking fee, is in [CHECKLIST.md](./CHECKLIST.md).
 
 ---
 
