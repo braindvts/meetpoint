@@ -22,9 +22,10 @@ Conclave introduces people matched by ambition or profession, then settles it ov
 
 ## Launching this thing
 
-- **Open `/setup` in the running app** — a live checklist of every key, whether this server can see it, what it costs, and a link straight to the provider.
-- **[LAUNCH.md](./LAUNCH.md)** — everything you have to buy (domain, hosting, database, Stripe, Apple's $99/year, Twilio) with costs, the order to do it in, and what the App Store will ask for.
+- **[CHECKLIST.md](./CHECKLIST.md)** — tick-box checklist from buying the domain to submitting the iPhone app. Start here.
+- **[LAUNCH.md](./LAUNCH.md)** — everything you have to buy (domain, hosting, database, Stripe, Apple's $99/year, Twilio) with costs and the order to do it in.
 - **[KEYS.md](./KEYS.md)** — every account and key the app is waiting on, what breaks without it, and how to verify it worked.
+- `/setup` in the running app — live status of which keys this server can actually see.
 
 Social sign-in and the welcome email do nothing until those keys exist. Email + password sign-up works with only a database.
 
