@@ -7,8 +7,9 @@ Conclave introduces people matched by ambition or profession, then settles it ov
 ## What’s working now
 
 - Landing, splash (first open only), mobile bottom dock
-- LinkedIn OAuth (when env configured) + membership profile
-- **SQLite + Prisma** — profiles, connections, chats persist server-side
+- Email + password sign-up, and Google / LinkedIn / Apple OAuth once keyed
+- Welcome email on sign-up (Resend) — logs and skips until keyed
+- **Postgres + Prisma** — profiles, connections, chats persist server-side
 - Discover lists real members from `/api/members`
 - Circle with Accept / Decline; DB sync when signed in
 - Private chats (localStorage + server poll every ~4s)
@@ -19,9 +20,10 @@ Conclave introduces people matched by ambition or profession, then settles it ov
 - Error boundary, hardened SMS rate limits
 - No demo mode: sign-up is the only way in, and every profile is a real member
 
-## Keys you still need to add
+## Launching this thing
 
-**[KEYS.md](./KEYS.md)** is the checklist: every account and key the app is waiting on, what breaks without it, and how to verify it worked — database, welcome email (Resend), Google / LinkedIn / Apple sign-in, Stripe, Google Places, Twilio.
+- **[LAUNCH.md](./LAUNCH.md)** — everything you have to buy (domain, hosting, database, Stripe, Apple's $99/year, Twilio) with costs, the order to do it in, and what the App Store will ask for.
+- **[KEYS.md](./KEYS.md)** — every account and key the app is waiting on, what breaks without it, and how to verify it worked.
 
 Social sign-in and the welcome email do nothing until those keys exist. Email + password sign-up works with only a database.
 
@@ -47,7 +49,7 @@ npm run dev
 **Story flyer (Instagram / TikTok):** open `/story` — download Story, Feed, and Post PNGs and copy a caption. Early access is the website; the app is coming soon. Add your site as the story link sticker.
 
 **To launch for real people + payments**, follow **[LAUNCH.md](./LAUNCH.md)**  
-(Hosting + Postgres + Stripe + Google Places + Twilio).
+(what to buy, in what order, and what the App Store expects).
 
 Check config after deploy: `/api/health`
 
