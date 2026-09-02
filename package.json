@@ -9,7 +9,8 @@
     "lint": "next lint",
     "postinstall": "prisma generate",
     "db:migrate": "prisma migrate dev",
-    "db:push": "prisma db push"
+    "db:push": "prisma db push",
+    "apple:secret": "node scripts/apple-client-secret.mjs"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",

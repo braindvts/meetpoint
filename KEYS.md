@@ -95,9 +95,20 @@ A LinkedIn sign-in also counts as a professional verification on the member's pr
 The fiddliest of the three — skip it until the others work.
 
 1. [Apple Developer → Identifiers](https://developer.apple.com/account/resources/identifiers) (needs the $99/year program).
-2. Create a **Services ID**; its identifier becomes `APPLE_CLIENT_ID`.
+2. Create a **Services ID**; its identifier (e.g. `com.yourdomain.conclave.web`) becomes `APPLE_CLIENT_ID`.
 3. Configure it for Sign In with Apple: domain `yourdomain.com`, return URL `https://yourdomain.com/api/auth/apple/callback`.
-4. Create a **Key** for Sign In with Apple, download the `.p8`, then generate a client-secret JWT from it (Apple secrets expire — a 6-month JWT is typical) and set it as `APPLE_CLIENT_SECRET`.
+4. Keys → create a key with **Sign In with Apple** enabled, download the `AuthKey_XXXXXXXXXX.p8` (one download only), and note the key id and your team id.
+5. Apple wants a signed JWT rather than a plain secret. Generate one:
+
+```bash
+npm run apple:secret -- \
+  --team-id ABCDE12345 \
+  --key-id XYZ9876543 \
+  --client-id com.yourdomain.conclave.web \
+  --key ~/Downloads/AuthKey_XYZ9876543.p8
+```
+
+Copy the printed `APPLE_CLIENT_ID` and `APPLE_CLIENT_SECRET` into your env. The secret expires after six months — re-run the command and update it before then, or Apple sign-in starts failing.
 
 Apple does not accept `127.0.0.1` return URLs, so test this one on the deployed domain.
 
