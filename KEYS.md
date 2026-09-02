@@ -4,7 +4,7 @@ A reminder list of every account, key, and setting the app is waiting on — wha
 
 Paste values into `.env.local` for local development, and into your host's environment variables for the live site (Vercel → Project → Settings → Environment Variables). Restart / redeploy after every change — Next.js reads env vars at boot.
 
-Check progress any time at **`/api/health`** (for example `http://127.0.0.1:43123/api/health`). It reports which keys are present without printing any secrets.
+Check progress any time by opening **`/setup`** in the app (for example `http://127.0.0.1:43123/setup`). It's a clickable checklist of every key with its status, cost, and a link to the provider — nothing secret is ever printed, and it isn't linked from anywhere members can see. The same data as raw JSON lives at `/api/health`.
 
 ---
 
