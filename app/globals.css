@@ -172,11 +172,16 @@ body:has([data-shot]) nextjs-portal {
 
 /* Floating mobile dock — pinned to the real viewport via portal */
 .mp-mobile-dock {
-  position: fixed !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
+  position: fixed;
+  bottom: 0;
   pointer-events: none;
+}
+/* Full width on phones; on wider screens it tracks the app column instead. */
+@media (max-width: 639px) {
+  .mp-mobile-dock {
+    left: 0 !important;
+    right: 0 !important;
+  }
 }
 .mp-mobile-dock a {
   pointer-events: auto;
