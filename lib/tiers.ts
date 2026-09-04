@@ -31,9 +31,9 @@ export const TIER_DEFINITIONS: TierDefinition[] = [
   },
   {
     tier: 4,
-    name: "Elite",
-    meaning: "Highly respected community member",
-    howToEarn: "Exceptional standing, or an Elite invite",
+    name: "BLACK",
+    meaning: "Premium verified professional — paid or earned",
+    howToEarn: "Purchase BLACK, or earn it through standing and real dinners",
   },
 ];
 
@@ -44,7 +44,7 @@ export const TIER_THRESHOLDS = {
   connectorMeetings: 20,
   connectorScore: 90,
   connectorProfile: 80,
-  eliteScore: 95,
+  blackScore: 95,
 } as const;
 
 export interface ProfileStrength {
@@ -60,8 +60,8 @@ export interface TierInput {
   meetingsAttended: number;
   reputationScore: number;
   profileStrength?: number;
-  /** Explicit Elite invite (or earned flag). */
-  elite?: boolean;
+  /** BLACK standing — paid, earned, or granted. */
+  black?: boolean;
 }
 
 export function tierDefinition(tier: MemberTier): TierDefinition {
@@ -156,11 +156,11 @@ export function scoreProfileStrength(
 export function computeMemberTier(input: TierInput): MemberTier | null {
   if (!input.verified || !input.profileComplete) return null;
 
-  const { meetingsAttended: m, reputationScore: score, elite } = input;
+  const { meetingsAttended: m, reputationScore: score, black } = input;
   const strength = input.profileStrength ?? 0;
   const T = TIER_THRESHOLDS;
 
-  if (elite || (m >= T.connectorMeetings && score >= T.eliteScore && strength >= 70)) return 4;
+  if (black || (m >= T.connectorMeetings && score >= T.blackScore && strength >= 70)) return 4;
   if (
     (m >= T.connectorMeetings && score >= T.connectorScore) ||
     strength >= T.connectorProfile
@@ -187,7 +187,7 @@ export function nextTierProgress(input: TierInput): {
     };
   }
   if (current === 4) {
-    return { current, next: null, hint: "Elite standing. You set the standard." };
+    return { current, next: null, hint: "BLACK standing. You set the standard." };
   }
   const next = TIER_DEFINITIONS[current];
   const T = TIER_THRESHOLDS;
@@ -215,7 +215,7 @@ export function nextTierProgress(input: TierInput): {
   return {
     current,
     next,
-    hint: "An Elite invitation — or exceptional dinners and a full profile — unlocks Elite.",
+    hint: "Purchase BLACK, or reach it through exceptional dinners and a full profile.",
   };
 }
 
@@ -242,7 +242,7 @@ export function tierForPerson(
     meetingsAttended: meetings,
     reputationScore: reputation.score,
     profileStrength: strength,
-    elite: person.elite === true,
+    black: person.black === true,
   });
 }
 
@@ -260,7 +260,7 @@ export function tierForProfile(
     meetingsAttended,
     reputationScore: score,
     profileStrength: scoreProfileStrength(profile).score,
-    elite: profile.elite === true,
+    black: profile.black === true,
   });
 }
 

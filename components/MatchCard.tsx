@@ -1,6 +1,7 @@
 "use client";
 
 import type { KeyboardEvent, MouseEvent } from "react";
+import BlackConnectionBadge from "@/components/BlackConnectionBadge";
 import TierBadge from "@/components/TierBadge";
 import type { MatchResult } from "@/lib/match";
 import { formatDistance } from "@/lib/match";
@@ -56,6 +57,7 @@ export default function MatchCard({
     isLocal,
   } = match;
 
+  const blackConnections = person.blackConnections ?? 0;
   const owned = ownedCompanies(person);
   const other = otherWork(person);
   const ideas = person.ideaTags.slice(0, 4);
@@ -157,6 +159,9 @@ export default function MatchCard({
           </p>
           <div className="mt-1.5 flex items-center gap-2">
             <TierBadge tier={tier} size="sm" />
+            {blackConnections > 0 ? (
+              <BlackConnectionBadge count={blackConnections} variant="compact" />
+            ) : null}
             <span className="truncate text-[11px] text-muted">
               {TRAVEL_LABEL[person.travel]}
             </span>

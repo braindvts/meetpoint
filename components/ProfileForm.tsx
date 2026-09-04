@@ -234,7 +234,9 @@ export default function ProfileForm({ initial }: { initial?: MyProfile | null })
       phone: phone.trim() ? formatPhoneDisplay(phone) : undefined,
       linkedInId: initial?.linkedInId,
       meetingsAttended: initial?.meetingsAttended,
-      elite: initial?.elite,
+      black: initial?.black,
+      blackSince: initial?.blackSince,
+      blackSource: initial?.blackSource,
       premierPlan: initial?.premierPlan,
     });
 

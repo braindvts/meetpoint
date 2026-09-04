@@ -1,3 +1,4 @@
+import { blackConnectionUnlocksReach } from "./black";
 import type { MemberTier } from "./tiers";
 import type { MyProfile, PremierInterval } from "./types";
 
@@ -11,8 +12,8 @@ export const PREMIER_PLAN = {
   name: "Conclave Premier",
   tagline: "Meet every tier in the room.",
   features: [
-    "Introduce yourself to Trusted, Connector & Elite",
-    "Elite members can still meet anyone freely",
+    "Introduce yourself to Trusted, Connector & BLACK",
+    "BLACK members can still meet anyone freely",
     "Priority placement in The Room",
     "Cancel anytime",
   ],
@@ -65,18 +66,21 @@ export function premierStatusLabel(profile: MyProfile | null | undefined): strin
 
 /**
  * Access rules:
- * - Elite (4): meet Elite and everyone else — free
+ * - BLACK (4): meet BLACK and everyone else — free
  * - Premier: meet any tier
+ * - Enough BLACK connections: reach earned through the network, no Premier needed
  * - Tier 1 without Premier: only other Tier 1
  * - Tier 2–3: meet anyone (earned access)
  */
 export function canIntroduceToTier(
   myTier: MemberTier | null,
   theirTier: MemberTier | null,
-  premier: boolean
+  premier: boolean,
+  myBlackConnections = 0
 ): boolean {
   if (myTier === 4) return true;
   if (premier) return true;
+  if (blackConnectionUnlocksReach(myBlackConnections)) return true;
   if (myTier === null || theirTier === null) return myTier === theirTier;
   if (myTier === 1 && theirTier > 1) return false;
   return true;

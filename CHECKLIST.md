@@ -151,7 +151,7 @@ That last row is the one to watch — on a $5 charge Stripe's cut is 9%, because
 - [ ] Buy a Twilio number with SMS enabled — $1.15/month
 - [ ] Complete Twilio 10DLC brand and campaign registration — ~$20–60 once, then ~$2–10/month
 - [ ] Set `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER`
-- [ ] Set `ELITE_INVITE_CODE` and `ADMIN_SECRET` for invites and `/admin/elite`
+- [ ] Set `ADMIN_SECRET` if you want to grant BLACK manually from `/admin/black`
 
 ## Phase 8 — The iPhone app · $99/year
 

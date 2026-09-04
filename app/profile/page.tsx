@@ -6,7 +6,7 @@ import MembershipPlans from "@/components/MembershipPlans";
 import MembershipTiers from "@/components/MembershipTiers";
 import Avatar from "@/components/Avatar";
 import EditProfilePopup from "@/components/EditProfilePopup";
-import EliteInviteCard from "@/components/EliteInviteCard";
+import BlackMembershipCard from "@/components/BlackMembershipCard";
 import Nav from "@/components/Nav";
 import PageHeader from "@/components/PageHeader";
 import PremierPlanSheet from "@/components/PremierPlanSheet";
@@ -96,7 +96,7 @@ function ProfileContent() {
     meetingsAttended: meetings,
     reputationScore: reputationScoreForMeetings(meetings),
     profileStrength: strength.score,
-    elite: profile.elite === true,
+    black: profile.black === true,
   };
 
   return (
@@ -147,7 +147,12 @@ function ProfileContent() {
           onSwitchInterval={switchInterval}
         />
 
-        <EliteInviteCard elite={profile.elite === true} />
+        <BlackMembershipCard
+          profile={profile}
+          meetings={meetings}
+          reputationScore={reputationScoreForMeetings(meetings)}
+          profileStrength={strength.score}
+        />
 
         <section className="mp-person-card mb-5 p-4">
           <p className="text-[12px] font-medium text-accent">Alerts</p>

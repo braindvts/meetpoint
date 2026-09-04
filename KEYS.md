@@ -21,7 +21,7 @@ Check progress any time at **`/api/health`** (for example `http://127.0.0.1:4312
 | 7 | Stripe payments | `STRIPE_SECRET_KEY` (+ `STRIPE_WEBHOOK_SECRET`) | Premier and the $5/person table fee confirm without charging |
 | 8 | Google Places | `GOOGLE_PLACES_API_KEY` | Restaurant suggestions fall back to a curated list |
 | 9 | Booking SMS | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER` | Table confirmations show in-app only, no text |
-| 10 | Elite invites + admin | `ELITE_INVITE_CODE`, `ADMIN_SECRET` | Invite redemption and `/admin/elite` stay closed |
+| 10 | Operator BLACK grant | `ADMIN_SECRET` | `/admin/black` stays closed |
 | 11 | Analytics (optional) | `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` | First-party pageviews only |
 
 Email sign-up with a password works today with no keys at all, as long as the database is set (#1).
@@ -139,14 +139,13 @@ Without it, table suggestions come from the curated Michelin/five-star list alre
 
 Trial accounts can only text numbers you've verified in the Twilio console.
 
-## 10. Elite invites + admin
+## 10. Operator BLACK grant
 
 ```
-ELITE_INVITE_CODE=<code you hand out>
 ADMIN_SECRET=<long random string>
 ```
 
-Members redeem the code on Profile; you can grant Elite from `/admin/elite` using the admin secret.
+BLACK is bought or earned by the member. This secret only lets you grant it manually from `/admin/black` — members can never grant it to each other.
 
 ## 11. Analytics (optional)
 

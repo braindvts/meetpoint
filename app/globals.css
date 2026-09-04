@@ -823,7 +823,7 @@ svg {
 }
 
 /* Centurion black — Amex-style Elite aura */
-@keyframes eliteSheen {
+@keyframes blackSheen {
   0% {
     transform: translateX(-120%) skewX(-12deg);
   }
@@ -832,8 +832,33 @@ svg {
   }
 }
 
-.elite-centurion {
-  --elite-metal: linear-gradient(
+/* The BLACK mark — same blacked-out metal as the Centurion card, badge sized */
+.black-mark {
+  position: relative;
+  overflow: hidden;
+  background: #000;
+  border-radius: 3px;
+  box-shadow:
+    0 0 0 1px #1c1c1c,
+    0 0 0 2px #8f8f8f,
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 6px 16px rgba(0, 0, 0, 0.6);
+}
+.black-mark-sheen {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    125deg,
+    rgba(255, 255, 255, 0.3) 0%,
+    transparent 38%,
+    transparent 58%,
+    rgba(255, 255, 255, 0.12) 100%
+  );
+  pointer-events: none;
+}
+
+.black-centurion {
+  --black-metal: linear-gradient(
     135deg,
     #f2f2f2 0%,
     #9a9a9a 22%,
@@ -854,13 +879,13 @@ svg {
     0 0 56px rgba(255, 255, 255, 0.08),
     0 20px 50px rgba(0, 0, 0, 0.85);
 }
-.elite-centurion::before {
+.black-centurion::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: 0;
   padding: 1.5px;
-  background: var(--elite-metal);
+  background: var(--black-metal);
   -webkit-mask:
     linear-gradient(#fff 0 0) content-box,
     linear-gradient(#fff 0 0);
@@ -868,18 +893,18 @@ svg {
   mask-composite: exclude;
   pointer-events: none;
 }
-.elite-centurion > *:not([aria-hidden]) {
+.black-centurion > *:not([aria-hidden]) {
   position: relative;
   z-index: 1;
 }
-.elite-centurion .elite-sheen {
+.black-centurion .black-sheen {
   pointer-events: none;
   position: absolute;
   inset: 0;
   z-index: 2;
   overflow: hidden;
 }
-.elite-centurion .elite-sheen::after {
+.black-centurion .black-sheen::after {
   content: "";
   position: absolute;
   top: 0;
@@ -892,9 +917,9 @@ svg {
     rgba(255, 255, 255, 0.14) 48%,
     transparent 72%
   );
-  animation: eliteSheen 4.5s ease-in-out infinite;
+  animation: blackSheen 4.5s ease-in-out infinite;
 }
-.elite-centurion:hover {
+.black-centurion:hover {
   box-shadow:
     0 0 0 1px #1a1a1a,
     0 0 0 2px #c8c8c8,
@@ -905,7 +930,7 @@ svg {
 }
 
 /* Elite profile sheet shell */
-.elite-profile-shell {
+.black-profile-shell {
   background: #000000 !important;
   border-color: #8a8a8a !important;
   box-shadow:
@@ -915,7 +940,7 @@ svg {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .elite-centurion .elite-sheen::after {
+  .black-centurion .black-sheen::after {
     animation: none !important;
   }
 }

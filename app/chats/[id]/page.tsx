@@ -7,6 +7,8 @@ import Nav from "@/components/Nav";
 import Avatar from "@/components/Avatar";
 import FoodSuggestPopup from "@/components/FoodSuggestPopup";
 import TableProposalCard, { takePendingBooking } from "@/components/TableProposalCard";
+import BlackInvitePanel from "@/components/BlackInvitePanel";
+import { settleBlackMeeting } from "@/lib/blackStore";
 import {
   shouldSuggestMeetingSpots,
   suggestSpotsForChatLive,
@@ -23,6 +25,23 @@ import {
 } from "@/lib/store";
 import { findPerson, loadDirectory, refreshDirectory } from "@/lib/directory";
 import type { ChatAttachment, GroupChat, MyProfile } from "@/lib/types";
+
+/**
+ * A booked table settles any accepted BLACK meeting request in this thread.
+ * Without that accepted request nothing is awarded.
+ */
+async function settleBookedMeeting(peerIds: string[]) {
+  for (const peerId of peerIds) {
+    const result = await settleBlackMeeting(peerId);
+    if (result.awarded) {
+      window.dispatchEvent(
+        new CustomEvent("meetpoint:toast", {
+          detail: { message: "BLACK CONNECTION awarded from this meeting.", peerId },
+        })
+      );
+    }
+  }
+}
 
 function ChatThreadInner() {
   const { id } = useParams<{ id: string }>();
@@ -76,6 +95,7 @@ function ChatThreadInner() {
         if (updated) {
           lastUpdatedRef.current = updated.updatedAt;
           setChat({ ...updated, messages: [...updated.messages] });
+          void settleBookedMeeting(updated.memberIds);
         }
         void import("@/lib/notify").then((n) => n.ensureNotifyPermission());
       }
@@ -326,6 +346,13 @@ function ChatThreadInner() {
                 );
               })}
 
+              <div className="pt-1">
+                <BlackInvitePanel
+                  chatId={chat.id}
+                  peers={members.map((m) => ({ id: m.id, name: m.name }))}
+                />
+              </div>
+
               {chat.tableProposal && (
                 <div className="pt-1">
                   {!chat.tableProposal.booked && (
@@ -340,7 +367,13 @@ function ChatThreadInner() {
                     onAgree={() => runChatWrite(() => agreeToTable(chat.id))}
                     onBook={(meetupAt, phone, paymentMethod) => {
                       void import("@/lib/notify").then((n) => n.ensureNotifyPermission());
-                      runChatWrite(() => bookTable(chat.id, meetupAt, phone, paymentMethod));
+                      runChatWrite(() => {
+                        const booked = bookTable(chat.id, meetupAt, phone, paymentMethod);
+                        if (booked?.tableProposal?.booked) {
+                          void settleBookedMeeting(booked.memberIds);
+                        }
+                        return booked;
+                      });
                     }}
                     onClear={
                       chat.tableProposal.booked

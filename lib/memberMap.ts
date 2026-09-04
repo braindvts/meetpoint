@@ -32,7 +32,9 @@ export function memberToProfile(m: Member): MyProfile {
     ),
     phone: m.phone || undefined,
     linkedInId: m.linkedInId || undefined,
-    elite: m.elite || undefined,
+    black: m.black || undefined,
+    blackSince: m.blackSince ? m.blackSince.toISOString() : undefined,
+    blackSource: (m.blackSource as MyProfile["blackSource"]) || undefined,
     meetingsAttended: m.meetingsAttended,
     premierPlan: m.premierActive
       ? {
@@ -72,10 +74,15 @@ export function memberToPerson(m: Member): Person {
       "workJson" in m ? String((m as { workJson?: string }).workJson || "[]") : "[]",
       []
     ),
-    elite: m.elite || undefined,
+    black: m.black || undefined,
   };
 }
 
+/**
+ * Fields a member may write about themselves. BLACK is absent on purpose: it is
+ * set only by the server (purchase, earned check, or operator grant), so a
+ * doctored profile payload can never claim it.
+ */
 export function profileToMemberData(profile: MyProfile) {
   return {
     name: profile.name,
@@ -94,7 +101,6 @@ export function profileToMemberData(profile: MyProfile) {
     workJson: JSON.stringify(profile.work || []),
     phone: profile.phone || null,
     linkedInId: profile.linkedInId || null,
-    elite: profile.elite === true,
     meetingsAttended: profile.meetingsAttended || 0,
     premierActive: profile.premierPlan?.active === true,
     premierInterval: profile.premierPlan?.interval || null,

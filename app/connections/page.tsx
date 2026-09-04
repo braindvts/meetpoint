@@ -6,6 +6,9 @@ import { useRouter } from "next/navigation";
 import Nav from "@/components/Nav";
 import PageHeader from "@/components/PageHeader";
 import Avatar from "@/components/Avatar";
+import BlackBadge from "@/components/BlackBadge";
+import BlackConnectionBadge from "@/components/BlackConnectionBadge";
+import { blackConnectionWith } from "@/lib/blackStore";
 import EmptyState from "@/components/EmptyState";
 import PersonProfileSheet from "@/components/PersonProfileSheet";
 import RateMeeting from "@/components/RateMeeting";
@@ -151,6 +154,14 @@ export default function ConnectionsPage() {
                         <p className="mt-0.5 truncate text-[11px] text-muted">
                           {person.jobTitle} · {person.city.name}
                         </p>
+                        {(person.black || blackConnectionWith(person.id)) && (
+                          <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                            {person.black && <BlackBadge size="xs" />}
+                            {blackConnectionWith(person.id) && (
+                              <BlackConnectionBadge count={1} variant="compact" />
+                            )}
+                          </div>
+                        )}
                         <p className="mt-1 text-[11px] text-accent">
                           {isInbound ? "Wants an introduction" : "View profile"}
                         </p>

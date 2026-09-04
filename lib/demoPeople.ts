@@ -49,6 +49,7 @@ export const DEMO_PEOPLE: Person[] = [
   },
   {
     id: "p2",
+    blackConnections: 2,
     name: "Sofia Alvarez",
     jobTitle: "Restaurant Owner",
     ideaTags: ["Food & Restaurants", "E-commerce"],
@@ -166,6 +167,7 @@ export const DEMO_PEOPLE: Person[] = [
   },
   {
     id: "p6",
+    blackConnections: 5,
     name: "Léa Dubois",
     jobTitle: "Marketing Consultant",
     ideaTags: ["Marketing Agency", "Fashion"],
@@ -307,7 +309,7 @@ export const DEMO_PEOPLE: Person[] = [
   },
   {
     id: "p11",
-    elite: true,
+    black: true,
     name: "Carlos Mendes",
     jobTitle: "Real Estate Agent",
     ideaTags: ["Real Estate", "Fintech"],
@@ -505,7 +507,7 @@ export const DEMO_PEOPLE: Person[] = [
   },
   {
     id: "p18",
-    elite: true,
+    black: true,
     name: "Ana Rodríguez",
     jobTitle: "Solar Engineer",
     ideaTags: ["Green Energy", "SaaS"],

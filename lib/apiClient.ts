@@ -93,6 +93,21 @@ export async function startPremierCheckout(
   }
 }
 
+export async function startBlackCheckout(
+  interval: "month" | "year"
+): Promise<{ url?: string; stripeConfigured?: boolean } | null> {
+  try {
+    const res = await fetch("/api/billing/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ kind: interval === "year" ? "black_year" : "black_month" }),
+    });
+    return (await res.json()) as { url?: string; stripeConfigured?: boolean };
+  } catch {
+    return null;
+  }
+}
+
 export async function startBookingCheckout(opts: {
   amountUsd: number;
   label: string;
@@ -158,21 +173,5 @@ export async function setBlocked(
     return data.ok && data.blockedIds ? data.blockedIds : null;
   } catch {
     return null;
-  }
-}
-
-export async function redeemEliteCode(
-  code: string
-): Promise<{ ok: boolean; error?: string }> {
-  try {
-    const res = await fetch("/api/elite/redeem", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code }),
-    });
-    const data = (await res.json()) as { ok?: boolean; error?: string };
-    return { ok: !!data.ok, error: data.error };
-  } catch {
-    return { ok: false, error: "Network error" };
   }
 }

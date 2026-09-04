@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getCurrentMember } from "@/lib/memberAuth";
 import { memberToPerson } from "@/lib/memberMap";
+import { blackConnectionCounts } from "@/lib/blackServer";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
 
 /** List real members for The Room. */
@@ -31,9 +32,12 @@ export async function GET() {
       take: 200,
     });
 
-    const members = rows
-      .filter((m) => !blocked.has(m.id))
-      .map(memberToPerson);
+    const visible = rows.filter((m) => !blocked.has(m.id));
+    const counts = await blackConnectionCounts(visible.map((m) => m.id));
+    const members = visible.map((m) => ({
+      ...memberToPerson(m),
+      blackConnections: counts[m.id] || 0,
+    }));
 
     return NextResponse.json({
       ok: true,

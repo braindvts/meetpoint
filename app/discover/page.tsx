@@ -29,6 +29,7 @@ import type { Connection, MyProfile, Person } from "@/lib/types";
 import EmptyState from "@/components/EmptyState";
 import NotifyPrompt from "@/components/NotifyPrompt";
 import SkeletonCard from "@/components/SkeletonCard";
+import { myBlackConnectionCount, syncBlackFromServer } from "@/lib/blackStore";
 import { track } from "@/lib/analytics";
 
 type Filter = "open" | "local";
@@ -47,6 +48,7 @@ export default function DiscoverPage() {
   const [exiting, setExiting] = useState<string | null>(null);
   const [profilePerson, setProfilePerson] = useState<Person | null>(null);
   const [directoryReady, setDirectoryReady] = useState(() => loadDirectory().length > 0);
+  const [blackConnections, setBlackConnections] = useState(0);
 
   const refreshConnections = useCallback(() => setConnections(loadConnections()), []);
 
@@ -77,11 +79,16 @@ export default function DiscoverPage() {
     window.addEventListener("meetpoint:connections-changed", refreshConnections);
     window.addEventListener("meetpoint:profile-changed", onProfile);
     window.addEventListener("meetpoint:directory-changed", onDir);
+    const onBlack = () => setBlackConnections(myBlackConnectionCount());
+    onBlack();
+    void syncBlackFromServer().then(onBlack);
+    window.addEventListener("meetpoint:black-changed", onBlack);
     window.addEventListener("meetpoint:blocks-changed", onBlocks);
     return () => {
       window.removeEventListener("meetpoint:connections-changed", refreshConnections);
       window.removeEventListener("meetpoint:profile-changed", onProfile);
       window.removeEventListener("meetpoint:directory-changed", onDir);
+      window.removeEventListener("meetpoint:black-changed", onBlack);
       window.removeEventListener("meetpoint:blocks-changed", onBlocks);
     };
   }, [router, refreshConnections]);
@@ -113,6 +120,7 @@ export default function DiscoverPage() {
   }, [profile]);
 
   const premier = hasActivePremier(profile);
+  const myBlackConnections = blackConnections;
 
   function connect(peerId: string) {
     setConnections(requestConnection(peerId));
@@ -249,7 +257,7 @@ export default function DiscoverPage() {
           ) : (
             <div key={filter} className="mp-stagger space-y-3">
               {filtered.map((m) => {
-                const allowed = canIntroduceToTier(myTier, m.tier, premier);
+                const allowed = canIntroduceToTier(myTier, m.tier, premier, myBlackConnections);
                 const leaving = exiting === m.person.id;
                 return (
                   <div
@@ -292,7 +300,8 @@ export default function DiscoverPage() {
             ? canIntroduceToTier(
                 myTier,
                 tierForPerson(profilePerson, getPeerReputation(profilePerson.id)),
-                premier
+                premier,
+                myBlackConnections
               )
             : true
         }

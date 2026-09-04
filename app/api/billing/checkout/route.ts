@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { getCurrentMember } from "@/lib/memberAuth";
 import { appUrl } from "@/lib/session";
+import { BLACK_MONTHLY_USD, BLACK_YEARLY_USD } from "@/lib/black";
 
 function stripeClient() {
   const key = process.env.STRIPE_SECRET_KEY?.trim();
@@ -31,7 +32,7 @@ export async function POST(req: Request) {
   if (!me) return NextResponse.json({ ok: false, error: "Not signed in" }, { status: 401 });
 
   const body = (await req.json()) as {
-    kind?: "premier_month" | "premier_year" | "booking";
+    kind?: "premier_month" | "premier_year" | "black_month" | "black_year" | "booking";
     amountUsd?: number;
     label?: string;
     chatId?: string;
@@ -45,6 +46,12 @@ export async function POST(req: Request) {
   if (kind === "premier_year") {
     amount = 10000;
     name = "Conclave Premier · Yearly";
+  } else if (kind === "black_month") {
+    amount = BLACK_MONTHLY_USD * 100;
+    name = "Conclave BLACK · Monthly";
+  } else if (kind === "black_year") {
+    amount = BLACK_YEARLY_USD * 100;
+    name = "Conclave BLACK · Yearly";
   } else if (kind === "booking") {
     amount = Math.round((body.amountUsd || 5) * 100);
     name = body.label || "Conclave table booking";
@@ -54,11 +61,15 @@ export async function POST(req: Request) {
   const successPath =
     kind === "booking" && chatId
       ? `/chats/${encodeURIComponent(chatId)}?paid=1`
-      : "/profile?billing=success";
+      : kind.startsWith("black")
+        ? "/profile?black=success"
+        : "/profile?billing=success";
   const cancelPath =
     kind === "booking" && chatId
       ? `/chats/${encodeURIComponent(chatId)}?paid=cancel`
-      : "/profile?billing=cancel";
+      : kind.startsWith("black")
+        ? "/profile?black=cancel"
+        : "/profile?billing=cancel";
 
   try {
     const session = await stripe.checkout.sessions.create({
@@ -82,7 +93,9 @@ export async function POST(req: Request) {
                 price_data: {
                   currency: "usd",
                   unit_amount: amount,
-                  recurring: { interval: kind === "premier_year" ? "year" : "month" },
+                  recurring: {
+                    interval: kind === "premier_year" || kind === "black_year" ? "year" : "month",
+                  },
                   product_data: { name },
                 },
               },

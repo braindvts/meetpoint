@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Nav from "@/components/Nav";
 import PageHeader from "@/components/PageHeader";
 import Avatar from "@/components/Avatar";
+import BlackBadge from "@/components/BlackBadge";
 import EmptyState from "@/components/EmptyState";
 import {
   createChat,
@@ -209,8 +210,9 @@ export default function ChatsPage() {
                     />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-baseline justify-between gap-2">
-                        <h2 className="truncate font-display text-lg font-semibold text-ivory">
-                          {chat.name}
+                        <h2 className="flex min-w-0 items-center gap-2 truncate font-display text-lg font-semibold text-ivory">
+                          <span className="truncate">{chat.name}</span>
+                          {members.some((m) => m.black) && <BlackBadge size="xs" />}
                         </h2>
                         {when && (
                           <span className="shrink-0 text-[11px] text-muted">{when}</span>

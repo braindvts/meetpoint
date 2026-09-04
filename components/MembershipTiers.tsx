@@ -12,7 +12,7 @@ const ROW: Record<1 | 2 | 3 | 4, string> = {
   1: "border-[#9aa3ad]/20 bg-[#d7dde5]/[0.06]",
   2: "border-[#b9a99a]/20 bg-[#c9b8a8]/[0.08]",
   3: "border-[#6a6a6a]/35 bg-[#3a3a3a]/30",
-  4: "border-white/15 bg-black relative overflow-hidden elite-centurion",
+  4: "border-white/15 bg-black relative overflow-hidden black-centurion",
 };
 
 export default function MembershipTiers({ input, missing }: Props) {
@@ -38,15 +38,15 @@ export default function MembershipTiers({ input, missing }: Props) {
       <div className="mt-2.5 space-y-1.5 sm:mt-4 sm:space-y-2">
         {TIER_DEFINITIONS.map((t) => {
           const active = progress.current === t.tier;
-          const elite = t.tier === 4;
+          const black = t.tier === 4;
           return (
             <div
               key={t.tier}
               className={`border px-2.5 py-2 sm:px-3.5 sm:py-3 ${ROW[t.tier]} ${
-                active && !elite ? "ring-1 ring-ivory/20" : ""
+                active && !black ? "ring-1 ring-ivory/20" : ""
               }`}
             >
-              {elite && (
+              {black && (
                 <span
                   className="pointer-events-none absolute inset-0 bg-[linear-gradient(118deg,rgba(255,255,255,0.1)_0%,transparent_40%)]"
                   aria-hidden
@@ -58,7 +58,7 @@ export default function MembershipTiers({ input, missing }: Props) {
                   <div className="flex items-center gap-2">
                     <p
                       className={`truncate font-display text-[13px] font-semibold sm:text-base ${
-                        elite ? "text-[#f5f5f5]" : TIER_CARD[t.tier].label
+                        black ? "text-[#f5f5f5]" : TIER_CARD[t.tier].label
                       }`}
                     >
                       {t.tier}. {t.name}
@@ -66,7 +66,7 @@ export default function MembershipTiers({ input, missing }: Props) {
                     {active && (
                       <span
                         className={`shrink-0 text-[8px] font-semibold uppercase tracking-[0.14em] ${
-                          elite ? "text-[#f5f5f5]" : "text-accent-2"
+                          black ? "text-[#f5f5f5]" : "text-accent-2"
                         }`}
                       >
                         You
@@ -75,7 +75,7 @@ export default function MembershipTiers({ input, missing }: Props) {
                   </div>
                   <p
                     className={`truncate text-[10px] sm:text-[11px] ${
-                      elite ? "text-[#a8a8a8]" : "text-muted"
+                      black ? "text-[#a8a8a8]" : "text-muted"
                     }`}
                   >
                     {t.howToEarn}

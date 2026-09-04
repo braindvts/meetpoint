@@ -1,3 +1,4 @@
+import BlackBadge from "@/components/BlackBadge";
 import { formatTierLabel, type MemberTier } from "@/lib/tiers";
 
 interface Props {
@@ -35,6 +36,9 @@ export const TIER_CARD: Record<
 };
 
 export default function TierBadge({ tier, size = "sm" }: Props) {
+  // Tier 4 is BLACK, and it has its own mark.
+  if (tier === 4) return <BlackBadge size={size === "md" ? "md" : "sm"} />;
+
   if (!tier) {
     return (
       <span
@@ -55,8 +59,7 @@ export default function TierBadge({ tier, size = "sm" }: Props) {
       className={`relative inline-block border font-semibold uppercase tracking-wide ${style.badge} ${pad}`}
       title={formatTierLabel(tier)}
     >
-      {tier === 4 && style.sheen ? <span className={style.sheen} aria-hidden /> : null}
-      <span className="relative">{tier === 4 ? "Elite · Black" : formatTierLabel(tier)}</span>
+      <span className="relative">{formatTierLabel(tier)}</span>
     </span>
   );
 }

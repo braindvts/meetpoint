@@ -3,34 +3,34 @@
 import { useState } from "react";
 import Link from "next/link";
 
-/** Simple Elite admin — grant by member id using ADMIN_SECRET. */
-export default function EliteAdminPage() {
+/** Operator BLACK grant — by member id, using ADMIN_SECRET. */
+export default function BlackAdminPage() {
   const [secret, setSecret] = useState("");
   const [memberId, setMemberId] = useState("");
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
 
-  async function grant(elite: boolean) {
+  async function grant(black: boolean) {
     setBusy(true);
     setMessage("");
     try {
-      const res = await fetch("/api/elite/grant", {
+      const res = await fetch("/api/black/grant", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ secret, memberId, elite }),
+        body: JSON.stringify({ secret, memberId, black }),
       });
       const data = (await res.json()) as {
         ok?: boolean;
         error?: string;
         name?: string;
-        elite?: boolean;
+        black?: boolean;
       };
       if (!data.ok) {
         setMessage(data.error || "Failed");
         return;
       }
       setMessage(
-        `${data.name || memberId} is now ${data.elite ? "Elite" : "not Elite"}.`
+        `${data.name || memberId} is now ${data.black ? "BLACK" : "not BLACK"}.`
       );
     } catch {
       setMessage("Network error");
@@ -44,7 +44,7 @@ export default function EliteAdminPage() {
       <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-accent">
         Admin
       </p>
-      <h1 className="mt-2 text-3xl font-semibold">Elite grant</h1>
+      <h1 className="mt-2 text-3xl font-semibold">BLACK grant</h1>
       <p className="mt-2 text-sm text-muted">
         Uses <code className="text-accent">ADMIN_SECRET</code>. Member IDs come from the
         database after someone saves a profile.
@@ -77,7 +77,7 @@ export default function EliteAdminPage() {
           onClick={() => grant(true)}
           className="flex-1 bg-gradient-to-b from-accent-2 to-accent py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink disabled:opacity-40"
         >
-          Grant Elite
+          Grant BLACK
         </button>
         <button
           type="button"

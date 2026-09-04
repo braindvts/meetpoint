@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import BlackBadge from "@/components/BlackBadge";
 import type { PaymentMethod } from "@/components/BookingPaymentSheet";
 import { RESTAURANTS } from "@/lib/data";
 import { findPerson } from "@/lib/directory";
@@ -99,6 +100,7 @@ export default function TableProposalCard({
   if (!proposal) return null;
 
   const voters = ["me", ...chat.memberIds];
+  const blackPeers = chat.memberIds.filter((id) => findPerson(id)?.black);
   const agreed = proposal.agreedBy;
   const iAgreed = agreed.includes("me");
   const unanimous = allAgreed(chat);
@@ -238,6 +240,14 @@ export default function TableProposalCard({
       </div>
 
       <div className="p-3.5">
+        {blackPeers.length > 0 && (
+          <div className="mb-2 flex flex-wrap items-center gap-2">
+            <BlackBadge size="xs" />
+            <span className="text-[11px] text-muted">
+              Business meeting with a BLACK member
+            </span>
+          </div>
+        )}
         <p className="text-[11px] text-muted">
           {displayCuisine(proposal.cuisine)} · {proposal.city}
         </p>

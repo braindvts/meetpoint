@@ -120,7 +120,7 @@ Stripe and Google's OAuth review both expect these to exist at real URLs.
 - [ ] Google Places for live restaurant search — enable **Places API**, set `GOOGLE_PLACES_API_KEY`
 - [ ] Set a Google Cloud budget alert first — it's $32 per 1,000 searches after the free 5,000
 - [ ] Twilio for booking texts — buy a number, complete 10DLC registration, set the three `TWILIO_*` vars
-- [ ] Set `ELITE_INVITE_CODE` and `ADMIN_SECRET` for Elite invites and `/admin/elite`
+- [ ] Set `ADMIN_SECRET` if you want to grant BLACK manually from `/admin/black`
 
 Without Places, restaurant suggestions come from the built-in Michelin and five-star list, which is fine to launch on.
 

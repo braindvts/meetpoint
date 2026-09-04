@@ -125,8 +125,10 @@ export interface Person {
   portfolioUrl?: string;
   /** Companies, apps, products, and projects they've built. */
   work?: PersonWork[];
-  /** Elite standing — invited or granted. */
-  elite?: boolean;
+  /** BLACK standing — paid, earned, or granted by an operator. */
+  black?: boolean;
+  /** How many BLACK network connections this member holds. */
+  blackConnections?: number;
 }
 
 export interface Restaurant {
@@ -192,8 +194,14 @@ export interface MyProfile {
   meetingsAttended?: number;
   /** Projects, companies, and work shown on your public card. */
   work?: PersonWork[];
-  /** Elite invite or earned flag. */
-  elite?: boolean;
+  /** BLACK standing — paid, earned, or granted by an operator. */
+  black?: boolean;
+  /** When BLACK began (ISO). */
+  blackSince?: string;
+  /** paid | earned | granted */
+  blackSource?: "paid" | "earned" | "granted";
+  /** How many BLACK network connections this member holds. */
+  blackConnections?: number;
   /** Conclave Premier — monthly $20 or yearly $100 (3-day trial on yearly). */
   premierPlan?: {
     active: boolean;

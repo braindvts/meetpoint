@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Nav from "@/components/Nav";
 import Avatar from "@/components/Avatar";
+import BlackBadge from "@/components/BlackBadge";
 import StarRating, { cuisineLine } from "@/components/StarRating";
 import { findPerson, refreshDirectory } from "@/lib/directory";
 import { distanceKm, formatDistance, midpointRestaurants, restaurantsInCity } from "@/lib/match";
@@ -144,8 +145,9 @@ export default function Planner({ peerId }: { peerId: string }) {
             <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-accent">
               Curate the table
             </p>
-            <h1 className="mt-1.5 text-2xl font-semibold tracking-tight sm:text-3xl">
+            <h1 className="mt-1.5 flex flex-wrap items-center gap-2.5 text-2xl font-semibold tracking-tight sm:text-3xl">
               Dinner with {person.name.split(" ")[0]}
+              {person.black && <BlackBadge size="sm" />}
             </h1>
             <p className="mt-1 text-sm text-muted">
               {person.city.name}, {person.city.country} · {formatDistance(km)}

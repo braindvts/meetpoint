@@ -29,7 +29,10 @@ model Member {
   verificationsJson String @default("[]")
   workJson       String   @default("[]")
   phone          String?
-  elite          Boolean  @default(false)
+  black          Boolean  @default(false)
+  blackSince     DateTime?
+  /// paid | earned | granted
+  blackSource    String?
   premierActive  Boolean  @default(false)
   premierInterval String?
   premierStartedAt String?
@@ -45,6 +48,48 @@ model Member {
   messages        Message[]
   blocksFrom      Block[]      @relation("blocker")
   blocksTo        Block[]      @relation("blocked")
+  blackInvitesSent     BlackInvite[]     @relation("blackInviteFrom")
+  blackInvitesReceived BlackInvite[]     @relation("blackInviteTo")
+  blackConnectionsHeld BlackConnection[] @relation("blackHolder")
+  blackConnectionsWith BlackConnection[] @relation("blackPeer")
+}
+
+/// An invitation into the BLACK network, always raised inside a private DM.
+/// Only a pairing that includes a BLACK member is valid, and accepting one
+/// awards BLACK CONNECTION to the other side — never BLACK itself.
+model BlackInvite {
+  id          String    @id @default(cuid())
+  fromId      String
+  toId        String
+  chatId      String?
+  /// connection | meeting
+  kind        String    @default("connection")
+  /// pending | accepted | declined
+  status      String    @default("pending")
+  createdAt   DateTime  @default(now())
+  respondedAt DateTime?
+  from        Member    @relation("blackInviteFrom", fields: [fromId], references: [id], onDelete: Cascade)
+  to          Member    @relation("blackInviteTo", fields: [toId], references: [id], onDelete: Cascade)
+
+  @@unique([fromId, toId, kind])
+  @@index([toId, status])
+}
+
+/// A settled BLACK network connection. `blackMemberId` is the BLACK party;
+/// `peerId` is the member who earns the BLACK CONNECTION credential.
+/// The unique pair means one connection can never be counted twice.
+model BlackConnection {
+  id            String   @id @default(cuid())
+  blackMemberId String
+  peerId        String
+  /// invite | meeting
+  source        String   @default("invite")
+  createdAt     DateTime @default(now())
+  blackMember   Member   @relation("blackHolder", fields: [blackMemberId], references: [id], onDelete: Cascade)
+  peer          Member   @relation("blackPeer", fields: [peerId], references: [id], onDelete: Cascade)
+
+  @@unique([blackMemberId, peerId])
+  @@index([peerId])
 }
 
 model Block {

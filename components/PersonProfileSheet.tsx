@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 import Avatar from "@/components/Avatar";
+import BlackConnectionBadge from "@/components/BlackConnectionBadge";
 import TierBadge from "@/components/TierBadge";
 import { getPeerReputation } from "@/lib/store";
 import { isOwner, ownedCompanies, otherWork, VERIFY_LABEL } from "@/lib/personFacts";
@@ -143,7 +144,7 @@ export default function PersonProfileSheet({
 
   if (!open || !person) return null;
 
-  const elite = tier === 4;
+  const black = tier === 4;
   const owner = isOwner(person);
   const companies = ownedCompanies(person);
   const projects = otherWork(person);
@@ -166,7 +167,7 @@ export default function PersonProfileSheet({
       <button
         type="button"
         className={`mp-backdrop-in absolute inset-0 [-webkit-tap-highlight-color:transparent] ${
-          elite ? "bg-black/80" : "bg-black/70"
+          black ? "bg-black/80" : "bg-black/70"
         }`}
         aria-label="Dismiss"
         onClick={onClose}
@@ -179,12 +180,12 @@ export default function PersonProfileSheet({
       >
         <div
           className={`relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-t-[20px] border border-b-0 sm:rounded-[24px] sm:border-b ${
-            elite
-              ? "elite-profile-shell elite-centurion border-white/20"
+            black
+              ? "black-profile-shell black-centurion border-white/20"
               : "border-accent/20 bg-[#12110f]"
           }`}
         >
-          {elite && <span className="elite-sheen" aria-hidden />}
+          {black && <span className="black-sheen" aria-hidden />}
 
           {/* Drag handle only — does not cover the photo / block scroll */}
           <div
@@ -219,7 +220,7 @@ export default function PersonProfileSheet({
                   src={person.photoUrl}
                   alt={person.name}
                   className={`pointer-events-none h-full w-full object-cover object-top select-none ${
-                    elite ? "contrast-[1.05] saturate-[0.9]" : ""
+                    black ? "contrast-[1.05] saturate-[0.9]" : ""
                   }`}
                   draggable={false}
                 />
@@ -232,7 +233,7 @@ export default function PersonProfileSheet({
                 className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/70 to-transparent px-4 pb-4 pt-20"
                 aria-hidden
               />
-              {elite && (
+              {black && (
                 <div
                   className="pointer-events-none absolute inset-0 bg-[linear-gradient(125deg,rgba(255,255,255,0.12)_0%,transparent_30%,transparent_62%,rgba(255,255,255,0.05)_100%)]"
                   aria-hidden
@@ -244,9 +245,9 @@ export default function PersonProfileSheet({
                     Owner
                   </p>
                 )}
-                {elite && !owner && (
+                {black && !owner && (
                   <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/55">
-                    Elite
+                    BLACK member
                   </p>
                 )}
                 <h2 className="text-2xl font-semibold tracking-tight text-white">
@@ -255,6 +256,9 @@ export default function PersonProfileSheet({
                 <p className="mt-1 text-[14px] font-medium text-accent-2">{person.jobTitle}</p>
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   <TierBadge tier={tier} size="md" />
+                  {(person.blackConnections ?? 0) > 0 && (
+                    <BlackConnectionBadge count={person.blackConnections ?? 0} showCount />
+                  )}
                   {tierCopy && (
                     <span className="text-[11px] text-white/55">{tierCopy.meaning}</span>
                   )}
@@ -262,7 +266,7 @@ export default function PersonProfileSheet({
               </div>
             </div>
 
-            <div className={`px-4 pb-6 pt-4 sm:px-5 ${elite ? "bg-black" : ""}`}>
+            <div className={`px-4 pb-6 pt-4 sm:px-5 ${black ? "bg-black" : ""}`}>
               <p className="text-[15px] leading-relaxed text-ivory/85">{person.bio}</p>
 
               <p className="mt-3 text-[13px] text-muted">

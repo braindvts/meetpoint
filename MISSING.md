@@ -49,7 +49,7 @@ npm run dev
 | # | Need | Status |
 |---|------|--------|
 | 20 | Report / block | **Done** — report + **Block** (DB `/api/blocks`, hides from Room, drops connection) |
-| 21 | Elite invite admin | **Done** — redeem on Profile (`ELITE_INVITE_CODE`) + `/admin/elite` (`ADMIN_SECRET`) |
+| 21 | BLACK tier | **Done** — bought or earned, operator grant at `/admin/black` (`ADMIN_SECRET`). No invite codes. |
 | 22 | Native push (FCM/APNs) | **Partial** — browser SW notifications + Profile “Enable alerts”. True FCM/APNs still needs native shell + Firebase keys |
 | 23 | Remove demo entry and seeded profiles | **Done** — sign-up is the only way in |
 | 24 | Analytics | **Done** — first-party `/api/analytics` pageviews + optional Plausible (`NEXT_PUBLIC_PLAUSIBLE_DOMAIN`) |
@@ -250,10 +250,9 @@ Optional Plausible:
 
 **Elite invite (members):** Profile → Elite invite → enter code. Set in env:
 ```env
-ELITE_INVITE_CODE=your-secret-code
 ```
 
-**Elite admin:** open `/admin/elite`, enter `ADMIN_SECRET` + member id:
+**BLACK grant:** open `/admin/black`, enter `ADMIN_SECRET` + member id:
 ```env
 ADMIN_SECRET=your-admin-secret
 ```
@@ -299,5 +298,5 @@ Then two phones on that URL share the same members/chats.
 3. Google Places (live restaurants)  
 4. Postgres + deploy (true multi-phone)  
 5. Twilio (SMS)  
-6. Set `ELITE_INVITE_CODE` / `ADMIN_SECRET` if you want Elite invites  
+6. Set `ADMIN_SECRET` if you want to grant BLACK manually  
 7. Ask me for: email verify, webhooks, realtime, cloud photos, FCM native push
