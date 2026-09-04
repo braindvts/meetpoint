@@ -10,10 +10,6 @@ function stripeClient() {
   return new Stripe(key, { apiVersion: "2026-07-29.dahlia" });
 }
 
-export function stripeConfigured() {
-  return !!process.env.STRIPE_SECRET_KEY?.trim();
-}
-
 /**
  * Create a Stripe Checkout session for Premier or a table booking fee.
  * Without STRIPE_SECRET_KEY → { stripeConfigured: false } so the UI can fall back.

@@ -3,6 +3,7 @@
 import type { KeyboardEvent, MouseEvent } from "react";
 import BlackConnectionBadge from "@/components/BlackConnectionBadge";
 import TierBadge from "@/components/TierBadge";
+import { blackConnectionWith } from "@/lib/blackStore";
 import type { MatchResult } from "@/lib/match";
 import { formatDistance } from "@/lib/match";
 import { otherWork, ownedCompanies, VERIFY_LABEL } from "@/lib/personFacts";
@@ -57,7 +58,10 @@ export default function MatchCard({
     isLocal,
   } = match;
 
-  const blackConnections = person.blackConnections ?? 0;
+  // Server counts win; otherwise fall back to a connection this browser settled.
+  const settledWithMe = preview ? undefined : blackConnectionWith(person.id);
+  const blackConnections =
+    person.blackConnections ?? (settledWithMe?.iAmBlack ? 1 : 0);
   const owned = ownedCompanies(person);
   const other = otherWork(person);
   const ideas = person.ideaTags.slice(0, 4);
