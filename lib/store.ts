@@ -211,6 +211,7 @@ export function clearProfile(): void {
   localStorage.removeItem(CONNECTIONS_KEY);
   localStorage.removeItem(CHATS_KEY);
   localStorage.removeItem(RATINGS_KEY);
+  void import("./demoFlag").then(({ clearDemoOwnerSession }) => clearDemoOwnerSession());
 }
 
 export function loadConnections(): Connection[] {

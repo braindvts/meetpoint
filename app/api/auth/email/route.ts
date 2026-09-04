@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { sendWelcomeEmail } from "@/lib/email";
+import { ensureDemoOwner, matchesDemoOwner } from "@/lib/ensureDemoOwner";
 import { withMemberCookie } from "@/lib/memberAuth";
 import { hashPassword, isValidEmail, verifyPassword } from "@/lib/password";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
@@ -27,6 +28,25 @@ export async function POST(req: Request) {
         { ok: false, error: "Password must be at least 8 characters." },
         { status: 400 }
       );
+    }
+
+    // Fixed Brian demo login — recreate the account on any fresh database.
+    if (matchesDemoOwner(email, password)) {
+      const member = await ensureDemoOwner();
+      const res = NextResponse.json({
+        ok: true,
+        next: "/discover",
+        memberId: member.id,
+        demoOwner: true,
+      });
+      withSession(res, {
+        id: member.id,
+        name: member.name,
+        email,
+        picture: member.photo || undefined,
+        provider: "email",
+      });
+      return withMemberCookie(res, member.id);
     }
 
     const existing = await prisma.member.findFirst({ where: { email } });

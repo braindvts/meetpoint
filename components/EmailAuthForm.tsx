@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { clearDemoOwnerSession, markDemoOwnerSession } from "@/lib/demoFlag";
+import { isDemoOwnerEmail } from "@/lib/demoOwner";
 
 export default function EmailAuthForm() {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
@@ -20,10 +22,20 @@ export default function EmailAuthForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, name, mode }),
       });
-      const data = (await res.json()) as { ok?: boolean; error?: string; next?: string };
+      const data = (await res.json()) as {
+        ok?: boolean;
+        error?: string;
+        next?: string;
+        demoOwner?: boolean;
+      };
       if (!data.ok) {
         setError(data.error || "Could not sign in.");
         return;
+      }
+      if (data.demoOwner || isDemoOwnerEmail(email)) {
+        markDemoOwnerSession();
+      } else {
+        clearDemoOwnerSession();
       }
       window.location.href = data.next || "/onboarding";
     } catch {
