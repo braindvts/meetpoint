@@ -25,12 +25,16 @@ export function profileToPerson(profile: MyProfile): Person {
     portfolioUrl: portfolio?.startsWith("http") ? portfolio : undefined,
     work: profile.work,
     black: profile.black,
+    blackConnections: profile.blackConnections,
   };
 }
 
 /** Synthetic match result for rendering MatchCard as “how others see you”. */
-export function selfCardMatch(profile: MyProfile): MatchResult {
-  const person = profileToPerson(profile);
+export function selfCardMatch(profile: MyProfile, blackConnections?: number): MatchResult {
+  const person = {
+    ...profileToPerson(profile),
+    blackConnections: blackConnections ?? profile.blackConnections,
+  };
   const meetings = getMeetingsAttended(profile);
   const tier = tierForProfile(profile, meetings);
   return {

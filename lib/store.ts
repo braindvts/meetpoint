@@ -117,6 +117,10 @@ export function saveProfile(profile: MyProfile): void {
 
 /** Install the sample member and skip onboarding — demo mode only. */
 export function enterAsDemo(): MyProfile {
+  // Re-entering the demo shouldn't throw away BLACK if it was already claimed.
+  const existing = loadProfile();
+  const keepBlack = existing && isDemoProfile(existing) && existing.black;
+
   const profile: MyProfile = {
     ...DEMO_PROFILE,
     verifications: DEMO_PROFILE.verifications.map((v) => ({
@@ -129,6 +133,13 @@ export function enterAsDemo(): MyProfile {
       interval: "year",
       trialEndsAt: trialEndsAt(new Date()),
     },
+    ...(keepBlack
+      ? {
+          black: true,
+          blackSince: existing!.blackSince,
+          blackSource: existing!.blackSource,
+        }
+      : {}),
   };
   saveProfile(profile);
   return profile;

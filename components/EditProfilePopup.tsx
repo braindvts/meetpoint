@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import MatchCard from "@/components/MatchCard";
+import { myBlackConnectionCount } from "@/lib/blackStore";
 import { selfCardMatch } from "@/lib/profileCard";
 import type { MyProfile } from "@/lib/types";
 
@@ -67,7 +68,7 @@ export default function EditProfilePopup({
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch]">
-          <MatchCard match={selfCardMatch(profile)} preview />
+          <MatchCard match={selfCardMatch(profile, myBlackConnectionCount())} preview />
         </div>
 
         <div className="shrink-0 space-y-2 border-t border-white/10 px-3.5 py-3">

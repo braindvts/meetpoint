@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import MemberStatusStrip from "@/components/MemberStatusStrip";
 import MembershipPlans from "@/components/MembershipPlans";
 import MembershipTiers from "@/components/MembershipTiers";
 import Avatar from "@/components/Avatar";
@@ -21,7 +22,12 @@ import {
   switchPremierInterval,
 } from "@/lib/store";
 import { readClientProfile } from "@/lib/clientProfile";
-import { isProfileComplete, reputationScoreForMeetings, scoreProfileStrength } from "@/lib/tiers";
+import {
+  computeMemberTier,
+  isProfileComplete,
+  reputationScoreForMeetings,
+  scoreProfileStrength,
+} from "@/lib/tiers";
 import type { MyProfile, PremierInterval } from "@/lib/types";
 
 function ProfileContent() {
@@ -136,6 +142,8 @@ function ProfileContent() {
             Reset
           </button>
         </section>
+
+        <MemberStatusStrip profile={profile} tier={computeMemberTier(tierInput)} />
 
         <MembershipPlans
           profile={profile}

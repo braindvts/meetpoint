@@ -310,6 +310,7 @@ export const DEMO_PEOPLE: Person[] = [
   {
     id: "p11",
     black: true,
+    blackConnections: 4,
     name: "Carlos Mendes",
     jobTitle: "Real Estate Agent",
     ideaTags: ["Real Estate", "Fintech"],
@@ -508,6 +509,7 @@ export const DEMO_PEOPLE: Person[] = [
   {
     id: "p18",
     black: true,
+    blackConnections: 6,
     name: "Ana Rodríguez",
     jobTitle: "Solar Engineer",
     ideaTags: ["Green Energy", "SaaS"],
