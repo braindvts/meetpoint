@@ -4,7 +4,9 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect } from "react";
 import AuthButtons from "@/components/AuthButtons";
+import DemoEnterButton from "@/components/DemoEnterButton";
 import EmailAuthForm from "@/components/EmailAuthForm";
+import { demoEntryEnabled } from "@/lib/demoFlag";
 import { loadProfile, saveProfile } from "@/lib/store";
 import type { MyProfile } from "@/lib/types";
 
@@ -77,6 +79,7 @@ function LoginContent() {
         >
           Continue to profile
         </Link>
+        {demoEntryEnabled() && <DemoEnterButton />}
       </div>
     </main>
   );

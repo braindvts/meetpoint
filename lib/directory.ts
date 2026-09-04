@@ -1,16 +1,26 @@
+import { demoProfilesEnabled } from "./demoFlag";
+import { DEMO_PEOPLE } from "./demoPeople";
 import type { Person } from "./types";
 
 const KEY = "conclave.directory";
 
-/** Client-side cache of the real member directory from /api/members. */
+/** Real members from /api/members, plus the sample members in demo mode. */
 export function loadDirectory(): Person[] {
-  if (typeof window === "undefined") return [];
+  if (typeof window === "undefined") {
+    return demoProfilesEnabled() ? DEMO_PEOPLE : [];
+  }
+  const byId = new Map<string, Person>();
+  if (demoProfilesEnabled()) {
+    for (const p of DEMO_PEOPLE) byId.set(p.id, p);
+  }
   try {
     const raw = localStorage.getItem(KEY);
-    return raw ? (JSON.parse(raw) as Person[]) : [];
+    const cached = raw ? (JSON.parse(raw) as Person[]) : [];
+    for (const p of cached) byId.set(p.id, p);
   } catch {
-    return [];
+    /* ignore */
   }
+  return [...byId.values()];
 }
 
 export function saveDirectory(people: Person[]): void {

@@ -1,4 +1,5 @@
 import { prisma } from "./db";
+import { demoEntryEnabled } from "./demoFlag";
 
 let done: Promise<void> | null = null;
 
@@ -31,6 +32,9 @@ async function removeMembers(ids: string[]): Promise<void> {
 export function purgeDemoResidue(): Promise<void> {
   if (!done) {
     done = (async () => {
+      // Demo mode is deliberately on — leave its member alone.
+      if (demoEntryEnabled()) return;
+
       const seeds = await prisma.member.findMany({
         where: { id: { in: LEGACY_SEED_IDS } },
         select: { id: true },
