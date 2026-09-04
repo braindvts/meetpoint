@@ -30,13 +30,18 @@ const CHATS_KEY = "meetpoint.chats";
 const RATINGS_KEY = "meetpoint.ratings";
 const BLOCKS_KEY = "meetpoint.blocked";
 
-/** The retired "Enter demo" account signed itself with this LinkedIn value. */
+/** The "Enter demo" account signs itself with this LinkedIn value. */
 const DEMO_PROFILE_MARKER = "linkedin.com/in/conclave-demo";
 
-function isRetiredDemoProfile(p: MyProfile): boolean {
-  return (p.verifications || []).some((v) =>
+/** Demo runs entirely in this browser — it never reaches the shared database. */
+export function isDemoProfile(p: MyProfile | null | undefined): boolean {
+  return (p?.verifications || []).some((v) =>
     String(v.value || "").includes(DEMO_PROFILE_MARKER)
   );
+}
+
+function isDemoPeer(peerId: string): boolean {
+  return DEMO_PEOPLE.some((p) => p.id === peerId);
 }
 
 export function loadProfile(): MyProfile | null {
@@ -47,7 +52,7 @@ export function loadProfile(): MyProfile | null {
     const p = JSON.parse(raw) as MyProfile;
 
     // With demo mode off, a browser that once used it shouldn't keep that member alive.
-    if (!demoEntryEnabled() && isRetiredDemoProfile(p)) {
+    if (!demoEntryEnabled() && isDemoProfile(p)) {
       clearProfile();
       return null;
     }
@@ -104,7 +109,9 @@ export function loadProfile(): MyProfile | null {
 export function saveProfile(profile: MyProfile): void {
   localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
   window.dispatchEvent(new CustomEvent("meetpoint:profile-changed"));
-  // Persist to SQLite so other devices / members can see you
+  // Persist so other devices / members can see you — except the demo member,
+  // who would otherwise show up in the real room as a stranger.
+  if (isDemoProfile(profile)) return;
   void import("./apiClient").then(({ syncProfileToServer }) => syncProfileToServer(profile));
 }
 
@@ -222,8 +229,9 @@ export function requestConnection(peerId: string): Connection[] {
   if (!connections.some((c) => c.peerId === peerId)) {
     connections.push({ peerId, status: "requested", direction: "out" });
     saveConnections(connections);
-    if (demoProfilesEnabled() && DEMO_PEOPLE.some((p) => p.id === peerId)) {
+    if (demoProfilesEnabled() && isDemoPeer(peerId)) {
       scheduleDemoAccept(peerId);
+      return connections;
     }
     void import("./apiClient").then(async ({ requestServerConnection }) => {
       const remote = await requestServerConnection(peerId);
@@ -359,6 +367,7 @@ export function acceptConnection(peerId: string): Connection[] {
     saveConnections(connections);
     window.dispatchEvent(new CustomEvent("meetpoint:connections-changed"));
   }
+  if (isDemoPeer(peerId)) return connections;
   void import("./apiClient").then(async ({ patchServerConnection }) => {
     const remote = await patchServerConnection(peerId, "accept");
     if (remote) {
@@ -370,9 +379,11 @@ export function acceptConnection(peerId: string): Connection[] {
 }
 
 export function declineConnection(peerId: string): Connection[] {
-  void import("./apiClient").then(({ patchServerConnection }) =>
-    patchServerConnection(peerId, "decline")
-  );
+  if (!isDemoPeer(peerId)) {
+    void import("./apiClient").then(({ patchServerConnection }) =>
+      patchServerConnection(peerId, "decline")
+    );
+  }
   return removeConnection(peerId);
 }
 
@@ -380,6 +391,7 @@ export function removeConnection(peerId: string): Connection[] {
   const connections = loadConnections().filter((c) => c.peerId !== peerId);
   saveConnections(connections);
   window.dispatchEvent(new CustomEvent("meetpoint:connections-changed"));
+  if (isDemoPeer(peerId)) return connections;
   void import("./apiClient").then(({ patchServerConnection }) =>
     patchServerConnection(peerId, "remove")
   );
@@ -440,6 +452,9 @@ export function createChat(name: string, memberIds: string[]): GroupChat {
   const chats = [chat, ...loadChats()];
   saveChats(chats);
 
+  // A chat with sample members stays in this browser.
+  if (chat.memberIds.some(isDemoPeer)) return chat;
+
   // Prefer server chat id when available (multi-device)
   void fetch("/api/chats", {
     method: "POST",
@@ -489,7 +504,7 @@ export function sendChatMessage(
   saveChats(chats);
 
   // Best-effort server sync (real multi-device); ignore failures for local-only chats
-  if (trimmed) {
+  if (trimmed && !chat.memberIds.some(isDemoPeer)) {
     void fetch(`/api/chats/${chatId}/messages`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

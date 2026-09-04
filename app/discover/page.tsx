@@ -14,6 +14,7 @@ import {
   ensureSampleInboundRequest,
   getMeetingsAttended,
   getPeerReputation,
+  isDemoProfile,
   loadBlockedIds,
   loadConnections,
   loadProfile,
@@ -63,7 +64,7 @@ export default function DiscoverPage() {
     setFilter("open");
     refreshConnections();
     ensureSampleInboundRequest();
-    void syncProfileToServer(p);
+    if (!isDemoProfile(p)) void syncProfileToServer(p);
     track("discover_open");
     void refreshDirectory().then((list) => {
       setPeople(list);
