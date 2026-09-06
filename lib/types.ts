@@ -42,9 +42,9 @@ export const VERIFICATION_OPTIONS: {
 }[] = [
   {
     method: "company-email",
-    label: "Company email",
-    hint: "A work address — not Gmail or personal mail.",
-    placeholder: "you@company.com",
+    label: "Email",
+    hint: "Any email works — work or personal.",
+    placeholder: "you@email.com",
   },
   {
     method: "linkedin",

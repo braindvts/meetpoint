@@ -1,7 +1,5 @@
 import type { Verification, VerificationMethod } from "./types";
 
-const PERSONAL_EMAIL = /@(gmail|yahoo|hotmail|outlook|icloud|aol|mail|proton)\./i;
-
 export function validateVerification(
   method: VerificationMethod,
   raw: string
@@ -11,10 +9,7 @@ export function validateVerification(
 
   if (method === "company-email") {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-      return { ok: false, error: "Enter a valid company email address." };
-    }
-    if (PERSONAL_EMAIL.test(value)) {
-      return { ok: false, error: "Use a company email — personal addresses aren’t accepted." };
+      return { ok: false, error: "Enter a valid email address." };
     }
     return { ok: true, value: value.toLowerCase() };
   }

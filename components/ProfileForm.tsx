@@ -207,7 +207,7 @@ export default function ProfileForm({ initial }: { initial?: MyProfile | null })
       verifications.push(makeVerification(opt.method, checked.value));
     }
     if (verifications.length === 0) {
-      return setError("Add at least one verification — work email, LinkedIn, website, or portfolio.");
+      return setError("Add at least one verification — email, LinkedIn, website, or portfolio.");
     }
 
     const projects = work
@@ -478,7 +478,7 @@ export default function ProfileForm({ initial }: { initial?: MyProfile | null })
       <Section
         num="04"
         title="Verification"
-        subtitle="Add as many as you have. Work email, LinkedIn, and a site raise your tier."
+        subtitle="Add as many as you have. Email, LinkedIn, and a site raise your tier."
       >
         <div className="space-y-3">
           {VERIFICATION_OPTIONS.map((o) => (

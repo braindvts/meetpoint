@@ -20,14 +20,14 @@ export const TIER_DEFINITIONS: TierDefinition[] = [
   {
     tier: 2,
     name: "Trusted",
-    meaning: "A fuller profile — work email, projects, links — or real dinners",
-    howToEarn: "Add work email, projects, and links — or attend 5+ meetings",
+    meaning: "A fuller profile — email, projects, links — or real dinners",
+    howToEarn: "Add email, projects, and links — or attend 5+ meetings",
   },
   {
     tier: 3,
     name: "Connector",
     meaning: "A rich public record of what you build",
-    howToEarn: "Work email + several projects and credentials — or 20+ meetings",
+    howToEarn: "Email + several projects and credentials — or 20+ meetings",
   },
   {
     tier: 4,
@@ -102,8 +102,8 @@ export function scoreProfileStrength(
 
   if (hasMethod(profile.verifications, "company-email")) {
     score += 22;
-    extras.push("Work email");
-  } else missing.push("Work email");
+    extras.push("Email");
+  } else missing.push("Email");
 
   if (hasMethod(profile.verifications, "linkedin")) {
     score += 12;

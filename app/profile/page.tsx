@@ -113,7 +113,7 @@ function ProfileContent() {
         <div className="px-4 pb-6 pt-2">
         {needsVerify && (
           <div className="mb-4 rounded-xl border border-accent/30 bg-accent/5 px-3 py-2 text-[12px] leading-snug text-accent-2">
-            Verification required. Add a company email, LinkedIn, website, registration, or
+            Verification required. Add an email, LinkedIn, website, registration, or
             portfolio below.
           </div>
         )}
