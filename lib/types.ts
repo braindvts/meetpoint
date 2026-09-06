@@ -30,44 +30,65 @@ export const LOOKING_FOR_OPTIONS: LookingFor[] = [
 export type VerificationMethod =
   | "company-email"
   | "linkedin"
+  | "resume"
   | "website"
   | "registration"
   | "portfolio";
+
+/**
+ * The three business credentials required for Verified.
+ * Website / portfolio / registration are optional extras.
+ */
+export const REQUIRED_VERIFICATIONS: VerificationMethod[] = [
+  "company-email",
+  "linkedin",
+  "resume",
+];
 
 export const VERIFICATION_OPTIONS: {
   method: VerificationMethod;
   label: string;
   hint: string;
   placeholder: string;
+  required?: boolean;
 }[] = [
   {
     method: "company-email",
-    label: "Email",
-    hint: "Any email works — work or personal.",
-    placeholder: "you@email.com",
+    label: "Business email",
+    hint: "Work email preferred. Personal email is OK if that’s what you use for business.",
+    placeholder: "you@company.com",
+    required: true,
   },
   {
     method: "linkedin",
     label: "LinkedIn profile",
-    hint: "Your public LinkedIn URL, or sign in with LinkedIn.",
+    hint: "Your public LinkedIn URL — required for Verified.",
     placeholder: "https://linkedin.com/in/you",
+    required: true,
+  },
+  {
+    method: "resume",
+    label: "Resume",
+    hint: "Link to your resume PDF (Google Drive, Dropbox, personal site).",
+    placeholder: "https://drive.google.com/…",
+    required: true,
   },
   {
     method: "website",
     label: "Business website",
-    hint: "Your company or product site.",
+    hint: "Optional — your company or product site.",
     placeholder: "https://yourcompany.com",
   },
   {
     method: "registration",
     label: "Business registration",
-    hint: "For founders — company number or registry ID.",
+    hint: "Optional — company number or registry ID.",
     placeholder: "e.g. LLC-123456 or Companies House number",
   },
   {
     method: "portfolio",
     label: "Professional portfolio",
-    hint: "Work samples, Behance, GitHub, personal site.",
+    hint: "Optional — Behance, GitHub, or work samples.",
     placeholder: "https://portfolio.you",
   },
 ];

@@ -22,9 +22,15 @@ export function validateVerification(
     return { ok: true, value };
   }
 
-  if (method === "website" || method === "portfolio") {
+  if (method === "resume" || method === "website" || method === "portfolio") {
     if (!/^https?:\/\/[^\s]+\.[^\s]+/i.test(value)) {
-      return { ok: false, error: "Enter a full URL starting with https://" };
+      return {
+        ok: false,
+        error:
+          method === "resume"
+            ? "Enter a resume link starting with https:// (PDF, Drive, Dropbox)."
+            : "Enter a full URL starting with https://",
+      };
     }
     return { ok: true, value };
   }

@@ -24,6 +24,7 @@ import {
 import { readClientProfile } from "@/lib/clientProfile";
 import {
   computeMemberTier,
+  hasRequiredVerifications,
   isProfileComplete,
   reputationScoreForMeetings,
   scoreProfileStrength,
@@ -97,7 +98,7 @@ function ProfileContent() {
 
   const strength = scoreProfileStrength(profile);
   const tierInput = {
-    verified: (profile.verifications?.length ?? 0) > 0,
+    verified: hasRequiredVerifications(profile.verifications),
     profileComplete: isProfileComplete(profile),
     meetingsAttended: meetings,
     reputationScore: reputationScoreForMeetings(meetings),
@@ -113,8 +114,8 @@ function ProfileContent() {
         <div className="px-4 pb-6 pt-2">
         {needsVerify && (
           <div className="mb-4 rounded-xl border border-accent/30 bg-accent/5 px-3 py-2 text-[12px] leading-snug text-accent-2">
-            Verification required. Add an email, LinkedIn, website, registration, or
-            portfolio below.
+            Verification required for Verified. Add business email, LinkedIn, and
+            resume below.
           </div>
         )}
 

@@ -30,8 +30,9 @@ export function ownerHeadline(person: Person): string | null {
 }
 
 export const VERIFY_LABEL: Record<VerificationMethod, string> = {
-  "company-email": "Email",
+  "company-email": "Business email",
   linkedin: "LinkedIn",
+  resume: "Resume",
   website: "Website",
   registration: "Business registration",
   portfolio: "Portfolio",

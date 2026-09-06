@@ -20,8 +20,18 @@ export const DEMO_PROFILE: MyProfile = {
   phone: "(555) 010-2026",
   verifications: [
     {
+      method: "company-email",
+      value: "demo@conclave.app",
+      verifiedAt: new Date().toISOString(),
+    },
+    {
       method: "linkedin",
       value: "https://linkedin.com/in/conclave-demo",
+      verifiedAt: new Date().toISOString(),
+    },
+    {
+      method: "resume",
+      value: "https://conclave.app/demo-resume.pdf",
       verifiedAt: new Date().toISOString(),
     },
   ],

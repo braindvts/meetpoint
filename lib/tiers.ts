@@ -1,5 +1,6 @@
 import { BLACK_EARNED_REQUIREMENTS } from "./black";
 import type { MyProfile, Person, PersonWork, ReputationSummary, Verification } from "./types";
+import { REQUIRED_VERIFICATIONS } from "./types";
 
 /** Conclave standing — only three levels. */
 export type MemberTier = 1 | 2 | 3;
@@ -21,8 +22,8 @@ export const TIER_DEFINITIONS: TierDefinition[] = [
   {
     tier: 2,
     name: "Verified",
-    meaning: "Identity confirmed and a complete professional profile",
-    howToEarn: "Finish your profile and add a verification",
+    meaning: "Identity backed by business email, LinkedIn, and resume",
+    howToEarn: "Finish your profile + add business email, LinkedIn, and resume",
   },
   {
     tier: 3,
@@ -65,6 +66,30 @@ export function tierDefinition(tier: MemberTier): TierDefinition {
   return TIER_DEFINITIONS[tier - 1];
 }
 
+function hasMethod(vers: Verification[] | undefined, method: string): boolean {
+  return (vers || []).some((v) => v.method === method && String(v.value || "").trim());
+}
+
+/** True when business email, LinkedIn, and resume are all present. */
+export function hasRequiredVerifications(
+  vers: Verification[] | undefined
+): boolean {
+  return REQUIRED_VERIFICATIONS.every((m) => hasMethod(vers, m));
+}
+
+export function missingRequiredVerifications(
+  vers: Verification[] | undefined
+): string[] {
+  const labels: Record<string, string> = {
+    "company-email": "Business email",
+    linkedin: "LinkedIn",
+    resume: "Resume",
+  };
+  return REQUIRED_VERIFICATIONS.filter((m) => !hasMethod(vers, m)).map(
+    (m) => labels[m] || m
+  );
+}
+
 export function isProfileComplete(profile: Pick<
   MyProfile,
   "name" | "photo" | "jobTitle" | "lookingFor" | "ideaTags" | "verifications"
@@ -75,12 +100,8 @@ export function isProfileComplete(profile: Pick<
     !!profile.jobTitle?.trim() &&
     (profile.lookingFor?.length ?? 0) > 0 &&
     (profile.ideaTags?.length ?? 0) > 0 &&
-    (profile.verifications?.length ?? 0) > 0
+    hasRequiredVerifications(profile.verifications)
   );
-}
-
-function hasMethod(vers: Verification[] | undefined, method: string): boolean {
-  return (vers || []).some((v) => v.method === method && String(v.value || "").trim());
 }
 
 function workList(profile: Pick<MyProfile, "work"> | Person): PersonWork[] {
@@ -88,7 +109,7 @@ function workList(profile: Pick<MyProfile, "work"> | Person): PersonWork[] {
   return [];
 }
 
-/** 0–100 based on email, projects, links, bio — extras beyond the basics. */
+/** 0–100 based on credentials, projects, links, bio. */
 export function scoreProfileStrength(
   profile: Pick<MyProfile, "verifications" | "bio" | "phone" | "work" | "ideaTags" | "lookingFor">
 ): ProfileStrength {
@@ -98,49 +119,54 @@ export function scoreProfileStrength(
   const max = 100;
 
   if (hasMethod(profile.verifications, "company-email")) {
-    score += 22;
-    extras.push("Email");
-  } else missing.push("Email");
+    score += 18;
+    extras.push("Business email");
+  } else missing.push("Business email");
 
   if (hasMethod(profile.verifications, "linkedin")) {
-    score += 12;
+    score += 16;
     extras.push("LinkedIn");
   } else missing.push("LinkedIn");
 
+  if (hasMethod(profile.verifications, "resume")) {
+    score += 16;
+    extras.push("Resume");
+  } else missing.push("Resume");
+
   if (hasMethod(profile.verifications, "website")) {
-    score += 12;
+    score += 10;
     extras.push("Website");
   } else missing.push("Website");
 
   if (hasMethod(profile.verifications, "portfolio")) {
-    score += 12;
+    score += 8;
     extras.push("Portfolio");
   } else missing.push("Portfolio");
 
   if (hasMethod(profile.verifications, "registration")) {
-    score += 8;
+    score += 6;
     extras.push("Registration");
   }
 
   const bio = (profile.bio || "").trim();
   if (bio.length >= 40) {
-    score += 10;
+    score += 8;
     extras.push("About you");
   } else missing.push("A longer about (40+ characters)");
 
   if (profile.phone?.trim()) {
-    score += 6;
+    score += 4;
     extras.push("Phone");
   }
 
   const projects = workList(profile);
-  const projectPts = Math.min(24, projects.length * 8);
+  const projectPts = Math.min(18, projects.length * 6);
   score += projectPts;
   if (projects.length > 0) extras.push(`${projects.length} project${projects.length === 1 ? "" : "s"}`);
   else missing.push("Projects you’ve built");
 
-  if ((profile.ideaTags?.length ?? 0) >= 3) score += 4;
-  if ((profile.lookingFor?.length ?? 0) >= 2) score += 4;
+  if ((profile.ideaTags?.length ?? 0) >= 3) score += 3;
+  if ((profile.lookingFor?.length ?? 0) >= 2) score += 3;
 
   return { score: Math.min(max, score), max, extras, missing };
 }
@@ -177,7 +203,7 @@ export function nextTierProgress(input: TierInput): {
     return {
       current,
       next: TIER_DEFINITIONS[1],
-      hint: "Add a photo, role, interests, what you’re looking for, and one verification to become Verified.",
+      hint: "Finish your profile and add business email, LinkedIn, and resume to become Verified.",
     };
   }
   return {
@@ -204,9 +230,10 @@ export function tierForPerson(
     ideaTags: person.ideaTags,
     lookingFor: person.lookingFor,
   }).score;
+  const verified = hasRequiredVerifications(vers);
   return computeMemberTier({
-    verified: (person.verifications?.length ?? 0) > 0,
-    profileComplete: true,
+    verified,
+    profileComplete: verified,
     meetingsAttended: meetings,
     reputationScore: reputation.score,
     profileStrength: strength,
@@ -222,8 +249,9 @@ export function tierForProfile(
   if (meetingsAttended >= TIER_THRESHOLDS.connectorMeetings) score = 92;
   else if (meetingsAttended >= TIER_THRESHOLDS.trustedMeetings) score = 85;
 
+  const verified = hasRequiredVerifications(profile.verifications);
   return computeMemberTier({
-    verified: (profile.verifications?.length ?? 0) > 0,
+    verified,
     profileComplete: isProfileComplete(profile),
     meetingsAttended,
     reputationScore: score,

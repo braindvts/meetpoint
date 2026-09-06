@@ -7,6 +7,7 @@ import type { Verification, VerificationMethod } from "@/lib/types";
 const METHODS: VerificationMethod[] = [
   "company-email",
   "linkedin",
+  "resume",
   "website",
   "registration",
   "portfolio",

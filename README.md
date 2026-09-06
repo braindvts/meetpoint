@@ -4,6 +4,8 @@
 
 Conclave introduces people matched by ambition or profession, then settles it over dinner.
 
+**Product handbook (keep this open):** **[CONCLAVE.md](./CONCLAVE.md)** — levels, verification, BLACK, screens, deploy, and where things live in code.
+
 ## What’s working now
 
 - Landing, splash (first open only), mobile bottom dock

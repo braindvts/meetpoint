@@ -261,7 +261,14 @@ export default function ProfileForm({ initial }: { initial?: MyProfile | null })
       if (opt.method === "linkedin" && initial?.linkedInId && !raw) {
         raw = `linkedin:${initial.linkedInId}`;
       }
-      if (!raw) continue;
+      if (!raw) {
+        if (opt.required) {
+          nextErrors.verification =
+            "Verified needs all three: business email, LinkedIn, and resume.";
+          missing.push(opt.label);
+        }
+        continue;
+      }
       const checked = validateVerification(opt.method, raw);
       if (!checked.ok) {
         nextErrors.verification = checked.error;
@@ -270,9 +277,19 @@ export default function ProfileForm({ initial }: { initial?: MyProfile | null })
       }
       verifications.push(makeVerification(opt.method, checked.value));
     }
-    if (verifications.length === 0 && !nextErrors.verification) {
-      nextErrors.verification = "Add at least one verification — email, LinkedIn, website, or portfolio.";
-      missing.push("Verification");
+    if (!nextErrors.verification) {
+      const have = new Set(verifications.map((v) => v.method));
+      const need = ["company-email", "linkedin", "resume"] as const;
+      const missingRequired = need.filter((m) => !have.has(m));
+      if (missingRequired.length) {
+        nextErrors.verification =
+          "Verified needs all three: business email, LinkedIn, and resume.";
+        for (const m of missingRequired) {
+          const label =
+            VERIFICATION_OPTIONS.find((o) => o.method === m)?.label || m;
+          if (!missing.includes(label)) missing.push(label);
+        }
+      }
     }
 
     setFieldErrors(nextErrors);
@@ -630,28 +647,35 @@ export default function ProfileForm({ initial }: { initial?: MyProfile | null })
         id="section-verification"
         num="04"
         title="Verification"
-        subtitle="Add as many as you have. Email, LinkedIn, and a site strengthen your profile."
+        subtitle="Required for Verified: business email, LinkedIn, and resume. Website and portfolio are optional."
         missing={!!fieldErrors.verification}
         missingLabel={fieldErrors.verification}
       >
         <div className={`space-y-3 ${fieldErrors.verification ? "rounded-sm border border-accent/35 p-2.5 sm:p-3" : ""}`}>
+          <p className="text-[11px] leading-relaxed text-muted sm:text-xs">
+            Add <span className="text-accent-2">all three</span> business credentials to become Verified.
+            Extra links strengthen your profile further.
+          </p>
           {VERIFICATION_OPTIONS.map((o) => (
             <label key={o.method} className="block">
-              <span className={labelCls}>{o.label}</span>
+              <span className={labelCls}>
+                {o.label}
+                {o.required ? " · required" : " · optional"}
+              </span>
               {o.method === "linkedin" && initial?.linkedInId && !verifyValues.linkedin?.startsWith("http") ? (
                 <p className="mt-1 border border-accent/30 bg-accent/5 px-3 py-2 text-[11px] text-accent-2">
                   LinkedIn connected — that counts. Add your public URL to show it on your card.
                 </p>
               ) : null}
               <input
-                className={fieldErrors.verification ? fieldWarn : field}
+                className={fieldErrors.verification && o.required && !(verifyValues[o.method] || "").trim() ? fieldWarn : field}
                 value={verifyValues[o.method] || ""}
                 onChange={(e) => {
                   setVerifyValues((prev) => ({ ...prev, [o.method]: e.target.value }));
                   clearFieldError("verification");
                 }}
                 placeholder={o.placeholder}
-                aria-invalid={!!fieldErrors.verification}
+                aria-invalid={!!fieldErrors.verification && !!o.required}
               />
               <p className="mt-1 hidden text-[11px] text-muted sm:block">{o.hint}</p>
             </label>

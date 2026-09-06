@@ -1,0 +1,34 @@
+---
+description: Conclave product handbook — levels, verification, BLACK, deploy
+alwaysApply: true
+---
+
+# Conclave product rules
+
+Read **CONCLAVE.md** at the repo root for the full handbook. Keep it accurate when product rules change.
+
+## Levels (only three)
+
+- **Member** — signed up
+- **Verified** — complete profile + all 3 credentials: business email, LinkedIn, resume
+- **BLACK** — paid ($50/mo or $500/yr) or earned; never granted by peer invite
+
+Optional verifications (website, registration, portfolio) do not replace the required three.
+
+## BLACK CONNECTION ≠ BLACK
+
+Peer invites award BLACK CONNECTION only. They never promote someone to BLACK.
+
+## Plans vs levels
+
+Premier ($20/mo) is a plan that expands who Members can meet. Standing levels are Member / Verified / BLACK.
+
+## UX
+
+- Level badges: matching metal marks — steel / champagne / black (BLACK is the coolest)
+- Never show “Tier N · Name”
+- Signup highlights missing sections and lists what’s missing
+
+## Demo
+
+`brianasome@gmail.com` / `Brian812` is the fixed demo owner login. Demo env flags stay off in production unless intentionally enabled.

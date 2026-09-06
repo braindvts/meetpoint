@@ -26,8 +26,18 @@ export const DEMO_OWNER_PROFILE: MyProfile = {
   phone: "(555) 010-2026",
   verifications: [
     {
+      method: "company-email",
+      value: "brianasome@gmail.com",
+      verifiedAt: new Date().toISOString(),
+    },
+    {
       method: "linkedin",
       value: "https://linkedin.com/in/conclave-brian-demo",
+      verifiedAt: new Date().toISOString(),
+    },
+    {
+      method: "resume",
+      value: "https://conclave.app/brian-resume.pdf",
       verifiedAt: new Date().toISOString(),
     },
   ],
