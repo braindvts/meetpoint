@@ -47,7 +47,7 @@ export default function MemberStatusStrip({ profile, tier }: Props) {
 
       <TierBadge tier={tier} size="sm" />
 
-      {black && !(tier === 4) ? <BlackBadge size="sm" /> : null}
+      {black && tier !== 3 ? <BlackBadge size="sm" /> : null}
 
       {connections > 0 ? (
         <BlackConnectionBadge count={connections} showCount />

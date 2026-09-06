@@ -6,13 +6,13 @@ export const PREMIER_MONTHLY_USD = 20;
 export const PREMIER_YEARLY_USD = 100;
 export const PREMIER_TRIAL_DAYS = 3;
 
-/** Premier unlocks Tier 1 → higher-tier introductions. */
+/** Premier unlocks Member → Verified & BLACK introductions. */
 export const PREMIER_PLAN = {
   id: "conclave-premier",
   name: "Conclave Premier",
-  tagline: "Meet every tier in the room.",
+  tagline: "Meet every level in the room.",
   features: [
-    "Introduce yourself to Trusted, Connector & BLACK",
+    "Introduce yourself to Verified & BLACK",
     "BLACK members can still meet anyone freely",
     "Priority placement in The Room",
     "Cancel anytime",
@@ -66,11 +66,11 @@ export function premierStatusLabel(profile: MyProfile | null | undefined): strin
 
 /**
  * Access rules:
- * - BLACK (4): meet BLACK and everyone else — free
- * - Premier: meet any tier
+ * - BLACK: meet any level
+ * - Premier: meet any level
  * - Enough BLACK connections: reach earned through the network, no Premier needed
- * - Tier 1 without Premier: only other Tier 1
- * - Tier 2–3: meet anyone (earned access)
+ * - Member without Premier: only other Members
+ * - Verified: meet anyone
  */
 export function canIntroduceToTier(
   myTier: MemberTier | null,
@@ -78,11 +78,12 @@ export function canIntroduceToTier(
   premier: boolean,
   myBlackConnections = 0
 ): boolean {
-  if (myTier === 4) return true;
+  const mine = myTier ?? 1;
+  const theirs = theirTier ?? 1;
+  if (mine === 3) return true;
   if (premier) return true;
   if (blackConnectionUnlocksReach(myBlackConnections)) return true;
-  if (myTier === null || theirTier === null) return myTier === theirTier;
-  if (myTier === 1 && theirTier > 1) return false;
+  if (mine === 1 && theirs > 1) return false;
   return true;
 }
 

@@ -6,60 +6,51 @@ interface Props {
   size?: "sm" | "md";
 }
 
-/** Metal / Centurion card palette — Elite is fully blacked out like a black Amex. */
+/**
+ * Shared metal-mark styling for Member / Verified.
+ * BLACK uses BlackBadge — same family, blacked-out and louder.
+ */
 export const TIER_CARD: Record<
   MemberTier,
-  { badge: string; label: string; sheen?: string }
+  { mark: string; label: string; row: string }
 > = {
   1: {
-    badge:
-      "border-[#9aa3ad]/60 bg-gradient-to-br from-[#e8edf2] via-[#b8c0c8] to-[#8e98a3] text-[#1a1d21] shadow-[inset_0_1px_0_rgba(255,255,255,0.55)]",
-    label: "text-[#c5ccd4]",
+    mark: "level-mark level-mark--member",
+    label: "text-[#b8c4d4]",
+    row: "border-[#6d7f96]/25 bg-[#7a8ba3]/[0.08]",
   },
   2: {
-    badge:
-      "border-[#b9a99a]/55 bg-gradient-to-br from-[#efe6dc] via-[#c9b8a8] to-[#8f7f72] text-[#1c1612] shadow-[inset_0_1px_0_rgba(255,255,255,0.45)]",
-    label: "text-[#d4c4b4]",
+    mark: "level-mark level-mark--verified",
+    label: "text-[#d4c4a8]",
+    row: "border-[#d4c4a8]/25 bg-[#d4c4a8]/[0.07]",
   },
   3: {
-    badge:
-      "border-[#6a6a6a]/80 bg-gradient-to-br from-[#4a4a4a] via-[#2e2e2e] to-[#1a1a1a] text-[#f0f0f0] shadow-[inset_0_1px_0_rgba(255,255,255,0.18)]",
-    label: "text-[#cfcfcf]",
-  },
-  4: {
-    badge:
-      "border-transparent bg-black text-[#f5f5f5] relative overflow-hidden shadow-[0_0_0_1px_#9a9a9a,0_0_0_2px_#000,0_0_12px_rgba(200,200,200,0.35),inset_0_1px_0_rgba(255,255,255,0.25)]",
+    mark: "level-mark level-mark--black",
     label: "text-[#f5f5f5]",
-    sheen:
-      "pointer-events-none absolute inset-0 bg-[linear-gradient(125deg,rgba(255,255,255,0.28)_0%,transparent_35%,transparent_55%,rgba(255,255,255,0.1)_100%)]",
+    row: "border-white/15 bg-black relative overflow-hidden black-centurion",
   },
 };
 
 export default function TierBadge({ tier, size = "sm" }: Props) {
-  // Tier 4 is BLACK, and it has its own mark.
-  if (tier === 4) return <BlackBadge size={size === "md" ? "md" : "sm"} />;
+  const resolved: MemberTier = tier ?? 1;
 
-  if (!tier) {
-    return (
-      <span
-        className={`inline-block font-semibold text-muted ${
-          size === "md" ? "text-[11px]" : "text-[10px]"
-        }`}
-      >
-        Unverified
-      </span>
-    );
+  if (resolved === 3) {
+    return <BlackBadge size={size === "md" ? "md" : "sm"} />;
   }
 
-  const style = TIER_CARD[tier];
-  const pad = size === "md" ? "px-3 py-1.5 text-[11px]" : "px-2.5 py-1 text-[10px]";
+  const style = TIER_CARD[resolved];
+  const pad =
+    size === "md"
+      ? "px-3.5 py-1.5 text-[11px] tracking-[0.22em]"
+      : "px-2.5 py-1 text-[9.5px] tracking-[0.2em]";
 
   return (
     <span
-      className={`relative inline-block border font-semibold uppercase tracking-wide ${style.badge} ${pad}`}
-      title={formatTierLabel(tier)}
+      className={`relative inline-flex shrink-0 items-center font-semibold uppercase ${style.mark} ${pad}`}
+      title={formatTierLabel(resolved)}
     >
-      <span className="relative">{formatTierLabel(tier)}</span>
+      <span className="level-mark-sheen" aria-hidden />
+      <span className="relative">{formatTierLabel(resolved)}</span>
     </span>
   );
 }

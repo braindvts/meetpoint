@@ -267,8 +267,8 @@ export function scoreMatch(
 
   // Reputation / tier lifts or lowers visibility
   if (reputation.status === "caution") score = Math.round(score * 0.55);
-  else if (tier === 4) score += 12;
-  else if (tier === 3) score += 10;
+  else if (tier === 3) score += 12;
+  else if (tier === 2) score += 8;
   else if (reputation.score >= 85) score += 8;
   else if (reputation.score < 70) score -= 10;
 

@@ -84,7 +84,7 @@ function ProfileContent() {
   function cancel() {
     if (
       !confirm(
-        "Cancel Conclave Premier? Tier 1 will only introduce to other Tier 1 members."
+        "Cancel Conclave Premier? Members can only introduce to other Members."
       )
     ) {
       return;

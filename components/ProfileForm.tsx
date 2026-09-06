@@ -55,23 +55,49 @@ function Section({
   title,
   subtitle,
   children,
+  id,
+  missing,
+  missingLabel,
 }: {
   num: string;
   title: string;
   subtitle?: string;
   children: React.ReactNode;
+  id?: string;
+  missing?: boolean;
+  missingLabel?: string;
 }) {
   return (
-    <section className="relative border-t border-line/70 pt-3.5 sm:pt-8">
+    <section
+      id={id}
+      className={`relative scroll-mt-24 border-t pt-3.5 sm:pt-8 ${
+        missing ? "border-accent/60 bg-accent/[0.04] px-2.5 -mx-2.5 sm:px-4 sm:-mx-4 rounded-sm" : "border-line/70"
+      }`}
+    >
       <div className="mb-2.5 flex items-baseline gap-2 sm:mb-6 sm:gap-4">
-        <span className="text-[10px] font-medium tabular-nums text-accent sm:text-sm">{num}</span>
-        <div>
-          <h2 className="text-base font-semibold tracking-tight text-ivory sm:text-xl">
-            {title}
-          </h2>
-          {subtitle && (
+        <span
+          className={`text-[10px] font-medium tabular-nums sm:text-sm ${
+            missing ? "text-accent-2" : "text-accent"
+          }`}
+        >
+          {num}
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 className="text-base font-semibold tracking-tight text-ivory sm:text-xl">
+              {title}
+            </h2>
+            {missing && (
+              <span className="rounded-sm border border-accent/40 bg-accent/10 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.14em] text-accent-2">
+                Needed
+              </span>
+            )}
+          </div>
+          {missing && missingLabel ? (
+            <p className="mt-1 text-[12px] leading-snug text-accent-2 sm:text-sm">{missingLabel}</p>
+          ) : subtitle ? (
             <p className="mt-0.5 hidden text-sm text-muted sm:block">{subtitle}</p>
-          )}
+          ) : null}
         </div>
       </div>
       {children}
@@ -137,17 +163,30 @@ export default function ProfileForm({ initial }: { initial?: MyProfile | null })
   const [tagSearch, setTagSearch] = useState("");
   const [showAllTags, setShowAllTags] = useState(false);
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<string, string>>>({});
+  const [missingItems, setMissingItems] = useState<string[]>([]);
+
+  function clearFieldError(key: string) {
+    setFieldErrors((prev) => {
+      if (!prev[key]) return prev;
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
+  }
 
   function toggleTag(tag: string) {
     setIdeaTags((tags) =>
       tags.includes(tag) ? tags.filter((t) => t !== tag) : [...tags, tag]
     );
+    clearFieldError("ideaTags");
   }
 
   function toggleLookingFor(item: LookingFor) {
     setLookingFor((list) =>
       list.includes(item) ? list.filter((t) => t !== item) : [...list, item]
     );
+    clearFieldError("lookingFor");
   }
 
   const customTags = ideaTags.filter((t) => !IDEA_TAGS.includes(t));
@@ -167,6 +206,7 @@ export default function ProfileForm({ initial }: { initial?: MyProfile | null })
     if (!query || exactExists) return;
     setIdeaTags((tags) => [...tags, query]);
     setTagSearch("");
+    clearFieldError("ideaTags");
   }
 
   async function onPhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -179,6 +219,7 @@ export default function ProfileForm({ initial }: { initial?: MyProfile | null })
     try {
       setPhoto(await processPhoto(file));
       setError("");
+      clearFieldError("photo");
     } catch {
       setError("Could not read that photo — try a different one.");
     }
@@ -186,14 +227,33 @@ export default function ProfileForm({ initial }: { initial?: MyProfile | null })
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!photo) return setError("Please add a real photo of yourself.");
-    if (!name.trim()) return setError("Please enter your name.");
-    if (!jobTitle.trim()) return setError("Please enter your job or role.");
-    if (ideaTags.length === 0) return setError("Pick at least one business idea or interest.");
-    if (lookingFor.length === 0)
-      return setError("Choose what you’re looking for — co-founder, investor, clients, etc.");
-    if (phone.trim() && !isValidPhone(phone))
-      return setError("Enter a valid mobile number (at least 10 digits), or leave it blank.");
+    const nextErrors: Partial<Record<string, string>> = {};
+    const missing: string[] = [];
+
+    if (!photo) {
+      nextErrors.photo = "Add a real photo of yourself.";
+      missing.push("Photo");
+    }
+    if (!name.trim()) {
+      nextErrors.name = "Enter your full name.";
+      missing.push("Full name");
+    }
+    if (!jobTitle.trim()) {
+      nextErrors.jobTitle = "Enter your job or role.";
+      missing.push("Job / role");
+    }
+    if (ideaTags.length === 0) {
+      nextErrors.ideaTags = "Pick at least one business idea or interest.";
+      missing.push("Ambitions");
+    }
+    if (lookingFor.length === 0) {
+      nextErrors.lookingFor = "Choose what you’re looking for.";
+      missing.push("Looking for");
+    }
+    if (phone.trim() && !isValidPhone(phone)) {
+      nextErrors.phone = "Enter a valid mobile number, or leave it blank.";
+      missing.push("Mobile number");
+    }
 
     const verifications: Verification[] = [];
     for (const opt of VERIFICATION_OPTIONS) {
@@ -203,12 +263,46 @@ export default function ProfileForm({ initial }: { initial?: MyProfile | null })
       }
       if (!raw) continue;
       const checked = validateVerification(opt.method, raw);
-      if (!checked.ok) return setError(checked.error);
+      if (!checked.ok) {
+        nextErrors.verification = checked.error;
+        missing.push(opt.label);
+        break;
+      }
       verifications.push(makeVerification(opt.method, checked.value));
     }
-    if (verifications.length === 0) {
-      return setError("Add at least one verification — email, LinkedIn, website, or portfolio.");
+    if (verifications.length === 0 && !nextErrors.verification) {
+      nextErrors.verification = "Add at least one verification — email, LinkedIn, website, or portfolio.";
+      missing.push("Verification");
     }
+
+    setFieldErrors(nextErrors);
+    setMissingItems(missing);
+
+    if (Object.keys(nextErrors).length > 0) {
+      const firstKey = ["photo", "name", "jobTitle", "phone", "ideaTags", "lookingFor", "verification"].find(
+        (k) => nextErrors[k]
+      );
+      const sectionId =
+        firstKey === "ideaTags"
+          ? "section-ambitions"
+          : firstKey === "lookingFor"
+            ? "section-looking"
+            : firstKey === "verification"
+              ? "section-verification"
+              : "section-identity";
+      setError(
+        missing.length
+          ? `Still needed: ${missing.join(" · ")}.`
+          : "Please fix the highlighted fields."
+      );
+      requestAnimationFrame(() => {
+        document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+      return;
+    }
+
+    setError("");
+    setMissingItems([]);
 
     const projects = work
       .map((w) => ({
@@ -257,22 +351,54 @@ export default function ProfileForm({ initial }: { initial?: MyProfile | null })
 
   const field =
     "w-full border-0 border-b border-line bg-transparent px-0 py-2 text-sm text-ivory outline-none transition placeholder:text-muted/45 focus:border-accent sm:py-3 sm:text-base";
+  const fieldWarn =
+    "w-full border-0 border-b border-accent bg-transparent px-0 py-2 text-sm text-ivory outline-none transition placeholder:text-muted/45 focus:border-accent-2 sm:py-3 sm:text-base";
   const labelCls =
     "text-[9px] font-semibold uppercase tracking-[0.18em] text-muted sm:text-[11px] sm:tracking-[0.22em]";
+  const errCls = "mt-1 text-[11px] text-accent-2";
 
   return (
     <form onSubmit={submit} className="space-y-5 sm:space-y-12">
+      {missingItems.length > 0 && (
+        <div className="sticky top-2 z-20 border border-accent/40 bg-ink/95 px-3 py-2.5 backdrop-blur-sm sm:px-4 sm:py-3">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-accent">
+            Missing to continue
+          </p>
+          <ul className="mt-1.5 flex flex-wrap gap-1.5">
+            {missingItems.map((item) => (
+              <li
+                key={item}
+                className="border border-accent/35 bg-accent/10 px-2 py-0.5 text-[11px] text-accent-2"
+              >
+                {item}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       <Section
+        id="section-identity"
         num="01"
         title="Identity"
         subtitle="Your photo is the first thing people see — make it count."
+        missing={!!(fieldErrors.photo || fieldErrors.name || fieldErrors.jobTitle || fieldErrors.phone)}
+        missingLabel={
+          [fieldErrors.photo, fieldErrors.name, fieldErrors.jobTitle, fieldErrors.phone]
+            .filter(Boolean)
+            .join(" ")
+        }
       >
         <div className="space-y-4 sm:grid sm:grid-cols-[200px_1fr] sm:items-start sm:gap-8 sm:space-y-0">
           <div className="flex flex-col gap-2">
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="group relative aspect-[3/4] w-full max-w-[280px] overflow-hidden border border-accent/35 bg-panel transition hover:border-accent sm:max-w-none"
+              className={`group relative aspect-[3/4] w-full max-w-[280px] overflow-hidden border bg-panel transition sm:max-w-none ${
+                fieldErrors.photo
+                  ? "border-accent ring-1 ring-accent/40"
+                  : "border-accent/35 hover:border-accent"
+              }`}
             >
               {photo ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -302,41 +428,60 @@ export default function ProfileForm({ initial }: { initial?: MyProfile | null })
               onChange={onPhotoChange}
               className="hidden"
             />
-            <p className="text-[11px] leading-relaxed text-muted">
-              Real photo of you. Face clear, good light. This is your first impression in The Room.
-            </p>
+            {fieldErrors.photo ? (
+              <p className={errCls}>{fieldErrors.photo}</p>
+            ) : (
+              <p className="text-[11px] leading-relaxed text-muted">
+                Real photo of you. Face clear, good light. This is your first impression in The Room.
+              </p>
+            )}
           </div>
 
           <div className="min-w-0 space-y-3 sm:space-y-6">
             <label className="block">
               <span className={labelCls}>Full name</span>
               <input
-                className={field}
+                className={fieldErrors.name ? fieldWarn : field}
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => {
+                  setName(e.target.value);
+                  clearFieldError("name");
+                }}
                 placeholder="Jordan Smith"
+                aria-invalid={!!fieldErrors.name}
               />
+              {fieldErrors.name && <p className={errCls}>{fieldErrors.name}</p>}
             </label>
             <label className="block">
               <span className={labelCls}>Job / role</span>
               <input
-                className={field}
+                className={fieldErrors.jobTitle ? fieldWarn : field}
                 value={jobTitle}
-                onChange={(e) => setJobTitle(e.target.value)}
+                onChange={(e) => {
+                  setJobTitle(e.target.value);
+                  clearFieldError("jobTitle");
+                }}
                 placeholder="Truck Driver, Software Engineer…"
+                aria-invalid={!!fieldErrors.jobTitle}
               />
+              {fieldErrors.jobTitle && <p className={errCls}>{fieldErrors.jobTitle}</p>}
             </label>
             <label className="block">
               <span className={labelCls}>Mobile</span>
               <input
-                className={field}
+                className={fieldErrors.phone ? fieldWarn : field}
                 type="tel"
                 inputMode="tel"
                 autoComplete="tel"
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                onChange={(e) => {
+                  setPhone(e.target.value);
+                  clearFieldError("phone");
+                }}
                 placeholder="(555) 123-4567"
+                aria-invalid={!!fieldErrors.phone}
               />
+              {fieldErrors.phone && <p className={errCls}>{fieldErrors.phone}</p>}
             </label>
           </div>
         </div>
@@ -344,9 +489,12 @@ export default function ProfileForm({ initial }: { initial?: MyProfile | null })
 
       {/* Ambitions */}
       <Section
+        id="section-ambitions"
         num="02"
         title="Ambitions"
         subtitle="What you’re building — pick all that fit, or search your own."
+        missing={!!fieldErrors.ideaTags}
+        missingLabel={fieldErrors.ideaTags}
       >
         <div className="relative mb-3">
           <input
@@ -459,9 +607,12 @@ export default function ProfileForm({ initial }: { initial?: MyProfile | null })
       </Section>
 
       <Section
+        id="section-looking"
         num="03"
         title="Looking for"
         subtitle="Required. Tell us the introductions you want — matches are built around this."
+        missing={!!fieldErrors.lookingFor}
+        missingLabel={fieldErrors.lookingFor}
       >
         <div className="flex flex-wrap gap-1.5">
           {LOOKING_FOR_OPTIONS.map((item) => (
@@ -476,11 +627,14 @@ export default function ProfileForm({ initial }: { initial?: MyProfile | null })
       </Section>
 
       <Section
+        id="section-verification"
         num="04"
         title="Verification"
-        subtitle="Add as many as you have. Email, LinkedIn, and a site raise your tier."
+        subtitle="Add as many as you have. Email, LinkedIn, and a site strengthen your profile."
+        missing={!!fieldErrors.verification}
+        missingLabel={fieldErrors.verification}
       >
-        <div className="space-y-3">
+        <div className={`space-y-3 ${fieldErrors.verification ? "rounded-sm border border-accent/35 p-2.5 sm:p-3" : ""}`}>
           {VERIFICATION_OPTIONS.map((o) => (
             <label key={o.method} className="block">
               <span className={labelCls}>{o.label}</span>
@@ -490,12 +644,14 @@ export default function ProfileForm({ initial }: { initial?: MyProfile | null })
                 </p>
               ) : null}
               <input
-                className={field}
+                className={fieldErrors.verification ? fieldWarn : field}
                 value={verifyValues[o.method] || ""}
-                onChange={(e) =>
-                  setVerifyValues((prev) => ({ ...prev, [o.method]: e.target.value }))
-                }
+                onChange={(e) => {
+                  setVerifyValues((prev) => ({ ...prev, [o.method]: e.target.value }));
+                  clearFieldError("verification");
+                }}
                 placeholder={o.placeholder}
+                aria-invalid={!!fieldErrors.verification}
               />
               <p className="mt-1 hidden text-[11px] text-muted sm:block">{o.hint}</p>
             </label>

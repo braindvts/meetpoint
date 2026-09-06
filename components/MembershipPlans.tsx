@@ -47,8 +47,8 @@ export default function MembershipPlans({
             </p>
           </div>
           <ul className="hidden space-y-1.5 text-xs text-ivory/70 sm:mt-3 sm:block sm:text-sm">
-            <li>The Room · your verified tier</li>
-            <li>Tier 1 ↔ Tier 1 introductions</li>
+            <li>The Room · your level</li>
+            <li>Member ↔ Member introductions</li>
             <li>Private chats & bookings</li>
           </ul>
           <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-accent-2 sm:mt-4">
@@ -122,7 +122,7 @@ export default function MembershipPlans({
               ))}
             </ul>
             <p className="mt-1.5 text-[10px] leading-snug text-muted sm:hidden">
-              Meet Trusted, Connector & Elite · cancel anytime
+              Meet Verified & BLACK · cancel anytime
             </p>
 
             {premier ? (

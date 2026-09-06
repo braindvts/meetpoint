@@ -822,7 +822,7 @@ svg {
   }
 }
 
-/* Centurion black — Amex-style Elite aura */
+/* Centurion black — Amex-style BLACK aura */
 @keyframes blackSheen {
   0% {
     transform: translateX(-120%) skewX(-12deg);
@@ -832,17 +832,76 @@ svg {
   }
 }
 
-/* The BLACK mark — same blacked-out metal as the Centurion card, badge sized */
-.black-mark {
+/* Shared metal mark family — Member / Verified / BLACK */
+.level-mark {
   position: relative;
   overflow: hidden;
-  background: #000;
   border-radius: 3px;
+  isolation: isolate;
+}
+.level-mark-sheen {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: linear-gradient(
+    125deg,
+    rgba(255, 255, 255, 0.28) 0%,
+    transparent 38%,
+    transparent 58%,
+    rgba(255, 255, 255, 0.1) 100%
+  );
+}
+.level-mark-sheen--live::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 48%;
+  background: linear-gradient(
+    105deg,
+    transparent 18%,
+    rgba(255, 255, 255, 0.22) 48%,
+    transparent 72%
+  );
+  animation: blackSheen 3.8s ease-in-out infinite;
+}
+
+/* Member — cool steel */
+.level-mark--member {
+  color: #e8eef6;
+  background: linear-gradient(145deg, #8a9bb0 0%, #5c6d82 42%, #3a4656 100%);
+  box-shadow:
+    0 0 0 1px #2a3440,
+    0 0 0 2px #9aabc0,
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+/* Verified — champagne gold (Conclave accent family) */
+.level-mark--verified {
+  color: #1a1610;
+  background: linear-gradient(145deg, #f0e6d4 0%, #d4c4a8 40%, #a8926e 100%);
+  box-shadow:
+    0 0 0 1px #6a5a3e,
+    0 0 0 2px #e2d4bc,
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+/* BLACK — pure black, loudest mark */
+.level-mark--black,
+.black-mark {
+  color: #f5f5f5;
+  background: #000;
   box-shadow:
     0 0 0 1px #1c1c1c,
-    0 0 0 2px #8f8f8f,
-    inset 0 1px 0 rgba(255, 255, 255, 0.22),
-    0 6px 16px rgba(0, 0, 0, 0.6);
+    0 0 0 2px #a8a8a8,
+    0 0 0 3px #000,
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    0 0 18px rgba(220, 220, 220, 0.28),
+    0 8px 20px rgba(0, 0, 0, 0.7);
 }
 .black-mark-sheen {
   position: absolute;
@@ -929,7 +988,7 @@ svg {
     0 24px 56px rgba(0, 0, 0, 0.9);
 }
 
-/* Elite profile sheet shell */
+/* BLACK profile sheet shell */
 .black-profile-shell {
   background: #000000 !important;
   border-color: #8a8a8a !important;
@@ -940,7 +999,8 @@ svg {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .black-centurion .black-sheen::after {
+  .black-centurion .black-sheen::after,
+  .level-mark-sheen--live::after {
     animation: none !important;
   }
 }

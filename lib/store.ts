@@ -760,7 +760,7 @@ export function getPeerReputation(peerId: string) {
   return summarizeReputation(peerId, loadRatings());
 }
 
-/** Booked tables count toward Trusted / Connector standing. */
+/** Booked tables count toward earned BLACK standing. */
 export function getMeetingsAttended(profile?: MyProfile | null): number {
   const p = profile ?? loadProfile();
   const fromProfile = p?.meetingsAttended ?? 0;

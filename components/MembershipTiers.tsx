@@ -8,13 +8,6 @@ interface Props {
   missing?: string[];
 }
 
-const ROW: Record<1 | 2 | 3 | 4, string> = {
-  1: "border-[#9aa3ad]/20 bg-[#d7dde5]/[0.06]",
-  2: "border-[#b9a99a]/20 bg-[#c9b8a8]/[0.08]",
-  3: "border-[#6a6a6a]/35 bg-[#3a3a3a]/30",
-  4: "border-white/15 bg-black relative overflow-hidden black-centurion",
-};
-
 export default function MembershipTiers({ input, missing }: Props) {
   const progress = nextTierProgress(input);
 
@@ -22,7 +15,7 @@ export default function MembershipTiers({ input, missing }: Props) {
     <section className="mb-5 border border-line/50 bg-panel/40 p-3 sm:mb-10 sm:p-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-[9px] font-semibold uppercase tracking-[0.22em] text-accent sm:text-[11px] sm:tracking-[0.32em]">
-          Tiers
+          Levels
         </p>
         <div className="flex items-center gap-2">
           <TierBadge tier={progress.current} size="sm" />
@@ -38,13 +31,13 @@ export default function MembershipTiers({ input, missing }: Props) {
       <div className="mt-2.5 space-y-1.5 sm:mt-4 sm:space-y-2">
         {TIER_DEFINITIONS.map((t) => {
           const active = progress.current === t.tier;
-          const black = t.tier === 4;
+          const black = t.tier === 3;
           return (
             <div
               key={t.tier}
-              className={`border px-2.5 py-2 sm:px-3.5 sm:py-3 ${ROW[t.tier]} ${
+              className={`border px-2.5 py-2 sm:px-3.5 sm:py-3 ${TIER_CARD[t.tier].row} ${
                 active && !black ? "ring-1 ring-ivory/20" : ""
-              }`}
+              } ${active && black ? "ring-1 ring-white/25" : ""}`}
             >
               {black && (
                 <span
@@ -57,11 +50,11 @@ export default function MembershipTiers({ input, missing }: Props) {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <p
-                      className={`truncate font-display text-[13px] font-semibold sm:text-base ${
+                      className={`truncate font-semibold text-[13px] sm:text-base ${
                         black ? "text-[#f5f5f5]" : TIER_CARD[t.tier].label
                       }`}
                     >
-                      {t.tier}. {t.name}
+                      {t.name}
                     </p>
                     {active && (
                       <span
@@ -86,9 +79,9 @@ export default function MembershipTiers({ input, missing }: Props) {
           );
         })}
       </div>
-      {missing && missing.length > 0 && (
+      {missing && missing.length > 0 && progress.current < 3 && (
         <p className="mt-3 text-[11px] leading-relaxed text-muted">
-          Add to raise your tier: {missing.slice(0, 4).join(" · ")}.
+          Still open: {missing.slice(0, 4).join(" · ")}.
         </p>
       )}
     </section>

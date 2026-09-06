@@ -144,7 +144,7 @@ export default function PersonProfileSheet({
 
   if (!open || !person) return null;
 
-  const black = tier === 4;
+  const black = tier === 3;
   const owner = isOwner(person);
   const companies = ownedCompanies(person);
   const projects = otherWork(person);
