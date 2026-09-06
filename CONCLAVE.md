@@ -18,7 +18,28 @@ Keep this open as your product handbook. Update it when rules change.
 
 There is **no** Trusted / Connector / “Tier 1 · …” anymore — only these three.
 
+### Member (and how you stay Member — not Verified)
+
+**Member** = they signed up, but they have **not** finished the Verified requirements yet.
+
+They become **Member** when they create an account (email/password or Google / LinkedIn / Apple). That’s it. No payment, no resume needed.
+
+They **stay Member** (not Verified) if **anything** below is missing:
+
+- Photo  
+- Full name  
+- Job / role  
+- Ambitions  
+- What they’re looking for  
+- **Or any of the 3 credentials:** business email · LinkedIn · resume  
+
+Missing even one of those → still **Member**.
+
+**Short version:** sign up → **Member**. Finish profile + email + LinkedIn + resume → **Verified**.
+
 ### Verified — the 3 required credentials
+
+They become **Verified** only when profile basics are complete **and** all 3 credentials are added.
 
 All three are required. Optional extras help your score but don’t replace these.
 
