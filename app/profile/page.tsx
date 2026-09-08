@@ -13,6 +13,7 @@ import MembershipTiers from "@/components/MembershipTiers";
 import { ensureNotifyPermission } from "@/lib/notify";
 import { clearProfile, getMeetingsAttended, loadProfile } from "@/lib/store";
 import { readClientProfile } from "@/lib/clientProfile";
+import { hydrateLocalProfile } from "@/lib/hydrateSession";
 import {
   computeMemberTier,
   hasRequiredVerifications,
@@ -35,13 +36,17 @@ function ProfileContent() {
   const [editPopupOpen, setEditPopupOpen] = useState(false);
 
   useEffect(() => {
-    const p = loadProfile();
-    if (!p) {
-      router.replace("/onboarding");
-      return;
-    }
-    setProfile(p);
-    setMeetings(getMeetingsAttended(p));
+    let cancelled = false;
+    void (async () => {
+      const p = await hydrateLocalProfile();
+      if (cancelled) return;
+      if (!p) {
+        router.replace("/onboarding");
+        return;
+      }
+      setProfile(p);
+      setMeetings(getMeetingsAttended(p));
+    })();
 
     const onProfile = () => {
       const next = loadProfile();
@@ -49,7 +54,10 @@ function ProfileContent() {
       if (next) setMeetings(getMeetingsAttended(next));
     };
     window.addEventListener("meetpoint:profile-changed", onProfile);
-    return () => window.removeEventListener("meetpoint:profile-changed", onProfile);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("meetpoint:profile-changed", onProfile);
+    };
   }, [router]);
 
   useEffect(() => {

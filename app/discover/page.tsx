@@ -23,6 +23,7 @@ import {
 import { refreshDirectory, loadDirectory } from "@/lib/directory";
 import { syncProfileToServer } from "@/lib/apiClient";
 import { readClientConnections, readClientProfile } from "@/lib/clientProfile";
+import { hydrateLocalProfile } from "@/lib/hydrateSession";
 import { TIER_DEFINITIONS, tierForPerson, tierForProfile, type MemberTier } from "@/lib/tiers";
 import type { Connection, LookingFor, MyProfile, Person } from "@/lib/types";
 import { LOOKING_FOR_OPTIONS } from "@/lib/types";
@@ -54,21 +55,27 @@ export default function DiscoverPage() {
   const refreshConnections = useCallback(() => setConnections(loadConnections()), []);
 
   useEffect(() => {
-    const p = loadProfile();
-    if (!p) {
-      router.replace("/onboarding");
-      return;
-    }
-    setProfile(p);
-    setFilter("open");
-    refreshConnections();
-    ensureSampleInboundRequest();
-    if (!isDemoProfile(p)) void syncProfileToServer(p);
-    track("discover_open");
-    void refreshDirectory().then((list) => {
-      setPeople(list);
-      setDirectoryReady(true);
-    });
+    let cancelled = false;
+    void (async () => {
+      const p = await hydrateLocalProfile();
+      if (cancelled) return;
+      if (!p) {
+        router.replace("/onboarding");
+        return;
+      }
+      setProfile(p);
+      setFilter("open");
+      refreshConnections();
+      ensureSampleInboundRequest();
+      if (!isDemoProfile(p)) void syncProfileToServer(p);
+      track("discover_open");
+      void refreshDirectory().then((list) => {
+        if (!cancelled) {
+          setPeople(list);
+          setDirectoryReady(true);
+        }
+      });
+    })();
 
     const onProfile = () => setProfile(loadProfile());
     const onDir = () => setPeople(loadDirectory());
@@ -79,6 +86,7 @@ export default function DiscoverPage() {
     void syncBlackFromServer();
     window.addEventListener("meetpoint:blocks-changed", onBlocks);
     return () => {
+      cancelled = true;
       window.removeEventListener("meetpoint:connections-changed", refreshConnections);
       window.removeEventListener("meetpoint:profile-changed", onProfile);
       window.removeEventListener("meetpoint:directory-changed", onDir);

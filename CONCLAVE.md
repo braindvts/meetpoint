@@ -123,7 +123,7 @@ Discover ranks people by shared ambitions, complementary “looking for,” same
 
 | Email | Password | Notes |
 |-------|----------|-------|
-| `brianasome@gmail.com` | `Brian812` | Always works; recreates on fresh DB; turns on sample people in that browser |
+| `brianasome@gmail.com` | `Brian812` | Always works; recreates on fresh DB; one-tap **Continue as Brian** on `/login`; skips setup |
 
 Local-only env flags (do **not** set on production unless you want demo entry):
 

@@ -2,7 +2,13 @@
 
 import { useState } from "react";
 import { clearDemoOwnerSession, markDemoOwnerSession } from "@/lib/demoFlag";
-import { isDemoOwnerEmail } from "@/lib/demoOwner";
+import {
+  DEMO_OWNER_EMAIL,
+  DEMO_OWNER_PASSWORD,
+  isDemoOwnerEmail,
+} from "@/lib/demoOwner";
+import { saveProfile } from "@/lib/store";
+import type { MyProfile } from "@/lib/types";
 
 export default function EmailAuthForm() {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
@@ -12,6 +18,28 @@ export default function EmailAuthForm() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
+  async function finishAuth(data: {
+    ok?: boolean;
+    error?: string;
+    next?: string;
+    demoOwner?: boolean;
+    profile?: MyProfile | null;
+  }) {
+    if (!data.ok) {
+      setError(data.error || "Could not sign in.");
+      return;
+    }
+    if (data.profile?.name) {
+      saveProfile(data.profile);
+    }
+    if (data.demoOwner || isDemoOwnerEmail(email)) {
+      markDemoOwnerSession();
+    } else {
+      clearDemoOwnerSession();
+    }
+    window.location.href = data.next || "/onboarding";
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
@@ -20,6 +48,7 @@ export default function EmailAuthForm() {
       const res = await fetch("/api/auth/email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ email, password, name, mode }),
       });
       const data = (await res.json()) as {
@@ -27,17 +56,41 @@ export default function EmailAuthForm() {
         error?: string;
         next?: string;
         demoOwner?: boolean;
+        profile?: MyProfile | null;
       };
-      if (!data.ok) {
-        setError(data.error || "Could not sign in.");
-        return;
-      }
-      if (data.demoOwner || isDemoOwnerEmail(email)) {
-        markDemoOwnerSession();
-      } else {
-        clearDemoOwnerSession();
-      }
-      window.location.href = data.next || "/onboarding";
+      await finishAuth(data);
+    } catch {
+      setError("Network error. Try again.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function signInAsBrian() {
+    setError("");
+    setBusy(true);
+    setMode("signin");
+    setEmail(DEMO_OWNER_EMAIL);
+    setPassword(DEMO_OWNER_PASSWORD);
+    try {
+      const res = await fetch("/api/auth/email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          email: DEMO_OWNER_EMAIL,
+          password: DEMO_OWNER_PASSWORD,
+          mode: "signin",
+        }),
+      });
+      const data = (await res.json()) as {
+        ok?: boolean;
+        error?: string;
+        next?: string;
+        demoOwner?: boolean;
+        profile?: MyProfile | null;
+      };
+      await finishAuth({ ...data, demoOwner: true });
     } catch {
       setError("Network error. Try again.");
     } finally {
@@ -66,6 +119,23 @@ export default function EmailAuthForm() {
           Create account
         </button>
       </div>
+
+      <button
+        type="button"
+        disabled={busy}
+        onClick={() => void signInAsBrian()}
+        className="w-full rounded-xl border border-accent/40 bg-accent/[0.08] px-3 py-3 text-left disabled:opacity-40"
+      >
+        <span className="block text-[10px] font-semibold uppercase tracking-[0.18em] text-accent">
+          Owner account
+        </span>
+        <span className="mt-1 block text-[13px] font-medium text-ivory">
+          Continue as Brian — one tap
+        </span>
+        <span className="mt-0.5 block text-[11px] text-muted">
+          {DEMO_OWNER_EMAIL} · always ready, skips setup
+        </span>
+      </button>
 
       {mode === "signup" && (
         <input

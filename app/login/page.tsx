@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect } from "react";
 import AuthButtons from "@/components/AuthButtons";
@@ -73,12 +72,6 @@ function LoginContent() {
           </span>
         </div>
         <EmailAuthForm />
-        <Link
-          href="/onboarding"
-          className="inline-flex w-full items-center justify-center rounded-xl border border-accent/25 py-3.5 text-[12px] font-medium text-muted"
-        >
-          Continue to profile
-        </Link>
         {demoEntryEnabled() && <DemoEnterButton />}
       </div>
     </main>

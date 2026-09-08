@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { sendWelcomeEmail } from "@/lib/email";
 import { ensureDemoOwner, matchesDemoOwner } from "@/lib/ensureDemoOwner";
 import { withMemberCookie } from "@/lib/memberAuth";
+import { memberToProfile } from "@/lib/memberMap";
 import { hashPassword, isValidEmail, verifyPassword } from "@/lib/password";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
 import { appUrl, withSession } from "@/lib/session";
@@ -38,6 +39,7 @@ export async function POST(req: Request) {
         next: "/discover",
         memberId: member.id,
         demoOwner: true,
+        profile: memberToProfile(member),
       });
       withSession(res, {
         id: member.id,
@@ -80,6 +82,7 @@ export async function POST(req: Request) {
         ok: true,
         next: existing?.jobTitle ? "/discover" : "/onboarding",
         memberId: member.id,
+        profile: memberToProfile(member),
       });
       withSession(res, {
         id: member.id,
@@ -95,7 +98,12 @@ export async function POST(req: Request) {
     }
 
     const next = existing.jobTitle && existing.photo ? "/discover" : "/onboarding";
-    const res = NextResponse.json({ ok: true, next, memberId: existing.id });
+    const res = NextResponse.json({
+      ok: true,
+      next,
+      memberId: existing.id,
+      profile: memberToProfile(existing),
+    });
     withSession(res, {
       id: existing.id,
       name: existing.name,
