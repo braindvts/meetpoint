@@ -15,7 +15,7 @@ Keep this open as your product handbook. Update it when rules change.
 | Now | Later |
 |-----|--------|
 | Responsive **browser website** (desktop + mobile) | Wrap the same site in iOS/Android (WKWebView / Capacitor) |
-| Top nav on desktop, bottom dock only on phones | Same URLs and product rules |
+| Top nav on every screen (fixed) | Same URLs and product rules |
 | Marketing home at `/` for every device | App Store listing when revenue supports it |
 
 **Do not** force a 430px phone column or bounce mobile users away from the landing page.
@@ -26,44 +26,41 @@ Keep this open as your product handbook. Update it when rules change.
 
 | Level | How you get it |
 |-------|----------------|
-| **Member** | Create an account (email/password or OAuth). You’re in the room. |
-| **Verified** | Finish your profile **and** add all **3** business credentials below. |
+| **Member** | Sign up + finish **Identity** (photo, name, role, ambitions, looking for). Verification is **not** required. |
+| **Verified** | Same Identity basics **plus** all **3** credentials: business email, LinkedIn, resume. |
 | **BLACK** | Pay ($50/mo or $500/yr) **or** earn it (~20 dinners + strong profile + high ratings). Must already be verified to activate. |
 
 There is **no** Trusted / Connector / “Tier 1 · …” anymore — only these three.
 
-### Member (and how you stay Member — not Verified)
+### Member (Identity only — verification optional)
 
-**Member** = they signed up, but they have **not** finished the Verified requirements yet.
+**Member** = they created an account and filled **Identity**. They do **not** need any verification fields.
 
-They become **Member** when they create an account (email/password or Google / LinkedIn / Apple). That’s it. No payment, no resume needed.
-
-They **stay Member** (not Verified) if **anything** below is missing:
+To become a Member they need:
 
 - Photo  
 - Full name  
 - Job / role  
 - Ambitions  
 - What they’re looking for  
-- **Or any of the 3 credentials:** business email · LinkedIn · resume  
 
-Missing even one of those → still **Member**.
+They can **skip** business email, LinkedIn, resume, website, portfolio entirely.
 
-**Short version:** sign up → **Member**. Finish profile + email + LinkedIn + resume → **Verified**.
+If they skip verification → they stay **Member** (not Verified). That’s correct.
 
-### Verified — the 3 required credentials
+**Short version:** Identity → **Member**. Identity + email + LinkedIn + resume → **Verified**.
 
-They become **Verified** only when profile basics are complete **and** all 3 credentials are added.
+### Verified — the 3 credentials (optional until they want it)
 
-All three are required. Optional extras help your score but don’t replace these.
+They become **Verified** only when Identity is done **and** all 3 credentials are added:
 
-1. **Business email** — work email preferred; personal OK if that’s what you use for business  
-2. **LinkedIn** — public `linkedin.com/in/…` URL (or LinkedIn sign-in)  
-3. **Resume** — HTTPS link to a PDF / Drive / Dropbox resume  
+1. **Business email**  
+2. **LinkedIn**  
+3. **Resume** (HTTPS link to PDF / Drive / Dropbox)
 
-Optional: website, business registration, portfolio.
+Optional extras (do not replace the three): website, business registration, portfolio.
 
-Also required for a complete profile (alongside the 3): photo, name, job/role, ambitions, what you’re looking for.
+Signup must **not** block on verification — only Identity is required to create the account / enter the room.
 
 ### BLACK vs BLACK CONNECTION
 

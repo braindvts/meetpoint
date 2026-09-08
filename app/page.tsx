@@ -77,8 +77,9 @@ export default function Landing() {
             Match in the browser. Meet at dinner.
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-[15px] leading-relaxed text-muted">
-            Build your profile, get Verified with business email, LinkedIn, and resume, then
-            discover people who fit — and settle it over a real table.
+            Build your Identity profile, join as a Member, optionally get Verified with
+            business email, LinkedIn, and resume, then discover people who fit — and settle
+            it over a real table.
           </p>
         </div>
       </section>
@@ -93,12 +94,12 @@ export default function Landing() {
               {
                 name: "Member",
                 mark: "level-mark level-mark--member",
-                copy: "Sign up and you’re in. Finish your profile when you’re ready.",
+                copy: "Sign up with Identity — photo, name, role. Verification is optional.",
               },
               {
                 name: "Verified",
                 mark: "level-mark level-mark--verified",
-                copy: "Business email, LinkedIn, and resume — plus a complete profile.",
+                copy: "Add business email, LinkedIn, and resume when you’re ready.",
               },
               {
                 name: "BLACK",

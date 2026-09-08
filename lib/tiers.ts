@@ -16,14 +16,14 @@ export const TIER_DEFINITIONS: TierDefinition[] = [
   {
     tier: 1,
     name: "Member",
-    meaning: "You’re in the room — finish your profile to get verified",
-    howToEarn: "Create your Conclave account",
+    meaning: "You’re in the room with your identity profile",
+    howToEarn: "Create your account and finish Identity (photo, name, role, ambitions)",
   },
   {
     tier: 2,
     name: "Verified",
     meaning: "Identity backed by business email, LinkedIn, and resume",
-    howToEarn: "Finish your profile + add business email, LinkedIn, and resume",
+    howToEarn: "Optional — add business email, LinkedIn, and resume when you’re ready",
   },
   {
     tier: 3,
@@ -90,6 +90,10 @@ export function missingRequiredVerifications(
   );
 }
 
+/**
+ * Identity basics only — enough to be a Member and use the room.
+ * Verifications are NOT required here.
+ */
 export function isProfileComplete(profile: Pick<
   MyProfile,
   "name" | "photo" | "jobTitle" | "lookingFor" | "ideaTags" | "verifications"
@@ -99,9 +103,16 @@ export function isProfileComplete(profile: Pick<
     !!profile.photo &&
     !!profile.jobTitle?.trim() &&
     (profile.lookingFor?.length ?? 0) > 0 &&
-    (profile.ideaTags?.length ?? 0) > 0 &&
-    hasRequiredVerifications(profile.verifications)
+    (profile.ideaTags?.length ?? 0) > 0
   );
+}
+
+/** Member who also added all three business credentials. */
+export function isVerifiedStanding(profile: Pick<
+  MyProfile,
+  "name" | "photo" | "jobTitle" | "lookingFor" | "ideaTags" | "verifications"
+>): boolean {
+  return isProfileComplete(profile) && hasRequiredVerifications(profile.verifications);
 }
 
 function workList(profile: Pick<MyProfile, "work"> | Person): PersonWork[] {
@@ -203,7 +214,7 @@ export function nextTierProgress(input: TierInput): {
     return {
       current,
       next: TIER_DEFINITIONS[1],
-      hint: "Finish your profile and add business email, LinkedIn, and resume to become Verified.",
+      hint: "You’re a Member. Add business email, LinkedIn, and resume anytime to become Verified.",
     };
   }
   return {
@@ -233,7 +244,7 @@ export function tierForPerson(
   const verified = hasRequiredVerifications(vers);
   return computeMemberTier({
     verified,
-    profileComplete: verified,
+    profileComplete: true,
     meetingsAttended: meetings,
     reputationScore: reputation.score,
     profileStrength: strength,
@@ -249,9 +260,8 @@ export function tierForProfile(
   if (meetingsAttended >= TIER_THRESHOLDS.connectorMeetings) score = 92;
   else if (meetingsAttended >= TIER_THRESHOLDS.trustedMeetings) score = 85;
 
-  const verified = hasRequiredVerifications(profile.verifications);
   return computeMemberTier({
-    verified,
+    verified: hasRequiredVerifications(profile.verifications),
     profileComplete: isProfileComplete(profile),
     meetingsAttended,
     reputationScore: score,
