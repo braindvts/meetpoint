@@ -154,13 +154,16 @@ function ChatsInner() {
     );
   }, [chats, connections, directory]);
 
-  function selectChat(chatId: string) {
-    router.replace(`/chats?c=${encodeURIComponent(chatId)}`, { scroll: false });
-  }
+  const selectChat = useCallback(
+    (chatId: string) => {
+      router.replace(`/chats?c=${encodeURIComponent(chatId)}`, { scroll: false });
+    },
+    [router]
+  );
 
-  function clearSelection() {
+  const clearSelection = useCallback(() => {
     router.replace("/chats", { scroll: false });
-  }
+  }, [router]);
 
   function openPerson(person: Person, existing: GroupChat | null) {
     if (existing) {

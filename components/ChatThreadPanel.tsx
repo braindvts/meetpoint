@@ -70,6 +70,11 @@ export default function ChatThreadPanel({ chatId, embedded = false, onBack }: Pr
     };
   }, [embedded]);
 
+  const onBackRef = useRef(onBack);
+  onBackRef.current = onBack;
+  const paidHandledRef = useRef<string | null>(null);
+
+  // Load / switch thread — only when chatId changes (do NOT clear composer on parent re-renders).
   useEffect(() => {
     const p = loadProfile();
     if (!p) {
@@ -79,7 +84,7 @@ export default function ChatThreadPanel({ chatId, embedded = false, onBack }: Pr
     setProfile(p);
     const c = getChat(chatId);
     if (!c) {
-      if (onBack) onBack();
+      if (onBackRef.current) onBackRef.current();
       else router.replace("/chats");
       return;
     }
@@ -90,21 +95,6 @@ export default function ChatThreadPanel({ chatId, embedded = false, onBack }: Pr
     lastScannedRef.current = c.messages[c.messages.length - 1]?.id || "";
     lastUpdatedRef.current = c.updatedAt;
     void refreshDirectory();
-
-    if (searchParams.get("paid") === "1") {
-      const pending = takePendingBooking(chatId);
-      if (pending && !c.tableProposal?.booked) {
-        ignoreChatsEventRef.current = true;
-        const updated = bookTable(chatId, pending.meetupAt, pending.phone, "card");
-        if (updated) {
-          lastUpdatedRef.current = updated.updatedAt;
-          setChat({ ...updated, messages: [...updated.messages] });
-          void settleBookedMeeting(updated.memberIds);
-        }
-        void import("@/lib/notify").then((n) => n.ensureNotifyPermission());
-      }
-      router.replace(`/chats?c=${encodeURIComponent(chatId)}`);
-    }
 
     const refresh = () => {
       const next = getChat(chatId);
@@ -123,7 +113,6 @@ export default function ChatThreadPanel({ chatId, embedded = false, onBack }: Pr
       lastScannedRef.current = last.id;
       if (
         shouldSuggestMeetingSpots(last.text) &&
-        p &&
         !(next.tableProposal && !next.tableProposal.booked)
       ) {
         const peers = loadDirectory().filter((x) => next.memberIds.includes(x.id));
@@ -166,7 +155,28 @@ export default function ChatThreadPanel({ chatId, embedded = false, onBack }: Pr
       window.removeEventListener("meetpoint:chats-changed", refresh);
       window.clearInterval(poll);
     };
-  }, [chatId, router, searchParams, onBack]);
+  }, [chatId, router]);
+
+  // Stripe return — finish booking once per chat, without resetting the composer.
+  useEffect(() => {
+    if (searchParams.get("paid") !== "1") return;
+    if (paidHandledRef.current === chatId) return;
+    paidHandledRef.current = chatId;
+    const c = getChat(chatId);
+    if (!c) return;
+    const pending = takePendingBooking(chatId);
+    if (pending && !c.tableProposal?.booked) {
+      ignoreChatsEventRef.current = true;
+      const updated = bookTable(chatId, pending.meetupAt, pending.phone, "card");
+      if (updated) {
+        lastUpdatedRef.current = updated.updatedAt;
+        setChat({ ...updated, messages: [...updated.messages] });
+        void settleBookedMeeting(updated.memberIds);
+      }
+      void import("@/lib/notify").then((n) => n.ensureNotifyPermission());
+    }
+    router.replace(`/chats?c=${encodeURIComponent(chatId)}`);
+  }, [chatId, router, searchParams]);
 
   function maybeSuggestFood(message: string, memberIds: string[]) {
     if (!profile || !shouldSuggestMeetingSpots(message)) return;
