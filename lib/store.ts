@@ -248,7 +248,7 @@ function scheduleDemoAccept(peerId: string) {
     window.dispatchEvent(
       new CustomEvent("meetpoint:toast", {
         detail: {
-          message: `${first} accepted your introduction. Message them in Circle.`,
+          message: `${first} accepted your introduction. Message them in Chats.`,
           peerId,
         },
       })
@@ -256,14 +256,14 @@ function scheduleDemoAccept(peerId: string) {
     void import("./notify").then(({ pushAppNotification }) =>
       pushAppNotification(
         "Introduction accepted",
-        `${first} accepted. Open Circle to message them.`,
-        { url: "/circle", tag: "conclave-intro" }
+        `${first} accepted. Open Chats to message them.`,
+        { url: "/chats", tag: "conclave-intro" }
       )
     );
   }, delay);
 }
 
-/** Seed one inbound intro so Circle has Accept / Decline — demo mode only. */
+/** Seed one inbound intro so Chats left rail has Accept / Decline — demo mode only. */
 export function ensureSampleInboundRequest(): void {
   if (typeof window === "undefined") return;
   if (!demoProfilesEnabled()) return;
@@ -299,7 +299,7 @@ export function ensureSampleInboundRequest(): void {
     window.dispatchEvent(
       new CustomEvent("meetpoint:toast", {
         detail: {
-          message: `${first} wants an introduction. Open Circle to accept.`,
+          message: `${first} wants an introduction. Open Chats to accept.`,
           peerId: candidate.id,
         },
       })

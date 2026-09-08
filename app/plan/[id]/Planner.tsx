@@ -64,7 +64,7 @@ export default function Planner({ peerId }: { peerId: string }) {
         <main className="mx-auto max-w-3xl px-6 py-16 text-center">
           <p className="text-lg font-semibold">Person not found</p>
           <Link href="/circle" className="mt-2 inline-block text-accent underline">
-            Back to connections
+            Back to circle
           </Link>
         </main>
       </>
@@ -121,7 +121,7 @@ export default function Planner({ peerId }: { peerId: string }) {
             href="/circle"
             className="mt-10 inline-block rounded-full bg-gradient-to-b from-accent-2 to-accent px-8 py-3.5 text-sm font-semibold text-ink transition hover:brightness-110"
           >
-            Back to your circle
+            View your reservations
           </Link>
         </main>
       </>

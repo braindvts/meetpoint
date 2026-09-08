@@ -271,11 +271,21 @@ function ChatThreadInner() {
                   You · {members.map((m) => m.name.split(" ")[0]).join(" · ")}
                 </p>
               </div>
-              <div className="flex shrink-0 -space-x-2">
-                <Avatar src={profile.photo} name={profile.name} sizeCls="h-8 w-8" />
-                {members.slice(0, 3).map((m) => (
-                  <Avatar key={m.id} src={m.photoUrl} name={m.name} sizeCls="h-8 w-8" />
-                ))}
+              <div className="flex shrink-0 items-center gap-2">
+                {members.length === 1 && (
+                  <Link
+                    href={`/plan/${members[0].id}`}
+                    className="hidden text-[10px] font-semibold uppercase tracking-[0.14em] text-accent sm:inline"
+                  >
+                    Plan table
+                  </Link>
+                )}
+                <div className="flex -space-x-2">
+                  <Avatar src={profile.photo} name={profile.name} sizeCls="h-8 w-8" />
+                  {members.slice(0, 3).map((m) => (
+                    <Avatar key={m.id} src={m.photoUrl} name={m.name} sizeCls="h-8 w-8" />
+                  ))}
+                </div>
               </div>
             </div>
           </header>

@@ -1,40 +1,71 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Nav from "@/components/Nav";
 import PageHeader from "@/components/PageHeader";
 import Avatar from "@/components/Avatar";
-import BlackBadge from "@/components/BlackBadge";
-import BlackConnectionBadge from "@/components/BlackConnectionBadge";
-import { blackConnectionWith } from "@/lib/blackStore";
 import EmptyState from "@/components/EmptyState";
-import PersonProfileSheet from "@/components/PersonProfileSheet";
 import RateMeeting from "@/components/RateMeeting";
 import StarRating, { cuisineLine } from "@/components/StarRating";
 import { RESTAURANTS } from "@/lib/data";
-import {
-  acceptConnection,
-  createChat,
-  declineConnection,
-  loadChats,
-  loadConnections,
-  loadProfile,
-  removeConnection,
-} from "@/lib/store";
+import { loadChats, loadConnections, loadProfile } from "@/lib/store";
 import { findPerson, refreshDirectory } from "@/lib/directory";
-import { readClientConnections, readClientProfile } from "@/lib/clientProfile";
-import type { Connection, MyProfile, Person } from "@/lib/types";
+import { readClientProfile } from "@/lib/clientProfile";
+import type { GroupChat, Meetup, MyProfile } from "@/lib/types";
+
+type Reservation =
+  | {
+      kind: "meetup";
+      id: string;
+      peerId: string;
+      meetup: Meetup;
+      restaurantName: string;
+      cuisine?: string;
+      city?: string;
+      whenLabel: string;
+      sortAt: string;
+    }
+  | {
+      kind: "table";
+      id: string;
+      chat: GroupChat;
+      peerIds: string[];
+      restaurantName: string;
+      cuisine?: string;
+      city?: string;
+      whenLabel: string;
+      sortAt: string;
+      feeLabel?: string;
+    };
+
+function formatMeetupDate(date: string): string {
+  return new Date(date + "T12:00:00").toLocaleDateString(undefined, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+}
+
+function formatIso(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleString(undefined, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
 
 export default function ConnectionsPage() {
   const router = useRouter();
   const [profile, setProfile] = useState<MyProfile | null>(() => readClientProfile());
-  const [connections, setConnections] = useState<Connection[]>(() => readClientConnections());
-  const [profilePerson, setProfilePerson] = useState<Person | null>(null);
-  const [, setDirectoryTick] = useState(0);
+  const [tick, setTick] = useState(0);
 
-  const refresh = useCallback(() => setConnections(loadConnections()), []);
+  const refresh = useCallback(() => setTick((n) => n + 1), []);
 
   useEffect(() => {
     const p = loadProfile();
@@ -43,51 +74,62 @@ export default function ConnectionsPage() {
       return;
     }
     setProfile(p);
-    refresh();
-    void refreshDirectory().then(() => setDirectoryTick((n) => n + 1));
-    const onDir = () => setDirectoryTick((n) => n + 1);
+    void refreshDirectory().then(() => refresh());
     window.addEventListener("meetpoint:connections-changed", refresh);
-    window.addEventListener("meetpoint:directory-changed", onDir);
+    window.addEventListener("meetpoint:chats-changed", refresh);
+    window.addEventListener("meetpoint:directory-changed", refresh);
     return () => {
       window.removeEventListener("meetpoint:connections-changed", refresh);
-      window.removeEventListener("meetpoint:directory-changed", onDir);
+      window.removeEventListener("meetpoint:chats-changed", refresh);
+      window.removeEventListener("meetpoint:directory-changed", refresh);
     };
   }, [router, refresh]);
 
-  function drop(peerId: string) {
-    setConnections(removeConnection(peerId));
-  }
+  const reservations = useMemo(() => {
+    void tick;
+    const items: Reservation[] = [];
 
-  function accept(peerId: string) {
-    setConnections(acceptConnection(peerId));
-  }
-
-  function decline(peerId: string) {
-    setConnections(declineConnection(peerId));
-  }
-
-  function messagePeer(peerId: string, peerName: string) {
-    const existing = loadChats().find(
-      (c) => c.memberIds.length === 1 && c.memberIds[0] === peerId
-    );
-    if (existing) {
-      router.push(`/chats/${existing.id}`);
-      return;
+    for (const conn of loadConnections()) {
+      if (!conn.meetup) continue;
+      const restaurant = RESTAURANTS.find((r) => r.id === conn.meetup!.restaurantId);
+      items.push({
+        kind: "meetup",
+        id: `meetup-${conn.peerId}`,
+        peerId: conn.peerId,
+        meetup: conn.meetup,
+        restaurantName: restaurant?.name || "Restaurant",
+        cuisine: restaurant ? cuisineLine(restaurant.cuisine) : undefined,
+        city: restaurant?.city,
+        whenLabel: formatMeetupDate(conn.meetup.date),
+        sortAt: `${conn.meetup.date}T12:00:00`,
+      });
     }
-    const chat = createChat(peerName.split(" ")[0], [peerId]);
-    router.push(`/chats/${chat.id}`);
-  }
+
+    for (const chat of loadChats()) {
+      const tp = chat.tableProposal;
+      if (!tp?.booked) continue;
+      const when = tp.meetupAt || tp.bookedAt || chat.updatedAt;
+      items.push({
+        kind: "table",
+        id: `table-${chat.id}`,
+        chat,
+        peerIds: chat.memberIds,
+        restaurantName: tp.restaurantName,
+        cuisine: tp.cuisine,
+        city: tp.city,
+        whenLabel: tp.meetupAt ? formatIso(tp.meetupAt) : "Booked",
+        sortAt: when,
+        feeLabel:
+          tp.totalChargedUsd != null
+            ? `$${tp.totalChargedUsd} table fee`
+            : undefined,
+      });
+    }
+
+    return items.sort((a, b) => a.sortAt.localeCompare(b.sortAt));
+  }, [tick]);
 
   if (!profile) return null;
-
-  const connected = connections.filter((c) => c.status === "connected");
-  const inbound = connections.filter(
-    (c) => c.status === "requested" && c.direction === "in"
-  );
-  const outbound = connections.filter(
-    (c) => c.status === "requested" && c.direction !== "in"
-  );
-  const ordered = [...inbound, ...outbound, ...connected];
 
   return (
     <>
@@ -95,176 +137,138 @@ export default function ConnectionsPage() {
       <main className="mp-app px-0 pb-10 md:px-6">
         <PageHeader title="Circle" />
         <div className="px-4 pt-2">
-          <p className="text-[14px] text-ivory/70">Your introductions</p>
+          <p className="text-[14px] text-ivory/70">Booked tables & business dinners</p>
           <p className="mt-1 text-[12px] text-muted">
-            {connections.length > 0
-              ? `${connected.length} connected${
-                  inbound.length ? ` · ${inbound.length} to review` : ""
-                }${outbound.length ? ` · ${outbound.length} waiting` : ""}`
-              : "Introductions you accept live here."}
+            {reservations.length > 0
+              ? `${reservations.length} reservation${reservations.length === 1 ? "" : "s"}`
+              : "Tables you book land here."}
           </p>
         </div>
 
         <div className="px-4 pb-6 pt-4">
-        {connections.length === 0 ? (
-          <EmptyState
-            title="Your circle awaits"
-            body="Step into the room and connect with someone who shares your ambition."
-            actionHref="/discover"
-            actionLabel="Discover"
-          />
-        ) : (
-          <div className="mp-stagger space-y-3">
-            {inbound.length > 0 && (
-              <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-accent">
-                Requests for you
-              </p>
-            )}
-            {ordered.map((conn) => {
-              const person = findPerson(conn.peerId);
-              if (!person) return null;
-              const restaurant = conn.meetup
-                ? RESTAURANTS.find((r) => r.id === conn.meetup!.restaurantId)
-                : null;
-              const isInbound = conn.direction === "in" && conn.status === "requested";
-
-              return (
-                <div
-                  key={conn.peerId}
-                  className={`mp-row mp-person-card p-3 ${
-                    isInbound ? "bg-accent/[0.06]" : ""
-                  }`}
-                >
-                  <div className="relative flex flex-wrap items-center justify-between gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setProfilePerson(person)}
-                      className="flex min-w-0 items-center gap-3 text-left sm:gap-4"
+          {reservations.length === 0 ? (
+            <EmptyState
+              title="No reservations yet"
+              body="Chat with a connection, propose a table, and book it — your dinners show up in Circle."
+              actionHref="/chats"
+              actionLabel="Open chats"
+            />
+          ) : (
+            <div className="mp-stagger space-y-4">
+              {reservations.map((item) => {
+                if (item.kind === "meetup") {
+                  const person = findPerson(item.peerId);
+                  const restaurant = RESTAURANTS.find(
+                    (r) => r.id === item.meetup.restaurantId
+                  );
+                  return (
+                    <article
+                      key={item.id}
+                      className="mp-person-card border border-accent/20 bg-accent/[0.05] p-4"
                     >
-                      <Avatar
-                        src={person.photoUrl}
-                        name={person.name}
-                        sizeCls="h-14 w-14 sm:h-16 sm:w-16"
-                        rounded="rounded-[12px]"
-                      />
-                      <div className="min-w-0">
-                        <h3 className="truncate font-display text-xl font-semibold text-ivory sm:text-2xl">
-                          {person.name}
-                        </h3>
-                        <p className="mt-0.5 truncate text-[11px] text-muted">
-                          {person.jobTitle} · {person.city.name}
-                        </p>
-                        <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                          {person.black ? <BlackBadge size="xs" /> : null}
-                          {blackConnectionWith(person.id) ? (
-                            <BlackConnectionBadge count={1} labeled />
-                          ) : null}
-                        </div>
-                        <p className="mt-1 text-[11px] text-accent">
-                          {isInbound ? "Wants an introduction" : "View profile"}
-                        </p>
-                      </div>
-                    </button>
-
-                    <div className="flex flex-wrap items-center gap-2">
-                      {isInbound ? (
-                        <>
-                          <button
-                            type="button"
-                            onClick={() => accept(person.id)}
-                            className="rounded-md bg-gradient-to-b from-accent-2 to-accent px-3 py-1.5 text-[11px] font-medium text-ink"
-                          >
-                            Accept
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => decline(person.id)}
-                            className="border border-line px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted"
-                          >
-                            Decline
-                          </button>
-                        </>
-                      ) : conn.status === "requested" ? (
-                        <span className="border border-line bg-panel-2 px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">
-                          Awaiting them
-                        </span>
-                      ) : (
-                        <>
-                          <button
-                            type="button"
-                            onClick={() => messagePeer(person.id, person.name)}
-                            className="border border-accent/30 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-ivory transition hover:border-accent/60"
-                          >
-                            Message
-                          </button>
-                          <Link
-                            href={`/plan/${person.id}`}
-                            className={`px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] ${
-                              conn.meetup
-                                ? "border border-line text-ivory hover:border-accent/40"
-                                : "mp-btn-lux bg-gradient-to-b from-accent-2 to-accent text-ink"
-                            }`}
-                          >
-                            {conn.meetup ? "Edit meetup" : "Plan meetup"}
-                          </Link>
-                        </>
-                      )}
-                      {!isInbound && (
-                        <button
-                          type="button"
-                          onClick={() => drop(conn.peerId)}
-                          title="Remove"
-                          className="border border-line px-3 py-2 text-sm text-muted transition hover:text-ivory"
-                        >
-                          ✕
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  {conn.meetup && restaurant && (
-                    <div className="relative mt-4 border border-accent/25 bg-accent/[0.06] p-4 text-sm">
                       <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-accent">
-                        The table is set
+                        Planned meetup
                       </p>
-                      <p className="mt-2 text-lg text-ivory">{restaurant.name}</p>
+                      <h2 className="mt-2 font-display text-2xl font-semibold text-ivory">
+                        {item.restaurantName}
+                      </h2>
                       <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
-                        <StarRating restaurant={restaurant} />
-                        <span className="text-[13px] text-ivory/55">
-                          {cuisineLine(restaurant.cuisine)}
-                        </span>
+                        {restaurant && <StarRating restaurant={restaurant} />}
+                        {item.cuisine && (
+                          <span className="text-[13px] text-ivory/55">{item.cuisine}</span>
+                        )}
+                        {item.city && (
+                          <span className="text-[13px] text-muted">· {item.city}</span>
+                        )}
                       </div>
-                      <p className="mt-1 text-muted">
-                        {new Date(conn.meetup.date + "T12:00:00").toLocaleDateString(undefined, {
-                          weekday: "long",
-                          month: "long",
-                          day: "numeric",
-                        })}
-                        {conn.meetup.note ? ` · “${conn.meetup.note}”` : ""}
-                      </p>
-                      {conn.status === "connected" && (
-                        <RateMeeting peerId={person.id} peerName={person.name} />
+                      <p className="mt-3 text-sm text-ivory">{item.whenLabel}</p>
+                      {item.meetup.note && (
+                        <p className="mt-1 text-sm text-muted">“{item.meetup.note}”</p>
                       )}
+                      <div className="mt-4 flex flex-wrap items-center gap-3">
+                        {person && (
+                          <div className="flex items-center gap-2">
+                            <Avatar
+                              src={person.photoUrl}
+                              name={person.name}
+                              sizeCls="h-9 w-9"
+                              rounded="rounded-[10px]"
+                            />
+                            <span className="text-sm text-ivory">{person.name}</span>
+                          </div>
+                        )}
+                        <Link
+                          href={`/plan/${item.peerId}`}
+                          className="border border-line px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted hover:text-ivory"
+                        >
+                          Edit
+                        </Link>
+                        {person && (
+                          <RateMeeting peerId={person.id} peerName={person.name} />
+                        )}
+                      </div>
+                    </article>
+                  );
+                }
+
+                const peers = item.peerIds
+                  .map((id) => findPerson(id))
+                  .filter(Boolean);
+                return (
+                  <article
+                    key={item.id}
+                    className="mp-person-card border border-accent/25 bg-gradient-to-b from-accent/[0.08] to-transparent p-4"
+                  >
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-accent">
+                      Booked reservation
+                    </p>
+                    <h2 className="mt-2 font-display text-2xl font-semibold text-ivory">
+                      {item.restaurantName}
+                    </h2>
+                    <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-ivory/55">
+                      {item.cuisine && <span>{item.cuisine}</span>}
+                      {item.city && <span>· {item.city}</span>}
+                      {item.feeLabel && <span className="text-muted">· {item.feeLabel}</span>}
                     </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
+                    <p className="mt-3 text-sm text-ivory">{item.whenLabel}</p>
+                    {peers.length > 0 && (
+                      <div className="mt-4 flex flex-wrap items-center gap-2">
+                        {peers.map((p) =>
+                          p ? (
+                            <div key={p.id} className="flex items-center gap-2 pr-2">
+                              <Avatar
+                                src={p.photoUrl}
+                                name={p.name}
+                                sizeCls="h-8 w-8"
+                                rounded="rounded-[10px]"
+                              />
+                              <span className="text-[13px] text-ivory">{p.name.split(" ")[0]}</span>
+                            </div>
+                          ) : null
+                        )}
+                      </div>
+                    )}
+                    <Link
+                      href={`/chats/${item.chat.id}`}
+                      className="mt-4 inline-flex border border-accent/30 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-ivory transition hover:border-accent/60"
+                    >
+                      Open chat
+                    </Link>
+                  </article>
+                );
+              })}
+            </div>
+          )}
+
+          <p className="mt-8 text-center text-[12px] text-muted">
+            Connect requests live in{" "}
+            <Link href="/chats" className="text-accent underline underline-offset-4">
+              Chats
+            </Link>
+            .
+          </p>
         </div>
       </main>
-
-      <PersonProfileSheet
-        open={!!profilePerson}
-        person={profilePerson}
-        onClose={() => setProfilePerson(null)}
-        status={
-          profilePerson
-            ? connections.find((c) => c.peerId === profilePerson.id)?.status
-            : undefined
-        }
-      />
     </>
   );
 }
