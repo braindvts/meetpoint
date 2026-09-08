@@ -30,7 +30,7 @@ Peer invites award BLACK CONNECTION only. They never promote someone to BLACK.
 ## UX
 
 - Level badges: matching metal marks — steel / champagne / black (BLACK is the coolest)
-- BLACK CONNECTION: black checkmark badge (not a chain icon)
+- BLACK CONNECTION: checkmark + “Trusted by BLACK” — keep it separate from the BLACK level badge
 - Never show “Tier N · Name”
 - Signup: Identity required; verification optional (skip = stay Member)
 - Discover cards: even height, no “verified via LinkedIn/email” list

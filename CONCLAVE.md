@@ -82,7 +82,7 @@ Must be **Verified** before activating BLACK.
 
 ### BLACK CONNECTION
 
-Separate from BLACK. Shown as a **black checkmark** next to the name (no “CONN.” text). Earned when a BLACK member connects you privately — never upgrades you to BLACK.
+Separate from BLACK. Shown as a black checkmark with **Trusted by BLACK** (not next to the BLACK level badge). Earned when a BLACK member connects you privately — never upgrades you to BLACK.
 
 ---
 

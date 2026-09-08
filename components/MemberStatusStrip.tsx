@@ -42,7 +42,7 @@ export default function MemberStatusStrip({ profile, tier }: Props) {
       {black && tier !== 3 ? <BlackBadge size="sm" /> : null}
 
       {connections > 0 ? (
-        <BlackConnectionBadge count={connections} showCount />
+        <BlackConnectionBadge count={connections} labeled showCount />
       ) : null}
     </div>
   );

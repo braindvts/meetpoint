@@ -17,6 +17,7 @@ import {
   computeMemberTier,
   hasRequiredVerifications,
   isProfileComplete,
+  missingRequiredVerifications,
   reputationScoreForMeetings,
   scoreProfileStrength,
 } from "@/lib/tiers";
@@ -51,6 +52,17 @@ function ProfileContent() {
     return () => window.removeEventListener("meetpoint:profile-changed", onProfile);
   }, [router]);
 
+  useEffect(() => {
+    if (!needsVerify) return;
+    const timer = window.setTimeout(() => {
+      document.getElementById("section-verification")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 200);
+    return () => window.clearTimeout(timer);
+  }, [needsVerify]);
+
   function reset() {
     if (confirm("Delete your profile and all connections?")) {
       clearProfile();
@@ -61,6 +73,7 @@ function ProfileContent() {
   if (!profile) return null;
 
   const strength = scoreProfileStrength(profile);
+  const missingVerify = missingRequiredVerifications(profile.verifications);
   const tierInput = {
     verified: hasRequiredVerifications(profile.verifications),
     profileComplete: isProfileComplete(profile),
@@ -77,9 +90,37 @@ function ProfileContent() {
         <PageHeader title="Profile" />
         <div className="px-4 pb-6 pt-2">
         {needsVerify && (
-          <div className="mb-4 rounded-xl border border-accent/30 bg-accent/5 px-3 py-2 text-[12px] leading-snug text-accent-2">
-            To connect with Verified or BLACK members, add business email, LinkedIn, and resume
-            below.
+          <div className="mb-4 rounded-xl border border-accent/45 bg-accent/[0.08] px-3.5 py-3 text-[13px] leading-snug text-accent-2">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-accent">
+              Verification required
+            </p>
+            <p className="mt-1.5">
+              To connect with Verified or BLACK members you must become{" "}
+              <span className="font-semibold text-ivory">Verified</span>. Complete the{" "}
+              <button
+                type="button"
+                className="font-semibold underline underline-offset-2"
+                onClick={() =>
+                  document.getElementById("section-verification")?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start",
+                  })
+                }
+              >
+                Verification
+              </button>{" "}
+              section below
+              {missingVerify.length > 0 ? (
+                <>
+                  {" "}
+                  — still needed:{" "}
+                  <span className="font-semibold text-ivory">{missingVerify.join(" · ")}</span>
+                </>
+              ) : (
+                <> and save your profile</>
+              )}
+              .
+            </p>
           </div>
         )}
 
@@ -136,7 +177,7 @@ function ProfileContent() {
         <p className="mb-2.5 mt-6 scroll-mt-20 text-[12px] font-medium text-accent" id="edit-details">
           Edit details
         </p>
-        <ProfileForm initial={profile} />
+        <ProfileForm initial={profile} focusVerification={needsVerify} />
         </div>
       </main>
 

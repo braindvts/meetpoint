@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CITIES, cityKey, indexOfCity, nearestCity } from "@/lib/cities";
 import { IDEA_TAGS, POPULAR_TAGS } from "@/lib/data";
@@ -133,7 +133,14 @@ function TagChip({
   );
 }
 
-export default function ProfileForm({ initial }: { initial?: MyProfile | null }) {
+export default function ProfileForm({
+  initial,
+  focusVerification = false,
+}: {
+  initial?: MyProfile | null;
+  /** From Discover when Connect is locked — scroll to and highlight Verification. */
+  focusVerification?: boolean;
+}) {
   const router = useRouter();
   const [name, setName] = useState(initial?.name ?? "");
   const [jobTitle, setJobTitle] = useState(initial?.jobTitle ?? "");
@@ -165,6 +172,25 @@ export default function ProfileForm({ initial }: { initial?: MyProfile | null })
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<string, string>>>({});
   const [missingItems, setMissingItems] = useState<string[]>([]);
+  const [highlightVerify, setHighlightVerify] = useState(focusVerification);
+
+  const missingVerifiedFields = useMemo(() => {
+    return VERIFICATION_OPTIONS.filter(
+      (o) => o.forVerified && !String(verifyValues[o.method] || "").trim()
+    ).map((o) => o.label);
+  }, [verifyValues]);
+
+  useEffect(() => {
+    if (!focusVerification) return;
+    setHighlightVerify(true);
+    const timer = window.setTimeout(() => {
+      document.getElementById("section-verification")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 120);
+    return () => window.clearTimeout(timer);
+  }, [focusVerification]);
 
   function clearFieldError(key: string) {
     setFieldErrors((prev) => {
@@ -627,40 +653,82 @@ export default function ProfileForm({ initial }: { initial?: MyProfile | null })
         id="section-verification"
         num="04"
         title="Verification"
-        subtitle="Optional. Skip for now and stay a Member — add all three later to become Verified."
-        missing={!!fieldErrors.verification}
-        missingLabel={fieldErrors.verification}
+        subtitle={
+          highlightVerify
+            ? "Complete this section to become Verified — then you can connect with Verified and BLACK members."
+            : "Optional. Skip for now and stay a Member — add all three later to become Verified."
+        }
+        missing={highlightVerify || !!fieldErrors.verification}
+        missingLabel={
+          fieldErrors.verification ||
+          (highlightVerify && missingVerifiedFields.length
+            ? `Still needed: ${missingVerifiedFields.join(" · ")}`
+            : highlightVerify
+              ? "Fill business email, LinkedIn, and resume to become Verified."
+              : undefined)
+        }
       >
-        <div className={`space-y-3 ${fieldErrors.verification ? "rounded-sm border border-accent/35 p-2.5 sm:p-3" : ""}`}>
-          <p className="text-[11px] leading-relaxed text-muted sm:text-xs">
-            Identity alone makes you a <span className="text-ivory">Member</span>. To become{" "}
-            <span className="text-accent-2">Verified</span>, add business email, LinkedIn, and
-            resume. Website and portfolio are extras.
-          </p>
-          {VERIFICATION_OPTIONS.map((o) => (
-            <label key={o.method} className="block">
-              <span className={labelCls}>
-                {o.label}
-                {o.forVerified ? " · for Verified" : " · optional"}
-              </span>
-              {o.method === "linkedin" && initial?.linkedInId && !verifyValues.linkedin?.startsWith("http") ? (
-                <p className="mt-1 border border-accent/30 bg-accent/5 px-3 py-2 text-[11px] text-accent-2">
-                  LinkedIn connected — that counts. Add your public URL to show it on your card.
-                </p>
-              ) : null}
-              <input
-                className={fieldErrors.verification ? fieldWarn : field}
-                value={verifyValues[o.method] || ""}
-                onChange={(e) => {
-                  setVerifyValues((prev) => ({ ...prev, [o.method]: e.target.value }));
-                  clearFieldError("verification");
-                }}
-                placeholder={o.placeholder}
-                aria-invalid={!!fieldErrors.verification}
-              />
-              <p className="mt-1 hidden text-[11px] text-muted sm:block">{o.hint}</p>
-            </label>
-          ))}
+        <div
+          className={`space-y-3 ${
+            highlightVerify || fieldErrors.verification
+              ? "rounded-sm border border-accent/50 bg-accent/[0.06] p-2.5 sm:p-3"
+              : ""
+          }`}
+        >
+          {highlightVerify ? (
+            <p className="text-[12px] leading-relaxed text-accent-2 sm:text-[13px]">
+              To connect beyond Members you must be <span className="font-semibold">Verified</span>.
+              Complete the three fields marked below, then save.
+            </p>
+          ) : (
+            <p className="text-[11px] leading-relaxed text-muted sm:text-xs">
+              Identity alone makes you a <span className="text-ivory">Member</span>. To become{" "}
+              <span className="text-accent-2">Verified</span>, add business email, LinkedIn, and
+              resume. Website and portfolio are extras.
+            </p>
+          )}
+          {VERIFICATION_OPTIONS.map((o) => {
+            const empty = !String(verifyValues[o.method] || "").trim();
+            const needed = highlightVerify && o.forVerified && empty;
+            return (
+              <label
+                key={o.method}
+                className={`block ${
+                  needed
+                    ? "rounded-md border border-accent/45 bg-accent/[0.08] px-2.5 py-2 sm:px-3"
+                    : ""
+                }`}
+              >
+                <span className={`${labelCls} ${needed ? "text-accent-2" : ""}`}>
+                  {o.label}
+                  {o.forVerified ? " · for Verified" : " · optional"}
+                  {needed ? (
+                    <span className="ml-2 inline-block border border-accent/40 px-1.5 py-px text-[8px] font-semibold uppercase tracking-[0.14em] text-accent">
+                      Needed
+                    </span>
+                  ) : null}
+                </span>
+                {o.method === "linkedin" &&
+                initial?.linkedInId &&
+                !verifyValues.linkedin?.startsWith("http") ? (
+                  <p className="mt-1 border border-accent/30 bg-accent/5 px-3 py-2 text-[11px] text-accent-2">
+                    LinkedIn connected — that counts. Add your public URL to show it on your card.
+                  </p>
+                ) : null}
+                <input
+                  className={needed || fieldErrors.verification ? fieldWarn : field}
+                  value={verifyValues[o.method] || ""}
+                  onChange={(e) => {
+                    setVerifyValues((prev) => ({ ...prev, [o.method]: e.target.value }));
+                    clearFieldError("verification");
+                  }}
+                  placeholder={o.placeholder}
+                  aria-invalid={needed || !!fieldErrors.verification}
+                />
+                <p className="mt-1 hidden text-[11px] text-muted sm:block">{o.hint}</p>
+              </label>
+            );
+          })}
         </div>
       </Section>
 
