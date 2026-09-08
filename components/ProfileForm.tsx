@@ -287,6 +287,12 @@ export default function ProfileForm({
       if (opt.method === "linkedin" && initial?.linkedInId && !raw) {
         raw = `linkedin:${initial.linkedInId}`;
       }
+      // When sent here to get Verified, require only the three Verified fields.
+      if (highlightVerify && opt.forVerified && !raw) {
+        nextErrors.verification = "Add business email, LinkedIn, and resume to become Verified.";
+        missing.push(opt.label);
+        continue;
+      }
       if (!raw) continue;
       const checked = validateVerification(opt.method, raw);
       if (!checked.ok) {
@@ -296,7 +302,7 @@ export default function ProfileForm({
       }
       verifications.push(makeVerification(opt.method, checked.value));
     }
-    // Verifications are optional — skipping them keeps you a Member (not Verified).
+    // Optional extras (website / registration / portfolio) never block Verified.
 
     setFieldErrors(nextErrors);
     setMissingItems(missing);
@@ -655,80 +661,111 @@ export default function ProfileForm({
         title="Verification"
         subtitle={
           highlightVerify
-            ? "Complete this section to become Verified — then you can connect with Verified and BLACK members."
-            : "Optional. Skip for now and stay a Member — add all three later to become Verified."
+            ? "Only three fields make you Verified: business email, LinkedIn, and resume."
+            : "Optional for Member. Add business email + LinkedIn + resume anytime to become Verified."
         }
-        missing={highlightVerify || !!fieldErrors.verification}
+        missing={
+          !!fieldErrors.verification ||
+          (highlightVerify && missingVerifiedFields.length > 0)
+        }
         missingLabel={
           fieldErrors.verification ||
           (highlightVerify && missingVerifiedFields.length
-            ? `Still needed: ${missingVerifiedFields.join(" · ")}`
-            : highlightVerify
-              ? "Fill business email, LinkedIn, and resume to become Verified."
-              : undefined)
+            ? `Still needed for Verified: ${missingVerifiedFields.join(" · ")}`
+            : undefined)
         }
       >
-        <div
-          className={`space-y-3 ${
-            highlightVerify || fieldErrors.verification
-              ? "rounded-sm border border-accent/50 bg-accent/[0.06] p-2.5 sm:p-3"
-              : ""
-          }`}
-        >
+        <div className="space-y-4">
           {highlightVerify ? (
-            <p className="text-[12px] leading-relaxed text-accent-2 sm:text-[13px]">
-              To connect beyond Members you must be <span className="font-semibold">Verified</span>.
-              Complete the three fields marked below, then save.
+            <p className="rounded-md border border-accent/40 bg-accent/[0.08] px-3 py-2.5 text-[12px] leading-relaxed text-accent-2 sm:text-[13px]">
+              To connect beyond Members, complete{" "}
+              <span className="font-semibold text-ivory">only these three</span> — then save.
+              Website, registration, and portfolio are optional extras.
             </p>
           ) : (
             <p className="text-[11px] leading-relaxed text-muted sm:text-xs">
               Identity alone makes you a <span className="text-ivory">Member</span>. To become{" "}
-              <span className="text-accent-2">Verified</span>, add business email, LinkedIn, and
-              resume. Website and portfolio are extras.
+              <span className="text-accent-2">Verified</span>, add the three fields below. Everything
+              under Optional extras can stay empty.
             </p>
           )}
-          {VERIFICATION_OPTIONS.map((o) => {
-            const empty = !String(verifyValues[o.method] || "").trim();
-            const needed = highlightVerify && o.forVerified && empty;
-            return (
-              <label
-                key={o.method}
-                className={`block ${
-                  needed
-                    ? "rounded-md border border-accent/45 bg-accent/[0.08] px-2.5 py-2 sm:px-3"
-                    : ""
-                }`}
-              >
-                <span className={`${labelCls} ${needed ? "text-accent-2" : ""}`}>
-                  {o.label}
-                  {o.forVerified ? " · for Verified" : " · optional"}
-                  {needed ? (
-                    <span className="ml-2 inline-block border border-accent/40 px-1.5 py-px text-[8px] font-semibold uppercase tracking-[0.14em] text-accent">
-                      Needed
-                    </span>
+
+          <div
+            className={`space-y-3 ${
+              highlightVerify || fieldErrors.verification
+                ? "rounded-sm border border-accent/45 bg-accent/[0.05] p-2.5 sm:p-3"
+                : ""
+            }`}
+          >
+            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-accent">
+              Required for Verified
+            </p>
+            {VERIFICATION_OPTIONS.filter((o) => o.forVerified).map((o) => {
+              const empty = !String(verifyValues[o.method] || "").trim();
+              const needed = highlightVerify && empty;
+              const errored =
+                !!fieldErrors.verification &&
+                missingItems.includes(o.label);
+              return (
+                <label
+                  key={o.method}
+                  className={`block ${
+                    needed || errored
+                      ? "rounded-md border border-accent/45 bg-accent/[0.08] px-2.5 py-2 sm:px-3"
+                      : ""
+                  }`}
+                >
+                  <span className={`${labelCls} ${needed || errored ? "text-accent-2" : ""}`}>
+                    {o.label}
+                    {needed || errored ? (
+                      <span className="ml-2 inline-block border border-accent/40 px-1.5 py-px text-[8px] font-semibold uppercase tracking-[0.14em] text-accent">
+                        Needed
+                      </span>
+                    ) : null}
+                  </span>
+                  {o.method === "linkedin" &&
+                  initial?.linkedInId &&
+                  !verifyValues.linkedin?.startsWith("http") ? (
+                    <p className="mt-1 border border-accent/30 bg-accent/5 px-3 py-2 text-[11px] text-accent-2">
+                      LinkedIn connected — that counts. Add your public URL to show it on your card.
+                    </p>
                   ) : null}
-                </span>
-                {o.method === "linkedin" &&
-                initial?.linkedInId &&
-                !verifyValues.linkedin?.startsWith("http") ? (
-                  <p className="mt-1 border border-accent/30 bg-accent/5 px-3 py-2 text-[11px] text-accent-2">
-                    LinkedIn connected — that counts. Add your public URL to show it on your card.
-                  </p>
-                ) : null}
+                  <input
+                    className={needed || errored ? fieldWarn : field}
+                    value={verifyValues[o.method] || ""}
+                    onChange={(e) => {
+                      setVerifyValues((prev) => ({ ...prev, [o.method]: e.target.value }));
+                      clearFieldError("verification");
+                    }}
+                    placeholder={o.placeholder}
+                    aria-invalid={needed || errored}
+                  />
+                  <p className="mt-1 text-[11px] text-muted">{o.hint}</p>
+                </label>
+              );
+            })}
+          </div>
+
+          <div className="space-y-3 border-t border-white/[0.06] pt-3">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">
+              Optional extras — not required for Verified
+            </p>
+            {VERIFICATION_OPTIONS.filter((o) => !o.forVerified).map((o) => (
+              <label key={o.method} className="block">
+                <span className={labelCls}>{o.label}</span>
                 <input
-                  className={needed || fieldErrors.verification ? fieldWarn : field}
+                  className={field}
                   value={verifyValues[o.method] || ""}
                   onChange={(e) => {
                     setVerifyValues((prev) => ({ ...prev, [o.method]: e.target.value }));
                     clearFieldError("verification");
                   }}
                   placeholder={o.placeholder}
-                  aria-invalid={needed || !!fieldErrors.verification}
                 />
                 <p className="mt-1 hidden text-[11px] text-muted sm:block">{o.hint}</p>
               </label>
-            );
-          })}
+            ))}
+          </div>
         </div>
       </Section>
 

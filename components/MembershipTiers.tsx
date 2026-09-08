@@ -6,9 +6,10 @@ import { TIER_DEFINITIONS, nextTierProgress, type TierInput } from "@/lib/tiers"
 interface Props {
   input: TierInput;
   missing?: string[];
+  missingHint?: string;
 }
 
-export default function MembershipTiers({ input, missing }: Props) {
+export default function MembershipTiers({ input, missing, missingHint }: Props) {
   const progress = nextTierProgress(input);
 
   return (
@@ -83,7 +84,8 @@ export default function MembershipTiers({ input, missing }: Props) {
       </div>
       {missing && missing.length > 0 && progress.current < 3 && (
         <p className="mt-3 text-[11px] leading-relaxed text-muted">
-          Still open: {missing.slice(0, 4).join(" · ")}.
+          {missingHint ? `${missingHint}: ` : "Still open: "}
+          {missing.slice(0, 4).join(" · ")}.
         </p>
       )}
     </section>

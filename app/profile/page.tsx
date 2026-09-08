@@ -103,31 +103,19 @@ function ProfileContent() {
               Verification required
             </p>
             <p className="mt-1.5">
-              To connect with Verified or BLACK members you must become{" "}
-              <span className="font-semibold text-ivory">Verified</span>. Complete the{" "}
-              <button
-                type="button"
-                className="font-semibold underline underline-offset-2"
-                onClick={() =>
-                  document.getElementById("section-verification")?.scrollIntoView({
-                    behavior: "smooth",
-                    block: "start",
-                  })
-                }
-              >
-                Verification
-              </button>{" "}
-              section below
+              To connect beyond Members, become{" "}
+              <span className="font-semibold text-ivory">Verified</span> with only{" "}
+              <span className="font-semibold text-ivory">
+                business email · LinkedIn · resume
+              </span>
+              . Website and portfolio are optional.
               {missingVerify.length > 0 ? (
                 <>
                   {" "}
-                  — still needed:{" "}
-                  <span className="font-semibold text-ivory">{missingVerify.join(" · ")}</span>
+                  Still needed:{" "}
+                  <span className="font-semibold text-ivory">{missingVerify.join(" · ")}</span>.
                 </>
-              ) : (
-                <> and save your profile</>
-              )}
-              .
+              ) : null}
             </p>
           </div>
         )}
@@ -180,7 +168,21 @@ function ProfileContent() {
           </button>
         </section>
 
-        <MembershipTiers input={tierInput} missing={strength.missing} />
+        <MembershipTiers
+          input={tierInput}
+          missing={
+            tierInput.verified
+              ? strength.missing.filter(
+                  (m) => !["Business email", "LinkedIn", "Resume"].includes(m)
+                )
+              : missingVerify
+          }
+          missingHint={
+            tierInput.verified
+              ? "Optional extras for a stronger profile"
+              : "Only these three for Verified"
+          }
+        />
 
         <p className="mb-2.5 mt-6 scroll-mt-20 text-[12px] font-medium text-accent" id="edit-details">
           Edit details
