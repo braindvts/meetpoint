@@ -6,11 +6,9 @@ import { useRouter } from "next/navigation";
 import Nav from "@/components/Nav";
 import MatchCard from "@/components/MatchCard";
 import PersonProfileSheet from "@/components/PersonProfileSheet";
-import PremierPlanSheet from "@/components/PremierPlanSheet";
 import { filterByPreference, rankMatches } from "@/lib/match";
-import { canIntroduceToTier, hasActivePremier } from "@/lib/plans";
+import { canIntroduceToTier } from "@/lib/plans";
 import {
-  activatePremierPlan,
   ensureSampleInboundRequest,
   getMeetingsAttended,
   getPeerReputation,
@@ -32,7 +30,7 @@ import EmptyState from "@/components/EmptyState";
 import NotifyPrompt from "@/components/NotifyPrompt";
 import SkeletonCard from "@/components/SkeletonCard";
 import TierBadge from "@/components/TierBadge";
-import { myBlackConnectionCount, syncBlackFromServer } from "@/lib/blackStore";
+import { syncBlackFromServer } from "@/lib/blackStore";
 import { track } from "@/lib/analytics";
 
 type Filter = "open" | "local";
@@ -48,13 +46,10 @@ export default function DiscoverPage() {
   const [filter, setFilter] = useState<Filter>("open");
   const [rankFilter, setRankFilter] = useState<MemberTier[]>([]);
   const [filterOpen, setFilterOpen] = useState(false);
-  const [premierOpen, setPremierOpen] = useState(false);
-  const [premierPeerName, setPremierPeerName] = useState<string | undefined>();
   const [skipped, setSkipped] = useState<string[]>([]);
   const [exiting, setExiting] = useState<string | null>(null);
   const [profilePerson, setProfilePerson] = useState<Person | null>(null);
   const [directoryReady, setDirectoryReady] = useState(() => loadDirectory().length > 0);
-  const [blackConnections, setBlackConnections] = useState(0);
 
   const refreshConnections = useCallback(() => setConnections(loadConnections()), []);
 
@@ -81,16 +76,12 @@ export default function DiscoverPage() {
     window.addEventListener("meetpoint:connections-changed", refreshConnections);
     window.addEventListener("meetpoint:profile-changed", onProfile);
     window.addEventListener("meetpoint:directory-changed", onDir);
-    const onBlack = () => setBlackConnections(myBlackConnectionCount());
-    onBlack();
-    void syncBlackFromServer().then(onBlack);
-    window.addEventListener("meetpoint:black-changed", onBlack);
+    void syncBlackFromServer();
     window.addEventListener("meetpoint:blocks-changed", onBlocks);
     return () => {
       window.removeEventListener("meetpoint:connections-changed", refreshConnections);
       window.removeEventListener("meetpoint:profile-changed", onProfile);
       window.removeEventListener("meetpoint:directory-changed", onDir);
-      window.removeEventListener("meetpoint:black-changed", onBlack);
       window.removeEventListener("meetpoint:blocks-changed", onBlocks);
     };
   }, [router, refreshConnections]);
@@ -140,23 +131,12 @@ export default function DiscoverPage() {
     return tierForProfile(profile, getMeetingsAttended(profile));
   }, [profile]);
 
-  const premier = hasActivePremier(profile);
-  const myBlackConnections = blackConnections;
-
   function connect(peerId: string) {
     setConnections(requestConnection(peerId));
   }
 
-  function needPremier(peerId: string) {
-    const person = people.find((p) => p.id === peerId);
-    setPremierPeerName(person?.name);
-    setPremierOpen(true);
-  }
-
-  function subscribe(interval: "month" | "year") {
-    const next = activatePremierPlan(interval);
-    if (next) setProfile(next);
-    setPremierOpen(false);
+  function needVerified() {
+    router.push("/profile?verify=1#edit-details");
   }
 
   function skip(id: string) {
@@ -202,16 +182,13 @@ export default function DiscoverPage() {
           <p className="mt-1 text-[13px] leading-snug text-ivory/60 md:mt-2">
             Curated professionals. Meaningful connections.
           </p>
-          {myTier === 1 && !premier && (
+          {myTier === 1 && (
             <button
               type="button"
-              onClick={() => {
-                setPremierPeerName(undefined);
-                setPremierOpen(true);
-              }}
+              onClick={() => needVerified()}
               className="mt-2 text-[12px] font-medium text-accent"
             >
-              Unlock Premier
+              Get Verified to meet anyone
             </button>
           )}
         </header>
@@ -372,7 +349,7 @@ export default function DiscoverPage() {
           ) : (
             <div key={filter} className="mp-stagger grid gap-3 md:grid-cols-2 md:gap-4">
               {filtered.map((m) => {
-                const allowed = canIntroduceToTier(myTier, m.tier, premier, myBlackConnections);
+                const allowed = canIntroduceToTier(myTier, m.tier);
                 const leaving = exiting === m.person.id;
                 return (
                   <div
@@ -387,7 +364,7 @@ export default function DiscoverPage() {
                       canConnect={allowed}
                       onConnect={connect}
                       onSkip={skip}
-                      onNeedPremier={needPremier}
+                      onNeedVerified={needVerified}
                       onOpenProfile={(id) => {
                         const p = people.find((x) => x.id === id) || null;
                         setProfilePerson(p);
@@ -414,21 +391,12 @@ export default function DiscoverPage() {
           profilePerson
             ? canIntroduceToTier(
                 myTier,
-                tierForPerson(profilePerson, getPeerReputation(profilePerson.id)),
-                premier,
-                myBlackConnections
+                tierForPerson(profilePerson, getPeerReputation(profilePerson.id))
               )
             : true
         }
         onConnect={connect}
-        onNeedPremier={needPremier}
-      />
-
-      <PremierPlanSheet
-        open={premierOpen}
-        peerName={premierPeerName}
-        onClose={() => setPremierOpen(false)}
-        onSubscribe={subscribe}
+        onNeedVerified={needVerified}
       />
 
       <NotifyPrompt />

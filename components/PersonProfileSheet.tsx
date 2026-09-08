@@ -17,7 +17,7 @@ interface Props {
   status?: ConnectionStatus;
   canConnect?: boolean;
   onConnect?: (peerId: string) => void;
-  onNeedPremier?: (peerId: string) => void;
+  onNeedVerified?: () => void;
   /** When set, shows Edit profile instead of Introduce (self preview). */
   editHref?: string;
   /** Small label above the name area, e.g. “How others see you”. */
@@ -76,7 +76,7 @@ export default function PersonProfileSheet({
   status,
   canConnect = true,
   onConnect,
-  onNeedPremier,
+  onNeedVerified,
   editHref,
   eyebrow,
 }: Props) {
@@ -437,7 +437,7 @@ export default function PersonProfileSheet({
                   type="button"
                   onClick={() => {
                     if (!canConnect) {
-                      onNeedPremier?.(person.id);
+                      onNeedVerified?.();
                       onClose();
                       return;
                     }
@@ -450,7 +450,7 @@ export default function PersonProfileSheet({
                       : "border border-accent/40 text-accent-2"
                   }`}
                 >
-                  {canConnect ? "Connect" : "Premier · Connect"}
+                  {canConnect ? "Connect" : "Get Verified to connect"}
                 </button>
               )}
               <div className="mt-2 flex gap-2">

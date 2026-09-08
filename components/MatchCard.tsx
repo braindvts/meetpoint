@@ -13,7 +13,7 @@ interface Props {
   status?: ConnectionStatus;
   canConnect?: boolean;
   onConnect?: (peerId: string) => void;
-  onNeedPremier?: (peerId: string) => void;
+  onNeedVerified?: () => void;
   onOpenProfile?: (peerId: string) => void;
   onSkip?: (peerId: string) => void;
   preview?: boolean;
@@ -28,7 +28,7 @@ export default function MatchCard({
   status,
   canConnect = true,
   onConnect,
-  onNeedPremier,
+  onNeedVerified,
   onOpenProfile,
   onSkip,
   preview = false,
@@ -64,7 +64,7 @@ export default function MatchCard({
     if (preview) return "Your card";
     if (status === "connected") return "Connected";
     if (status === "requested") return "Waiting";
-    if (!canConnect) return "Unlock Premier to connect";
+    if (!canConnect) return "Get Verified to connect";
     return "Connect";
   }
 
@@ -72,7 +72,7 @@ export default function MatchCard({
     if (preview) return "Your card";
     if (status === "connected") return "Connected";
     if (status === "requested") return "Waiting";
-    if (!canConnect) return "Premier";
+    if (!canConnect) return "Verified";
     return "Connect";
   }
 
@@ -80,7 +80,7 @@ export default function MatchCard({
     e.stopPropagation();
     if (preview) return;
     if (!canConnect) {
-      onNeedPremier?.(person.id);
+      onNeedVerified?.();
       return;
     }
     if (!connectLocked) onConnect?.(person.id);

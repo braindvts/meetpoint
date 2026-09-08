@@ -7,7 +7,6 @@ import { DEMO_PROFILE } from "./demoAccount";
 import { demoEntryEnabled, demoProfilesEnabled } from "./demoFlag";
 import { DEMO_PEOPLE } from "./demoPeople";
 import { findPerson } from "./directory";
-import { trialEndsAt } from "./plans";
 import {
   BOOKING_FEE_PER_PERSON_USD,
   bookingHeadcount,
@@ -23,6 +22,13 @@ import type {
   MyProfile,
   PremierInterval,
 } from "./types";
+
+/** Legacy Premier trial helper — Premier is retired; kept for stored profiles. */
+function trialEndsAt(from = new Date(), days = 3): string {
+  const d = new Date(from);
+  d.setDate(d.getDate() + days);
+  return d.toISOString();
+}
 
 const PROFILE_KEY = "meetpoint.profile";
 const CONNECTIONS_KEY = "meetpoint.connections";

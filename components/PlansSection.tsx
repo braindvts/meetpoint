@@ -11,37 +11,24 @@ import {
 import { claimBlack, myBlackConnectionCount } from "@/lib/blackStore";
 import { startBlackCheckout } from "@/lib/apiClient";
 import { track } from "@/lib/analytics";
-import {
-  PREMIER_PLAN,
-  formatPremierPrice,
-  hasActivePremier,
-  isPremierOnTrial,
-  premierStatusLabel,
-} from "@/lib/plans";
 import { hasRequiredVerifications } from "@/lib/tiers";
-import type { MyProfile, PremierInterval } from "@/lib/types";
+import type { MyProfile } from "@/lib/types";
 
 interface Props {
   profile: MyProfile;
   meetings: number;
   reputationScore: number;
   profileStrength: number;
-  onBuyPremier: (prefer?: PremierInterval) => void;
-  onCancelPremier?: () => void;
-  onSwitchPremier?: (interval: PremierInterval) => void;
 }
 
 /**
- * One Plans block — BLACK first so it reads immediately, then Premier, then Free.
+ * Plans: BLACK first, then Free. No Premier — Verified unlocks higher intros.
  */
 export default function PlansSection({
   profile,
   meetings,
   reputationScore,
   profileStrength,
-  onBuyPremier,
-  onCancelPremier,
-  onSwitchPremier,
 }: Props) {
   const [busy, setBusy] = useState<"month" | "year" | "earned" | null>(null);
   const [error, setError] = useState("");
@@ -54,9 +41,6 @@ export default function PlansSection({
     return () => window.removeEventListener("meetpoint:black-changed", sync);
   }, []);
 
-  const premier = hasActivePremier(profile);
-  const onTrial = isPremierOnTrial(profile);
-  const current: PremierInterval = profile.premierPlan?.interval || "month";
   const verified = hasRequiredVerifications(profile.verifications);
   const isBlack = profile.black === true;
   const req = BLACK_EARNED_REQUIREMENTS;
@@ -97,16 +81,11 @@ export default function PlansSection({
           Plans
         </p>
         <p className="text-[10px] text-muted sm:text-xs">
-          {isBlack
-            ? "BLACK active"
-            : premier
-              ? premierStatusLabel(profile)
-              : "Free Member"}
+          {isBlack ? "BLACK active" : verified ? "Verified · Free" : "Free Member"}
         </p>
       </div>
 
       <div className="space-y-2.5">
-        {/* BLACK — lead so the top tier is impossible to miss */}
         <div className="border border-white/20 bg-black px-3.5 py-4 black-centurion sm:px-4 sm:py-4">
           <div className="relative z-[1]">
             <div className="flex items-start justify-between gap-3">
@@ -195,88 +174,17 @@ export default function PlansSection({
           </div>
         </div>
 
-        {/* Premier */}
-        <div className="border border-accent/30 bg-ink/50 px-3.5 py-3 sm:px-4 sm:py-3.5">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="text-[15px] font-semibold text-ivory">Premier</p>
-              <p className="mt-0.5 text-[12px] leading-snug text-muted">
-                Meet Verified & BLACK · {formatPremierPrice("month")} or{" "}
-                {formatPremierPrice("year")}
-              </p>
-            </div>
-            {premier ? (
-              <span className="shrink-0 border border-accent/35 px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.14em] text-accent">
-                {onTrial ? "Trial" : "Active"}
-              </span>
-            ) : null}
-          </div>
-
-          <div className="mt-2.5 flex rounded-md border border-white/10 bg-white/[0.03] p-0.5">
-            <button
-              type="button"
-              onClick={() => {
-                if (premier) onSwitchPremier?.("month");
-                else onBuyPremier("month");
-              }}
-              className={`flex-1 rounded px-2 py-1.5 text-center text-[11px] font-medium transition ${
-                premier && current === "month"
-                  ? "bg-accent text-ink"
-                  : "text-ivory/75 hover:bg-white/[0.05]"
-              }`}
-            >
-              Monthly · {formatPremierPrice("month")}
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                if (premier) onSwitchPremier?.("year");
-                else onBuyPremier("year");
-              }}
-              className={`flex-1 rounded px-2 py-1.5 text-center text-[11px] font-medium transition ${
-                premier && current === "year"
-                  ? "bg-accent text-ink"
-                  : "text-ivory/75 hover:bg-white/[0.05]"
-              }`}
-            >
-              Yearly · {formatPremierPrice("year")}
-            </button>
-          </div>
-
-          {premier ? (
-            onCancelPremier ? (
-              <button
-                type="button"
-                onClick={onCancelPremier}
-                className="mt-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted hover:text-ivory"
-              >
-                Cancel Premier
-              </button>
-            ) : null
-          ) : (
-            <button
-              type="button"
-              onClick={() => onBuyPremier("year")}
-              className="mp-btn-lux mt-2.5 w-full rounded-xl bg-gradient-to-b from-accent-2 to-accent py-2.5 text-[12px] font-semibold text-ink"
-            >
-              Get Premier
-            </button>
-          )}
-          <p className="mt-1.5 text-[10px] text-muted/80">
-            {PREMIER_PLAN.yearly.trialNote} · cancel anytime
-          </p>
-        </div>
-
-        {/* Free */}
         <div className="border border-line/60 bg-ink/40 px-3.5 py-3 sm:px-4 sm:py-3.5">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-[15px] font-semibold text-ivory">Free</p>
-              <p className="mt-0.5 text-[12px] text-muted">$0 · Member ↔ Member intros</p>
+              <p className="mt-0.5 text-[12px] leading-snug text-muted">
+                $0 · Member ↔ Member intros. Get Verified to meet anyone.
+              </p>
             </div>
-            {!premier && !isBlack ? (
+            {!isBlack ? (
               <span className="shrink-0 text-[9px] font-semibold uppercase tracking-[0.14em] text-accent-2">
-                Current
+                {verified ? "Verified" : "Current"}
               </span>
             ) : (
               <span className="shrink-0 text-[9px] font-semibold uppercase tracking-[0.14em] text-muted">

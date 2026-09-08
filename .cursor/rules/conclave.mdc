@@ -21,9 +21,11 @@ Do not block signup on verification. Optional extras (website, registration, por
 
 Peer invites award BLACK CONNECTION only. They never promote someone to BLACK.
 
-## Plans vs levels
+## Intros (no Premier)
 
-Premier ($20/mo) is a plan that expands who Members can meet. Standing levels are Member / Verified / BLACK.
+- **Member** ↔ Member only
+- **Verified** and **BLACK** meet anyone
+- Want to connect beyond Members? Become Verified — there is no Premier plan
 
 ## UX
 
@@ -32,7 +34,7 @@ Premier ($20/mo) is a plan that expands who Members can meet. Standing levels ar
 - Never show “Tier N · Name”
 - Signup: Identity required; verification optional (skip = stay Member)
 - Discover cards: even height, no “verified via LinkedIn/email” list
-- Plans: one grouped Free / Premier / BLACK block
+- Plans: BLACK · Free (no Premier)
 - Signup highlights missing Identity sections when incomplete
 - Top nav fixed on every screen
 

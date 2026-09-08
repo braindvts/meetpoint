@@ -13,7 +13,7 @@ export type BlackInviteKind = "connection" | "meeting";
 export type BlackInviteStatus = "pending" | "accepted" | "declined";
 export type BlackConnectionSource = "invite" | "meeting";
 
-/** Price of BLACK. Premier stays the cheaper tier below it. */
+/** Price of BLACK. Must already be Verified to activate. */
 export const BLACK_MONTHLY_USD = 50;
 export const BLACK_YEARLY_USD = 500;
 
@@ -42,7 +42,7 @@ export const BLACK_CONNECTION_LEVELS = [
   {
     atLeast: 5,
     name: "Trusted inside BLACK",
-    benefit: "Introductions to BLACK members without Premier.",
+    benefit: "Introductions carry more weight inside the BLACK network.",
   },
 ] as const;
 
@@ -70,7 +70,7 @@ export function hasBlackConnection(count: number | undefined | null): boolean {
   return (count ?? 0) >= BLACK_CONNECTION_LEVELS[0].atLeast;
 }
 
-/** The 5+ tier lets someone reach BLACK members without paying for Premier. */
+/** Kept for BLACK CONNECTION standing labels; reach is unlocked by Verified/BLACK. */
 export function blackConnectionUnlocksReach(count: number | undefined | null): boolean {
   const top = BLACK_CONNECTION_LEVELS[BLACK_CONNECTION_LEVELS.length - 1];
   return (count ?? 0) >= top.atLeast;

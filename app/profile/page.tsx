@@ -8,18 +8,10 @@ import Avatar from "@/components/Avatar";
 import EditProfilePopup from "@/components/EditProfilePopup";
 import Nav from "@/components/Nav";
 import PageHeader from "@/components/PageHeader";
-import PremierPlanSheet from "@/components/PremierPlanSheet";
 import ProfileForm from "@/components/ProfileForm";
 import MembershipTiers from "@/components/MembershipTiers";
 import { ensureNotifyPermission } from "@/lib/notify";
-import {
-  activatePremierPlan,
-  cancelPremierPlan,
-  clearProfile,
-  getMeetingsAttended,
-  loadProfile,
-  switchPremierInterval,
-} from "@/lib/store";
+import { clearProfile, getMeetingsAttended, loadProfile } from "@/lib/store";
 import { readClientProfile } from "@/lib/clientProfile";
 import {
   computeMemberTier,
@@ -28,20 +20,17 @@ import {
   reputationScoreForMeetings,
   scoreProfileStrength,
 } from "@/lib/tiers";
-import type { MyProfile, PremierInterval } from "@/lib/types";
+import type { MyProfile } from "@/lib/types";
 
 function ProfileContent() {
   const router = useRouter();
   const params = useSearchParams();
   const needsVerify = params.get("verify") === "1";
-  const buyPremier = params.get("plan") === "premier" || params.get("plan") === "pro";
   const [profile, setProfile] = useState<MyProfile | null>(() => readClientProfile());
   const [meetings, setMeetings] = useState(() => {
     const p = readClientProfile();
     return p ? getMeetingsAttended(p) : 0;
   });
-  const [premierOpen, setPremierOpen] = useState(false);
-  const [sheetInterval, setSheetInterval] = useState<PremierInterval>("year");
   const [editPopupOpen, setEditPopupOpen] = useState(false);
 
   useEffect(() => {
@@ -52,7 +41,6 @@ function ProfileContent() {
     }
     setProfile(p);
     setMeetings(getMeetingsAttended(p));
-    if (buyPremier && !p.premierPlan?.active) setPremierOpen(true);
 
     const onProfile = () => {
       const next = loadProfile();
@@ -61,36 +49,13 @@ function ProfileContent() {
     };
     window.addEventListener("meetpoint:profile-changed", onProfile);
     return () => window.removeEventListener("meetpoint:profile-changed", onProfile);
-  }, [router, buyPremier]);
+  }, [router]);
 
   function reset() {
     if (confirm("Delete your profile and all connections?")) {
       clearProfile();
       router.push("/");
     }
-  }
-
-  function subscribe(interval: "month" | "year") {
-    const next = activatePremierPlan(interval);
-    if (next) setProfile(next);
-    setPremierOpen(false);
-  }
-
-  function switchInterval(interval: PremierInterval) {
-    const next = switchPremierInterval(interval);
-    if (next) setProfile(next);
-  }
-
-  function cancel() {
-    if (
-      !confirm(
-        "Cancel Conclave Premier? Members can only introduce to other Members."
-      )
-    ) {
-      return;
-    }
-    const next = cancelPremierPlan();
-    if (next) setProfile(next);
   }
 
   if (!profile) return null;
@@ -113,8 +78,8 @@ function ProfileContent() {
         <div className="px-4 pb-6 pt-2">
         {needsVerify && (
           <div className="mb-4 rounded-xl border border-accent/30 bg-accent/5 px-3 py-2 text-[12px] leading-snug text-accent-2">
-            Want Verified? Add business email, LinkedIn, and resume below — or skip and stay a
-            Member.
+            To connect with Verified or BLACK members, add business email, LinkedIn, and resume
+            below.
           </div>
         )}
 
@@ -150,12 +115,6 @@ function ProfileContent() {
           meetings={meetings}
           reputationScore={reputationScoreForMeetings(meetings)}
           profileStrength={strength.score}
-          onBuyPremier={(prefer) => {
-            setSheetInterval(prefer || "year");
-            setPremierOpen(true);
-          }}
-          onCancelPremier={cancel}
-          onSwitchPremier={switchInterval}
         />
 
         <section className="mp-person-card mb-5 p-4">
@@ -181,13 +140,6 @@ function ProfileContent() {
         </div>
       </main>
 
-      <PremierPlanSheet
-        open={premierOpen}
-        initialInterval={sheetInterval}
-        onClose={() => setPremierOpen(false)}
-        onSubscribe={subscribe}
-      />
-
       <EditProfilePopup
         open={editPopupOpen}
         profile={profile}
@@ -200,7 +152,7 @@ function ProfileContent() {
 
 export default function ProfilePage() {
   return (
-    <Suspense fallback={<main className="min-h-dvh" />}>
+    <Suspense fallback={null}>
       <ProfileContent />
     </Suspense>
   );

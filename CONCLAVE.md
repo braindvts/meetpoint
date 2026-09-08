@@ -71,15 +71,12 @@ Signup must **not** block on verification — only Identity is required to creat
 
 ## Plans (money, separate from levels)
 
-All three live in **one Plans block** on Profile (grouped, short copy):
-
 | Plan | Price | What you get |
 |------|-------|----------------|
-| **Free** | $0 | Member ↔ Member intros |
-| **Premier** | $20/mo or $100/yr | Meet Verified & BLACK · trial on yearly |
+| **Free** | $0 | Member ↔ Member intros. Get **Verified** to meet anyone. |
 | **BLACK** | $50/mo or $500/yr | Top level · meet anyone · paid or earned |
 
-Premier is a **plan**. Member / Verified / BLACK are **standing levels**. Someone can be Verified + Free, or Verified + Premier, or BLACK.
+There is **no Premier**. Standing levels are Member / Verified / BLACK. Want to introduce beyond Members? Become Verified (email + LinkedIn + resume).
 
 Must be **Verified** before activating BLACK.
 
@@ -111,14 +108,14 @@ Separate from BLACK. Shown as a **black checkmark** next to the name (no “CONN
 | `/discover` | The Room — For you / Nearby match cards |
 | `/circle` | Incoming / outgoing connection requests |
 | `/chats` | Private DMs (poll ~4s) + table proposals |
-| `/profile` | Your card, Plans (BLACK first, then Premier / Free), levels |
+| `/profile` | Your card, Plans (BLACK · Free), levels |
 | `/demo` | Demo bypass (only if `NEXT_PUBLIC_ENABLE_DEMO=1`) |
 
 ---
 
 ## How matching works (short)
 
-Discover ranks people by shared ambitions, complementary “looking for,” same profession, and distance. Nearby narrows by city/geo. The filter also lets you narrow by **rank** (Member / Verified / BLACK). Members without Premier only introduce to other Members. Verified and BLACK (or Premier) can reach further. Looking-for preferences can be edited from Discover’s filter anytime.
+Discover ranks people by shared ambitions, complementary “looking for,” same profession, and distance. Nearby narrows by city/geo. The filter also lets you narrow by **rank** (Member / Verified / BLACK). **Members** only introduce to other Members. **Verified** and **BLACK** can meet anyone. Looking-for preferences can be edited from Discover’s filter anytime.
 
 ---
 
@@ -142,7 +139,7 @@ NEXT_PUBLIC_ENABLE_DEMO_PROFILES=1
 - **Frontend:** Next.js App Router, TypeScript, Tailwind  
 - **DB:** Postgres via Prisma (`Member`, connections, chats, BLACK tables)  
 - **Auth:** email/password + Google / LinkedIn / Apple (when keyed)  
-- **Payments:** Stripe Checkout (`premier`, `black_month`, `black_year`)  
+- **Payments:** Stripe Checkout (`black_month`, `black_year`, table fee)  
 - **Email:** Resend welcome on sign-up  
 - **Health:** `/api/health` shows which keys the server can see  
 
@@ -169,7 +166,7 @@ Details: [WEBSITE.md](./WEBSITE.md) · [KEYS.md](./KEYS.md) · [LAUNCH.md](./LAU
 
 ## What’s still missing for full launch
 
-See [MISSING.md](./MISSING.md). Big ones: email verify + password reset links, cloud photo storage, Stripe webhooks for durable Premier/BLACK, true realtime chat, optional iOS app.
+See [MISSING.md](./MISSING.md). Big ones: email verify + password reset links, cloud photo storage, Stripe webhooks for durable BLACK, true realtime chat, optional iOS app.
 
 ---
 
@@ -179,10 +176,10 @@ See [MISSING.md](./MISSING.md). Big ones: email verify + password reset links, c
 |-------|------|
 | Levels logic | `lib/tiers.ts` |
 | Required 3 credentials | `lib/types.ts` → `REQUIRED_VERIFICATIONS` |
-| Plans (BLACK · Premier · Free) | `components/PlansSection.tsx` |
+| Plans (BLACK · Free) | `components/PlansSection.tsx` |
 | BLACK CONNECTION checkmark | `components/BlackConnectionBadge.tsx` |
 | Discover cards | `components/MatchCard.tsx` |
 | Signup missing fields | `components/ProfileForm.tsx` |
 | BLACK rules | `lib/black.ts` |
-| Premier access | `lib/plans.ts` |
+| Intro reach | `lib/plans.ts` (`canIntroduceToTier`) |
 | Demo owner login | `lib/demoOwner.ts`, `lib/ensureDemoOwner.ts` |

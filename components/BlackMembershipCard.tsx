@@ -94,7 +94,7 @@ export default function BlackMembershipCard({
           <p className="mt-2 text-[13px] leading-relaxed text-ivory/75">
             {isBlack
               ? "Your BLACK membership is active. You can extend a BLACK connection from any private conversation."
-              : "The top of the room: verified, premium, serious. Reach any tier without Premier, and extend BLACK connections privately."}
+              : "The top of the room: verified, premium, serious. Meet anyone, and extend BLACK connections privately."}
           </p>
         </div>
       </div>
