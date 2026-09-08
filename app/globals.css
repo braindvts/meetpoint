@@ -177,46 +177,90 @@ body:has([data-shot]) nextjs-portal {
   pointer-events: none;
 }
 
-/* Floating mobile dock — phones only; desktop uses the top site nav */
-.mp-mobile-dock {
+/* Fixed top site nav — full width, every breakpoint (easy to find) */
+.mp-site-nav {
   position: fixed;
-  bottom: 0;
+  top: 0;
   left: 0;
   right: 0;
-  pointer-events: none;
   z-index: 100;
+  border-bottom: 1px solid rgba(212, 196, 168, 0.22);
+  background: rgba(5, 5, 5, 0.96);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+}
+.mp-site-nav-inner {
+  margin: 0 auto;
+  display: flex;
+  max-width: 72rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 3.5rem;
+  padding: 0.55rem 1rem;
 }
 @media (min-width: 768px) {
-  .mp-mobile-dock {
-    display: none !important;
+  .mp-site-nav-inner {
+    padding: 0.65rem 1.5rem;
   }
 }
-.mp-mobile-dock a {
-  pointer-events: auto;
+.mp-site-nav-brand {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--color-accent);
 }
-.mp-dock {
-  border-top: 1px solid rgba(243, 239, 230, 0.08);
-  background: rgba(5, 5, 5, 0.94);
-  backdrop-filter: blur(22px);
-  -webkit-backdrop-filter: blur(22px);
-  pointer-events: auto;
+.mp-site-nav-links {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.25rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
 }
-
-/* Desktop top site nav */
-.mp-site-nav {
+.mp-site-nav-links::-webkit-scrollbar {
   display: none;
 }
-@media (min-width: 768px) {
-  .mp-site-nav {
-    display: block;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    border-bottom: 1px solid rgba(243, 239, 230, 0.08);
-    background: rgba(5, 5, 5, 0.92);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-  }
+.mp-site-nav-link {
+  flex-shrink: 0;
+  border-radius: 999px;
+  padding: 0.55rem 0.85rem;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-muted);
+  transition:
+    color 0.2s ease,
+    background 0.2s ease;
+}
+.mp-site-nav-link:hover {
+  color: var(--color-ivory);
+  background: rgba(255, 255, 255, 0.04);
+}
+.mp-site-nav-link.is-active {
+  color: #14110e;
+  background: linear-gradient(180deg, #efe6d6, #d4c4a8);
+  font-weight: 600;
+}
+
+/* Leave room under the fixed top bar */
+html.mp-has-site-nav {
+  scroll-padding-top: 4rem;
+}
+html.mp-has-site-nav body {
+  padding-top: 3.5rem;
+}
+
+/* Legacy bottom dock — kept hidden; navigation is top-only now */
+.mp-mobile-dock {
+  display: none !important;
+}
+.mp-dock {
+  display: none !important;
 }
 
 /* Segmented filter control */

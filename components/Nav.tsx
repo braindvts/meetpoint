@@ -5,41 +5,17 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
 
-const ICONS: Record<string, React.ReactNode> = {
-  search: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-5 w-5">
-      <circle cx="11" cy="11" r="7" />
-      <path d="m20 20-3.5-3.5" strokeLinecap="round" />
-    </svg>
-  ),
-  circle: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-5 w-5">
-      <circle cx="8" cy="9" r="3.2" />
-      <circle cx="16.5" cy="10.5" r="2.6" />
-      <path d="M3.5 19c.7-3 2.8-4.5 4.5-4.5S11.8 16 12.5 19" strokeLinecap="round" />
-      <path d="M13.8 18c.5-2.2 1.8-3.4 2.7-3.4 1.3 0 3.1 1.1 3.7 3.4" strokeLinecap="round" />
-    </svg>
-  ),
-  chats: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-5 w-5">
-      <path d="M5 6.5h14v8.5H9l-4 3V6.5Z" strokeLinejoin="round" />
-    </svg>
-  ),
-  profile: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-5 w-5">
-      <circle cx="12" cy="8" r="3.5" />
-      <path d="M5 20c1-4 4-5.5 7-5.5s6 1.5 7 5.5" strokeLinecap="round" />
-    </svg>
-  ),
-};
-
 const LINKS = [
-  { href: "/discover", label: "Discover", icon: ICONS.search },
-  { href: "/circle", label: "Circle", icon: ICONS.circle },
-  { href: "/chats", label: "Chats", icon: ICONS.chats },
-  { href: "/profile", label: "Profile", icon: ICONS.profile },
+  { href: "/discover", label: "Discover" },
+  { href: "/circle", label: "Circle" },
+  { href: "/chats", label: "Chats" },
+  { href: "/profile", label: "Profile" },
 ];
 
+/**
+ * Fixed top navigation for the website — always at the top of the viewport,
+ * every screen size. (The old bottom dock was easy to miss.)
+ */
 export default function Nav() {
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
@@ -49,61 +25,41 @@ export default function Nav() {
     setMounted(true);
   }, []);
 
+  useEffect(() => {
+    if (!mounted || inChatThread) {
+      document.documentElement.classList.remove("mp-has-site-nav");
+      return;
+    }
+    document.documentElement.classList.add("mp-has-site-nav");
+    return () => document.documentElement.classList.remove("mp-has-site-nav");
+  }, [mounted, inChatThread]);
+
   if (!mounted || inChatThread) return null;
 
   return createPortal(
-    <>
-      {/* Desktop — normal website top nav */}
-      <nav className="mp-site-nav" aria-label="Conclave">
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-6 px-6">
-          <Link
-            href="/discover"
-            className="text-[11px] font-semibold uppercase tracking-[0.28em] text-accent"
-          >
-            Conclave
-          </Link>
-          <div className="flex items-center gap-1">
-            {LINKS.map((l) => {
-              const active = pathname.startsWith(l.href);
-              return (
-                <Link
-                  key={l.href}
-                  href={l.href}
-                  aria-current={active ? "page" : undefined}
-                  className={`rounded-sm px-3 py-2 text-[13px] font-medium transition ${
-                    active ? "text-accent" : "text-muted hover:text-ivory"
-                  }`}
-                >
-                  {l.label}
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      </nav>
-
-      {/* Mobile — bottom dock (phones / small tablets only) */}
-      <nav className="mp-mobile-dock" aria-label="Conclave">
-        <div className="mp-dock flex pb-[max(0.35rem,env(safe-area-inset-bottom))]">
+    <nav className="mp-site-nav" aria-label="Conclave">
+      <div className="mp-site-nav-inner">
+        <Link href="/discover" className="mp-site-nav-brand">
+          Conclave
+        </Link>
+        <div className="mp-site-nav-links" role="list">
           {LINKS.map((l) => {
             const active = pathname.startsWith(l.href);
             return (
               <Link
                 key={l.href}
                 href={l.href}
+                role="listitem"
                 aria-current={active ? "page" : undefined}
-                className={`relative flex flex-1 flex-col items-center gap-0.5 py-2.5 transition ${
-                  active ? "text-accent" : "text-muted active:text-ivory"
-                }`}
+                className={`mp-site-nav-link ${active ? "is-active" : ""}`}
               >
-                <span className="leading-none">{l.icon}</span>
-                <span className="text-[10px] font-medium tracking-wide">{l.label}</span>
+                {l.label}
               </Link>
             );
           })}
         </div>
-      </nav>
-    </>,
+      </div>
+    </nav>,
     document.body
   );
 }

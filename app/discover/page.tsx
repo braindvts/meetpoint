@@ -154,7 +154,7 @@ export default function DiscoverPage() {
   return (
     <>
       <Nav />
-      <main className="mp-app px-0 pb-24 md:px-6 md:pb-10">
+      <main className="mp-app px-0 pb-10 md:px-6">
         <header className="sticky top-0 z-40 bg-ink/95 px-5 pb-3 pt-4 backdrop-blur-xl md:px-0 md:pt-6">
           <div className="relative flex h-7 items-center justify-center md:justify-between">
             <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-accent md:hidden">

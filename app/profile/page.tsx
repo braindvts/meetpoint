@@ -109,7 +109,7 @@ function ProfileContent() {
   return (
     <>
       <Nav />
-      <main className="mp-app px-0 pb-24 md:px-6 md:pb-10">
+      <main className="mp-app px-0 pb-10 md:px-6">
         <PageHeader title="Profile" />
         <div className="px-4 pb-6 pt-2">
         {needsVerify && (
