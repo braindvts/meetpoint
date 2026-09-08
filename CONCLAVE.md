@@ -85,7 +85,7 @@ Must be **Verified** before activating BLACK.
 
 ### BLACK CONNECTION
 
-Separate from BLACK. Shown as a **black checkmark** badge. Earned when a BLACK member connects you privately — never upgrades you to BLACK.
+Separate from BLACK. Shown as a **black checkmark** next to the name (no “CONN.” text). Earned when a BLACK member connects you privately — never upgrades you to BLACK.
 
 ---
 
@@ -111,14 +111,14 @@ Separate from BLACK. Shown as a **black checkmark** badge. Earned when a BLACK m
 | `/discover` | The Room — For you / Nearby match cards |
 | `/circle` | Incoming / outgoing connection requests |
 | `/chats` | Private DMs (poll ~4s) + table proposals |
-| `/profile` | Your card, grouped Plans (Free/Premier/BLACK), levels |
+| `/profile` | Your card, Plans (BLACK first, then Premier / Free), levels |
 | `/demo` | Demo bypass (only if `NEXT_PUBLIC_ENABLE_DEMO=1`) |
 
 ---
 
 ## How matching works (short)
 
-Discover ranks people by shared ambitions, complementary “looking for,” same profession, and distance. Nearby narrows by city/geo. Members without Premier only introduce to other Members. Verified and BLACK (or Premier) can reach further. Looking-for preferences can be edited from Discover’s filter anytime.
+Discover ranks people by shared ambitions, complementary “looking for,” same profession, and distance. Nearby narrows by city/geo. The filter also lets you narrow by **rank** (Member / Verified / BLACK). Members without Premier only introduce to other Members. Verified and BLACK (or Premier) can reach further. Looking-for preferences can be edited from Discover’s filter anytime.
 
 ---
 
@@ -179,7 +179,7 @@ See [MISSING.md](./MISSING.md). Big ones: email verify + password reset links, c
 |-------|------|
 | Levels logic | `lib/tiers.ts` |
 | Required 3 credentials | `lib/types.ts` → `REQUIRED_VERIFICATIONS` |
-| Plans (Free / Premier / BLACK) | `components/PlansSection.tsx` |
+| Plans (BLACK · Premier · Free) | `components/PlansSection.tsx` |
 | BLACK CONNECTION checkmark | `components/BlackConnectionBadge.tsx` |
 | Discover cards | `components/MatchCard.tsx` |
 | Signup missing fields | `components/ProfileForm.tsx` |

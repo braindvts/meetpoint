@@ -148,20 +148,20 @@ export default function ConnectionsPage() {
                         rounded="rounded-[12px]"
                       />
                       <div className="min-w-0">
-                        <h3 className="truncate font-display text-xl font-semibold text-ivory sm:text-2xl">
-                          {person.name}
+                        <h3 className="flex min-w-0 items-center gap-1.5 truncate font-display text-xl font-semibold text-ivory sm:text-2xl">
+                          <span className="truncate">{person.name}</span>
+                          {blackConnectionWith(person.id) ? (
+                            <BlackConnectionBadge count={1} />
+                          ) : null}
                         </h3>
                         <p className="mt-0.5 truncate text-[11px] text-muted">
                           {person.jobTitle} · {person.city.name}
                         </p>
-                        {(person.black || blackConnectionWith(person.id)) && (
-                          <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                            {person.black && <BlackBadge size="xs" />}
-                            {blackConnectionWith(person.id) && (
-                              <BlackConnectionBadge count={1} variant="compact" />
-                            )}
+                        {person.black ? (
+                          <div className="mt-1.5">
+                            <BlackBadge size="xs" />
                           </div>
-                        )}
+                        ) : null}
                         <p className="mt-1 text-[11px] text-accent">
                           {isInbound ? "Wants an introduction" : "View profile"}
                         </p>

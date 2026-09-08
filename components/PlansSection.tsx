@@ -32,7 +32,7 @@ interface Props {
 }
 
 /**
- * One Plans block: Free · Premier · BLACK — short copy, grouped together.
+ * One Plans block — BLACK first so it reads immediately, then Premier, then Free.
  */
 export default function PlansSection({
   profile,
@@ -106,21 +106,91 @@ export default function PlansSection({
       </div>
 
       <div className="space-y-2.5">
-        {/* Free */}
-        <div className="border border-line/60 bg-ink/40 px-3.5 py-3 sm:px-4 sm:py-3.5">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="text-[15px] font-semibold text-ivory">Free</p>
-              <p className="mt-0.5 text-[12px] text-muted">$0 · Member ↔ Member intros</p>
+        {/* BLACK — lead so the top tier is impossible to miss */}
+        <div className="border border-white/20 bg-black px-3.5 py-4 black-centurion sm:px-4 sm:py-4">
+          <div className="relative z-[1]">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <div className="flex items-center gap-2.5">
+                  <BlackBadge size="sm" />
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#cfcfcf]">
+                      Top of the room
+                    </p>
+                    <p className="text-[17px] font-semibold tracking-tight text-[#f5f5f5]">BLACK</p>
+                  </div>
+                </div>
+                <p className="mt-2 text-[12px] leading-snug text-[#a8a8a8]">
+                  Meet anyone · {formatBlackPrice("month")} or {formatBlackPrice("year")}
+                </p>
+              </div>
+              {isBlack ? (
+                <span className="shrink-0 border border-white/25 px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.14em] text-[#f5f5f5]">
+                  Active
+                </span>
+              ) : null}
             </div>
-            {!premier && !isBlack ? (
-              <span className="shrink-0 text-[9px] font-semibold uppercase tracking-[0.14em] text-accent-2">
-                Current
-              </span>
+
+            {isBlack ? (
+              <div className="mt-3 space-y-2">
+                <p className="text-[12px] text-[#cfcfcf]">
+                  You’re BLACK
+                  {profile.blackSource ? ` · ${profile.blackSource}` : ""}.
+                </p>
+                {connections > 0 ? (
+                  <div className="flex flex-wrap items-center gap-2">
+                    <BlackConnectionBadge count={connections} showCount />
+                    {level.name ? (
+                      <span className="text-[11px] text-[#a8a8a8]">{level.name}</span>
+                    ) : null}
+                  </div>
+                ) : (
+                  <p className="text-[11px] text-[#8a8a8a]">
+                    Invite peers from a private chat to award BLACK CONNECTION — never BLACK.
+                  </p>
+                )}
+              </div>
             ) : (
-              <span className="shrink-0 text-[9px] font-semibold uppercase tracking-[0.14em] text-muted">
-                Base
-              </span>
+              <div className="mt-3 space-y-2">
+                {!verified ? (
+                  <p className="text-[11px] text-[#c4b59a]">
+                    Get Verified first (email + LinkedIn + resume), then unlock BLACK.
+                  </p>
+                ) : null}
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    disabled={!verified || busy !== null}
+                    onClick={() => void buyBlack("month")}
+                    className="rounded-xl border border-white/20 py-2.5 text-[12px] font-semibold text-[#f5f5f5] disabled:opacity-40"
+                  >
+                    {busy === "month" ? "…" : formatBlackPrice("month")}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={!verified || busy !== null}
+                    onClick={() => void buyBlack("year")}
+                    className="rounded-xl bg-[#f5f5f5] py-2.5 text-[12px] font-semibold text-black disabled:opacity-40"
+                  >
+                    {busy === "year" ? "…" : formatBlackPrice("year")}
+                  </button>
+                </div>
+                {earnedReady ? (
+                  <button
+                    type="button"
+                    disabled={busy !== null}
+                    onClick={() => void claimEarned()}
+                    className="w-full text-[11px] font-semibold uppercase tracking-[0.14em] text-[#f5f5f5] underline-offset-2 hover:underline"
+                  >
+                    {busy === "earned" ? "Claiming…" : "Claim earned BLACK"}
+                  </button>
+                ) : (
+                  <p className="text-[10px] text-[#7a7a7a]">
+                    Or earn it: {req.meetings}+ dinners · strong profile · top ratings
+                  </p>
+                )}
+                {error ? <p className="text-[11px] text-red-300/90">{error}</p> : null}
+              </div>
             )}
           </div>
         </div>
@@ -197,87 +267,21 @@ export default function PlansSection({
           </p>
         </div>
 
-        {/* BLACK */}
-        <div className="border border-white/15 bg-black px-3.5 py-3 black-centurion sm:px-4 sm:py-3.5">
-          <div className="relative z-[1]">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <div className="flex items-center gap-2">
-                  <BlackBadge size="xs" />
-                  <p className="text-[15px] font-semibold text-[#f5f5f5]">BLACK</p>
-                </div>
-                <p className="mt-1 text-[12px] leading-snug text-[#a8a8a8]">
-                  Top of the room · meet anyone · {formatBlackPrice("month")} or{" "}
-                  {formatBlackPrice("year")}
-                </p>
-              </div>
-              {isBlack ? (
-                <span className="shrink-0 border border-white/25 px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.14em] text-[#f5f5f5]">
-                  Active
-                </span>
-              ) : null}
+        {/* Free */}
+        <div className="border border-line/60 bg-ink/40 px-3.5 py-3 sm:px-4 sm:py-3.5">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-[15px] font-semibold text-ivory">Free</p>
+              <p className="mt-0.5 text-[12px] text-muted">$0 · Member ↔ Member intros</p>
             </div>
-
-            {isBlack ? (
-              <div className="mt-3 space-y-2">
-                <p className="text-[12px] text-[#cfcfcf]">
-                  You’re BLACK
-                  {profile.blackSource ? ` · ${profile.blackSource}` : ""}.
-                </p>
-                {connections > 0 ? (
-                  <div className="flex flex-wrap items-center gap-2">
-                    <BlackConnectionBadge count={connections} showCount />
-                    {level.name ? (
-                      <span className="text-[11px] text-[#a8a8a8]">{level.name}</span>
-                    ) : null}
-                  </div>
-                ) : (
-                  <p className="text-[11px] text-[#8a8a8a]">
-                    Invite peers from a private chat to award BLACK CONNECTION — never BLACK.
-                  </p>
-                )}
-              </div>
+            {!premier && !isBlack ? (
+              <span className="shrink-0 text-[9px] font-semibold uppercase tracking-[0.14em] text-accent-2">
+                Current
+              </span>
             ) : (
-              <div className="mt-3 space-y-2">
-                {!verified ? (
-                  <p className="text-[11px] text-[#c4b59a]">
-                    Get Verified first (email + LinkedIn + resume), then unlock BLACK.
-                  </p>
-                ) : null}
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    disabled={!verified || busy !== null}
-                    onClick={() => void buyBlack("month")}
-                    className="rounded-xl border border-white/20 py-2 text-[11px] font-semibold text-[#f5f5f5] disabled:opacity-40"
-                  >
-                    {busy === "month" ? "…" : formatBlackPrice("month")}
-                  </button>
-                  <button
-                    type="button"
-                    disabled={!verified || busy !== null}
-                    onClick={() => void buyBlack("year")}
-                    className="rounded-xl bg-[#f5f5f5] py-2 text-[11px] font-semibold text-black disabled:opacity-40"
-                  >
-                    {busy === "year" ? "…" : formatBlackPrice("year")}
-                  </button>
-                </div>
-                {earnedReady ? (
-                  <button
-                    type="button"
-                    disabled={busy !== null}
-                    onClick={() => void claimEarned()}
-                    className="w-full text-[11px] font-semibold uppercase tracking-[0.14em] text-[#f5f5f5] underline-offset-2 hover:underline"
-                  >
-                    {busy === "earned" ? "Claiming…" : "Claim earned BLACK"}
-                  </button>
-                ) : (
-                  <p className="text-[10px] text-[#7a7a7a]">
-                    Or earn it: {req.meetings}+ dinners · strong profile · top ratings
-                  </p>
-                )}
-                {error ? <p className="text-[11px] text-red-300/90">{error}</p> : null}
-              </div>
+              <span className="shrink-0 text-[9px] font-semibold uppercase tracking-[0.14em] text-muted">
+                Base
+              </span>
             )}
           </div>
         </div>

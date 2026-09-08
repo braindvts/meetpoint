@@ -25,16 +25,19 @@ import {
 import { refreshDirectory, loadDirectory } from "@/lib/directory";
 import { syncProfileToServer } from "@/lib/apiClient";
 import { readClientConnections, readClientProfile } from "@/lib/clientProfile";
-import { tierForPerson, tierForProfile } from "@/lib/tiers";
+import { TIER_DEFINITIONS, tierForPerson, tierForProfile, type MemberTier } from "@/lib/tiers";
 import type { Connection, LookingFor, MyProfile, Person } from "@/lib/types";
 import { LOOKING_FOR_OPTIONS } from "@/lib/types";
 import EmptyState from "@/components/EmptyState";
 import NotifyPrompt from "@/components/NotifyPrompt";
 import SkeletonCard from "@/components/SkeletonCard";
+import TierBadge from "@/components/TierBadge";
 import { myBlackConnectionCount, syncBlackFromServer } from "@/lib/blackStore";
 import { track } from "@/lib/analytics";
 
 type Filter = "open" | "local";
+
+const RANK_OPTIONS: MemberTier[] = [3, 2, 1];
 
 export default function DiscoverPage() {
   const router = useRouter();
@@ -43,6 +46,7 @@ export default function DiscoverPage() {
   const [people, setPeople] = useState<Person[]>(() => loadDirectory());
   const [blocked, setBlocked] = useState<string[]>(() => loadBlockedIds());
   const [filter, setFilter] = useState<Filter>("open");
+  const [rankFilter, setRankFilter] = useState<MemberTier[]>([]);
   const [filterOpen, setFilterOpen] = useState(false);
   const [premierOpen, setPremierOpen] = useState(false);
   const [premierPeerName, setPremierPeerName] = useState<string | undefined>();
@@ -104,13 +108,32 @@ export default function DiscoverPage() {
   const forYou = useMemo(() => filterByPreference(matches, "open"), [matches]);
   const nearby = useMemo(() => filterByPreference(matches, "local"), [matches]);
   const pool = filter === "open" ? forYou : nearby;
-  const filtered = useMemo(
-    () => pool.filter((m) => !skipped.includes(m.person.id)),
-    [pool, skipped]
+
+  const byRank = useMemo(
+    () =>
+      rankFilter.length === 0
+        ? pool
+        : pool.filter((m) => m.tier != null && rankFilter.includes(m.tier)),
+    [pool, rankFilter]
   );
 
-  const remainingForYou = forYou.filter((m) => !skipped.includes(m.person.id)).length;
-  const remainingNearby = nearby.filter((m) => !skipped.includes(m.person.id)).length;
+  const filtered = useMemo(
+    () => byRank.filter((m) => !skipped.includes(m.person.id)),
+    [byRank, skipped]
+  );
+
+  const remainingForYou = forYou
+    .filter((m) => rankFilter.length === 0 || (m.tier != null && rankFilter.includes(m.tier)))
+    .filter((m) => !skipped.includes(m.person.id)).length;
+  const remainingNearby = nearby
+    .filter((m) => rankFilter.length === 0 || (m.tier != null && rankFilter.includes(m.tier)))
+    .filter((m) => !skipped.includes(m.person.id)).length;
+
+  function toggleRank(tier: MemberTier) {
+    setRankFilter((prev) =>
+      prev.includes(tier) ? prev.filter((t) => t !== tier) : [...prev, tier]
+    );
+  }
 
   const myTier = useMemo(() => {
     if (!profile) return null;
@@ -213,40 +236,82 @@ export default function DiscoverPage() {
         </div>
 
         {filterOpen && profile ? (
-          <div className="mx-4 mt-3 border border-accent/25 bg-panel/50 px-3 py-3 md:mx-0">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-accent">
-              What you’re looking for
-            </p>
-            <p className="mt-1 text-[12px] text-muted">
-              Change this anytime — Discover updates to match.
-            </p>
-            <div className="mt-2.5 flex flex-wrap gap-1.5">
-              {LOOKING_FOR_OPTIONS.map((item) => {
-                const on = profile.lookingFor?.includes(item);
-                return (
-                  <button
-                    key={item}
-                    type="button"
-                    onClick={() => {
-                      const next: LookingFor[] = on
-                        ? (profile.lookingFor || []).filter((x) => x !== item)
-                        : [...(profile.lookingFor || []), item];
-                      const updated = { ...profile, lookingFor: next };
-                      saveProfile(updated);
-                      setProfile(updated);
-                    }}
-                    className={`border px-2.5 py-1 text-[12px] transition ${
-                      on
-                        ? "border-accent/50 bg-accent/15 text-accent-2"
-                        : "border-line/80 text-muted hover:border-accent/35 hover:text-ivory"
-                    }`}
-                  >
-                    {item}
-                  </button>
-                );
-              })}
+          <div className="mx-4 mt-3 space-y-4 border border-accent/25 bg-panel/50 px-3 py-3 md:mx-0">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-accent">
+                What you’re looking for
+              </p>
+              <p className="mt-1 text-[12px] text-muted">
+                Change this anytime — Discover updates to match.
+              </p>
+              <div className="mt-2.5 flex flex-wrap gap-1.5">
+                {LOOKING_FOR_OPTIONS.map((item) => {
+                  const on = profile.lookingFor?.includes(item);
+                  return (
+                    <button
+                      key={item}
+                      type="button"
+                      onClick={() => {
+                        const next: LookingFor[] = on
+                          ? (profile.lookingFor || []).filter((x) => x !== item)
+                          : [...(profile.lookingFor || []), item];
+                        const updated = { ...profile, lookingFor: next };
+                        saveProfile(updated);
+                        setProfile(updated);
+                      }}
+                      className={`border px-2.5 py-1 text-[12px] transition ${
+                        on
+                          ? "border-accent/50 bg-accent/15 text-accent-2"
+                          : "border-line/80 text-muted hover:border-accent/35 hover:text-ivory"
+                      }`}
+                    >
+                      {item}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-            <p className="mt-2.5 text-[11px] text-muted">
+
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-accent">
+                Rank
+              </p>
+              <p className="mt-1 text-[12px] text-muted">
+                Show only selected ranks. Leave empty to see everyone.
+              </p>
+              <div className="mt-2.5 flex flex-wrap gap-1.5">
+                {RANK_OPTIONS.map((tier) => {
+                  const on = rankFilter.includes(tier);
+                  const def = TIER_DEFINITIONS.find((t) => t.tier === tier);
+                  return (
+                    <button
+                      key={tier}
+                      type="button"
+                      onClick={() => toggleRank(tier)}
+                      className={`inline-flex items-center gap-1.5 border px-2.5 py-1 text-[12px] transition ${
+                        on
+                          ? "border-accent/50 bg-accent/15 text-accent-2"
+                          : "border-line/80 text-muted hover:border-accent/35 hover:text-ivory"
+                      }`}
+                    >
+                      <TierBadge tier={tier} size="sm" />
+                      <span className="sr-only">{def?.name}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              {rankFilter.length > 0 ? (
+                <button
+                  type="button"
+                  onClick={() => setRankFilter([])}
+                  className="mt-2 text-[11px] font-medium text-accent"
+                >
+                  Clear ranks
+                </button>
+              ) : null}
+            </div>
+
+            <p className="text-[11px] text-muted">
               For you ranks by overlap. Nearby is people close to your city.
             </p>
           </div>
@@ -286,10 +351,23 @@ export default function DiscoverPage() {
             />
           ) : filtered.length === 0 ? (
             <EmptyState
-              title="You've seen everyone"
-              body="Skip is just for this session. Restore the list and keep going, or come back later."
-              actionLabel="Restore list"
-              onAction={() => setSkipped([])}
+              title={
+                rankFilter.length > 0 && byRank.length === 0
+                  ? "No one at these ranks"
+                  : "You've seen everyone"
+              }
+              body={
+                rankFilter.length > 0 && byRank.length === 0
+                  ? "Clear the rank filter or pick different ranks to see more people."
+                  : "Skip is just for this session. Restore the list and keep going, or come back later."
+              }
+              actionLabel={
+                rankFilter.length > 0 && byRank.length === 0 ? "Clear ranks" : "Restore list"
+              }
+              onAction={() => {
+                if (rankFilter.length > 0 && byRank.length === 0) setRankFilter([]);
+                else setSkipped([]);
+              }}
             />
           ) : (
             <div key={filter} className="mp-stagger grid gap-3 md:grid-cols-2 md:gap-4">

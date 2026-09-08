@@ -92,9 +92,9 @@ export default function Landing() {
           <div className="mt-10 grid gap-8 sm:grid-cols-3">
             {[
               {
-                name: "Member",
-                mark: "level-mark level-mark--member",
-                copy: "Sign up with Identity — photo, name, role. Verification is optional.",
+                name: "BLACK",
+                mark: "level-mark level-mark--black",
+                copy: "Premium standing. Pay or earn it through dinners and reputation.",
               },
               {
                 name: "Verified",
@@ -102,9 +102,9 @@ export default function Landing() {
                 copy: "Add business email, LinkedIn, and resume when you’re ready.",
               },
               {
-                name: "BLACK",
-                mark: "level-mark level-mark--black",
-                copy: "Premium standing. Pay or earn it through dinners and reputation.",
+                name: "Member",
+                mark: "level-mark level-mark--member",
+                copy: "Sign up with Identity — photo, name, role. Verification is optional.",
               },
             ].map((level) => (
               <div key={level.name} className="text-center sm:text-left">

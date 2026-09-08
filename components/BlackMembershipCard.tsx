@@ -88,7 +88,7 @@ export default function BlackMembershipCard({
           <div className="flex items-center gap-2">
             <BlackBadge size="md" />
             {isBlack && level.count > 0 ? (
-              <BlackConnectionBadge count={level.count} variant="compact" showCount />
+              <BlackConnectionBadge count={level.count} showCount />
             ) : null}
           </div>
           <p className="mt-2 text-[13px] leading-relaxed text-ivory/75">

@@ -29,7 +29,7 @@ export default function MembershipTiers({ input, missing }: Props) {
       </div>
 
       <div className="mt-2.5 space-y-1.5 sm:mt-4 sm:space-y-2">
-        {TIER_DEFINITIONS.map((t) => {
+        {[...TIER_DEFINITIONS].reverse().map((t) => {
           const active = progress.current === t.tier;
           const black = t.tier === 3;
           return (
@@ -37,7 +37,9 @@ export default function MembershipTiers({ input, missing }: Props) {
               key={t.tier}
               className={`border px-2.5 py-2 sm:px-3.5 sm:py-3 ${TIER_CARD[t.tier].row} ${
                 active && !black ? "ring-1 ring-ivory/20" : ""
-              } ${active && black ? "ring-1 ring-white/25" : ""}`}
+              } ${active && black ? "ring-1 ring-white/25" : ""} ${
+                black ? "py-3 sm:py-3.5" : ""
+              }`}
             >
               {black && (
                 <span

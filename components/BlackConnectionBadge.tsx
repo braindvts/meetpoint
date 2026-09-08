@@ -3,19 +3,16 @@ import { blackConnectionLevel } from "@/lib/black";
 interface Props {
   /** How many BLACK network connections the member holds. */
   count?: number;
-  /** Compact mark for dense rows; full shows the wording. */
-  variant?: "compact" | "full";
   showCount?: boolean;
   className?: string;
 }
 
 /**
- * BLACK CONNECTION — a credential, not a level.
- * Marked with a black check so it reads clearly next to the BLACK badge.
+ * BLACK CONNECTION — just a black checkmark next to the name.
+ * Hover/title still explains the credential.
  */
 export default function BlackConnectionBadge({
   count = 1,
-  variant = "full",
   showCount = false,
   className = "",
 }: Props) {
@@ -24,21 +21,23 @@ export default function BlackConnectionBadge({
 
   return (
     <span
-      className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/25 bg-black px-2.5 py-1 text-[9.5px] font-semibold uppercase tracking-[0.16em] text-[#f5f5f5] shadow-[0_0_0_1px_#000] ${className}`}
-      title={`BLACK CONNECTION — ${level.name || "connected"} (${count})`}
+      className={`inline-flex shrink-0 items-center gap-1 ${className}`}
+      title={`BLACK CONNECTION — ${level.name || "connected"}${showCount ? ` (${count})` : ""}`}
+      aria-label={`BLACK CONNECTION${showCount ? `, ${count}` : ""}`}
     >
-      <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 shrink-0" fill="none" aria-hidden>
-        <circle cx="12" cy="12" r="10" fill="#0a0a0a" stroke="#cfcfcf" strokeWidth="1.4" />
+      <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" aria-hidden>
+        <circle cx="12" cy="12" r="10" fill="#000" stroke="#bdbdbd" strokeWidth="1.5" />
         <path
           d="M7.5 12.4l3 3 6-6.5"
           stroke="#f5f5f5"
-          strokeWidth="2.2"
+          strokeWidth="2.4"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
       </svg>
-      {variant === "compact" ? "CONN." : "CONNECTION"}
-      {showCount ? <span className="text-white/70">· {count}</span> : null}
+      {showCount ? (
+        <span className="text-[10px] font-semibold tabular-nums text-ivory/70">{count}</span>
+      ) : null}
     </span>
   );
 }

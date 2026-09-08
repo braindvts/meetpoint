@@ -245,20 +245,18 @@ export default function PersonProfileSheet({
                     Owner
                   </p>
                 )}
-                {black && !owner && (
-                  <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/55">
-                    BLACK member
-                  </p>
-                )}
-                <h2 className="text-2xl font-semibold tracking-tight text-white">
-                  {person.name}
-                </h2>
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2 className="text-2xl font-semibold tracking-tight text-white">
+                    {person.name}
+                  </h2>
+                  {black ? <TierBadge tier={tier} size="md" /> : null}
+                  {(person.blackConnections ?? 0) > 0 ? (
+                    <BlackConnectionBadge count={person.blackConnections ?? 0} />
+                  ) : null}
+                </div>
                 <p className="mt-1 text-[14px] font-medium text-accent-2">{person.jobTitle}</p>
                 <div className="mt-2 flex flex-wrap items-center gap-2">
-                  <TierBadge tier={tier} size="md" />
-                  {(person.blackConnections ?? 0) > 0 && (
-                    <BlackConnectionBadge count={person.blackConnections ?? 0} showCount />
-                  )}
+                  {!black ? <TierBadge tier={tier} size="md" /> : null}
                   {tierCopy && (
                     <span className="text-[11px] text-white/55">{tierCopy.meaning}</span>
                   )}

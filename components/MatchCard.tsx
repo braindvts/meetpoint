@@ -127,8 +127,12 @@ export default function MatchCard({
 
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
-            <h3 className="truncate text-[1.05rem] font-semibold leading-tight tracking-tight text-ivory sm:text-[1.15rem]">
-              {person.name}
+            <h3 className="flex min-w-0 items-center gap-1.5 text-[1.05rem] font-semibold leading-tight tracking-tight text-ivory sm:text-[1.15rem]">
+              <span className="truncate">{person.name}</span>
+              {tier === 3 ? <TierBadge tier={tier} size="sm" /> : null}
+              {blackConnections > 0 ? (
+                <BlackConnectionBadge count={blackConnections} />
+              ) : null}
             </h3>
             {isNew ? (
               <span className="shrink-0 rounded-full bg-accent px-2 py-0.5 text-[9.5px] font-semibold uppercase tracking-[0.14em] text-ink">
@@ -141,12 +145,11 @@ export default function MatchCard({
             {person.city.name}, {person.city.country}
             {distance > 0 ? ` · ${formatDistance(distance)}` : ""}
           </p>
-          <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-            <TierBadge tier={tier} size="sm" />
-            {blackConnections > 0 ? (
-              <BlackConnectionBadge count={blackConnections} variant="compact" />
-            ) : null}
-          </div>
+          {tier !== 3 ? (
+            <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+              <TierBadge tier={tier} size="sm" />
+            </div>
+          ) : null}
         </div>
       </div>
 

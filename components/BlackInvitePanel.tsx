@@ -123,7 +123,7 @@ export default function BlackInvitePanel({ chatId, peers }: Props) {
             {settled ? "Network connection" : "Network"}
           </p>
         </div>
-        {connections > 0 && <BlackConnectionBadge count={connections} variant="compact" />}
+        {connections > 0 && <BlackConnectionBadge count={connections} />}
       </div>
 
       {settled ? (
