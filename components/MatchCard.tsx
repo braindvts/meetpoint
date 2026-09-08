@@ -6,7 +6,6 @@ import TierBadge from "@/components/TierBadge";
 import { blackConnectionWith } from "@/lib/blackStore";
 import type { MatchResult } from "@/lib/match";
 import { formatDistance } from "@/lib/match";
-import { otherWork, ownedCompanies, VERIFY_LABEL } from "@/lib/personFacts";
 import type { ConnectionStatus } from "@/lib/types";
 
 interface Props {
@@ -20,23 +19,10 @@ interface Props {
   preview?: boolean;
 }
 
-const TRAVEL_LABEL = {
-  local: "Meets locally",
-  country: "Travels in country",
-  worldwide: "Travels worldwide",
-} as const;
-
-function Row({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="flex gap-3">
-      <span className="w-[74px] shrink-0 pt-[3px] text-[9.5px] font-semibold uppercase tracking-[0.14em] text-accent/70">
-        {label}
-      </span>
-      <div className="min-w-0 flex-1 text-[12.5px] leading-snug text-ivory/80">{children}</div>
-    </div>
-  );
-}
-
+/**
+ * Discover card — fixed height, most important info only.
+ * Level badge already shows Verified; we don’t list how they verified.
+ */
 export default function MatchCard({
   match,
   status,
@@ -58,24 +44,18 @@ export default function MatchCard({
     isLocal,
   } = match;
 
-  // Server counts win; otherwise fall back to a connection this browser settled.
   const settledWithMe = preview ? undefined : blackConnectionWith(person.id);
   const blackConnections =
     person.blackConnections ?? (settledWithMe?.iAmBlack ? 1 : 0);
-  const owned = ownedCompanies(person);
-  const other = otherWork(person);
-  const ideas = person.ideaTags.slice(0, 4);
-  const looking = person.lookingFor.slice(0, 4);
+  const ideas = person.ideaTags.slice(0, 3);
+  const looking = person.lookingFor.slice(0, 3);
 
   const reasons: string[] = [];
-  if (sharedIdeas.length)
-    reasons.push(
-      `${sharedIdeas.length} shared ${sharedIdeas.length === 1 ? "interest" : "interests"}: ${sharedIdeas.slice(0, 2).join(", ")}`
-    );
-  if (helpReasons.length) reasons.push(`Can help with ${helpReasons.slice(0, 2).join(", ")}`);
-  if (sharedLookingFor.length) reasons.push(`Both want ${sharedLookingFor.slice(0, 2).join(", ")}`);
+  if (sharedIdeas.length) reasons.push(`${sharedIdeas.length} shared interests`);
+  if (helpReasons.length) reasons.push(`Can help`);
+  if (sharedLookingFor.length) reasons.push(`Both want ${sharedLookingFor[0]}`);
   if (sameJob) reasons.push("Same profession");
-  if (isLocal) reasons.push("In your city");
+  if (isLocal) reasons.push("Nearby");
 
   const isNew = !preview && !status;
   const connectLocked = preview || status === "connected" || status === "requested";
@@ -120,12 +100,12 @@ export default function MatchCard({
       tabIndex={onOpenProfile ? 0 : undefined}
       onClick={() => onOpenProfile?.(person.id)}
       onKeyDown={handleKey}
-      className={`overflow-hidden rounded-[18px] border border-accent/20 bg-[#12110f] ${
+      className={`flex h-full min-h-[320px] flex-col overflow-hidden rounded-[18px] border border-accent/20 bg-[#12110f] ${
         onOpenProfile || preview ? "cursor-pointer [-webkit-tap-highlight-color:transparent]" : ""
       }`}
     >
       <div className="flex gap-3.5 px-4 pb-3 pt-4">
-        <div className="relative h-[86px] w-[86px] shrink-0 overflow-hidden rounded-[14px] border border-accent/20 bg-black">
+        <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-[12px] border border-accent/20 bg-black sm:h-[72px] sm:w-[72px]">
           {person.photoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -134,7 +114,7 @@ export default function MatchCard({
               className="h-full w-full object-cover object-top"
             />
           ) : (
-            <div className="grid h-full place-items-center bg-panel-2 text-xl font-semibold text-ivory/40">
+            <div className="grid h-full place-items-center bg-panel-2 text-lg font-semibold text-ivory/40">
               {person.name
                 .split(" ")
                 .map((w) => w[0])
@@ -147,7 +127,7 @@ export default function MatchCard({
 
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
-            <h3 className="truncate text-[1.15rem] font-semibold leading-tight tracking-tight text-ivory">
+            <h3 className="truncate text-[1.05rem] font-semibold leading-tight tracking-tight text-ivory sm:text-[1.15rem]">
               {person.name}
             </h3>
             {isNew ? (
@@ -161,97 +141,64 @@ export default function MatchCard({
             {person.city.name}, {person.city.country}
             {distance > 0 ? ` · ${formatDistance(distance)}` : ""}
           </p>
-          <div className="mt-1.5 flex items-center gap-2">
+          <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
             <TierBadge tier={tier} size="sm" />
             {blackConnections > 0 ? (
               <BlackConnectionBadge count={blackConnections} variant="compact" />
             ) : null}
-            <span className="truncate text-[11px] text-muted">
-              {TRAVEL_LABEL[person.travel]}
-            </span>
           </div>
         </div>
       </div>
 
-      <div className="space-y-2.5 border-t border-white/[0.07] px-4 py-3.5">
-        <p className="line-clamp-3 text-[13px] leading-relaxed text-ivory/75">{person.bio}</p>
-
-        {owned.length > 0 ? (
-          <Row label="Owns">
-            <span className="font-medium text-accent-2">{owned[0].title}</span>
-            <span className="text-ivory/55"> — {owned[0].description}</span>
-            {owned.length > 1 ? (
-              <span className="text-muted"> +{owned.length - 1} more</span>
-            ) : null}
-          </Row>
-        ) : null}
-
-        {other.length > 0 ? (
-          <Row label="Built">
-            {other.slice(0, 2).map((w) => w.title).join(", ")}
-            {other.length > 2 ? <span className="text-muted"> +{other.length - 2}</span> : null}
-          </Row>
-        ) : null}
+      <div className="flex flex-1 flex-col gap-2.5 border-t border-white/[0.07] px-4 py-3">
+        <p className="line-clamp-2 min-h-[2.5rem] text-[13px] leading-relaxed text-ivory/75">
+          {person.bio || "—"}
+        </p>
 
         {ideas.length > 0 ? (
-          <Row label="Focus">
-            <span className="flex flex-wrap gap-1.5">
-              {ideas.map((tag) => {
-                const shared = sharedIdeas.includes(tag);
-                return (
-                  <span
-                    key={tag}
-                    className={`rounded-full border px-2 py-[3px] text-[11px] ${
-                      shared
-                        ? "border-accent/45 bg-accent/10 text-accent"
-                        : "border-white/12 bg-white/[0.04] text-ivory/70"
-                    }`}
-                  >
-                    {tag}
-                  </span>
-                );
-              })}
-            </span>
-          </Row>
-        ) : null}
+          <div className="flex flex-wrap gap-1.5">
+            {ideas.map((tag) => {
+              const shared = sharedIdeas.includes(tag);
+              return (
+                <span
+                  key={tag}
+                  className={`rounded-full border px-2 py-[3px] text-[11px] ${
+                    shared
+                      ? "border-accent/45 bg-accent/10 text-accent"
+                      : "border-white/12 bg-white/[0.04] text-ivory/70"
+                  }`}
+                >
+                  {tag}
+                </span>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="min-h-[1.6rem]" />
+        )}
 
         {looking.length > 0 ? (
-          <Row label="Wants">
+          <p className="line-clamp-1 text-[12px] text-ivory/65">
+            <span className="text-muted">Wants </span>
             {looking.map((item, i) => (
               <span key={item}>
-                <span
-                  className={
-                    sharedLookingFor.includes(item) ? "font-medium text-accent" : undefined
-                  }
-                >
+                <span className={sharedLookingFor.includes(item) ? "text-accent" : undefined}>
                   {item}
                 </span>
-                {i < looking.length - 1 ? <span className="text-ivory/35">, </span> : null}
+                {i < looking.length - 1 ? ", " : ""}
               </span>
             ))}
-          </Row>
-        ) : null}
+          </p>
+        ) : (
+          <p className="min-h-[1.1rem] text-[12px] text-transparent">.</p>
+        )}
 
-        {!preview && reasons.length > 0 ? (
-          <Row label="Match">
-            <span className="text-ivory/70">{reasons.slice(0, 2).join(" · ")}</span>
-          </Row>
-        ) : null}
-
-        {person.verifications.length > 0 ? (
-          <Row label="Verified">
-            <span className="inline-flex flex-wrap items-center gap-x-1.5 gap-y-1 text-ivory/70">
-              <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 shrink-0 text-accent" fill="none" stroke="currentColor" strokeWidth="1.9">
-                <path d="M12 3.5l6.5 2.4v5.3c0 4-2.7 7.2-6.5 8.8-3.8-1.6-6.5-4.8-6.5-8.8V5.9L12 3.5z" strokeLinejoin="round" />
-                <path d="M9 12l2.2 2.2L15.2 10" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              {person.verifications.map((v) => VERIFY_LABEL[v]).join(" · ")}
-            </span>
-          </Row>
-        ) : null}
+        <p className="mt-auto line-clamp-1 text-[12px] text-ivory/55">
+          {!preview && reasons.length > 0 ? reasons.slice(0, 2).join(" · ") : "\u00a0"}
+        </p>
       </div>
 
-      <div className="flex items-center gap-3 border-t border-white/[0.07] px-4 py-3">
+      <div className="mt-auto flex items-center gap-3 border-t border-white/[0.07] px-4 py-3">
         {onSkip && !preview ? (
           <button
             type="button"

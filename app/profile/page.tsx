@@ -3,15 +3,14 @@
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import MemberStatusStrip from "@/components/MemberStatusStrip";
-import MembershipPlans from "@/components/MembershipPlans";
-import MembershipTiers from "@/components/MembershipTiers";
+import PlansSection from "@/components/PlansSection";
 import Avatar from "@/components/Avatar";
 import EditProfilePopup from "@/components/EditProfilePopup";
-import BlackMembershipCard from "@/components/BlackMembershipCard";
 import Nav from "@/components/Nav";
 import PageHeader from "@/components/PageHeader";
 import PremierPlanSheet from "@/components/PremierPlanSheet";
 import ProfileForm from "@/components/ProfileForm";
+import MembershipTiers from "@/components/MembershipTiers";
 import { ensureNotifyPermission } from "@/lib/notify";
 import {
   activatePremierPlan,
@@ -146,21 +145,17 @@ function ProfileContent() {
 
         <MemberStatusStrip profile={profile} tier={computeMemberTier(tierInput)} />
 
-        <MembershipPlans
-          profile={profile}
-          onBuy={(prefer) => {
-            setSheetInterval(prefer || "year");
-            setPremierOpen(true);
-          }}
-          onCancel={cancel}
-          onSwitchInterval={switchInterval}
-        />
-
-        <BlackMembershipCard
+        <PlansSection
           profile={profile}
           meetings={meetings}
           reputationScore={reputationScoreForMeetings(meetings)}
           profileStrength={strength.score}
+          onBuyPremier={(prefer) => {
+            setSheetInterval(prefer || "year");
+            setPremierOpen(true);
+          }}
+          onCancelPremier={cancel}
+          onSwitchPremier={switchInterval}
         />
 
         <section className="mp-person-card mb-5 p-4">

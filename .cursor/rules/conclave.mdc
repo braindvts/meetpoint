@@ -28,8 +28,13 @@ Premier ($20/mo) is a plan that expands who Members can meet. Standing levels ar
 ## UX
 
 - Level badges: matching metal marks — steel / champagne / black (BLACK is the coolest)
+- BLACK CONNECTION: black checkmark badge (not a chain icon)
 - Never show “Tier N · Name”
-- Signup highlights missing sections and lists what’s missing
+- Signup: Identity required; verification optional (skip = stay Member)
+- Discover cards: even height, no “verified via LinkedIn/email” list
+- Plans: one grouped Free / Premier / BLACK block
+- Signup highlights missing Identity sections when incomplete
+- Top nav fixed on every screen
 
 ## Demo
 

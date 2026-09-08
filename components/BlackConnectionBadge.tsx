@@ -10,8 +10,8 @@ interface Props {
 }
 
 /**
- * BLACK CONNECTION — a credential, not a tier. Outlined rather than filled so
- * it reads as secondary to the BLACK mark at a glance.
+ * BLACK CONNECTION — a credential, not a level.
+ * Marked with a black check so it reads clearly next to the BLACK badge.
  */
 export default function BlackConnectionBadge({
   count = 1,
@@ -24,16 +24,21 @@ export default function BlackConnectionBadge({
 
   return (
     <span
-      className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border border-accent/45 bg-accent/[0.06] px-2.5 py-1 text-[9.5px] font-semibold uppercase tracking-[0.18em] text-accent ${className}`}
+      className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/25 bg-black px-2.5 py-1 text-[9.5px] font-semibold uppercase tracking-[0.16em] text-[#f5f5f5] shadow-[0_0_0_1px_#000] ${className}`}
       title={`BLACK CONNECTION — ${level.name || "connected"} (${count})`}
     >
-      <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M9.5 14.5l5-5" strokeLinecap="round" />
-        <path d="M7.8 11.2 6.4 12.6a3 3 0 0 0 4.2 4.2l1.4-1.4" strokeLinecap="round" />
-        <path d="M16.2 12.8l1.4-1.4a3 3 0 0 0-4.2-4.2l-1.4 1.4" strokeLinecap="round" />
+      <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 shrink-0" fill="none" aria-hidden>
+        <circle cx="12" cy="12" r="10" fill="#0a0a0a" stroke="#cfcfcf" strokeWidth="1.4" />
+        <path
+          d="M7.5 12.4l3 3 6-6.5"
+          stroke="#f5f5f5"
+          strokeWidth="2.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
       </svg>
-      {variant === "compact" ? "BLACK CONN." : "BLACK CONNECTION"}
-      {showCount ? <span className="text-accent-2">· {count}</span> : null}
+      {variant === "compact" ? "CONN." : "CONNECTION"}
+      {showCount ? <span className="text-white/70">· {count}</span> : null}
     </span>
   );
 }

@@ -71,15 +71,35 @@ Signup must **not** block on verification — only Identity is required to creat
 
 ## Plans (money, separate from levels)
 
-| Plan | Price | What it unlocks |
-|------|-------|-----------------|
-| Free Member | $0 | Member ↔ Member intros |
-| **Conclave Premier** | $20/mo or $100/yr | Meet Verified & BLACK without being BLACK |
-| **BLACK** | $50/mo or $500/yr | Top level + meet anyone |
+All three live in **one Plans block** on Profile (grouped, short copy):
+
+| Plan | Price | What you get |
+|------|-------|----------------|
+| **Free** | $0 | Member ↔ Member intros |
+| **Premier** | $20/mo or $100/yr | Meet Verified & BLACK · trial on yearly |
+| **BLACK** | $50/mo or $500/yr | Top level · meet anyone · paid or earned |
 
 Premier is a **plan**. Member / Verified / BLACK are **standing levels**. Someone can be Verified + Free, or Verified + Premier, or BLACK.
 
+Must be **Verified** before activating BLACK.
+
+### BLACK CONNECTION
+
+Separate from BLACK. Shown as a **black checkmark** badge. Earned when a BLACK member connects you privately — never upgrades you to BLACK.
+
 ---
+
+## Discover cards & filter
+
+- Cards are **even height**; only the important info: name, role, city, level badge, short bio, focus tags, wants, match line.
+- Do **not** list how someone verified (email / LinkedIn / resume). The **Verified** level badge is enough.
+- Filter (funnel icon): change **what you’re looking for** anytime after signup — Discover updates immediately.
+
+---
+
+## Chats
+
+- **New chat** button uses a **+ icon** plus the label (not a bare “New” word).
 
 ## Main screens
 
@@ -91,14 +111,14 @@ Premier is a **plan**. Member / Verified / BLACK are **standing levels**. Someon
 | `/discover` | The Room — For you / Nearby match cards |
 | `/circle` | Incoming / outgoing connection requests |
 | `/chats` | Private DMs (poll ~4s) + table proposals |
-| `/profile` | Your card, plans, levels, BLACK card |
+| `/profile` | Your card, grouped Plans (Free/Premier/BLACK), levels |
 | `/demo` | Demo bypass (only if `NEXT_PUBLIC_ENABLE_DEMO=1`) |
 
 ---
 
 ## How matching works (short)
 
-Discover ranks people by shared ambitions, complementary “looking for,” same profession, and distance. Nearby narrows by city/geo. Members without Premier only introduce to other Members. Verified and BLACK (or Premier) can reach further.
+Discover ranks people by shared ambitions, complementary “looking for,” same profession, and distance. Nearby narrows by city/geo. Members without Premier only introduce to other Members. Verified and BLACK (or Premier) can reach further. Looking-for preferences can be edited from Discover’s filter anytime.
 
 ---
 
@@ -159,7 +179,9 @@ See [MISSING.md](./MISSING.md). Big ones: email verify + password reset links, c
 |-------|------|
 | Levels logic | `lib/tiers.ts` |
 | Required 3 credentials | `lib/types.ts` → `REQUIRED_VERIFICATIONS` |
-| Level badges | `components/TierBadge.tsx`, `BlackBadge.tsx` |
+| Plans (Free / Premier / BLACK) | `components/PlansSection.tsx` |
+| BLACK CONNECTION checkmark | `components/BlackConnectionBadge.tsx` |
+| Discover cards | `components/MatchCard.tsx` |
 | Signup missing fields | `components/ProfileForm.tsx` |
 | BLACK rules | `lib/black.ts` |
 | Premier access | `lib/plans.ts` |

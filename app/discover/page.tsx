@@ -20,12 +20,14 @@ import {
   loadProfile,
   loadRatings,
   requestConnection,
+  saveProfile,
 } from "@/lib/store";
 import { refreshDirectory, loadDirectory } from "@/lib/directory";
 import { syncProfileToServer } from "@/lib/apiClient";
 import { readClientConnections, readClientProfile } from "@/lib/clientProfile";
 import { tierForPerson, tierForProfile } from "@/lib/tiers";
-import type { Connection, MyProfile, Person } from "@/lib/types";
+import type { Connection, LookingFor, MyProfile, Person } from "@/lib/types";
+import { LOOKING_FOR_OPTIONS } from "@/lib/types";
 import EmptyState from "@/components/EmptyState";
 import NotifyPrompt from "@/components/NotifyPrompt";
 import SkeletonCard from "@/components/SkeletonCard";
@@ -56,10 +58,6 @@ export default function DiscoverPage() {
     const p = loadProfile();
     if (!p) {
       router.replace("/onboarding");
-      return;
-    }
-    if (!p.verifications?.length) {
-      router.replace("/profile?verify=1");
       return;
     }
     setProfile(p);
@@ -214,11 +212,45 @@ export default function DiscoverPage() {
           </div>
         </div>
 
-        {filterOpen && (
-          <p className="px-5 pt-3 text-[12px] leading-relaxed text-muted">
-            For you ranks by ambition and overlap. Nearby is people within reach of your city.
-          </p>
-        )}
+        {filterOpen && profile ? (
+          <div className="mx-4 mt-3 border border-accent/25 bg-panel/50 px-3 py-3 md:mx-0">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-accent">
+              What you’re looking for
+            </p>
+            <p className="mt-1 text-[12px] text-muted">
+              Change this anytime — Discover updates to match.
+            </p>
+            <div className="mt-2.5 flex flex-wrap gap-1.5">
+              {LOOKING_FOR_OPTIONS.map((item) => {
+                const on = profile.lookingFor?.includes(item);
+                return (
+                  <button
+                    key={item}
+                    type="button"
+                    onClick={() => {
+                      const next: LookingFor[] = on
+                        ? (profile.lookingFor || []).filter((x) => x !== item)
+                        : [...(profile.lookingFor || []), item];
+                      const updated = { ...profile, lookingFor: next };
+                      saveProfile(updated);
+                      setProfile(updated);
+                    }}
+                    className={`border px-2.5 py-1 text-[12px] transition ${
+                      on
+                        ? "border-accent/50 bg-accent/15 text-accent-2"
+                        : "border-line/80 text-muted hover:border-accent/35 hover:text-ivory"
+                    }`}
+                  >
+                    {item}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="mt-2.5 text-[11px] text-muted">
+              For you ranks by overlap. Nearby is people close to your city.
+            </p>
+          </div>
+        ) : null}
 
         <div className="px-4 pb-6 pt-4 md:px-0">
           {showSkeletons ? (
