@@ -52,29 +52,58 @@ export default function Nav() {
   if (!mounted || inChatThread) return null;
 
   return createPortal(
-    <nav
-      className="mp-mobile-dock fixed inset-x-0 bottom-0 z-[100] sm:left-1/2 sm:right-auto sm:w-full sm:max-w-[430px] sm:-translate-x-1/2"
-      aria-label="App"
-    >
-      <div className="mp-dock flex pb-[max(0.35rem,env(safe-area-inset-bottom))]">
-        {LINKS.map((l) => {
-          const active = pathname.startsWith(l.href);
-          return (
-            <Link
-              key={l.href}
-              href={l.href}
-              aria-current={active ? "page" : undefined}
-              className={`relative flex flex-1 flex-col items-center gap-0.5 py-2.5 transition ${
-                active ? "text-accent" : "text-muted active:text-ivory"
-              }`}
-            >
-              <span className="leading-none">{l.icon}</span>
-              <span className="text-[10px] font-medium tracking-wide">{l.label}</span>
-            </Link>
-          );
-        })}
-      </div>
-    </nav>,
+    <>
+      {/* Desktop — normal website top nav */}
+      <nav className="mp-site-nav" aria-label="Conclave">
+        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-6 px-6">
+          <Link
+            href="/discover"
+            className="text-[11px] font-semibold uppercase tracking-[0.28em] text-accent"
+          >
+            Conclave
+          </Link>
+          <div className="flex items-center gap-1">
+            {LINKS.map((l) => {
+              const active = pathname.startsWith(l.href);
+              return (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  aria-current={active ? "page" : undefined}
+                  className={`rounded-sm px-3 py-2 text-[13px] font-medium transition ${
+                    active ? "text-accent" : "text-muted hover:text-ivory"
+                  }`}
+                >
+                  {l.label}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </nav>
+
+      {/* Mobile — bottom dock (phones / small tablets only) */}
+      <nav className="mp-mobile-dock" aria-label="Conclave">
+        <div className="mp-dock flex pb-[max(0.35rem,env(safe-area-inset-bottom))]">
+          {LINKS.map((l) => {
+            const active = pathname.startsWith(l.href);
+            return (
+              <Link
+                key={l.href}
+                href={l.href}
+                aria-current={active ? "page" : undefined}
+                className={`relative flex flex-1 flex-col items-center gap-0.5 py-2.5 transition ${
+                  active ? "text-accent" : "text-muted active:text-ivory"
+                }`}
+              >
+                <span className="leading-none">{l.icon}</span>
+                <span className="text-[10px] font-medium tracking-wide">{l.label}</span>
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
+    </>,
     document.body
   );
 }

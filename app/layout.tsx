@@ -15,13 +15,12 @@ const outfit = Outfit({
 export const metadata: Metadata = {
   title: "Conclave",
   description:
-    "A private society for introductions that end at a table. Matched by ambition or profession — settled over dinner.",
+    "Conclave — the private network for ambitious people. Use it in the browser now; native app later.",
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
   viewportFit: "cover",
   themeColor: "#050505",
   interactiveWidget: "resizes-content",

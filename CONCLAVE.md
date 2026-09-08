@@ -1,10 +1,24 @@
-# Conclave — how the app works
+# Conclave — how the product works
 
 Keep this open as your product handbook. Update it when rules change.
 
 **One-liner:** Conclave introduces ambitious people, then settles it over dinner.
 
+**Delivery plan:** **Website first** (browser on laptop/phone). Turn it into a native app later once the website is making money. Do not rebuild the UI as a phone-frame “app shell” for web.
+
 **Live code:** GitHub `braindvts/meetpoint` · stack Next.js + Postgres + Prisma · brand dark `#050505` + champagne gold `#d4c4a8`
+
+---
+
+## Website first (now) → native app (later)
+
+| Now | Later |
+|-----|--------|
+| Responsive **browser website** (desktop + mobile) | Wrap the same site in iOS/Android (WKWebView / Capacitor) |
+| Top nav on desktop, bottom dock only on phones | Same URLs and product rules |
+| Marketing home at `/` for every device | App Store listing when revenue supports it |
+
+**Do not** force a 430px phone column or bounce mobile users away from the landing page.
 
 ---
 

@@ -92,7 +92,7 @@ export default function ConnectionsPage() {
   return (
     <>
       <Nav />
-      <main className="mp-app pb-24">
+      <main className="mp-app px-0 pb-24 md:px-6 md:pb-10">
         <PageHeader title="Circle" />
         <div className="px-4 pt-2">
           <p className="text-[14px] text-ivory/70">Your introductions</p>

@@ -68,14 +68,29 @@ body::after {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-/* Phone-app column — the earlier mockup format */
+/* Website shell — fluid browser layout (mobile stays usable; wrap as app later) */
 .mp-app {
   width: 100%;
-  max-width: 430px;
+  max-width: 72rem; /* ~6xl */
   margin-left: auto;
   margin-right: auto;
   min-height: 100dvh;
-  background: var(--color-ink);
+  background: transparent;
+}
+
+/* Marketing / full-bleed pages */
+.mp-site {
+  width: 100%;
+  min-height: 100dvh;
+}
+
+@media (min-width: 768px) {
+  body {
+    background:
+      radial-gradient(ellipse 80% 50% at 50% -15%, rgba(212, 196, 168, 0.1), transparent 55%),
+      radial-gradient(ellipse 35% 40% at 100% 10%, rgba(212, 196, 168, 0.05), transparent 50%),
+      #050505;
+  }
 }
 
 /* Hide Next.js dev badge on story exports and product screenshots */
@@ -87,14 +102,6 @@ body:has([data-shot]) nextjs-portal {
   display: none !important;
   visibility: hidden !important;
   pointer-events: none !important;
-}
-@media (min-width: 640px) {
-  body {
-    background: #030303;
-  }
-  .mp-app {
-    box-shadow: 0 0 0 1px rgba(212, 196, 168, 0.08), 0 24px 80px rgba(0, 0, 0, 0.55);
-  }
 }
 
 .mp-stage {
@@ -170,17 +177,18 @@ body:has([data-shot]) nextjs-portal {
   pointer-events: none;
 }
 
-/* Floating mobile dock — pinned to the real viewport via portal */
+/* Floating mobile dock — phones only; desktop uses the top site nav */
 .mp-mobile-dock {
   position: fixed;
   bottom: 0;
+  left: 0;
+  right: 0;
   pointer-events: none;
+  z-index: 100;
 }
-/* Full width on phones; on wider screens it tracks the app column instead. */
-@media (max-width: 639px) {
+@media (min-width: 768px) {
   .mp-mobile-dock {
-    left: 0 !important;
-    right: 0 !important;
+    display: none !important;
   }
 }
 .mp-mobile-dock a {
@@ -192,6 +200,23 @@ body:has([data-shot]) nextjs-portal {
   backdrop-filter: blur(22px);
   -webkit-backdrop-filter: blur(22px);
   pointer-events: auto;
+}
+
+/* Desktop top site nav */
+.mp-site-nav {
+  display: none;
+}
+@media (min-width: 768px) {
+  .mp-site-nav {
+    display: block;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid rgba(243, 239, 230, 0.08);
+    background: rgba(5, 5, 5, 0.92);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+  }
 }
 
 /* Segmented filter control */
@@ -229,6 +254,7 @@ body:has([data-shot]) nextjs-portal {
 /* Freeze page chrome under open sheets (phones) */
 @media (max-width: 639px) {
   html.mp-sheet-open header,
+  html.mp-sheet-open nav[aria-label="Conclave"],
   html.mp-sheet-open nav[aria-label="App"] {
     visibility: hidden;
   }

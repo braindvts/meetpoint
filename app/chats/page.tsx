@@ -106,7 +106,7 @@ export default function ChatsPage() {
   return (
     <>
       <Nav />
-      <main className="mp-app pb-24">
+      <main className="mp-app px-0 pb-24 md:px-6 md:pb-10">
         <PageHeader
           title="Chats"
           action={

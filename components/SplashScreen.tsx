@@ -31,7 +31,13 @@ export default function SplashScreen() {
     }
     if (alreadySeen()) return;
     if (window.location.pathname.startsWith("/story")) return;
+    if (window.location.pathname === "/") return; // marketing site — no app splash
     if (window.location.search.includes("shot=1")) return;
+    // Website-first: skip the app splash on desktop browsers
+    if (window.matchMedia("(min-width: 768px)").matches) {
+      markSeen();
+      return;
+    }
 
     setVisible(true);
 

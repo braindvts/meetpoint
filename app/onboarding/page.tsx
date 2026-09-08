@@ -63,7 +63,7 @@ function OnboardingContent() {
   }, []);
 
   return (
-    <main className="mp-app relative min-h-dvh pb-10">
+    <main className="mp-app relative min-h-dvh px-4 pb-10 md:px-6">
       <div className="px-6 pt-14">
         <p className="text-center text-[0.75rem] font-medium tracking-[0.14em] text-accent">
           CONCLAVE

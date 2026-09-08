@@ -154,26 +154,31 @@ export default function DiscoverPage() {
   return (
     <>
       <Nav />
-      <main className="mp-app pb-24">
-        <header className="sticky top-0 z-40 bg-ink/95 px-5 pb-3 pt-4 backdrop-blur-xl">
-          <div className="relative flex h-7 items-center justify-center">
-            <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-accent">
+      <main className="mp-app px-0 pb-24 md:px-6 md:pb-10">
+        <header className="sticky top-0 z-40 bg-ink/95 px-5 pb-3 pt-4 backdrop-blur-xl md:px-0 md:pt-6">
+          <div className="relative flex h-7 items-center justify-center md:justify-between">
+            <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-accent md:hidden">
               Conclave
             </p>
+            <h1 className="hidden text-[1.85rem] font-semibold tracking-tight text-ivory md:block">
+              Discover
+            </h1>
             <button
               type="button"
               aria-label="Filter"
               aria-expanded={filterOpen}
               onClick={() => setFilterOpen((v) => !v)}
-              className="absolute right-0 text-accent"
+              className="absolute right-0 text-accent md:static"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" className="h-5 w-5">
                 <path d="M4 5h16l-5.5 7.2V19l-5 2v-8.8L4 5z" strokeLinejoin="round" />
               </svg>
             </button>
           </div>
-          <h1 className="mt-2 text-[1.85rem] font-semibold tracking-tight text-ivory">Discover</h1>
-          <p className="mt-1 text-[13px] leading-snug text-ivory/60">
+          <h1 className="mt-2 text-[1.85rem] font-semibold tracking-tight text-ivory md:hidden">
+            Discover
+          </h1>
+          <p className="mt-1 text-[13px] leading-snug text-ivory/60 md:mt-2">
             Curated professionals. Meaningful connections.
           </p>
           {myTier === 1 && !premier && (
@@ -190,8 +195,8 @@ export default function DiscoverPage() {
           )}
         </header>
 
-        <div className="px-4 pt-3">
-          <div className="flex rounded-full border border-white/12 bg-[#12110f] p-1">
+        <div className="px-4 pt-3 md:px-0 md:pt-4">
+          <div className="flex max-w-md rounded-full border border-white/12 bg-[#12110f] p-1 md:max-w-lg">
             {(["open", "local"] as Filter[]).map((key) => (
               <button
                 key={key}
@@ -215,7 +220,7 @@ export default function DiscoverPage() {
           </p>
         )}
 
-        <div className="px-4 pb-6 pt-4">
+        <div className="px-4 pb-6 pt-4 md:px-0">
           {showSkeletons ? (
             <div className="space-y-3">
               <SkeletonCard />
@@ -255,7 +260,7 @@ export default function DiscoverPage() {
               onAction={() => setSkipped([])}
             />
           ) : (
-            <div key={filter} className="mp-stagger space-y-3">
+            <div key={filter} className="mp-stagger grid gap-3 md:grid-cols-2 md:gap-4">
               {filtered.map((m) => {
                 const allowed = canIntroduceToTier(myTier, m.tier, premier, myBlackConnections);
                 const leaving = exiting === m.person.id;
