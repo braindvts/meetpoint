@@ -133,7 +133,7 @@ export default function PlansSection({
               <div className="mt-3 space-y-2">
                 {!verified ? (
                   <p className="text-[11px] text-[#c4b59a]">
-                    Get Verified first (email + LinkedIn + resume), then unlock BLACK.
+                    Get Verified first (email + LinkedIn), then unlock BLACK.
                   </p>
                 ) : null}
                 <div className="grid grid-cols-2 gap-2">

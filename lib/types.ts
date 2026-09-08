@@ -36,13 +36,12 @@ export type VerificationMethod =
   | "portfolio";
 
 /**
- * The three business credentials for Verified standing.
+ * Business credentials for Verified standing.
  * Optional at signup — Members can skip these and stay Member.
  */
 export const REQUIRED_VERIFICATIONS: VerificationMethod[] = [
   "company-email",
   "linkedin",
-  "resume",
 ];
 
 export const VERIFICATION_OPTIONS: {
@@ -56,7 +55,7 @@ export const VERIFICATION_OPTIONS: {
   {
     method: "company-email",
     label: "Business email",
-    hint: "Optional for Member. Needed (with LinkedIn + resume) to become Verified.",
+    hint: "Optional for Member. Needed (with LinkedIn) to become Verified.",
     placeholder: "you@company.com",
     forVerified: true,
   },
@@ -70,9 +69,8 @@ export const VERIFICATION_OPTIONS: {
   {
     method: "resume",
     label: "Resume",
-    hint: "Optional for Member. Link to PDF / Drive / Dropbox for Verified.",
+    hint: "Optional — link to PDF / Drive / Dropbox.",
     placeholder: "https://drive.google.com/…",
-    forVerified: true,
   },
   {
     method: "website",

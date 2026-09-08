@@ -287,9 +287,9 @@ export default function ProfileForm({
       if (opt.method === "linkedin" && initial?.linkedInId && !raw) {
         raw = `linkedin:${initial.linkedInId}`;
       }
-      // When sent here to get Verified, require only the three Verified fields.
+      // When sent here to get Verified, require only email + LinkedIn.
       if (highlightVerify && opt.forVerified && !raw) {
-        nextErrors.verification = "Add business email, LinkedIn, and resume to become Verified.";
+        nextErrors.verification = "Add business email and LinkedIn to become Verified.";
         missing.push(opt.label);
         continue;
       }
@@ -661,8 +661,8 @@ export default function ProfileForm({
         title="Verification"
         subtitle={
           highlightVerify
-            ? "Only three fields make you Verified: business email, LinkedIn, and resume."
-            : "Optional for Member. Add business email + LinkedIn + resume anytime to become Verified."
+            ? "Only two fields make you Verified: business email and LinkedIn."
+            : "Optional for Member. Add business email + LinkedIn anytime to become Verified."
         }
         missing={
           !!fieldErrors.verification ||
@@ -679,13 +679,13 @@ export default function ProfileForm({
           {highlightVerify ? (
             <p className="rounded-md border border-accent/40 bg-accent/[0.08] px-3 py-2.5 text-[12px] leading-relaxed text-accent-2 sm:text-[13px]">
               To connect beyond Members, complete{" "}
-              <span className="font-semibold text-ivory">only these three</span> — then save.
-              Website, registration, and portfolio are optional extras.
+              <span className="font-semibold text-ivory">only these two</span> — then save.
+              Resume, website, and portfolio are optional extras.
             </p>
           ) : (
             <p className="text-[11px] leading-relaxed text-muted sm:text-xs">
               Identity alone makes you a <span className="text-ivory">Member</span>. To become{" "}
-              <span className="text-accent-2">Verified</span>, add the three fields below. Everything
+              <span className="text-accent-2">Verified</span>, add the two fields below. Everything
               under Optional extras can stay empty.
             </p>
           )}

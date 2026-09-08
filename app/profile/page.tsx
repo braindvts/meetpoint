@@ -106,9 +106,9 @@ function ProfileContent() {
               To connect beyond Members, become{" "}
               <span className="font-semibold text-ivory">Verified</span> with only{" "}
               <span className="font-semibold text-ivory">
-                business email · LinkedIn · resume
+                business email · LinkedIn
               </span>
-              . Website and portfolio are optional.
+              . Resume and website are optional.
               {missingVerify.length > 0 ? (
                 <>
                   {" "}
@@ -173,14 +173,14 @@ function ProfileContent() {
           missing={
             tierInput.verified
               ? strength.missing.filter(
-                  (m) => !["Business email", "LinkedIn", "Resume"].includes(m)
+                  (m) => !["Business email", "LinkedIn"].includes(m)
                 )
               : missingVerify
           }
           missingHint={
             tierInput.verified
               ? "Optional extras for a stronger profile"
-              : "Only these three for Verified"
+              : "Only these two for Verified"
           }
         />
 

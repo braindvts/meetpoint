@@ -78,7 +78,7 @@ export default function Landing() {
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-[15px] leading-relaxed text-muted">
             Build your Identity profile, join as a Member, optionally get Verified with
-            business email, LinkedIn, and resume, then discover people who fit — and settle
+            business email and LinkedIn, then discover people who fit — and settle
             it over a real table.
           </p>
         </div>
@@ -99,7 +99,7 @@ export default function Landing() {
               {
                 name: "Verified",
                 mark: "level-mark level-mark--verified",
-                copy: "Add business email, LinkedIn, and resume when you’re ready.",
+                copy: "Add business email and LinkedIn when you’re ready.",
               },
               {
                 name: "Member",

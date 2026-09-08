@@ -22,8 +22,8 @@ export const TIER_DEFINITIONS: TierDefinition[] = [
   {
     tier: 2,
     name: "Verified",
-    meaning: "Identity backed by business email, LinkedIn, and resume",
-    howToEarn: "Optional — add business email, LinkedIn, and resume when you’re ready",
+    meaning: "Identity backed by business email and LinkedIn",
+    howToEarn: "Optional — add business email and LinkedIn when you’re ready",
   },
   {
     tier: 3,
@@ -70,7 +70,7 @@ function hasMethod(vers: Verification[] | undefined, method: string): boolean {
   return (vers || []).some((v) => v.method === method && String(v.value || "").trim());
 }
 
-/** True when business email, LinkedIn, and resume are all present. */
+/** True when business email and LinkedIn are present. */
 export function hasRequiredVerifications(
   vers: Verification[] | undefined
 ): boolean {
@@ -107,7 +107,7 @@ export function isProfileComplete(profile: Pick<
   );
 }
 
-/** Member who also added all three business credentials. */
+/** Member who also added the required business credentials. */
 export function isVerifiedStanding(profile: Pick<
   MyProfile,
   "name" | "photo" | "jobTitle" | "lookingFor" | "ideaTags" | "verifications"
@@ -214,7 +214,7 @@ export function nextTierProgress(input: TierInput): {
     return {
       current,
       next: TIER_DEFINITIONS[1],
-      hint: "You’re a Member. Add business email, LinkedIn, and resume anytime to become Verified.",
+      hint: "You’re a Member. Add business email and LinkedIn anytime to become Verified.",
     };
   }
   return {

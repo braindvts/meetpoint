@@ -27,7 +27,7 @@ Keep this open as your product handbook. Update it when rules change.
 | Level | How you get it |
 |-------|----------------|
 | **Member** | Sign up + finish **Identity** (photo, name, role, ambitions, looking for). Verification is **not** required. |
-| **Verified** | Same Identity basics **plus** all **3** credentials: business email, LinkedIn, resume. |
+| **Verified** | Same Identity basics **plus** business email and LinkedIn. |
 | **BLACK** | Pay ($50/mo or $500/yr) **or** earn it (~20 dinners + strong profile + high ratings). Must already be verified to activate. |
 
 There is **no** Trusted / Connector / “Tier 1 · …” anymore — only these three.
@@ -48,17 +48,16 @@ They can **skip** business email, LinkedIn, resume, website, portfolio entirely.
 
 If they skip verification → they stay **Member** (not Verified). That’s correct.
 
-**Short version:** Identity → **Member**. Identity + email + LinkedIn + resume → **Verified**.
+**Short version:** Identity → **Member**. Identity + email + LinkedIn → **Verified**.
 
-### Verified — the 3 credentials (optional until they want it)
+### Verified — business email + LinkedIn (optional until they want it)
 
-They become **Verified** only when Identity is done **and** all 3 credentials are added:
+They become **Verified** only when Identity is done **and** both credentials are added:
 
 1. **Business email**  
-2. **LinkedIn**  
-3. **Resume** (HTTPS link to PDF / Drive / Dropbox)
+2. **LinkedIn**
 
-Optional extras (do not replace the three): website, business registration, portfolio.
+Optional extras (do not replace those two): resume, website, business registration, portfolio.
 
 Signup must **not** block on verification — only Identity is required to create the account / enter the room.
 
@@ -76,7 +75,7 @@ Signup must **not** block on verification — only Identity is required to creat
 | **Free** | $0 | Member ↔ Member intros. Get **Verified** to meet anyone. |
 | **BLACK** | $50/mo or $500/yr | Top level · meet anyone · paid or earned |
 
-There is **no Premier**. Standing levels are Member / Verified / BLACK. Want to introduce beyond Members? Become Verified (email + LinkedIn + resume).
+There is **no Premier**. Standing levels are Member / Verified / BLACK. Want to introduce beyond Members? Become Verified (email + LinkedIn).
 
 Must be **Verified** before activating BLACK.
 
@@ -89,7 +88,7 @@ Separate from BLACK. Shown as a black checkmark with **Trusted by BLACK** (not n
 ## Discover cards & filter
 
 - Cards are **even height**; only the important info: name, role, city, level badge, short bio, focus tags, wants, match line.
-- Do **not** list how someone verified (email / LinkedIn / resume). The **Verified** level badge is enough.
+- Do **not** list how someone verified (email / LinkedIn). The **Verified** level badge is enough.
 - Filter (funnel icon): change **what you’re looking for** anytime after signup — Discover updates immediately.
 
 ---
