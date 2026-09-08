@@ -240,7 +240,7 @@ export default function ConnectionsPage() {
                                 <div className="mt-1.5 flex flex-wrap items-center gap-2">
                                   {person.black ? <BlackBadge size="xs" /> : null}
                                   {blackConnectionWith(person.id) ? (
-                                    <BlackConnectionBadge count={1} labeled />
+                                    <BlackConnectionBadge count={1} />
                                   ) : null}
                                 </div>
                                 <p className="mt-1 text-[11px] text-accent">

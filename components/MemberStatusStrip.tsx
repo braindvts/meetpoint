@@ -14,7 +14,7 @@ interface Props {
 }
 
 /**
- * Standing row: Free / Verified / BLACK + BLACK CONNECTION checkmark.
+ * Standing row: Free / Verified / BLACK check + trusted blue check.
  */
 export default function MemberStatusStrip({ profile, tier }: Props) {
   const [connections, setConnections] = useState(0);
@@ -42,7 +42,7 @@ export default function MemberStatusStrip({ profile, tier }: Props) {
       {black && tier !== 3 ? <BlackBadge size="sm" /> : null}
 
       {connections > 0 ? (
-        <BlackConnectionBadge count={connections} labeled showCount />
+        <BlackConnectionBadge count={connections} showCount />
       ) : null}
     </div>
   );

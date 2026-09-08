@@ -81,7 +81,9 @@ Must be **Verified** before activating BLACK.
 
 ### BLACK CONNECTION
 
-Separate from BLACK. Shown as a black checkmark with **Trusted by BLACK** (not next to the BLACK level badge). Earned when a BLACK member connects you privately — never upgrades you to BLACK.
+Separate from BLACK. Shown as a **blue checkmark** next to the name (trusted). Earned when a BLACK member connects you privately — never upgrades you to BLACK.
+
+**BLACK** standing itself uses a **black checkmark** by the name (not a “BLACK” word badge).
 
 ---
 
@@ -162,7 +164,7 @@ Details: [WEBSITE.md](./WEBSITE.md) · [KEYS.md](./KEYS.md) · [LAUNCH.md](./LAU
 
 - Brand first: Conclave / champagne on dark ink  
 - One typeface family (Outfit)  
-- Level marks are the same metal shape: steel Member · champagne Verified · black sheen BLACK  
+- Level marks: steel Member · champagne Verified · **black check** for BLACK · **blue check** for trusted (BLACK CONNECTION)  
 - Signup must show **what** is missing and **where** (Needed sections + sticky chips)  
 - No purple AI-default theme, no cream+terracotta cliché  
 

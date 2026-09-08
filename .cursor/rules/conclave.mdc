@@ -29,14 +29,15 @@ Peer invites award BLACK CONNECTION only. They never promote someone to BLACK.
 
 ## UX
 
-- Level badges: matching metal marks — steel / champagne / black (BLACK is the coolest)
-- BLACK CONNECTION: checkmark + “Trusted by BLACK” — keep it separate from the BLACK level badge
+- Level badges: steel Member · champagne Verified · **black check** for BLACK · **blue check** for trusted (BLACK CONNECTION)
+- Checks appear by the name in chat and on profiles
 - Never show “Tier N · Name”
 - Signup: Identity required; verification optional (skip = stay Member)
 - Discover cards: even height, no “verified via LinkedIn/email” list
 - Plans: BLACK · Free (no Premier)
 - Signup highlights missing Identity sections when incomplete
 - Top nav fixed on every screen
+- Table booking photos stay compact in chat (thumbnail, not full-bleed)
 
 ## Demo
 

@@ -119,7 +119,7 @@ export default function FoodSuggestPopup({
                   key={s.restaurant.id}
                   className="overflow-hidden border border-white/10 bg-white/[0.03]"
                 >
-                  <div className="relative aspect-[16/10] w-full overflow-hidden bg-black">
+                  <div className="relative h-20 w-full overflow-hidden bg-black sm:h-24">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={restaurantPhoto(s.restaurant)}
@@ -128,10 +128,10 @@ export default function FoodSuggestPopup({
                       loading="lazy"
                     />
                     <div
-                      className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/85 to-transparent"
+                      className="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-black/85 to-transparent"
                       aria-hidden
                     />
-                    <p className="absolute bottom-2 left-3 right-3 truncate font-display text-lg font-semibold text-white">
+                    <p className="absolute bottom-1.5 left-2.5 right-2.5 truncate font-display text-base font-semibold text-white">
                       {s.restaurant.name}
                     </p>
                   </div>

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import Nav from "@/components/Nav";
 import Avatar from "@/components/Avatar";
-import BlackBadge from "@/components/BlackBadge";
+import NameMarks from "@/components/NameMarks";
 import ChatThreadPanel from "@/components/ChatThreadPanel";
 import EmptyState from "@/components/EmptyState";
 import {
@@ -231,7 +231,12 @@ function ChatsInner() {
                           <div className="flex items-baseline justify-between gap-2">
                             <p className="flex min-w-0 items-center gap-1.5 truncate font-medium text-ivory">
                               <span className="truncate">{row.person.name}</span>
-                              {row.person.black && <BlackBadge size="xs" />}
+                              <NameMarks
+                                black={!!row.person.black}
+                                trusted={(row.person.blackConnections ?? 0) > 0}
+                                trustedCount={row.person.blackConnections}
+                                size="xs"
+                              />
                             </p>
                             {row.lastAt && (
                               <span className="shrink-0 text-[11px] text-muted">

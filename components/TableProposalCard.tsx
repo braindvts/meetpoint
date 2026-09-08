@@ -202,59 +202,57 @@ export default function TableProposalCard({
 
   return (
     <div className="overflow-hidden border border-accent/35 bg-panel/80">
-      <div className={`relative w-full overflow-hidden bg-black ${booking ? "aspect-[21/9]" : "aspect-[16/9]"}`}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={restaurantPhoto(
-            RESTAURANTS.find((r) => r.id === proposal.restaurantId) || {
-              id: proposal.restaurantId,
-              cuisine: proposal.cuisine,
-            }
-          )}
-          alt={proposal.restaurantName}
-          className="h-full w-full object-cover"
-        />
-        <div
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/90 to-transparent"
-          aria-hidden
-        />
-        <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-2 px-3 pb-2.5">
-          <div className="min-w-0">
-            <p className="text-[9px] font-semibold uppercase tracking-[0.22em] text-accent-2">
-              {stepLabel}
-            </p>
-            <h3 className="truncate font-display text-xl font-semibold text-ivory">
-              {proposal.restaurantName}
-            </h3>
+      <div className="flex gap-3 p-3">
+        <div className="relative h-16 w-20 shrink-0 overflow-hidden rounded-md bg-black sm:h-[4.5rem] sm:w-24">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={restaurantPhoto(
+              RESTAURANTS.find((r) => r.id === proposal.restaurantId) || {
+                id: proposal.restaurantId,
+                cuisine: proposal.cuisine,
+              }
+            )}
+            alt={proposal.restaurantName}
+            className="h-full w-full object-cover"
+          />
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <p className="text-[9px] font-semibold uppercase tracking-[0.22em] text-accent-2">
+                {stepLabel}
+              </p>
+              <h3 className="truncate font-display text-lg font-semibold text-ivory sm:text-xl">
+                {proposal.restaurantName}
+              </h3>
+            </div>
+            {booking && (
+              <button
+                type="button"
+                onClick={cancelBookingFlow}
+                className="shrink-0 rounded-full border border-white/25 bg-black/50 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-white"
+              >
+                Close
+              </button>
+            )}
           </div>
-          {booking && (
-            <button
-              type="button"
-              onClick={cancelBookingFlow}
-              className="shrink-0 rounded-full border border-white/25 bg-black/50 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-white"
-            >
-              Close
-            </button>
+          {blackPeers.length > 0 && (
+            <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+              <BlackBadge size="xs" />
+              <span className="text-[11px] text-muted">BLACK table</span>
+            </div>
           )}
+          <p className="mt-1 text-[11px] text-muted">
+            {displayCuisine(proposal.cuisine)} · {proposal.city}
+          </p>
+          <div className="mt-1">
+            <StarRating restaurant={ratingSource} />
+          </div>
         </div>
       </div>
 
-      <div className="p-3.5">
-        {blackPeers.length > 0 && (
-          <div className="mb-2 flex flex-wrap items-center gap-2">
-            <BlackBadge size="xs" />
-            <span className="text-[11px] text-muted">
-              Business meeting with a BLACK member
-            </span>
-          </div>
-        )}
-        <p className="text-[11px] text-muted">
-          {displayCuisine(proposal.cuisine)} · {proposal.city}
-        </p>
-        <div className="mt-1.5">
-          <StarRating restaurant={ratingSource} />
-        </div>
-        <p className="mt-1 text-sm text-ivory/70">{proposal.vibe}</p>
+      <div className="border-t border-line/40 px-3.5 pb-3.5 pt-2.5">
+        <p className="text-sm text-ivory/70">{proposal.vibe}</p>
 
         <div className="mt-3 flex flex-wrap gap-1.5">
           {voters.map((id) => {

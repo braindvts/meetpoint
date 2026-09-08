@@ -1,7 +1,7 @@
 "use client";
 
 import type { KeyboardEvent, MouseEvent } from "react";
-import BlackConnectionBadge from "@/components/BlackConnectionBadge";
+import NameMarks from "@/components/NameMarks";
 import TierBadge from "@/components/TierBadge";
 import { blackConnectionWith } from "@/lib/blackStore";
 import type { MatchResult } from "@/lib/match";
@@ -129,7 +129,12 @@ export default function MatchCard({
           <div className="flex items-start justify-between gap-2">
             <h3 className="flex min-w-0 items-center gap-1.5 text-[1.05rem] font-semibold leading-tight tracking-tight text-ivory sm:text-[1.15rem]">
               <span className="truncate">{person.name}</span>
-              {tier === 3 ? <TierBadge tier={tier} size="sm" /> : null}
+              <NameMarks
+                black={tier === 3 || !!person.black}
+                trusted={blackConnections > 0}
+                trustedCount={blackConnections}
+                size="sm"
+              />
             </h3>
             {isNew ? (
               <span className="shrink-0 rounded-full bg-accent px-2 py-0.5 text-[9.5px] font-semibold uppercase tracking-[0.14em] text-ink">
@@ -144,9 +149,6 @@ export default function MatchCard({
           </p>
           <div className="mt-1.5 flex flex-wrap items-center gap-2">
             {tier !== 3 ? <TierBadge tier={tier} size="sm" /> : null}
-            {blackConnections > 0 ? (
-              <BlackConnectionBadge count={blackConnections} labeled />
-            ) : null}
           </div>
         </div>
       </div>

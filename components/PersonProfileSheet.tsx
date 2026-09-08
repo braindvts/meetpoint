@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 import Avatar from "@/components/Avatar";
-import BlackConnectionBadge from "@/components/BlackConnectionBadge";
+import NameMarks from "@/components/NameMarks";
 import TierBadge from "@/components/TierBadge";
 import { getPeerReputation } from "@/lib/store";
 import { isOwner, ownedCompanies, otherWork, VERIFY_LABEL } from "@/lib/personFacts";
@@ -249,14 +249,16 @@ export default function PersonProfileSheet({
                   <h2 className="text-2xl font-semibold tracking-tight text-white">
                     {person.name}
                   </h2>
-                  {black ? <TierBadge tier={tier} size="md" /> : null}
+                  <NameMarks
+                    black={black}
+                    trusted={(person.blackConnections ?? 0) > 0}
+                    trustedCount={person.blackConnections}
+                    size="md"
+                  />
                 </div>
                 <p className="mt-1 text-[14px] font-medium text-accent-2">{person.jobTitle}</p>
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   {!black ? <TierBadge tier={tier} size="md" /> : null}
-                  {(person.blackConnections ?? 0) > 0 ? (
-                    <BlackConnectionBadge count={person.blackConnections ?? 0} labeled />
-                  ) : null}
                   {tierCopy && (
                     <span className="text-[11px] text-white/55">{tierCopy.meaning}</span>
                   )}

@@ -7,7 +7,8 @@ import Avatar from "@/components/Avatar";
 import FoodSuggestPopup from "@/components/FoodSuggestPopup";
 import TableProposalCard, { takePendingBooking } from "@/components/TableProposalCard";
 import BlackInvitePanel from "@/components/BlackInvitePanel";
-import { settleBlackMeeting } from "@/lib/blackStore";
+import NameMarks from "@/components/NameMarks";
+import { settleBlackMeeting, blackConnectionWith } from "@/lib/blackStore";
 import {
   shouldSuggestMeetingSpots,
   suggestSpotsForChatLive,
@@ -263,6 +264,31 @@ export default function ChatThreadPanel({ chatId, embedded = false, onBack }: Pr
     return findPerson(senderId)?.name.split(" ")[0] || "Member";
   }
 
+  function senderMarks(senderId: string) {
+    if (senderId === "system") return null;
+    if (senderId === "me") {
+      return (
+        <NameMarks
+          black={!!profile!.black}
+          trusted={(profile!.blackConnections ?? 0) > 0}
+          trustedCount={profile!.blackConnections}
+          size="xs"
+        />
+      );
+    }
+    const person = findPerson(senderId);
+    const trusted =
+      (person?.blackConnections ?? 0) > 0 || !!blackConnectionWith(senderId);
+    return (
+      <NameMarks
+        black={!!person?.black}
+        trusted={trusted}
+        trustedCount={person?.blackConnections}
+        size="xs"
+      />
+    );
+  }
+
   function senderPhoto(senderId: string) {
     if (senderId === "me") return profile!.photo;
     return findPerson(senderId)?.photoUrl;
@@ -349,8 +375,9 @@ export default function ChatThreadPanel({ chatId, embedded = false, onBack }: Pr
                       sizeCls="h-8 w-8 sm:h-9 sm:w-9"
                     />
                     <div className={`max-w-[78%] ${mine ? "text-right" : ""}`}>
-                      <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-muted">
-                        {senderName(m.senderId)}
+                      <p className="mb-1 inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-muted">
+                        <span>{senderName(m.senderId)}</span>
+                        {senderMarks(m.senderId)}
                       </p>
                       <div
                         className={`inline-block max-w-full border px-3.5 py-2.5 text-left text-sm leading-relaxed sm:px-4 sm:py-3 ${
@@ -364,7 +391,7 @@ export default function ChatThreadPanel({ chatId, embedded = false, onBack }: Pr
                           <img
                             src={m.attachment.url}
                             alt={m.attachment.name}
-                            className={`${showCaption ? "mb-2" : ""} max-h-56 w-full max-w-[240px] rounded-sm object-cover`}
+                            className={`${showCaption ? "mb-2" : ""} max-h-36 w-full max-w-[160px] rounded-sm object-cover`}
                           />
                         )}
                         {m.attachment?.kind === "file" && (
