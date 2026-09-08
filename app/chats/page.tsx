@@ -79,6 +79,7 @@ function ChatsInner() {
     readClientConnections()
   );
   const [directory, setDirectory] = useState(() => loadDirectory());
+  const [query, setQuery] = useState("");
 
   const refreshConnections = useCallback(() => setConnections(loadConnections()), []);
 
@@ -154,6 +155,33 @@ function ChatsInner() {
     );
   }, [chats, connections, directory]);
 
+  const filteredRows = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return rows;
+    return rows.filter((row) => {
+      if (row.kind === "person") {
+        const hay = [
+          row.person.name,
+          row.person.jobTitle,
+          row.person.city?.name,
+          row.preview,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+        return hay.includes(q);
+      }
+      const memberNames = row.chat.memberIds
+        .map((id) => findPerson(id)?.name || "")
+        .join(" ");
+      const hay = [row.chat.name, memberNames, row.lead?.name, row.preview]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      return hay.includes(q);
+    });
+  }, [rows, query]);
+
   const selectChat = useCallback(
     (chatId: string) => {
       router.replace(`/chats?c=${encodeURIComponent(chatId)}`, { scroll: false });
@@ -193,6 +221,28 @@ function ChatsInner() {
             <p className="mt-1 text-[13px] text-muted">
               People you’ve accepted · pick one to message
             </p>
+            <label className="relative mt-3 block">
+              <span className="sr-only">Search people</span>
+              <svg
+                viewBox="0 0 24 24"
+                className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                aria-hidden
+              >
+                <circle cx="11" cy="11" r="7" />
+                <path d="M20 20l-3.5-3.5" strokeLinecap="round" />
+              </svg>
+              <input
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search people…"
+                autoComplete="off"
+                className="w-full rounded-xl border border-line/70 bg-ink/50 py-2.5 pl-10 pr-3 text-sm text-ivory outline-none placeholder:text-muted/55 focus:border-accent"
+              />
+            </label>
           </div>
 
           <div className="min-h-0 flex-1 overflow-y-auto px-2 py-2">
@@ -205,9 +255,20 @@ function ChatsInner() {
                   actionLabel="Open Circle"
                 />
               </div>
+            ) : filteredRows.length === 0 ? (
+              <div className="px-3 py-10 text-center">
+                <p className="text-sm text-muted">No people match “{query.trim()}”.</p>
+                <button
+                  type="button"
+                  onClick={() => setQuery("")}
+                  className="mt-3 text-[12px] text-accent underline underline-offset-4"
+                >
+                  Clear search
+                </button>
+              </div>
             ) : (
               <div className="mp-stagger space-y-1">
-                {rows.map((row) => {
+                {filteredRows.map((row) => {
                   if (row.kind === "person") {
                     const active = row.chat?.id === selectedId;
                     return (
