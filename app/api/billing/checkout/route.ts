@@ -56,13 +56,13 @@ export async function POST(req: Request) {
   const chatId = body.chatId?.trim();
   const successPath =
     kind === "booking" && chatId
-      ? `/chats/${encodeURIComponent(chatId)}?paid=1`
+      ? `/chats?c=${encodeURIComponent(chatId)}&paid=1`
       : kind.startsWith("black")
         ? "/profile?black=success"
         : "/profile?billing=success";
   const cancelPath =
     kind === "booking" && chatId
-      ? `/chats/${encodeURIComponent(chatId)}?paid=cancel`
+      ? `/chats?c=${encodeURIComponent(chatId)}`
       : kind.startsWith("black")
         ? "/profile?black=cancel"
         : "/profile?billing=cancel";

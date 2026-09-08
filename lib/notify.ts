@@ -40,7 +40,7 @@ export async function pushAppNotification(
   if (!ok) return;
 
   const tag = opts?.tag || "conclave";
-  const data = { url: opts?.url || "/chats" };
+  const data = { url: opts?.url || "/circle" };
 
   try {
     const reg = await navigator.serviceWorker?.getRegistration();

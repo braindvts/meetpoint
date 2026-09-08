@@ -335,6 +335,49 @@ html.mp-chat-lock body {
   overflow: hidden;
 }
 
+/* Split inbox — left people rail, right open thread */
+.mp-chats-layout {
+  display: flex;
+  height: calc(100dvh - 4.25rem);
+  max-height: calc(100dvh - 4.25rem);
+  overflow: hidden;
+  background: var(--color-ink);
+}
+
+.mp-chats-rail {
+  width: 100%;
+  max-width: 100%;
+  flex-direction: column;
+  min-height: 0;
+  background: color-mix(in srgb, var(--color-ink) 92%, #12110f);
+}
+
+.mp-chats-thread {
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.mp-chat-shell.is-embedded {
+  position: static;
+  inset: auto;
+  z-index: 0;
+  height: 100%;
+  max-height: 100%;
+  max-width: none;
+  margin: 0;
+  background: transparent;
+}
+
+@media (min-width: 1024px) {
+  .mp-chats-rail {
+    width: 22rem;
+    max-width: 22rem;
+    flex-shrink: 0;
+  }
+}
+
 .mp-chat-messages {
   flex: 1 1 auto;
   min-height: 0;
@@ -370,7 +413,7 @@ html.mp-chat-lock body {
     touch-action: auto;
   }
 
-  .mp-chat-shell {
+  .mp-chat-shell:not(.is-embedded) {
     position: static;
     z-index: 0;
     height: calc(100dvh - 4.25rem);

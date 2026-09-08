@@ -263,7 +263,7 @@ function scheduleDemoAccept(peerId: string) {
   }, delay);
 }
 
-/** Seed one inbound intro so Chats left rail has Accept / Decline — demo mode only. */
+/** Seed one inbound intro so Circle has Accept / Decline — demo mode only. */
 export function ensureSampleInboundRequest(): void {
   if (typeof window === "undefined") return;
   if (!demoProfilesEnabled()) return;
@@ -299,7 +299,7 @@ export function ensureSampleInboundRequest(): void {
     window.dispatchEvent(
       new CustomEvent("meetpoint:toast", {
         detail: {
-          message: `${first} wants an introduction. Open Chats to accept.`,
+          message: `${first} wants an introduction. Open Circle to accept.`,
           peerId: candidate.id,
         },
       })

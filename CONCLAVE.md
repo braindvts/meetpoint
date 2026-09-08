@@ -95,13 +95,12 @@ Separate from BLACK. Shown as a black checkmark with **Trusted by BLACK** (not n
 
 ## Chats
 
-- **New chat** button uses a **+ icon** plus the label (not a bare “New” word).
-- **Split layout:** left = people who want to connect (accept / decline); right = private threads with people you’re chatting with.
+- **Messenger layout:** left = people you’ve accepted / talk to; right = the selected thread.
+- Deep links `/chats/[id]` open `/chats?c=…` in the split view.
 
 ## Circle
 
-- **Booked tables & business dinners** — planned meetups and confirmed table reservations.
-- Connect requests no longer live here; they sit on the left side of **Chats**.
+- **Incoming connections** (accept / decline) and **booked reservations** (planned meetups + confirmed tables).
 
 ## Main screens
 
@@ -111,8 +110,8 @@ Separate from BLACK. Shown as a black checkmark with **Trusted by BLACK** (not n
 | `/login` | Email + OAuth sign-in |
 | `/onboarding` | Profile setup (highlights missing fields) |
 | `/discover` | The Room — For you / Nearby match cards |
-| `/circle` | Booked reservations & planned dinners |
-| `/chats` | Connect requests (left) + private DMs (right) + table proposals |
+| `/circle` | Incoming connects + booked reservations |
+| `/chats` | People list (left) + open thread (right) |
 | `/profile` | Your card, Plans (BLACK · Free), levels |
 | `/demo` | Demo bypass (only if `NEXT_PUBLIC_ENABLE_DEMO=1`) |
 
