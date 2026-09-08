@@ -4,8 +4,9 @@ import { loadProfile, saveProfile } from "@/lib/store";
 import type { MyProfile } from "@/lib/types";
 
 /**
- * Prefer the local profile; if missing, pull the signed-in member from the server
- * so a fresh browser / cleared storage still skips onboarding.
+ * Prefer the local profile when one exists.
+ * Never overwrite local verifications with a stale server copy — that was
+ * re-Verifying people after they cleared email / LinkedIn and saved.
  */
 export async function hydrateLocalProfile(): Promise<MyProfile | null> {
   const local = loadProfile();

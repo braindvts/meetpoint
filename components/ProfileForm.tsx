@@ -4,8 +4,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CITIES, cityKey, indexOfCity, nearestCity } from "@/lib/cities";
 import { IDEA_TAGS, POPULAR_TAGS } from "@/lib/data";
+import { showToast } from "@/lib/notify";
 import { formatPhoneDisplay, isValidPhone } from "@/lib/phone";
 import { saveProfile } from "@/lib/store";
+import { hasRequiredVerifications } from "@/lib/tiers";
 import { makeVerification, validateVerification } from "@/lib/verifyRules";
 import type {
   MyProfile,
@@ -173,6 +175,7 @@ export default function ProfileForm({
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<string, string>>>({});
   const [missingItems, setMissingItems] = useState<string[]>([]);
   const [highlightVerify, setHighlightVerify] = useState(focusVerification);
+  const [saving, setSaving] = useState(false);
 
   const missingVerifiedFields = useMemo(() => {
     return VERIFICATION_OPTIONS.filter(
@@ -284,13 +287,8 @@ export default function ProfileForm({
     const verifications: Verification[] = [];
     for (const opt of VERIFICATION_OPTIONS) {
       const raw = (verifyValues[opt.method] || "").trim();
-      // When sent here to get Verified, require only email + LinkedIn.
-      if (highlightVerify && opt.forVerified && !raw) {
-        nextErrors.verification = "Add business email and LinkedIn to become Verified.";
-        missing.push(opt.label);
-        continue;
-      }
-      // Empty field = remove that credential. Do not re-inject LinkedIn from OAuth id.
+      // Empty = remove that credential. Never block save for missing Verified fields —
+      // clearing email/LinkedIn must be allowed so standing drops back to Member.
       if (!raw) continue;
       const checked = validateVerification(opt.method, raw);
       if (!checked.ok) {
@@ -300,7 +298,6 @@ export default function ProfileForm({
       }
       verifications.push(makeVerification(opt.method, checked.value));
     }
-    // Optional extras (website / registration / portfolio) never block Verified.
 
     setFieldErrors(nextErrors);
     setMissingItems(missing);
@@ -330,6 +327,7 @@ export default function ProfileForm({
 
     setError("");
     setMissingItems([]);
+    setSaving(true);
 
     const projects = work
       .map((w) => ({
@@ -340,14 +338,14 @@ export default function ProfileForm({
       }))
       .filter((w) => w.title);
 
-    const nextProfile = {
+    const nextProfile: MyProfile = {
       name: name.trim(),
       jobTitle: jobTitle.trim(),
       bio: bio.trim(),
       photo,
       city: CITIES[cityIdx],
       travel,
-      meetPreference: "open" as const,
+      meetPreference: "open",
       lookingFor,
       ideaTags,
       verifications,
@@ -361,17 +359,46 @@ export default function ProfileForm({
       premierPlan: initial?.premierPlan,
     };
 
+    const wasVerified = hasRequiredVerifications(initial?.verifications);
+    const nowVerified = hasRequiredVerifications(verifications);
+
+    // Write local first so the UI updates immediately.
     saveProfile(nextProfile);
 
-    // Full profile PUT replaces verifications on the server (including removals).
+    let synced = false;
     try {
       const { syncProfileToServer } = await import("@/lib/apiClient");
-      await syncProfileToServer(nextProfile);
+      const remote = await syncProfileToServer(nextProfile);
+      synced = remote?.ok === true;
+      // Trust the server echo when present (full verification list after replace).
+      if (remote?.ok && remote.profile) {
+        saveProfile({
+          ...remote.profile,
+          // Keep client-only fields the PUT may omit.
+          premierPlan: remote.profile.premierPlan ?? nextProfile.premierPlan,
+          black: remote.profile.black ?? nextProfile.black,
+          blackSince: remote.profile.blackSince ?? nextProfile.blackSince,
+          blackSource: remote.profile.blackSource ?? nextProfile.blackSource,
+        });
+      }
     } catch {
-      /* local profile still saved */
+      synced = false;
     }
 
-    router.push("/profile");
+    setHighlightVerify(false);
+    setSaving(false);
+
+    if (wasVerified && !nowVerified) {
+      showToast(synced ? "Saved — you’re a Member again" : "Saved on this device — you’re a Member again");
+    } else if (!wasVerified && nowVerified) {
+      showToast(synced ? "Saved — you’re Verified" : "Saved on this device — you’re Verified");
+    } else {
+      showToast(synced ? "Saved" : "Saved on this device");
+    }
+
+    // Stay on profile so the level badge update is obvious.
+    router.replace("/profile");
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   const field =
@@ -912,9 +939,14 @@ export default function ProfileForm({
         </p>
         <button
           type="submit"
-          className="mp-btn-lux rounded-xl bg-gradient-to-b from-accent-2 to-accent px-10 py-3.5 text-[13px] font-semibold text-ink"
+          disabled={saving}
+          className="mp-btn-lux rounded-xl bg-gradient-to-b from-accent-2 to-accent px-10 py-3.5 text-[13px] font-semibold text-ink disabled:opacity-50"
         >
-          {initial?.jobTitle || initial?.ideaTags?.length ? "Save profile" : "Start discovering"}
+          {saving
+            ? "Saving…"
+            : initial?.jobTitle || initial?.ideaTags?.length
+              ? "Save profile"
+              : "Start discovering"}
         </button>
       </div>
     </form>

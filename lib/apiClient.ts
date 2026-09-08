@@ -1,15 +1,24 @@
 import type { Connection, GroupChat, MyProfile, Person } from "./types";
 
-/** Sync local membership to SQLite / multi-device backend. */
-export async function syncProfileToServer(profile: MyProfile): Promise<string | null> {
+/** Sync local membership to the server. Replaces verifications fully (including removals). */
+export async function syncProfileToServer(
+  profile: MyProfile
+): Promise<{ ok: boolean; memberId?: string; profile?: MyProfile } | null> {
   try {
     const res = await fetch("/api/members/me", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ profile }),
     });
-    const data = (await res.json()) as { ok?: boolean; memberId?: string };
-    return data.ok ? data.memberId || null : null;
+    const data = (await res.json()) as {
+      ok?: boolean;
+      memberId?: string;
+      profile?: MyProfile;
+      error?: string;
+    };
+    if (!data.ok) return { ok: false };
+    return { ok: true, memberId: data.memberId, profile: data.profile };
   } catch {
     return null;
   }

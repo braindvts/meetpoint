@@ -97,7 +97,7 @@ function ProfileContent() {
       <main className="mp-app px-0 pb-10 md:px-6">
         <PageHeader title="Profile" />
         <div className="px-4 pb-6 pt-2">
-        {needsVerify && (
+        {needsVerify && !tierInput.verified && (
           <div className="mb-4 rounded-xl border border-accent/45 bg-accent/[0.08] px-3.5 py-3 text-[13px] leading-snug text-accent-2">
             <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-accent">
               Verification required
@@ -187,7 +187,11 @@ function ProfileContent() {
         <p className="mb-2.5 mt-6 scroll-mt-20 text-[12px] font-medium text-accent" id="edit-details">
           Edit details
         </p>
-        <ProfileForm initial={profile} focusVerification={needsVerify} />
+        <ProfileForm
+          key={(profile.verifications || []).map((v) => `${v.method}:${v.value}`).join("|") || "none"}
+          initial={profile}
+          focusVerification={needsVerify && !tierInput.verified}
+        />
         </div>
       </main>
 

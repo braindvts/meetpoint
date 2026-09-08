@@ -47,7 +47,12 @@ export async function PUT(req: Request) {
         value: string;
         verifiedAt: string;
       }[];
-      if (session.provider === "linkedin" && !verifications.some((v) => v.method === "linkedin")) {
+      // Only seed LinkedIn on first create — never re-add after the member cleared it.
+      if (
+        !existing &&
+        session.provider === "linkedin" &&
+        !verifications.some((v) => v.method === "linkedin")
+      ) {
         verifications.push({
           method: "linkedin",
           value: `linkedin:${session.id}`,
