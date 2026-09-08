@@ -82,30 +82,6 @@ export function loadProfile(): MyProfile | null {
       localStorage.setItem(PROFILE_KEY, JSON.stringify(p));
     }
 
-    // Auto-verify existing members so they aren't locked out of the room.
-    if (p.verifications.length === 0) {
-      if (p.linkedInId) {
-        p.verifications = [
-          {
-            method: "linkedin",
-            value: `linkedin:${p.linkedInId}`,
-            verifiedAt: new Date().toISOString(),
-          },
-        ];
-      } else if (p.name && p.photo) {
-        p.verifications = [
-          {
-            method: "portfolio",
-            value: "verified:member",
-            verifiedAt: new Date().toISOString(),
-          },
-        ];
-      }
-      if (p.verifications.length) {
-        localStorage.setItem(PROFILE_KEY, JSON.stringify(p));
-      }
-    }
-
     return p;
   } catch {
     return null;

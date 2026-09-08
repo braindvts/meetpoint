@@ -283,16 +283,14 @@ export default function ProfileForm({
 
     const verifications: Verification[] = [];
     for (const opt of VERIFICATION_OPTIONS) {
-      let raw = (verifyValues[opt.method] || "").trim();
-      if (opt.method === "linkedin" && initial?.linkedInId && !raw) {
-        raw = `linkedin:${initial.linkedInId}`;
-      }
+      const raw = (verifyValues[opt.method] || "").trim();
       // When sent here to get Verified, require only email + LinkedIn.
       if (highlightVerify && opt.forVerified && !raw) {
         nextErrors.verification = "Add business email and LinkedIn to become Verified.";
         missing.push(opt.label);
         continue;
       }
+      // Empty field = remove that credential. Do not re-inject LinkedIn from OAuth id.
       if (!raw) continue;
       const checked = validateVerification(opt.method, raw);
       if (!checked.ok) {
@@ -342,14 +340,14 @@ export default function ProfileForm({
       }))
       .filter((w) => w.title);
 
-    saveProfile({
+    const nextProfile = {
       name: name.trim(),
       jobTitle: jobTitle.trim(),
       bio: bio.trim(),
       photo,
       city: CITIES[cityIdx],
       travel,
-      meetPreference: "open",
+      meetPreference: "open" as const,
       lookingFor,
       ideaTags,
       verifications,
@@ -361,21 +359,19 @@ export default function ProfileForm({
       blackSince: initial?.blackSince,
       blackSource: initial?.blackSource,
       premierPlan: initial?.premierPlan,
-    });
+    };
 
-    for (const v of verifications) {
-      try {
-        await fetch("/api/verify", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ method: v.method, value: v.value }),
-        });
-      } catch {
-        /* local profile still saved */
-      }
+    saveProfile(nextProfile);
+
+    // Full profile PUT replaces verifications on the server (including removals).
+    try {
+      const { syncProfileToServer } = await import("@/lib/apiClient");
+      await syncProfileToServer(nextProfile);
+    } catch {
+      /* local profile still saved */
     }
 
-    router.push("/discover");
+    router.push("/profile");
   }
 
   const field =

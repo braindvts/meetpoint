@@ -12,9 +12,32 @@ import { hashPassword } from "@/lib/password";
 /**
  * Creates or refreshes the fixed Brian demo account so email sign-in always
  * works with the published credentials, even on a fresh database.
+ *
+ * On create: seed the full ready-made profile.
+ * On update: only refresh login credentials — keep profile edits (e.g. cleared
+ * verifications) so testing Verified ↔ Member sticks across sessions.
  */
 export async function ensureDemoOwner() {
   const email = DEMO_OWNER_EMAIL;
+  const existing = await prisma.member.findFirst({ where: { email } });
+
+  if (existing) {
+    return prisma.member.update({
+      where: { id: existing.id },
+      data: {
+        email,
+        passwordHash: hashPassword(DEMO_OWNER_PASSWORD),
+        // Keep name/photo if they wiped them by mistake, but never restore
+        // verifications they intentionally cleared.
+        name: existing.name?.trim() ? existing.name : DEMO_OWNER_PROFILE.name,
+        photo: existing.photo?.trim() ? existing.photo : DEMO_OWNER_PROFILE.photo,
+        jobTitle: existing.jobTitle?.trim()
+          ? existing.jobTitle
+          : DEMO_OWNER_PROFILE.jobTitle,
+      },
+    });
+  }
+
   const profile = {
     ...DEMO_OWNER_PROFILE,
     verifications: DEMO_OWNER_PROFILE.verifications.map((v) => ({
@@ -28,20 +51,14 @@ export async function ensureDemoOwner() {
       trialEndsAt: new Date(Date.now() + 3 * 86400000).toISOString(),
     },
   };
-  const data = {
-    ...profileToMemberData(profile),
-    email,
-    passwordHash: hashPassword(DEMO_OWNER_PASSWORD),
-  };
 
-  const existing = await prisma.member.findFirst({ where: { email } });
-  if (existing) {
-    return prisma.member.update({
-      where: { id: existing.id },
-      data,
-    });
-  }
-  return prisma.member.create({ data });
+  return prisma.member.create({
+    data: {
+      ...profileToMemberData(profile),
+      email,
+      passwordHash: hashPassword(DEMO_OWNER_PASSWORD),
+    },
+  });
 }
 
 export function matchesDemoOwner(email: string, password: string): boolean {
