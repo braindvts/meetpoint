@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { publicError } from "@/lib/safeError";
 import { getCurrentMember } from "@/lib/memberAuth";
 import { rateLimit } from "@/lib/rateLimit";
 import { parseBody } from "@/lib/validation/parse";
@@ -54,10 +55,7 @@ export async function POST(req: Request) {
       }
       return NextResponse.json({ ok: true, provider: "twilio" });
     } catch (e) {
-      return NextResponse.json(
-        { ok: false, error: e instanceof Error ? e.message : "SMS failed" },
-        { status: 502 }
-      );
+      return publicError(e, "SMS failed", 502);
     }
   }
 

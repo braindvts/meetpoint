@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { publicError } from "@/lib/safeError";
 import { prisma } from "@/lib/db";
 import { clearBlack, isVerified, setBlack } from "@/lib/blackServer";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
@@ -65,9 +66,6 @@ export async function POST(req: Request) {
       source: updated.blackSource,
     });
   } catch (e) {
-    return NextResponse.json(
-      { ok: false, error: e instanceof Error ? e.message : "Failed" },
-      { status: 500 }
-    );
+    return publicError(e, "Failed");
   }
 }

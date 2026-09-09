@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { sendWelcomeEmail } from "@/lib/email";
+import { verifyGoogleIdToken } from "@/lib/googleAuth";
 import { withMemberCookie } from "@/lib/memberAuth";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
+import { sanitizeName } from "@/lib/sanitize";
 import {
   appUrl,
   clearOAuthStateCookie,
@@ -42,21 +44,37 @@ export async function GET(req: NextRequest) {
       console.error("Google token error", await tokenRes.text());
       return NextResponse.redirect(appUrl("/login?error=token_failed"));
     }
-    const token = (await tokenRes.json()) as { access_token: string };
-    const profileRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
-      headers: { Authorization: `Bearer ${token.access_token}` },
-    });
-    if (!profileRes.ok) {
-      return NextResponse.redirect(appUrl("/login?error=profile_failed"));
-    }
-    const user = (await profileRes.json()) as {
-      sub: string;
-      name?: string;
-      email?: string;
-      picture?: string;
+    const token = (await tokenRes.json()) as {
+      access_token?: string;
+      id_token?: string;
     };
 
+    let user: { sub: string; name?: string; email?: string; picture?: string };
+
+    if (token.id_token) {
+      user = await verifyGoogleIdToken(token.id_token);
+    } else if (token.access_token) {
+      const profileRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+        headers: { Authorization: `Bearer ${token.access_token}` },
+      });
+      if (!profileRes.ok) {
+        return NextResponse.redirect(appUrl("/login?error=profile_failed"));
+      }
+      user = (await profileRes.json()) as {
+        sub: string;
+        name?: string;
+        email?: string;
+        picture?: string;
+      };
+      if (!user.sub) {
+        return NextResponse.redirect(appUrl("/login?error=profile_failed"));
+      }
+    } else {
+      return NextResponse.redirect(appUrl("/login?error=token_failed"));
+    }
+
     const email = user.email?.toLowerCase() || null;
+    const displayName = sanitizeName(user.name || "Member") || "Member";
     let member = await prisma.member.findFirst({ where: { googleId: user.sub } });
     if (!member && email) {
       member = await prisma.member.findFirst({ where: { email } });
@@ -68,7 +86,7 @@ export async function GET(req: NextRequest) {
           googleId: user.sub,
           email: email || member.email,
           photo: member.photo || user.picture || "",
-          name: member.name || user.name || "Member",
+          name: member.name || displayName,
         },
       });
     } else {
@@ -76,7 +94,7 @@ export async function GET(req: NextRequest) {
         data: {
           googleId: user.sub,
           email,
-          name: user.name || "Member",
+          name: displayName,
           photo: user.picture || "",
         },
       });

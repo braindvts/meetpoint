@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { publicError } from "@/lib/safeError";
 import Stripe from "stripe";
 import { getCurrentMember } from "@/lib/memberAuth";
 import { memberToProfile } from "@/lib/memberMap";
@@ -109,9 +110,6 @@ export async function POST(req: Request) {
       profile: memberToProfile(updated),
     });
   } catch (e) {
-    return NextResponse.json(
-      { ok: false, error: e instanceof Error ? e.message : "Failed" },
-      { status: 500 }
-    );
+    return publicError(e, "Failed");
   }
 }

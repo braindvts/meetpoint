@@ -4,35 +4,38 @@ import { getCurrentMember } from "@/lib/memberAuth";
 import { memberToPerson } from "@/lib/memberMap";
 import { blackConnectionCounts } from "@/lib/blackServer";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
+import { rateLimit } from "@/lib/rateLimit";
+import { publicError } from "@/lib/safeError";
 
-/** List real members for The Room. */
-export async function GET() {
+/** List real members for The Room — signed-in members only. */
+export async function GET(req: Request) {
   try {
+    const limited = rateLimit(req, { name: "members-list", limit: 60, windowMs: 60_000 });
+    if (!limited.ok) return limited.response;
+
     await purgeDemoResidue();
     const me = await getCurrentMember();
-
-    let blocked = new Set<string>();
-    if (me) {
-      const rows = await prisma.block.findMany({
-        where: {
-          OR: [{ blockerId: me.id }, { blockedId: me.id }],
-        },
-        select: { blockerId: true, blockedId: true },
-      });
-      blocked = new Set(
-        rows.flatMap((r) =>
-          r.blockerId === me.id ? [r.blockedId] : [r.blockerId]
-        )
-      );
+    if (!me) {
+      return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
     }
 
-    const rows = await prisma.member.findMany({
-      where: me ? { id: { not: me.id } } : undefined,
+    const rows = await prisma.block.findMany({
+      where: {
+        OR: [{ blockerId: me.id }, { blockedId: me.id }],
+      },
+      select: { blockerId: true, blockedId: true },
+    });
+    const blocked = new Set(
+      rows.flatMap((r) => (r.blockerId === me.id ? [r.blockedId] : [r.blockerId]))
+    );
+
+    const people = await prisma.member.findMany({
+      where: { id: { not: me.id } },
       orderBy: { updatedAt: "desc" },
       take: 200,
     });
 
-    const visible = rows.filter((m) => !blocked.has(m.id));
+    const visible = people.filter((m) => !blocked.has(m.id));
     const counts = await blackConnectionCounts(visible.map((m) => m.id));
     const members = visible.map((m) => ({
       ...memberToPerson(m),
@@ -42,12 +45,9 @@ export async function GET() {
     return NextResponse.json({
       ok: true,
       members,
-      meId: me?.id || null,
+      meId: me.id,
     });
   } catch (e) {
-    return NextResponse.json(
-      { ok: false, error: e instanceof Error ? e.message : "Failed to load members" },
-      { status: 500 }
-    );
+    return publicError(e, "Failed to load members");
   }
 }

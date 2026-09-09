@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getCurrentMember } from "@/lib/memberAuth";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
+import { rateLimit } from "@/lib/rateLimit";
+import { publicError } from "@/lib/safeError";
+import { parseBody } from "@/lib/validation/parse";
+import { blockSchema } from "@/lib/validation/safety";
 
 export async function GET() {
   try {
@@ -18,26 +22,28 @@ export async function GET() {
       blockedIds: rows.map((r) => r.blockedId),
     });
   } catch (e) {
-    return NextResponse.json(
-      { ok: false, error: e instanceof Error ? e.message : "Failed" },
-      { status: 500 }
-    );
+    return publicError(e, "Failed");
   }
 }
 
 export async function POST(req: Request) {
   try {
+    const limited = rateLimit(req, { name: "blocks", limit: 40, windowMs: 60_000 });
+    if (!limited.ok) return limited.response;
+
     await purgeDemoResidue();
     const me = await getCurrentMember();
     if (!me) return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
 
-    const body = (await req.json()) as { peerId?: string; action?: "block" | "unblock" };
-    const peerId = String(body.peerId || "").trim();
-    if (!peerId || peerId === me.id) {
+    const parsed = await parseBody(req, blockSchema);
+    if (!parsed.ok) return parsed.response;
+
+    const peerId = parsed.data.peerId;
+    if (peerId === me.id) {
       return NextResponse.json({ ok: false, error: "Invalid peer" }, { status: 400 });
     }
 
-    if (body.action === "unblock") {
+    if (parsed.data.action === "unblock") {
       await prisma.block.deleteMany({ where: { blockerId: me.id, blockedId: peerId } });
     } else {
       await prisma.block.upsert({
@@ -61,9 +67,6 @@ export async function POST(req: Request) {
     });
     return NextResponse.json({ ok: true, blockedIds: rows.map((r) => r.blockedId) });
   } catch (e) {
-    return NextResponse.json(
-      { ok: false, error: e instanceof Error ? e.message : "Failed" },
-      { status: 500 }
-    );
+    return publicError(e, "Failed");
   }
 }

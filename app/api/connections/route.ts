@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { publicError } from "@/lib/safeError";
 import { prisma } from "@/lib/db";
 import { getCurrentMember } from "@/lib/memberAuth";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
@@ -39,10 +40,7 @@ export async function GET() {
       connections: rows.map((r) => toClient(r, me.id)),
     });
   } catch (e) {
-    return NextResponse.json(
-      { ok: false, error: e instanceof Error ? e.message : "Failed" },
-      { status: 500 }
-    );
+    return publicError(e, "Failed");
   }
 }
 
@@ -82,10 +80,7 @@ export async function POST(req: Request) {
       connections: rows.map((r) => toClient(r, me.id)),
     });
   } catch (e) {
-    return NextResponse.json(
-      { ok: false, error: e instanceof Error ? e.message : "Failed" },
-      { status: 500 }
-    );
+    return publicError(e, "Failed");
   }
 }
 
@@ -128,9 +123,6 @@ export async function PATCH(req: Request) {
       connections: rows.map((r) => toClient(r, me.id)),
     });
   } catch (e) {
-    return NextResponse.json(
-      { ok: false, error: e instanceof Error ? e.message : "Failed" },
-      { status: 500 }
-    );
+    return publicError(e, "Failed");
   }
 }

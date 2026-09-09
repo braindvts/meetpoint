@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { publicError } from "@/lib/safeError";
 import Stripe from "stripe";
 import { BLACK_MONTHLY_USD, BLACK_YEARLY_USD } from "@/lib/black";
 import { getCurrentMember } from "@/lib/memberAuth";
@@ -122,9 +123,6 @@ export async function POST(req: Request) {
       sessionId: session.id,
     });
   } catch (e) {
-    return NextResponse.json(
-      { ok: false, error: e instanceof Error ? e.message : "Checkout failed" },
-      { status: 500 }
-    );
+    return publicError(e, "Checkout failed");
   }
 }

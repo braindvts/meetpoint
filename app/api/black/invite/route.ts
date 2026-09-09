@@ -8,6 +8,10 @@ import {
   resolvePairing,
 } from "@/lib/blackServer";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
+import { rateLimit } from "@/lib/rateLimit";
+import { publicError } from "@/lib/safeError";
+import { blackInvitePatchSchema, blackInvitePostSchema } from "@/lib/validation/black";
+import { parseBody } from "@/lib/validation/parse";
 
 /**
  * BLACK invitations. Raised inside a private DM, for a private connection or a
@@ -17,22 +21,22 @@ import { purgeDemoResidue } from "@/lib/purgeDemo";
  * awards BLACK, in either direction.
  */
 
-const KINDS = ["connection", "meeting"] as const;
-type Kind = (typeof KINDS)[number];
-
 export async function POST(req: Request) {
   try {
+    const limited = rateLimit(req, { name: "black-invite", limit: 20, windowMs: 60_000 });
+    if (!limited.ok) return limited.response;
+
     await purgeDemoResidue();
     const me = await getCurrentMember();
     if (!me) return NextResponse.json({ ok: false, error: "Sign in first" }, { status: 401 });
 
-    const body = (await req.json()) as { peerId?: string; chatId?: string; kind?: string };
-    const peerId = String(body.peerId || "").trim();
-    const kind: Kind = body.kind === "meeting" ? "meeting" : "connection";
+    const parsed = await parseBody(req, blackInvitePostSchema);
+    if (!parsed.ok) return parsed.response;
 
-    if (!peerId) {
-      return NextResponse.json({ ok: false, error: "peerId required" }, { status: 400 });
-    }
+    const peerId = parsed.data.peerId;
+    const kind = parsed.data.kind === "meeting" ? "meeting" : "connection";
+    const chatId = parsed.data.chatId || null;
+
     if (peerId === me.id) {
       return NextResponse.json(
         { ok: false, error: "You can't invite yourself." },
@@ -91,11 +95,11 @@ export async function POST(req: Request) {
       create: {
         fromId: me.id,
         toId: peerId,
-        chatId: body.chatId ? String(body.chatId) : null,
+        chatId,
         kind,
         status: "pending",
       },
-      update: { status: "pending", respondedAt: null, chatId: body.chatId ? String(body.chatId) : null },
+      update: { status: "pending", respondedAt: null, chatId },
     });
 
     return NextResponse.json({
@@ -111,22 +115,24 @@ export async function POST(req: Request) {
       },
     });
   } catch (e) {
-    return NextResponse.json(
-      { ok: false, error: e instanceof Error ? e.message : "Failed" },
-      { status: 500 }
-    );
+    return publicError(e, "Failed");
   }
 }
 
 /** Accept or decline. Only the recipient may respond, and only once. */
 export async function PATCH(req: Request) {
   try {
+    const limited = rateLimit(req, { name: "black-invite-patch", limit: 30, windowMs: 60_000 });
+    if (!limited.ok) return limited.response;
+
     const me = await getCurrentMember();
     if (!me) return NextResponse.json({ ok: false, error: "Sign in first" }, { status: 401 });
 
-    const body = (await req.json()) as { inviteId?: string; action?: string };
-    const inviteId = String(body.inviteId || "").trim();
-    const action = body.action === "accept" ? "accept" : "decline";
+    const parsed = await parseBody(req, blackInvitePatchSchema);
+    if (!parsed.ok) return parsed.response;
+
+    const inviteId = parsed.data.inviteId;
+    const action = parsed.data.action === "accept" ? "accept" : "decline";
 
     const invite = await prisma.blackInvite.findUnique({ where: { id: inviteId } });
     if (!invite) return NextResponse.json({ ok: false, error: "Invite not found" }, { status: 404 });
@@ -192,9 +198,6 @@ export async function PATCH(req: Request) {
       blackConnections: blackConnectionLevel(count),
     });
   } catch (e) {
-    return NextResponse.json(
-      { ok: false, error: e instanceof Error ? e.message : "Failed" },
-      { status: 500 }
-    );
+    return publicError(e, "Failed");
   }
 }

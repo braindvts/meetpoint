@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { publicError } from "@/lib/safeError";
 import { prisma } from "@/lib/db";
 import { getCurrentMember, withMemberCookie } from "@/lib/memberAuth";
 import { memberToProfile, profileToMemberData } from "@/lib/memberMap";
@@ -20,10 +21,7 @@ export async function GET() {
       memberId: me.id,
     });
   } catch (e) {
-    return NextResponse.json(
-      { ok: false, error: e instanceof Error ? e.message : "Failed" },
-      { status: 500 }
-    );
+    return publicError(e, "Failed");
   }
 }
 
@@ -122,9 +120,6 @@ export async function PUT(req: Request) {
     });
     return withMemberCookie(res, member.id);
   } catch (e) {
-    return NextResponse.json(
-      { ok: false, error: e instanceof Error ? e.message : "Save failed" },
-      { status: 500 }
-    );
+    return publicError(e, "Failed");
   }
 }

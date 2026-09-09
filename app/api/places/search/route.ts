@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { publicError } from "@/lib/safeError";
 import { RESTAURANTS } from "@/lib/data";
 import { rateLimit } from "@/lib/rateLimit";
 import { placesQuerySchema } from "@/lib/validation/safety";
@@ -81,10 +82,7 @@ export async function GET(req: Request) {
         { status: 502 }
       );
     } catch (e) {
-      return NextResponse.json(
-        { ok: false, error: e instanceof Error ? e.message : "Places failed" },
-        { status: 502 }
-      );
+      return publicError(e, "Places failed", 502);
     }
   }
 

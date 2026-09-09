@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import {
+  clearAuthFailures,
+  isAuthLocked,
+  recordAuthFailure,
+} from "@/lib/authLockout";
 import { sendWelcomeEmail } from "@/lib/email";
 import { ensureDemoOwner, matchesDemoOwner } from "@/lib/ensureDemoOwner";
 import { withMemberCookie } from "@/lib/memberAuth";
@@ -11,9 +16,11 @@ import {
 } from "@/lib/password";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
 import { rateLimit } from "@/lib/rateLimit";
+import { publicError } from "@/lib/safeError";
+import { sanitizeName } from "@/lib/sanitize";
 import { appUrl, withSession } from "@/lib/session";
 import { demoOwnerAuthSchema, emailAuthSchema } from "@/lib/validation/auth";
-import { parseBody } from "@/lib/validation/parse";
+import { clientIp, parseBody } from "@/lib/validation/parse";
 
 export async function POST(req: Request) {
   try {
@@ -21,6 +28,7 @@ export async function POST(req: Request) {
     if (!limited.ok) return limited.response;
 
     await purgeDemoResidue();
+    const ip = clientIp(req);
 
     // Peek mode without full parse for demo-owner
     const peek = await req.clone().json().catch(() => ({} as { mode?: string }));
@@ -51,7 +59,15 @@ export async function POST(req: Request) {
     const { email, password, name: rawName } = parsed.data;
     const mode = parsed.data.mode === "signup" ? "signup" : "signin";
 
+    if (isAuthLocked(email, ip)) {
+      return NextResponse.json(
+        { ok: false, error: "Too many failed attempts. Try again in 15 minutes." },
+        { status: 429 }
+      );
+    }
+
     if (matchesDemoOwner(email, password)) {
+      clearAuthFailures(email, ip);
       const member = await ensureDemoOwner();
       const res = NextResponse.json({
         ok: true,
@@ -79,7 +95,8 @@ export async function POST(req: Request) {
           { status: 409 }
         );
       }
-      const name = (rawName || "").trim() || email.split("@")[0];
+      const name =
+        sanitizeName(rawName || "") || sanitizeName(email.split("@")[0] || "Member") || "Member";
       const member = existing
         ? await prisma.member.update({
             where: { id: existing.id },
@@ -97,6 +114,7 @@ export async function POST(req: Request) {
         void sendWelcomeEmail(email, member.name);
       }
 
+      clearAuthFailures(email, ip);
       const res = NextResponse.json({
         ok: true,
         next: existing?.jobTitle ? "/discover" : "/onboarding",
@@ -113,11 +131,14 @@ export async function POST(req: Request) {
     }
 
     if (!existing?.passwordHash || !verifyPassword(password, existing.passwordHash)) {
+      recordAuthFailure(email, ip);
       return NextResponse.json(
         { ok: false, error: "Email or password is incorrect." },
         { status: 401 }
       );
     }
+
+    clearAuthFailures(email, ip);
 
     // Upgrade legacy password hashes on successful login
     if (passwordNeedsUpgrade(existing.passwordHash)) {
@@ -143,10 +164,7 @@ export async function POST(req: Request) {
     });
     return withMemberCookie(res, existing.id);
   } catch (e) {
-    return NextResponse.json(
-      { ok: false, error: e instanceof Error ? e.message : "Auth failed" },
-      { status: 500 }
-    );
+    return publicError(e, "Auth failed");
   }
 }
 

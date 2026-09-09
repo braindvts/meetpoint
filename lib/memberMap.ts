@@ -8,6 +8,7 @@ import type {
   TravelRange,
   Verification,
 } from "./types";
+import { sanitizeName, sanitizeText } from "./sanitize";
 
 export function memberToProfile(m: Member): MyProfile {
   return {
@@ -85,12 +86,12 @@ export function memberToPerson(m: Member): Person {
  */
 export function profileToMemberData(profile: MyProfile) {
   return {
-    name: profile.name,
-    jobTitle: profile.jobTitle || "",
-    bio: profile.bio || "",
+    name: sanitizeName(profile.name || "Member") || "Member",
+    jobTitle: sanitizeText(profile.jobTitle || "", 120),
+    bio: sanitizeText(profile.bio || "", 2000),
     photo: profile.photo || "",
-    cityName: profile.city.name,
-    cityCountry: profile.city.country,
+    cityName: sanitizeText(profile.city.name, 80),
+    cityCountry: sanitizeText(profile.city.country, 80),
     cityLat: profile.city.lat,
     cityLng: profile.city.lng,
     travel: profile.travel,

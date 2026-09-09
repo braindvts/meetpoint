@@ -3,6 +3,8 @@ import { prisma } from "@/lib/db";
 import { getCurrentMember } from "@/lib/memberAuth";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
 import { rateLimit } from "@/lib/rateLimit";
+import { publicError } from "@/lib/safeError";
+import { sanitizeText } from "@/lib/sanitize";
 import { parseBody } from "@/lib/validation/parse";
 import { chatMessageSchema } from "@/lib/validation/safety";
 
@@ -41,10 +43,7 @@ export async function GET(
       })),
     });
   } catch (e) {
-    return NextResponse.json(
-      { ok: false, error: e instanceof Error ? e.message : "Failed" },
-      { status: 500 }
-    );
+    return publicError(e, "Failed to load messages");
   }
 }
 
@@ -69,7 +68,7 @@ export async function POST(
     });
     if (!membership) return NextResponse.json({ ok: false, error: "Not found" }, { status: 404 });
 
-    const text = parsed.data.text;
+    const text = sanitizeText(parsed.data.text, 4000);
     if (!text) return NextResponse.json({ ok: false, error: "Empty" }, { status: 400 });
 
     const msg = await prisma.message.create({
@@ -87,9 +86,6 @@ export async function POST(
       },
     });
   } catch (e) {
-    return NextResponse.json(
-      { ok: false, error: e instanceof Error ? e.message : "Failed" },
-      { status: 500 }
-    );
+    return publicError(e, "Failed to send message");
   }
 }

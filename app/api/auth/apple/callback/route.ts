@@ -1,24 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
+import { verifyAppleIdToken } from "@/lib/appleAuth";
 import { prisma } from "@/lib/db";
 import { sendWelcomeEmail } from "@/lib/email";
 import { withMemberCookie } from "@/lib/memberAuth";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
+import { sanitizeName } from "@/lib/sanitize";
 import {
   appUrl,
   clearOAuthStateCookie,
   consumeOAuthState,
   withSession,
 } from "@/lib/session";
-
-function decodeJwtPayload(idToken: string): {
-  sub?: string;
-  email?: string;
-} {
-  const part = idToken.split(".")[1];
-  if (!part) return {};
-  const json = Buffer.from(part.replace(/-/g, "+").replace(/_/g, "/"), "base64").toString("utf8");
-  return JSON.parse(json) as { sub?: string; email?: string };
-}
 
 export async function POST(req: NextRequest) {
   const form = await req.formData();
@@ -27,7 +19,7 @@ export async function POST(req: NextRequest) {
   const idToken = String(form.get("id_token") || "");
   const userRaw = String(form.get("user") || "");
 
-  if (!code || !state) {
+  if (!code || !state || !idToken) {
     return NextResponse.redirect(appUrl("/login?error=missing_code"));
   }
   const ok = await consumeOAuthState(state);
@@ -35,21 +27,23 @@ export async function POST(req: NextRequest) {
 
   try {
     await purgeDemoResidue();
-    const claims = decodeJwtPayload(idToken);
+    const claims = await verifyAppleIdToken(idToken);
     const sub = claims.sub;
-    if (!sub) return NextResponse.redirect(appUrl("/login?error=profile_failed"));
 
     let name = "Member";
     if (userRaw) {
       try {
         const parsed = JSON.parse(userRaw) as { name?: { firstName?: string; lastName?: string } };
-        name = [parsed.name?.firstName, parsed.name?.lastName].filter(Boolean).join(" ") || name;
+        name =
+          sanitizeName(
+            [parsed.name?.firstName, parsed.name?.lastName].filter(Boolean).join(" ") || name
+          ) || name;
       } catch {
         /* ignore */
       }
     }
 
-    const email = claims.email?.toLowerCase() || null;
+    const email = claims.email || null;
     let member = await prisma.member.findFirst({ where: { appleId: sub } });
     if (!member && email) {
       member = await prisma.member.findFirst({ where: { email } });
