@@ -784,7 +784,7 @@ svg {
   0% {
     transform: scaleX(0);
   }
-  70% {
+  85% {
     transform: scaleX(1);
   }
   100% {
@@ -795,11 +795,33 @@ svg {
 @keyframes splashMark {
   from {
     opacity: 0;
-    transform: scale(0.6);
+    letter-spacing: 0.7em;
+    transform: translateY(6px);
   }
   to {
     opacity: 1;
-    transform: scale(1);
+    letter-spacing: 0.48em;
+    transform: translateY(0);
+  }
+}
+
+@keyframes splashRule {
+  from {
+    opacity: 0;
+    transform: scaleY(0);
+  }
+  to {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+@keyframes splashCaption {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 
@@ -817,58 +839,77 @@ html.mp-boot-splash body::before {
 }
 
 .mp-splash {
-  animation: fadeIn 0.25s ease-out both;
+  animation: fadeIn 0.3s ease-out both;
 }
 .mp-splash-out {
-  animation: splashOut 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: splashOut 0.65s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   pointer-events: none;
 }
 .mp-splash-seal {
-  animation: splashSealIn 1.15s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: splashSealIn 1.35s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 .mp-splash-glow {
-  animation: splashGlow 2.8s ease-in-out infinite;
+  animation: splashGlow 3.4s ease-in-out infinite;
+}
+.mp-splash-glow--late {
+  animation-delay: 0.9s;
 }
 .mp-splash-grain {
   background-image: radial-gradient(rgba(255, 255, 255, 0.35) 0.5px, transparent 0.5px);
   background-size: 3px 3px;
 }
+.mp-splash-vignette {
+  background: linear-gradient(
+    to bottom,
+    rgba(5, 5, 5, 0.55) 0%,
+    transparent 28%,
+    transparent 72%,
+    rgba(5, 5, 5, 0.7) 100%
+  );
+}
 .mp-splash-ring {
   position: absolute;
-  inset: -34% -22%;
+  inset: -38% -26%;
   border-radius: 50%;
-  border: 1px solid rgba(212, 196, 168, 0.22);
-  animation: splashRing 1.25s cubic-bezier(0.22, 1, 0.36, 1) 0.08s both;
+  border: 1px solid rgba(212, 196, 168, 0.2);
+  animation: splashRing 1.45s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
   pointer-events: none;
 }
 .mp-splash-ring--outer {
-  inset: -52% -38%;
-  border-color: rgba(212, 196, 168, 0.1);
-  animation-delay: 0.18s;
+  inset: -58% -42%;
+  border-color: rgba(212, 196, 168, 0.09);
+  animation-delay: 0.28s;
 }
 .mp-splash-ring::after {
   content: "";
   position: absolute;
-  inset: 12%;
+  inset: 14%;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.045);
 }
 .mp-splash-mark {
-  animation: splashMark 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
+  animation: splashMark 0.95s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
+}
+.mp-splash-rule {
+  transform-origin: center top;
+  animation: splashRule 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.35s both;
 }
 .mp-splash-word {
-  animation: splashWord 1s cubic-bezier(0.22, 1, 0.36, 1) 0.28s both;
+  animation: splashWord 1.15s cubic-bezier(0.22, 1, 0.36, 1) 0.4s both;
 }
 .mp-splash-tag {
-  animation: splashTag 0.75s ease-out 0.75s both;
+  animation: splashTag 0.9s ease-out 1.05s both;
 }
 .mp-splash-line {
   transform-origin: center;
-  animation: splashLine 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.55s both;
+  animation: splashLine 0.95s cubic-bezier(0.22, 1, 0.36, 1) 0.75s both;
 }
 .mp-splash-bar-fill {
   transform-origin: left center;
-  animation: splashBar 2.2s cubic-bezier(0.22, 1, 0.36, 1) 0.45s both;
+  animation: splashBar 3.6s cubic-bezier(0.22, 1, 0.36, 1) 0.55s both;
+}
+.mp-splash-caption {
+  animation: splashCaption 0.8s ease-out 1.35s both;
 }
 
 /* Route enter */
@@ -980,6 +1021,8 @@ html.mp-boot-splash body::before {
   .mp-splash-mark,
   .mp-splash-glow,
   .mp-splash-bar-fill,
+  .mp-splash-rule,
+  .mp-splash-caption,
   .mp-page-enter,
   .mp-skeleton::after,
   .mp-ambient {
