@@ -163,9 +163,20 @@ model Message {
 }
 
 model Report {
-  id         String   @id @default(cuid())
-  reporterId String
-  peerId     String
-  reason     String
-  createdAt  DateTime @default(now())
+  id          String   @id @default(cuid())
+  reporterId  String
+  peerId      String
+  /// harassment | spam | fake_profile | inappropriate | scam | other
+  category    String   @default("other")
+  reason      String
+  /// open | reviewing | resolved | dismissed
+  status      String   @default("open")
+  notes       String   @default("")
+  alsoBlocked Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  reviewedAt  DateTime?
+
+  @@index([status, createdAt])
+  @@index([peerId, createdAt])
+  @@index([reporterId, createdAt])
 }

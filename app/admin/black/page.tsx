@@ -94,9 +94,14 @@ export default function BlackAdminPage() {
 
       {message && <p className="mt-4 text-sm text-accent-2">{message}</p>}
 
-      <Link href="/profile" className="mt-10 inline-block text-sm text-muted underline">
-        Back to profile
-      </Link>
+      <nav className="mt-8 flex flex-wrap gap-4 text-sm text-muted">
+        <Link href="/admin/reports" className="underline hover:text-ivory">
+          Reports queue
+        </Link>
+        <Link href="/profile" className="underline hover:text-ivory">
+          Back to profile
+        </Link>
+      </nav>
     </main>
   );
 }

@@ -1,5 +1,14 @@
 import { z } from "zod";
+import { REPORT_CATEGORIES, REPORT_STATUSES } from "@/lib/reportLabels";
 import { zId, zLongText, zShortText } from "./primitives";
+
+export {
+  REPORT_CATEGORIES,
+  REPORT_STATUSES,
+  REPORT_CATEGORY_LABEL,
+  type ReportCategory,
+  type ReportStatus,
+} from "@/lib/reportLabels";
 
 export const connectionPostSchema = z
   .object({
@@ -37,7 +46,17 @@ export const blockSchema = z
 export const reportSchema = z
   .object({
     peerId: zId,
+    category: z.enum(REPORT_CATEGORIES).optional(),
     reason: zShortText(500).min(3),
+    alsoBlock: z.boolean().optional(),
+  })
+  .strict();
+
+export const reportAdminPatchSchema = z
+  .object({
+    reportId: zId,
+    status: z.enum(REPORT_STATUSES),
+    notes: zShortText(1000).optional(),
   })
   .strict();
 

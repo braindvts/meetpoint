@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import Avatar from "@/components/Avatar";
 import NameMarks from "@/components/NameMarks";
+import ReportDialog from "@/components/ReportDialog";
 import TierBadge from "@/components/TierBadge";
 import { getPeerReputation } from "@/lib/store";
 import { isOwner, ownedCompanies, otherWork, VERIFY_LABEL } from "@/lib/personFacts";
@@ -80,6 +81,7 @@ export default function PersonProfileSheet({
   editHref,
   eyebrow,
 }: Props) {
+  const [reportOpen, setReportOpen] = useState(false);
   const sheetRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const startY = useRef(0);
@@ -100,7 +102,10 @@ export default function PersonProfileSheet({
     document.body.style.overflow = "hidden";
     document.documentElement.classList.add("mp-sheet-open");
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        if (reportOpen) setReportOpen(false);
+        else onClose();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => {
@@ -108,7 +113,7 @@ export default function PersonProfileSheet({
       document.documentElement.classList.remove("mp-sheet-open");
       window.removeEventListener("keydown", onKey);
     };
-  }, [open, onClose, person?.id]);
+  }, [open, onClose, person?.id, reportOpen]);
 
   function onHandlePointerDown(e: React.PointerEvent) {
     active.current = true;
@@ -459,34 +464,7 @@ export default function PersonProfileSheet({
                 <button
                   type="button"
                   className="flex-1 py-2 text-[11px] font-medium text-white/40 transition hover:text-white/70"
-                  onClick={async () => {
-                    const reason = window.prompt("Why are you reporting this member?");
-                    if (!reason?.trim()) return;
-                    try {
-                      const res = await fetch("/api/report", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ peerId: person.id, reason }),
-                      });
-                      const data = (await res.json()) as { ok?: boolean; error?: string };
-                      window.dispatchEvent(
-                        new CustomEvent("meetpoint:toast", {
-                          detail: {
-                            message: data.ok
-                              ? "Report received. We’ll review it."
-                              : data.error || "Could not send report. Sign in and try again.",
-                          },
-                        })
-                      );
-                    } catch {
-                      window.dispatchEvent(
-                        new CustomEvent("meetpoint:toast", {
-                          detail: { message: "Could not send report." },
-                        })
-                      );
-                    }
-                    onClose();
-                  }}
+                  onClick={() => setReportOpen(true)}
                 >
                   Report
                 </button>
@@ -515,6 +493,15 @@ export default function PersonProfileSheet({
           ) : null}
         </div>
       </div>
+      {person ? (
+        <ReportDialog
+          open={reportOpen}
+          peerId={person.id}
+          peerName={person.name}
+          onClose={() => setReportOpen(false)}
+          onSubmitted={() => onClose()}
+        />
+      ) : null}
     </div>
   );
 }

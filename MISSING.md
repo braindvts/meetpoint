@@ -48,7 +48,7 @@ npm run dev
 
 | # | Need | Status |
 |---|------|--------|
-| 20 | Report / block | **Done** — report + **Block** (DB `/api/blocks`, hides from Room, drops connection) |
+| 20 | Report / block | **Done** — report dialog (category + details + optional block), admin queue `/admin/reports`, Block hides from Room |
 | 21 | BLACK tier | **Done** — bought or earned, operator grant at `/admin/black` (`ADMIN_SECRET`). No invite codes. |
 | 22 | Native push (FCM/APNs) | **Partial** — browser SW notifications + Profile “Enable alerts”. True FCM/APNs still needs native shell + Firebase keys |
 | 23 | Remove demo entry and seeded profiles | **Done** — sign-up is the only way in |

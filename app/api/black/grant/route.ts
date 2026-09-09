@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/adminAuth";
 import { publicError } from "@/lib/safeError";
 import { prisma } from "@/lib/db";
 import { clearBlack, isVerified, setBlack } from "@/lib/blackServer";
@@ -6,17 +7,6 @@ import { purgeDemoResidue } from "@/lib/purgeDemo";
 import { rateLimit } from "@/lib/rateLimit";
 import { blackGrantSchema } from "@/lib/validation/black";
 import { parseBody } from "@/lib/validation/parse";
-import { timingSafeEqual } from "crypto";
-
-function secretsMatch(got: string, expected: string): boolean {
-  try {
-    const a = Buffer.from(got);
-    const b = Buffer.from(expected);
-    return a.length === b.length && timingSafeEqual(a, b);
-  } catch {
-    return false;
-  }
-}
 
 /**
  * Operator grant: POST { memberId, black? }
@@ -28,17 +18,8 @@ export async function POST(req: Request) {
     if (!limited.ok) return limited.response;
 
     await purgeDemoResidue();
-    const admin = process.env.ADMIN_SECRET?.trim();
-    if (!admin) {
-      return NextResponse.json({ ok: false, error: "ADMIN_SECRET not set" }, { status: 503 });
-    }
-
-    const auth = req.headers.get("authorization") || "";
-    const bearer = auth.startsWith("Bearer ") ? auth.slice(7).trim() : "";
-    const headerSecret = req.headers.get("x-admin-secret")?.trim() || "";
-    if (!secretsMatch(bearer || headerSecret, admin)) {
-      return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = requireAdmin(req);
+    if (!auth.ok) return auth.response;
 
     const parsed = await parseBody(req, blackGrantSchema);
     if (!parsed.ok) return parsed.response;
