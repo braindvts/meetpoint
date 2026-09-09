@@ -5,6 +5,7 @@ interface Props {
   className?: string;
 }
 
+/** Standalone LinkedIn CTA — uses the official LinkedIn logo mark. */
 export default function LinkedInButton({
   label = "Continue with LinkedIn",
   className = "",
@@ -12,10 +13,13 @@ export default function LinkedInButton({
   return (
     <a
       href="/api/auth/linkedin"
-      className={`inline-flex w-full items-center justify-center gap-3 rounded-full border border-ivory/80 bg-ivory px-6 py-3.5 text-sm font-semibold text-ink transition hover:bg-white sm:w-auto ${className}`}
+      className={`inline-flex w-full items-center justify-center gap-2.5 rounded-lg bg-[#0A66C2] px-5 py-2.5 text-[13px] font-semibold text-white transition hover:bg-[#004182] sm:w-auto ${className}`}
     >
-      <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current" aria-hidden>
-        <path d="M20.45 20.45h-3.55v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.36V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z" />
+      <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" aria-hidden>
+        <path
+          fill="currentColor"
+          d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.225 0z"
+        />
       </svg>
       {label}
     </a>
