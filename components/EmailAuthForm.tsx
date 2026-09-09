@@ -99,11 +99,11 @@ export default function EmailAuthForm() {
   }
 
   const field =
-    "w-full rounded-xl border border-accent/25 bg-[#12110f] px-3 py-3 text-sm text-ivory outline-none placeholder:text-muted/70 focus:border-accent";
+    "w-full rounded-lg border border-line/80 bg-ink/60 px-3 py-2 text-[14px] text-ivory outline-none placeholder:text-muted/55 focus:border-accent";
 
   return (
-    <form onSubmit={submit} className="space-y-3">
-      <div className="flex gap-3 text-[11px] font-semibold uppercase tracking-[0.18em]">
+    <form onSubmit={submit} className="space-y-2.5">
+      <div className="flex gap-4 text-[11px] font-semibold uppercase tracking-[0.18em]">
         <button
           type="button"
           onClick={() => setMode("signin")}
@@ -124,16 +124,13 @@ export default function EmailAuthForm() {
         type="button"
         disabled={busy}
         onClick={() => void signInAsBrian()}
-        className="w-full rounded-xl border border-accent/40 bg-accent/[0.08] px-3 py-3 text-left disabled:opacity-40"
+        className="w-full rounded-lg border border-accent/35 bg-accent/[0.07] px-3 py-2 text-left disabled:opacity-40"
       >
-        <span className="block text-[10px] font-semibold uppercase tracking-[0.18em] text-accent">
-          Owner account
+        <span className="block text-[10px] font-semibold uppercase tracking-[0.16em] text-accent">
+          Owner
         </span>
-        <span className="mt-1 block text-[13px] font-medium text-ivory">
-          Continue as Brian — one tap
-        </span>
-        <span className="mt-0.5 block text-[11px] text-muted">
-          {DEMO_OWNER_EMAIL} · always ready, skips setup
+        <span className="mt-0.5 block text-[13px] font-medium text-ivory">
+          Continue as Brian
         </span>
       </button>
 
@@ -159,23 +156,20 @@ export default function EmailAuthForm() {
         type="password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
-        placeholder={mode === "signup" ? "Password (8+ characters)" : "Password"}
+        placeholder={mode === "signup" ? "Password (8+)" : "Password"}
         autoComplete={mode === "signup" ? "new-password" : "current-password"}
         required
         minLength={8}
         className={field}
       />
-      {error && <p className="text-sm text-red-300/90">{error}</p>}
+      {error && <p className="text-[13px] text-red-300/90">{error}</p>}
       <button
         type="submit"
         disabled={busy}
-        className="mp-btn-lux w-full bg-gradient-to-b from-accent-2 to-accent py-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-ink disabled:opacity-40"
+        className="mp-btn-lux w-full rounded-lg bg-gradient-to-b from-accent-2 to-accent py-2.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink disabled:opacity-40"
       >
-        {busy ? "Please wait…" : mode === "signup" ? "Create account" : "Sign in with email"}
+        {busy ? "Please wait…" : mode === "signup" ? "Create account" : "Sign in"}
       </button>
-      <p className="text-[11px] leading-relaxed text-muted/70">
-        Your session stays signed in on this device until you depart.
-      </p>
     </form>
   );
 }

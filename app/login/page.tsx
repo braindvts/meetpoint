@@ -47,32 +47,45 @@ function LoginContent() {
   }, [router]);
 
   return (
-    <main className="mp-app flex min-h-dvh flex-col px-6 pb-10 pt-16 md:max-w-lg md:pt-20">
-      <p className="text-center text-[0.75rem] font-medium tracking-[0.14em] text-accent">
-        CONCLAVE
-      </p>
-      <h1 className="mt-10 text-3xl font-semibold tracking-tight text-ivory">
-        Sign in
-      </h1>
-      <p className="mt-2 text-sm leading-relaxed text-muted">
-        Email, Google, Apple, or LinkedIn — your session stays on this device.
-      </p>
+    <main className="mp-app relative flex min-h-dvh flex-col items-center justify-center px-5 py-12">
+      <div
+        className="pointer-events-none absolute inset-0 overflow-hidden"
+        aria-hidden
+      >
+        <div className="absolute left-1/2 top-[28%] h-64 w-64 -translate-x-1/2 rounded-full bg-accent/10 blur-3xl" />
+      </div>
 
-      {error && (
-        <div className="mt-6 rounded-xl border border-accent/30 bg-accent/5 px-4 py-3 text-sm leading-relaxed text-accent-2">
-          {error}
-        </div>
-      )}
+      <div className="relative w-full max-w-[17.5rem] sm:max-w-[18.5rem]">
+        <p className="text-center text-[0.7rem] font-semibold tracking-[0.28em] text-accent">
+          CONCLAVE
+        </p>
+        <h1 className="mt-5 text-center text-2xl font-semibold tracking-tight text-ivory">
+          Sign in
+        </h1>
+        <p className="mt-1.5 text-center text-[13px] leading-snug text-muted">
+          Pick a provider or use email.
+        </p>
 
-      <div className="mt-8 space-y-5">
-        <AuthButtons />
-        <div className="lux-divider">
-          <span className="text-[10px] font-semibold uppercase tracking-[0.28em] text-muted">
-            or email
-          </span>
+        {error && (
+          <div className="mt-5 rounded-lg border border-accent/30 bg-accent/5 px-3 py-2.5 text-[12px] leading-relaxed text-accent-2">
+            {error}
+          </div>
+        )}
+
+        <div className="mt-6 space-y-4">
+          <AuthButtons />
+          <div className="lux-divider">
+            <span className="text-[9px] font-semibold uppercase tracking-[0.24em] text-muted">
+              or email
+            </span>
+          </div>
+          <EmailAuthForm />
+          {demoEntryEnabled() && (
+            <div className="pt-1 text-center">
+              <DemoEnterButton />
+            </div>
+          )}
         </div>
-        <EmailAuthForm />
-        {demoEntryEnabled() && <DemoEnterButton />}
       </div>
     </main>
   );
