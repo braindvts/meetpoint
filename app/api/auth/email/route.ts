@@ -4,34 +4,53 @@ import { sendWelcomeEmail } from "@/lib/email";
 import { ensureDemoOwner, matchesDemoOwner } from "@/lib/ensureDemoOwner";
 import { withMemberCookie } from "@/lib/memberAuth";
 import { memberToProfile } from "@/lib/memberMap";
-import { hashPassword, isValidEmail, verifyPassword } from "@/lib/password";
+import {
+  hashPassword,
+  passwordNeedsUpgrade,
+  verifyPassword,
+} from "@/lib/password";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
+import { rateLimit } from "@/lib/rateLimit";
 import { appUrl, withSession } from "@/lib/session";
+import { demoOwnerAuthSchema, emailAuthSchema } from "@/lib/validation/auth";
+import { parseBody } from "@/lib/validation/parse";
 
 export async function POST(req: Request) {
   try {
+    const limited = rateLimit(req, { name: "auth-email", limit: 20, windowMs: 60_000 });
+    if (!limited.ok) return limited.response;
+
     await purgeDemoResidue();
-    const body = (await req.json()) as {
-      email?: string;
-      password?: string;
-      name?: string;
-      mode?: "signin" | "signup";
-    };
-    const email = String(body.email || "").trim().toLowerCase();
-    const password = String(body.password || "");
-    const mode = body.mode === "signup" ? "signup" : "signin";
 
-    if (!isValidEmail(email)) {
-      return NextResponse.json({ ok: false, error: "Enter a valid email." }, { status: 400 });
-    }
-    if (password.length < 8) {
-      return NextResponse.json(
-        { ok: false, error: "Password must be at least 8 characters." },
-        { status: 400 }
-      );
+    // Peek mode without full parse for demo-owner
+    const peek = await req.clone().json().catch(() => ({} as { mode?: string }));
+    if (peek?.mode === "demo-owner") {
+      const parsed = await parseBody(req, demoOwnerAuthSchema);
+      if (!parsed.ok) return parsed.response;
+      const member = await ensureDemoOwner();
+      const res = NextResponse.json({
+        ok: true,
+        next: "/discover",
+        memberId: member.id,
+        demoOwner: true,
+        profile: memberToProfile(member),
+      });
+      withSession(res, {
+        id: member.id,
+        name: member.name,
+        email: member.email || undefined,
+        picture: member.photo || undefined,
+        provider: "email",
+      });
+      return withMemberCookie(res, member.id);
     }
 
-    // Fixed Brian demo login — recreate the account on any fresh database.
+    const parsed = await parseBody(req, emailAuthSchema);
+    if (!parsed.ok) return parsed.response;
+
+    const { email, password, name: rawName } = parsed.data;
+    const mode = parsed.data.mode === "signup" ? "signup" : "signin";
+
     if (matchesDemoOwner(email, password)) {
       const member = await ensureDemoOwner();
       const res = NextResponse.json({
@@ -60,7 +79,7 @@ export async function POST(req: Request) {
           { status: 409 }
         );
       }
-      const name = String(body.name || "").trim() || email.split("@")[0];
+      const name = (rawName || "").trim() || email.split("@")[0];
       const member = existing
         ? await prisma.member.update({
             where: { id: existing.id },
@@ -94,7 +113,18 @@ export async function POST(req: Request) {
     }
 
     if (!existing?.passwordHash || !verifyPassword(password, existing.passwordHash)) {
-      return NextResponse.json({ ok: false, error: "Email or password is incorrect." }, { status: 401 });
+      return NextResponse.json(
+        { ok: false, error: "Email or password is incorrect." },
+        { status: 401 }
+      );
+    }
+
+    // Upgrade legacy password hashes on successful login
+    if (passwordNeedsUpgrade(existing.passwordHash)) {
+      await prisma.member.update({
+        where: { id: existing.id },
+        data: { passwordHash: hashPassword(password) },
+      });
     }
 
     const next = existing.jobTitle && existing.photo ? "/discover" : "/onboarding";
@@ -114,7 +144,7 @@ export async function POST(req: Request) {
     return withMemberCookie(res, existing.id);
   } catch (e) {
     return NextResponse.json(
-      { ok: false, error: e instanceof Error ? e.message : "Sign-in failed" },
+      { ok: false, error: e instanceof Error ? e.message : "Auth failed" },
       { status: 500 }
     );
   }

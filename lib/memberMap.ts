@@ -79,9 +79,9 @@ export function memberToPerson(m: Member): Person {
 }
 
 /**
- * Fields a member may write about themselves. BLACK is absent on purpose: it is
- * set only by the server (purchase, earned check, or operator grant), so a
- * doctored profile payload can never claim it.
+ * Fields a member may write about themselves.
+ * Privileged standing fields are NEVER taken from the client:
+ * black*, meetingsAttended, premier*, verifications (use /api/verify).
  */
 export function profileToMemberData(profile: MyProfile) {
   return {
@@ -97,16 +97,14 @@ export function profileToMemberData(profile: MyProfile) {
     meetPreference: profile.meetPreference || "open",
     lookingForJson: JSON.stringify(profile.lookingFor || []),
     ideaTagsJson: JSON.stringify(profile.ideaTags || []),
-    verificationsJson: JSON.stringify(profile.verifications || []),
     workJson: JSON.stringify(profile.work || []),
     phone: profile.phone || null,
-    linkedInId: profile.linkedInId || null,
-    meetingsAttended: profile.meetingsAttended || 0,
-    premierActive: profile.premierPlan?.active === true,
-    premierInterval: profile.premierPlan?.interval || null,
-    premierStartedAt: profile.premierPlan?.startedAt || null,
-    premierTrialEndsAt: profile.premierPlan?.trialEndsAt || null,
   };
+}
+
+/** Server-only: merge verifications without letting clients invent standing. */
+export function verificationsToJson(verifications: Verification[]): string {
+  return JSON.stringify(verifications || []);
 }
 
 function safeJson<T>(raw: string, fallback: T): T {

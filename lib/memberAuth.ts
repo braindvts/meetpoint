@@ -24,7 +24,7 @@ export async function getMemberIdFromCookie(): Promise<string | null> {
 }
 
 export function withMemberCookie(res: NextResponse, memberId: string): NextResponse {
-  res.cookies.set(MEMBER_COOKIE, signValue(memberId), cookieOpts(60 * 60 * 24 * 365));
+  res.cookies.set(MEMBER_COOKIE, signValue(memberId), cookieOpts(60 * 60 * 24 * 7));
   return res;
 }
 

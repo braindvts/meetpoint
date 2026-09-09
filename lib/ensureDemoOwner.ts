@@ -1,24 +1,18 @@
 import { prisma } from "@/lib/db";
-import {
-  DEMO_OWNER_EMAIL,
-  DEMO_OWNER_PASSWORD,
-  DEMO_OWNER_PROFILE,
-  isDemoOwnerEmail,
-  isDemoOwnerPassword,
-} from "@/lib/demoOwner";
+import { DEMO_OWNER_EMAIL, DEMO_OWNER_PROFILE } from "@/lib/demoOwner";
+import { demoOwnerPassword, matchesDemoOwner } from "@/lib/demoOwnerServer";
 import { profileToMemberData } from "@/lib/memberMap";
 import { hashPassword } from "@/lib/password";
+
+export { matchesDemoOwner };
 
 /**
  * Creates or refreshes the fixed Brian demo account so email sign-in always
  * works with the published credentials, even on a fresh database.
- *
- * On create: seed the full ready-made profile.
- * On update: only refresh login credentials — keep profile edits (e.g. cleared
- * verifications) so testing Verified ↔ Member sticks across sessions.
  */
 export async function ensureDemoOwner() {
   const email = DEMO_OWNER_EMAIL;
+  const password = demoOwnerPassword();
   const existing = await prisma.member.findFirst({ where: { email } });
 
   if (existing) {
@@ -26,9 +20,7 @@ export async function ensureDemoOwner() {
       where: { id: existing.id },
       data: {
         email,
-        passwordHash: hashPassword(DEMO_OWNER_PASSWORD),
-        // Keep name/photo if they wiped them by mistake, but never restore
-        // verifications they intentionally cleared.
+        passwordHash: hashPassword(password),
         name: existing.name?.trim() ? existing.name : DEMO_OWNER_PROFILE.name,
         photo: existing.photo?.trim() ? existing.photo : DEMO_OWNER_PROFILE.photo,
         jobTitle: existing.jobTitle?.trim()
@@ -44,23 +36,15 @@ export async function ensureDemoOwner() {
       ...v,
       verifiedAt: new Date().toISOString(),
     })),
-    premierPlan: {
-      active: true as const,
-      startedAt: new Date().toISOString(),
-      interval: "year" as const,
-      trialEndsAt: new Date(Date.now() + 3 * 86400000).toISOString(),
-    },
   };
 
   return prisma.member.create({
     data: {
       ...profileToMemberData(profile),
+      verificationsJson: JSON.stringify(profile.verifications),
+      meetingsAttended: profile.meetingsAttended || 0,
       email,
-      passwordHash: hashPassword(DEMO_OWNER_PASSWORD),
+      passwordHash: hashPassword(password),
     },
   });
-}
-
-export function matchesDemoOwner(email: string, password: string): boolean {
-  return isDemoOwnerEmail(email) && isDemoOwnerPassword(password);
 }

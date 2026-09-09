@@ -28,6 +28,7 @@ async function post<T>(url: string, body: unknown): Promise<T | null> {
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify(body),
     });
     return (await res.json()) as T;
@@ -49,7 +50,12 @@ export async function fetchBlackStatus(): Promise<BlackStatus | null> {
 export async function activateBlack(opts: {
   source: "paid" | "earned";
   sessionId?: string;
-}): Promise<{ ok?: boolean; error?: string; needsVerification?: boolean } | null> {
+}): Promise<{
+  ok?: boolean;
+  error?: string;
+  needsVerification?: boolean;
+  needsReauth?: boolean;
+} | null> {
   return post("/api/black/activate", opts);
 }
 

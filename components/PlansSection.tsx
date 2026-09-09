@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import BlackBadge from "@/components/BlackBadge";
 import BlackConnectionBadge from "@/components/BlackConnectionBadge";
+import ReauthDialog from "@/components/ReauthDialog";
 import {
   BLACK_EARNED_REQUIREMENTS,
   blackConnectionLevel,
@@ -33,6 +34,8 @@ export default function PlansSection({
   const [busy, setBusy] = useState<"month" | "year" | "earned" | null>(null);
   const [error, setError] = useState("");
   const [connections, setConnections] = useState(0);
+  const [reauthOpen, setReauthOpen] = useState(false);
+  const [pendingBuy, setPendingBuy] = useState<"month" | "year" | null>(null);
 
   useEffect(() => {
     const sync = () => setConnections(myBlackConnectionCount());
@@ -55,13 +58,25 @@ export default function PlansSection({
     setBusy(interval);
     setError("");
     const checkout = await startBlackCheckout(interval);
+    if (checkout?.needsReauth) {
+      setPendingBuy(interval);
+      setReauthOpen(true);
+      setBusy(null);
+      return;
+    }
     if (checkout?.url) {
       window.location.href = checkout.url;
       return;
     }
     const result = await claimBlack("paid");
-    if (!result.ok) setError(result.error || "Could not activate BLACK.");
-    else track("black_activated_paid");
+    if (!result.ok) {
+      if (result.needsReauth) {
+        setPendingBuy(interval);
+        setReauthOpen(true);
+      } else {
+        setError(result.error || "Could not activate BLACK.");
+      }
+    } else track("black_activated_paid");
     setBusy(null);
   }
 
@@ -194,6 +209,18 @@ export default function PlansSection({
           </div>
         </div>
       </div>
+
+      <ReauthDialog
+        open={reauthOpen}
+        onClose={() => {
+          setReauthOpen(false);
+          setPendingBuy(null);
+        }}
+        onSuccess={() => {
+          if (pendingBuy) void buyBlack(pendingBuy);
+        }}
+        title="Confirm to buy BLACK"
+      />
     </section>
   );
 }

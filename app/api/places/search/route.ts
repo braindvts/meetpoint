@@ -1,20 +1,35 @@
 import { NextResponse } from "next/server";
 import { RESTAURANTS } from "@/lib/data";
+import { rateLimit } from "@/lib/rateLimit";
+import { placesQuerySchema } from "@/lib/validation/safety";
 
 /**
- * Live restaurant search via Google Places Text Nearby when GOOGLE_PLACES_API_KEY is set.
- * Otherwise returns curated Michelin/5-star seed restaurants filtered by query/city.
+ * Live restaurant search via Google Places when GOOGLE_PLACES_API_KEY is set.
+ * Photo URLs go through /api/places/photo — the API key never leaves the server.
  */
 export async function GET(req: Request) {
+  const limited = rateLimit(req, { name: "places", limit: 40, windowMs: 60_000 });
+  if (!limited.ok) return limited.response;
+
   const { searchParams } = new URL(req.url);
-  const q = (searchParams.get("q") || "").trim().toLowerCase();
-  const city = (searchParams.get("city") || "").trim().toLowerCase();
-  const lat = Number(searchParams.get("lat") || NaN);
-  const lng = Number(searchParams.get("lng") || NaN);
+  const parsed = placesQuerySchema.safeParse({
+    q: searchParams.get("q") || undefined,
+    city: searchParams.get("city") || undefined,
+    lat: searchParams.get("lat") || undefined,
+    lng: searchParams.get("lng") || undefined,
+  });
+  if (!parsed.success) {
+    return NextResponse.json({ ok: false, error: "Invalid query" }, { status: 400 });
+  }
+
+  const q = (parsed.data.q || "").toLowerCase();
+  const city = (parsed.data.city || "").toLowerCase();
+  const lat = parsed.data.lat;
+  const lng = parsed.data.lng;
 
   const key = process.env.GOOGLE_PLACES_API_KEY?.trim();
 
-  if (key && Number.isFinite(lat) && Number.isFinite(lng)) {
+  if (key && lat != null && lng != null && Number.isFinite(lat) && Number.isFinite(lng)) {
     try {
       const url = new URL("https://maps.googleapis.com/maps/api/place/nearbysearch/json");
       url.searchParams.set("location", `${lat},${lng}`);
@@ -50,7 +65,7 @@ export async function GET(req: Request) {
           rating: r.rating,
           vibe: r.rating ? `Rated ${r.rating}` : "Recommended nearby",
           photoUrl: r.photos?.[0]
-            ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photo_reference=${r.photos[0].photo_reference}&key=${key}`
+            ? `/api/places/photo?ref=${encodeURIComponent(r.photos[0].photo_reference)}`
             : undefined,
           live: true,
         }));
@@ -87,9 +102,6 @@ export async function GET(req: Request) {
   return NextResponse.json({
     ok: true,
     live: false,
-    places: list.slice(0, 24).map((r) => ({ ...r, live: false })),
-    message: key
-      ? "Pass lat & lng for live Places results."
-      : "Add GOOGLE_PLACES_API_KEY for live restaurant search.",
+    places: list.slice(0, 20),
   });
 }

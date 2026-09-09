@@ -1,9 +1,15 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getCurrentMember } from "@/lib/memberAuth";
+import { rateLimit } from "@/lib/rateLimit";
+import { parseBody } from "@/lib/validation/parse";
+import { reportSchema } from "@/lib/validation/safety";
 
 /** Safety: report a member. */
 export async function POST(req: Request) {
+  const limited = rateLimit(req, { name: "report", limit: 10, windowMs: 60_000 });
+  if (!limited.ok) return limited.response;
+
   const me = await getCurrentMember();
   if (!me) {
     return NextResponse.json(
@@ -12,16 +18,14 @@ export async function POST(req: Request) {
     );
   }
 
-  const body = (await req.json()) as { peerId?: string; reason?: string };
-  if (!body.peerId || !body.reason?.trim()) {
-    return NextResponse.json({ ok: false, error: "Missing peerId/reason" }, { status: 400 });
-  }
+  const parsed = await parseBody(req, reportSchema);
+  if (!parsed.ok) return parsed.response;
 
   await prisma.report.create({
     data: {
       reporterId: me.id,
-      peerId: body.peerId,
-      reason: body.reason.trim().slice(0, 500),
+      peerId: parsed.data.peerId,
+      reason: parsed.data.reason,
     },
   });
 

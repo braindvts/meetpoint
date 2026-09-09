@@ -1,15 +1,28 @@
 import type { Connection, GroupChat, MyProfile, Person } from "./types";
 
-/** Sync local membership to the server. Replaces verifications fully (including removals). */
+/** Sync local membership to the server. Only writable identity fields are sent. */
 export async function syncProfileToServer(
   profile: MyProfile
 ): Promise<{ ok: boolean; memberId?: string; profile?: MyProfile } | null> {
   try {
+    const safe = {
+      name: profile.name,
+      jobTitle: profile.jobTitle,
+      bio: profile.bio,
+      photo: profile.photo,
+      city: profile.city,
+      travel: profile.travel,
+      meetPreference: profile.meetPreference,
+      lookingFor: profile.lookingFor,
+      ideaTags: profile.ideaTags,
+      phone: profile.phone,
+      work: profile.work,
+    };
     const res = await fetch("/api/members/me", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ profile }),
+      body: JSON.stringify({ profile: safe }),
     });
     const data = (await res.json()) as {
       ok?: boolean;
@@ -104,14 +117,25 @@ export async function startPremierCheckout(
 
 export async function startBlackCheckout(
   interval: "month" | "year"
-): Promise<{ url?: string; stripeConfigured?: boolean } | null> {
+): Promise<{
+  url?: string;
+  stripeConfigured?: boolean;
+  needsReauth?: boolean;
+  error?: string;
+} | null> {
   try {
     const res = await fetch("/api/billing/checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ kind: interval === "year" ? "black_year" : "black_month" }),
     });
-    return (await res.json()) as { url?: string; stripeConfigured?: boolean };
+    return (await res.json()) as {
+      url?: string;
+      stripeConfigured?: boolean;
+      needsReauth?: boolean;
+      error?: string;
+    };
   } catch {
     return null;
   }

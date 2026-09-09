@@ -16,8 +16,11 @@ export default function BlackAdminPage() {
     try {
       const res = await fetch("/api/black/grant", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ secret, memberId, black }),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${secret}`,
+        },
+        body: JSON.stringify({ memberId, black }),
       });
       const data = (await res.json()) as {
         ok?: boolean;

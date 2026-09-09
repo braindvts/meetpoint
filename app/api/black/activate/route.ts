@@ -8,30 +8,39 @@ import {
   setBlack,
 } from "@/lib/blackServer";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
+import { rateLimit } from "@/lib/rateLimit";
+import { hasRecentReauth } from "@/lib/session";
+import { blackActivateSchema } from "@/lib/validation/black";
+import { parseBody } from "@/lib/validation/parse";
 
 /**
- * Become BLACK — by paying or by qualifying. Two rules hold in both cases:
- * verification is never skipped, and the client never decides the outcome.
- *
- *   { source: "earned" }              → the server re-checks the requirements
- *   { source: "paid", sessionId }     → the server confirms the Stripe payment
+ * Become BLACK — by paying or by qualifying.
+ * Paid path requires recent re-auth + verified Stripe session when configured.
  */
 export async function POST(req: Request) {
   try {
+    const limited = rateLimit(req, { name: "black-activate", limit: 15, windowMs: 60_000 });
+    if (!limited.ok) return limited.response;
+
     await purgeDemoResidue();
     const me = await getCurrentMember();
     if (!me) return NextResponse.json({ ok: false, error: "Sign in first" }, { status: 401 });
 
-    // Paying does not buy a way around verification.
     if (!isVerified(me)) {
       return NextResponse.json(
-        { ok: false, error: "Verify your profile before BLACK can be activated.", needsVerification: true },
+        {
+          ok: false,
+          error: "Verify your profile before BLACK can be activated.",
+          needsVerification: true,
+        },
         { status: 403 }
       );
     }
 
-    const body = (await req.json()) as { source?: string; sessionId?: string };
-    const source = body.source === "paid" ? "paid" : "earned";
+    const parsed = await parseBody(req, blackActivateSchema);
+    if (!parsed.ok) return parsed.response;
+
+    const source = parsed.data.source === "paid" ? "paid" : "earned";
 
     if (source === "earned") {
       if (!memberQualifiesForEarnedBlack(me)) {
@@ -41,12 +50,29 @@ export async function POST(req: Request) {
         );
       }
       const updated = await setBlack(me.id, "earned");
-      return NextResponse.json({ ok: true, black: true, source: "earned", profile: memberToProfile(updated) });
+      return NextResponse.json({
+        ok: true,
+        black: true,
+        source: "earned",
+        profile: memberToProfile(updated),
+      });
+    }
+
+    // Paid BLACK — step-up reauth when the account has a password
+    if (me.passwordHash && !(await hasRecentReauth(me.id))) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "Confirm your password to continue.",
+          needsReauth: true,
+        },
+        { status: 401 }
+      );
     }
 
     const key = process.env.STRIPE_SECRET_KEY?.trim();
     if (key) {
-      const sessionId = String(body.sessionId || "").trim();
+      const sessionId = String(parsed.data.sessionId || "").trim();
       if (!sessionId) {
         return NextResponse.json(
           { ok: false, error: "Missing checkout session" },
@@ -65,12 +91,14 @@ export async function POST(req: Request) {
           { status: 402 }
         );
       }
-    } else if (process.env.NODE_ENV === "production") {
-      // No Stripe key in production means no verifiable purchase, so no BLACK.
-      return NextResponse.json(
-        { ok: false, error: "Payments are not configured, so BLACK cannot be purchased." },
-        { status: 503 }
-      );
+    } else {
+      // Never grant paid BLACK without Stripe in any environment that looks live
+      if (process.env.NODE_ENV === "production" || process.env.VERCEL) {
+        return NextResponse.json(
+          { ok: false, error: "Payments are not configured, so BLACK cannot be purchased." },
+          { status: 503 }
+        );
+      }
     }
 
     const updated = await setBlack(me.id, "paid");
@@ -78,7 +106,6 @@ export async function POST(req: Request) {
       ok: true,
       black: true,
       source: "paid",
-      stripeVerified: !!key,
       profile: memberToProfile(updated),
     });
   } catch (e) {

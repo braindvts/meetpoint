@@ -2,7 +2,13 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getCurrentMember } from "@/lib/memberAuth";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
+import { rateLimit } from "@/lib/rateLimit";
 import type { Connection as ClientConnection } from "@/lib/types";
+import {
+  connectionPatchSchema,
+  connectionPostSchema,
+} from "@/lib/validation/safety";
+import { parseBody } from "@/lib/validation/parse";
 
 function toClient(
   row: { id: string; fromId: string; toId: string; status: string; meetupJson: string | null },
@@ -43,12 +49,17 @@ export async function GET() {
 /** Request an introduction to peerId. */
 export async function POST(req: Request) {
   try {
+    const limited = rateLimit(req, { name: "connections-post", limit: 40, windowMs: 60_000 });
+    if (!limited.ok) return limited.response;
+
     await purgeDemoResidue();
     const me = await getCurrentMember();
     if (!me) return NextResponse.json({ ok: false, error: "Not signed in" }, { status: 401 });
 
-    const { peerId } = (await req.json()) as { peerId?: string };
-    if (!peerId) return NextResponse.json({ ok: false, error: "Missing peerId" }, { status: 400 });
+    const parsed = await parseBody(req, connectionPostSchema);
+    if (!parsed.ok) return parsed.response;
+    const { peerId } = parsed.data;
+
     if (peerId === me.id) {
       return NextResponse.json({ ok: false, error: "Invalid peer" }, { status: 400 });
     }
@@ -81,29 +92,28 @@ export async function POST(req: Request) {
 /** Accept / decline / remove. */
 export async function PATCH(req: Request) {
   try {
+    const limited = rateLimit(req, { name: "connections-patch", limit: 60, windowMs: 60_000 });
+    if (!limited.ok) return limited.response;
+
     await purgeDemoResidue();
     const me = await getCurrentMember();
     if (!me) return NextResponse.json({ ok: false, error: "Not signed in" }, { status: 401 });
 
-    const body = (await req.json()) as {
-      peerId?: string;
-      action?: "accept" | "decline" | "remove";
-    };
-    if (!body.peerId || !body.action) {
-      return NextResponse.json({ ok: false, error: "Missing fields" }, { status: 400 });
-    }
+    const parsed = await parseBody(req, connectionPatchSchema);
+    if (!parsed.ok) return parsed.response;
+    const { peerId, action } = parsed.data;
 
-    if (body.action === "accept") {
+    if (action === "accept") {
       await prisma.connection.updateMany({
-        where: { fromId: body.peerId, toId: me.id, status: "requested" },
+        where: { fromId: peerId, toId: me.id, status: "requested" },
         data: { status: "connected" },
       });
     } else {
       await prisma.connection.deleteMany({
         where: {
           OR: [
-            { fromId: me.id, toId: body.peerId },
-            { fromId: body.peerId, toId: me.id },
+            { fromId: me.id, toId: peerId },
+            { fromId: peerId, toId: me.id },
           ],
         },
       });

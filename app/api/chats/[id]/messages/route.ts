@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getCurrentMember } from "@/lib/memberAuth";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
+import { rateLimit } from "@/lib/rateLimit";
+import { parseBody } from "@/lib/validation/parse";
+import { chatMessageSchema } from "@/lib/validation/safety";
 
 export async function GET(
   _req: Request,
@@ -50,18 +53,23 @@ export async function POST(
   ctx: { params: Promise<{ id: string }> }
 ) {
   try {
+    const limited = rateLimit(req, { name: "chat-msg", limit: 90, windowMs: 60_000 });
+    if (!limited.ok) return limited.response;
+
     await purgeDemoResidue();
     const me = await getCurrentMember();
     if (!me) return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
     const { id } = await ctx.params;
-    const body = (await req.json()) as { text?: string };
+
+    const parsed = await parseBody(req, chatMessageSchema);
+    if (!parsed.ok) return parsed.response;
 
     const membership = await prisma.chatMember.findUnique({
       where: { chatId_memberId: { chatId: id, memberId: me.id } },
     });
     if (!membership) return NextResponse.json({ ok: false, error: "Not found" }, { status: 404 });
 
-    const text = String(body.text || "").trim().slice(0, 4000);
+    const text = parsed.data.text;
     if (!text) return NextResponse.json({ ok: false, error: "Empty" }, { status: 400 });
 
     const msg = await prisma.message.create({

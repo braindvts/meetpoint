@@ -4,7 +4,9 @@ import { getCurrentMember, withMemberCookie } from "@/lib/memberAuth";
 import { memberToProfile, profileToMemberData } from "@/lib/memberMap";
 import { getSession } from "@/lib/session";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
-import type { MyProfile } from "@/lib/types";
+import { rateLimit } from "@/lib/rateLimit";
+import { membersMePutSchema } from "@/lib/validation/profile";
+import { parseBody } from "@/lib/validation/parse";
 
 /** Current membership profile from the database. */
 export async function GET() {
@@ -25,46 +27,53 @@ export async function GET() {
   }
 }
 
-/** Upsert the signed-in / cookie member from a Conclave profile. */
+/** Upsert the signed-in member — privileged fields are stripped by schema. */
 export async function PUT(req: Request) {
   try {
+    const limited = rateLimit(req, { name: "members-me", limit: 60, windowMs: 60_000 });
+    if (!limited.ok) return limited.response;
+
     await purgeDemoResidue();
-    const body = (await req.json()) as { profile?: MyProfile };
-    if (!body.profile?.name) {
-      return NextResponse.json({ ok: false, error: "Missing profile" }, { status: 400 });
-    }
+    const parsed = await parseBody(req, membersMePutSchema, { maxBytes: 2_200_000 });
+    if (!parsed.ok) return parsed.response;
 
     const session = await getSession();
     const existing = await getCurrentMember();
-    const data = profileToMemberData({
-      ...body.profile,
-      linkedInId: body.profile.linkedInId || session?.id,
-    });
 
-    if (session?.id) {
-      const verifications = JSON.parse(data.verificationsJson || "[]") as {
+    // Require a session or existing member cookie for updates
+    if (!session && !existing) {
+      return NextResponse.json({ ok: false, error: "Sign in first" }, { status: 401 });
+    }
+
+    const data = profileToMemberData(parsed.data.profile as never);
+
+    let verificationsJson = existing?.verificationsJson || "[]";
+    let linkedInId = existing?.linkedInId || null;
+
+    // First create via LinkedIn: seed verification once
+    if (
+      !existing &&
+      session?.provider === "linkedin" &&
+      session.id
+    ) {
+      const vers = JSON.parse(verificationsJson) as {
         method: string;
         value: string;
         verifiedAt: string;
       }[];
-      // Only seed LinkedIn on first create — never re-add after the member cleared it.
-      if (
-        !existing &&
-        session.provider === "linkedin" &&
-        !verifications.some((v) => v.method === "linkedin")
-      ) {
-        verifications.push({
+      if (!vers.some((v) => v.method === "linkedin")) {
+        vers.push({
           method: "linkedin",
           value: `linkedin:${session.id}`,
           verifiedAt: new Date().toISOString(),
         });
-        data.verificationsJson = JSON.stringify(verifications);
-        data.linkedInId = session.id;
+        verificationsJson = JSON.stringify(vers);
       }
+      linkedInId = session.id;
     }
 
     const extra = {
-      linkedInId: session?.provider === "linkedin" ? session.id : data.linkedInId,
+      linkedInId: session?.provider === "linkedin" ? session.id : linkedInId,
       googleId: session?.provider === "google" ? session.id : undefined,
       appleId: session?.provider === "apple" ? session.id : undefined,
     };
@@ -75,6 +84,16 @@ export async function PUT(req: Request) {
         where: { id: existing.id },
         data: {
           ...data,
+          // Keep standing fields — never overwrite from client
+          verificationsJson: existing.verificationsJson,
+          meetingsAttended: existing.meetingsAttended,
+          premierActive: existing.premierActive,
+          premierInterval: existing.premierInterval,
+          premierStartedAt: existing.premierStartedAt,
+          premierTrialEndsAt: existing.premierTrialEndsAt,
+          black: existing.black,
+          blackSince: existing.blackSince,
+          blackSource: existing.blackSource,
           email: session?.email || existing.email,
           linkedInId: extra.linkedInId || existing.linkedInId,
           googleId: extra.googleId || existing.googleId,
@@ -85,6 +104,7 @@ export async function PUT(req: Request) {
       member = await prisma.member.create({
         data: {
           ...data,
+          verificationsJson,
           email: session?.email || null,
           linkedInId: extra.linkedInId || null,
           googleId: extra.googleId || null,

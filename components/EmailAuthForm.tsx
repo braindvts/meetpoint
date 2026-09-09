@@ -2,11 +2,7 @@
 
 import { useState } from "react";
 import { clearDemoOwnerSession, markDemoOwnerSession } from "@/lib/demoFlag";
-import {
-  DEMO_OWNER_EMAIL,
-  DEMO_OWNER_PASSWORD,
-  isDemoOwnerEmail,
-} from "@/lib/demoOwner";
+import { DEMO_OWNER_EMAIL, isDemoOwnerEmail } from "@/lib/demoOwner";
 import { saveProfile } from "@/lib/store";
 import type { MyProfile } from "@/lib/types";
 
@@ -66,22 +62,18 @@ export default function EmailAuthForm() {
     }
   }
 
+  /** Password never leaves the server — demo-owner mode only. */
   async function signInAsBrian() {
     setError("");
     setBusy(true);
     setMode("signin");
     setEmail(DEMO_OWNER_EMAIL);
-    setPassword(DEMO_OWNER_PASSWORD);
     try {
       const res = await fetch("/api/auth/email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({
-          email: DEMO_OWNER_EMAIL,
-          password: DEMO_OWNER_PASSWORD,
-          mode: "signin",
-        }),
+        body: JSON.stringify({ mode: "demo-owner" }),
       });
       const data = (await res.json()) as {
         ok?: boolean;

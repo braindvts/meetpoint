@@ -1,29 +1,24 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getCurrentMember } from "@/lib/memberAuth";
+import { rateLimit } from "@/lib/rateLimit";
 import { makeVerification, validateVerification } from "@/lib/verifyRules";
-import type { Verification, VerificationMethod } from "@/lib/types";
-
-const METHODS: VerificationMethod[] = [
-  "company-email",
-  "linkedin",
-  "resume",
-  "website",
-  "registration",
-  "portfolio",
-];
+import type { Verification } from "@/lib/types";
+import { verifySchema } from "@/lib/validation/safety";
+import { parseBody } from "@/lib/validation/parse";
 
 export async function POST(req: Request) {
+  const limited = rateLimit(req, { name: "verify", limit: 30, windowMs: 60_000 });
+  if (!limited.ok) return limited.response;
+
   const me = await getCurrentMember();
   if (!me) return NextResponse.json({ ok: false, error: "Sign in first." }, { status: 401 });
 
-  const body = (await req.json()) as { method?: string; value?: string };
-  const method = body.method as VerificationMethod;
-  if (!METHODS.includes(method)) {
-    return NextResponse.json({ ok: false, error: "Unknown verification method." }, { status: 400 });
-  }
+  const parsed = await parseBody(req, verifySchema);
+  if (!parsed.ok) return parsed.response;
 
-  const checked = validateVerification(method, String(body.value || ""));
+  const { method, value } = parsed.data;
+  const checked = validateVerification(method, value);
   if (!checked.ok) {
     return NextResponse.json({ ok: false, error: checked.error }, { status: 400 });
   }

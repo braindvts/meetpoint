@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
-import { getCurrentMember } from "@/lib/memberAuth";
-import { appUrl } from "@/lib/session";
 import { BLACK_MONTHLY_USD, BLACK_YEARLY_USD } from "@/lib/black";
+import { getCurrentMember } from "@/lib/memberAuth";
+import { rateLimit } from "@/lib/rateLimit";
+import { appUrl, hasRecentReauth } from "@/lib/session";
+import { billingCheckoutSchema } from "@/lib/validation/black";
+import { parseBody } from "@/lib/validation/parse";
 
 function stripeClient() {
   const key = process.env.STRIPE_SECRET_KEY?.trim();
@@ -10,11 +13,11 @@ function stripeClient() {
   return new Stripe(key, { apiVersion: "2026-07-29.dahlia" });
 }
 
-/**
- * Create a Stripe Checkout session for Premier or a table booking fee.
- * Without STRIPE_SECRET_KEY → { stripeConfigured: false } so the UI can fall back.
- */
+/** Create a Stripe Checkout session. Amounts for BLACK are server-fixed. */
 export async function POST(req: Request) {
+  const limited = rateLimit(req, { name: "billing", limit: 20, windowMs: 60_000 });
+  if (!limited.ok) return limited.response;
+
   const stripe = stripeClient();
   if (!stripe) {
     return NextResponse.json({
@@ -27,29 +30,36 @@ export async function POST(req: Request) {
   const me = await getCurrentMember();
   if (!me) return NextResponse.json({ ok: false, error: "Not signed in" }, { status: 401 });
 
-  const body = (await req.json()) as {
-    kind?: "premier_month" | "premier_year" | "black_month" | "black_year" | "booking";
-    amountUsd?: number;
-    label?: string;
-    chatId?: string;
-    meetupAt?: string;
-    phone?: string;
-  };
+  if (me.passwordHash && !(await hasRecentReauth(me.id))) {
+    return NextResponse.json(
+      { ok: false, error: "Confirm your password to continue.", needsReauth: true },
+      { status: 401 }
+    );
+  }
 
-  const kind = body.kind || "premier_month";
-  let amount = 2000;
-  let name = "Conclave Premier · Monthly";
+  const parsed = await parseBody(req, billingCheckoutSchema);
+  if (!parsed.ok) return parsed.response;
+  const body = parsed.data;
+
+  const kind = body.kind || "black_month";
+  let amount = BLACK_MONTHLY_USD * 100;
+  let name = "Conclave BLACK · Monthly";
   if (kind === "premier_year") {
     amount = 10000;
     name = "Conclave Premier · Yearly";
-  } else if (kind === "black_month") {
-    amount = BLACK_MONTHLY_USD * 100;
-    name = "Conclave BLACK · Monthly";
+  } else if (kind === "premier_month") {
+    amount = 2000;
+    name = "Conclave Premier · Monthly";
   } else if (kind === "black_year") {
     amount = BLACK_YEARLY_USD * 100;
     name = "Conclave BLACK · Yearly";
+  } else if (kind === "black_month") {
+    amount = BLACK_MONTHLY_USD * 100;
+    name = "Conclave BLACK · Monthly";
   } else if (kind === "booking") {
-    amount = Math.round((body.amountUsd || 5) * 100);
+    // Cap booking fee — ignore inflated client amounts
+    const requested = Math.round((body.amountUsd || 5) * 100);
+    amount = Math.min(Math.max(requested, 100), 5000);
     name = body.label || "Conclave table booking";
   }
 
@@ -89,29 +99,32 @@ export async function POST(req: Request) {
                 price_data: {
                   currency: "usd",
                   unit_amount: amount,
-                  recurring: {
-                    interval: kind === "premier_year" || kind === "black_year" ? "year" : "month",
-                  },
+                  recurring: { interval: kind.endsWith("year") ? "year" : "month" },
                   product_data: { name },
                 },
               },
             ],
-      success_url: appUrl(successPath),
-      cancel_url: appUrl(cancelPath),
+      success_url: appUrl(`${successPath}`),
+      cancel_url: appUrl(`${cancelPath}`),
       metadata: {
-        memberId: me.id,
         kind,
+        memberId: me.id,
         chatId: chatId || "",
         meetupAt: body.meetupAt || "",
         phone: body.phone || "",
       },
     });
 
-    return NextResponse.json({ ok: true, stripeConfigured: true, url: session.url });
+    return NextResponse.json({
+      ok: true,
+      stripeConfigured: true,
+      url: session.url,
+      sessionId: session.id,
+    });
   } catch (e) {
     return NextResponse.json(
-      { ok: false, error: e instanceof Error ? e.message : "Stripe failed" },
-      { status: 502 }
+      { ok: false, error: e instanceof Error ? e.message : "Checkout failed" },
+      { status: 500 }
     );
   }
 }

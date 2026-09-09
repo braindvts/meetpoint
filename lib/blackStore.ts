@@ -324,6 +324,7 @@ export async function claimBlack(source: "paid" | "earned", sessionId?: string):
   ok: boolean;
   error?: string;
   needsVerification?: boolean;
+  needsReauth?: boolean;
 }> {
   const profile = loadProfile();
   if (!profile) return { ok: false, error: "Create your profile first." };
@@ -344,6 +345,7 @@ export async function claimBlack(source: "paid" | "earned", sessionId?: string):
         ok: false,
         error: remote?.error || "Could not activate BLACK.",
         needsVerification: remote?.needsVerification,
+        needsReauth: remote?.needsReauth,
       };
     }
   }

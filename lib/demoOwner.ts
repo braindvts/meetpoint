@@ -1,8 +1,7 @@
 import type { MyProfile } from "./types";
 
-/** Fixed demo login for walkthroughs — always available. */
+/** Public demo identity — safe to import from client components. */
 export const DEMO_OWNER_EMAIL = "brianasome@gmail.com";
-export const DEMO_OWNER_PASSWORD = "Brian812";
 
 export const DEMO_OWNER_FLAG_KEY = "conclave.demoOwner";
 
@@ -42,18 +41,8 @@ export const DEMO_OWNER_PROFILE: MyProfile = {
     },
   ],
   meetingsAttended: 2,
-  premierPlan: {
-    active: true,
-    startedAt: new Date().toISOString(),
-    interval: "year",
-    trialEndsAt: new Date(Date.now() + 3 * 86400000).toISOString(),
-  },
 };
 
 export function isDemoOwnerEmail(email: string): boolean {
   return email.trim().toLowerCase() === DEMO_OWNER_EMAIL;
-}
-
-export function isDemoOwnerPassword(password: string): boolean {
-  return password === DEMO_OWNER_PASSWORD;
 }
