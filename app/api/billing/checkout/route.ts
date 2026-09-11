@@ -44,24 +44,24 @@ export async function POST(req: Request) {
 
   const kind = body.kind || "black_month";
   let amount = BLACK_MONTHLY_USD * 100;
-  let name = "Conclave BLACK · Monthly";
+  let name = "Interlink BLACK · Monthly";
   if (kind === "premier_year") {
     amount = 10000;
-    name = "Conclave Premier · Yearly";
+    name = "Interlink Premier · Yearly";
   } else if (kind === "premier_month") {
     amount = 2000;
-    name = "Conclave Premier · Monthly";
+    name = "Interlink Premier · Monthly";
   } else if (kind === "black_year") {
     amount = BLACK_YEARLY_USD * 100;
-    name = "Conclave BLACK · Yearly";
+    name = "Interlink BLACK · Yearly";
   } else if (kind === "black_month") {
     amount = BLACK_MONTHLY_USD * 100;
-    name = "Conclave BLACK · Monthly";
+    name = "Interlink BLACK · Monthly";
   } else if (kind === "booking") {
     // Cap booking fee — ignore inflated client amounts
     const requested = Math.round((body.amountUsd || 5) * 100);
     amount = Math.min(Math.max(requested, 100), 5000);
-    name = body.label || "Conclave table booking";
+    name = body.label || "Interlink table booking";
   }
 
   const chatId = body.chatId?.trim();

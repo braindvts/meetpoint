@@ -1,5 +1,5 @@
 /**
- * BLACK — the top of the Conclave ladder. A member is BLACK because they paid
+ * BLACK — the top of the Interlink ladder. A member is BLACK because they paid
  * for it or earned it, never because someone handed it over.
  *
  * BLACK CONNECTION is a separate, secondary credential: proof that someone has

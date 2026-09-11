@@ -13,9 +13,9 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "Conclave",
+  title: "Interlink",
   description:
-    "Conclave — the private network for ambitious people. Use it in the browser now; native app later.",
+    "Interlink — the private network for ambitious people. Use it in the browser now; native app later.",
 };
 
 export const viewport: Viewport = {
@@ -34,7 +34,7 @@ export default function RootLayout({
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var q=location.search;if(/[?&]shot=1/.test(q)){document.documentElement.setAttribute('data-shot','1');return;}if(sessionStorage.getItem('conclave.splash.seen')==='1')return;if(location.pathname.indexOf('/story')===0)return;document.documentElement.classList.add('mp-boot-splash');}catch(e){}})();`,
+            __html: `(function(){try{var q=location.search;if(/[?&]shot=1/.test(q)){document.documentElement.setAttribute('data-shot','1');return;}var s=sessionStorage;if(s.getItem('interlink.splash.seen')==='1'||s.getItem('conclave.splash.seen')==='1')return;if(location.pathname.indexOf('/story')===0)return;document.documentElement.classList.add('mp-boot-splash');}catch(e){}})();`,
           }}
         />
       </head>

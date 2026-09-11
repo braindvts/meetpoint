@@ -66,7 +66,7 @@ function OnboardingContent() {
     <main className="mp-app relative min-h-dvh px-4 pb-10 md:px-6">
       <div className="px-6 pt-14">
         <p className="text-center text-[0.75rem] font-medium tracking-[0.14em] text-accent">
-          CONCLAVE
+          INTERLINK
         </p>
         <header className="mt-10 mb-8">
           <h1 className="text-3xl font-semibold tracking-tight text-ivory">

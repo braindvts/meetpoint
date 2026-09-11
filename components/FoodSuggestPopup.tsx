@@ -40,7 +40,7 @@ export default function FoodSuggestPopup({
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-accent-2">
-                  Conclave AI
+                  Interlink AI
                 </p>
                 <p className="mt-1.5 font-display text-xl font-semibold tracking-tight text-ivory">
                   Ready to pick a table?
@@ -94,7 +94,7 @@ export default function FoodSuggestPopup({
             <div className="flex items-start justify-between gap-3 px-4 pb-2 pt-3">
               <div>
                 <p className="text-[9px] font-semibold uppercase tracking-[0.22em] text-white/45">
-                  Conclave AI
+                  Interlink AI
                 </p>
                 <h2 className="mt-1 font-display text-xl font-semibold text-white">
                   Tables nearby

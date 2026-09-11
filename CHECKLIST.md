@@ -1,4 +1,4 @@
-# Conclave launch checklist
+# Interlink launch checklist
 
 Tick these off as you go. Boxes already ticked are done in the code — you don't need to touch them.
 
@@ -85,7 +85,7 @@ That last row is the one to watch — on a $5 charge Stripe's cut is 9%, because
 - [ ] Add your domain in Resend → Domains
 - [ ] Paste Resend's SPF and DKIM records into your DNS
 - [ ] Wait for the domain to show Verified in Resend
-- [ ] Set `EMAIL_FROM`, e.g. `Conclave <hello@yourdomain.com>`
+- [ ] Set `EMAIL_FROM`, e.g. `Interlink <hello@yourdomain.com>`
 - [ ] Sign up with your own email on the live site and confirm the welcome email arrives
 - [x] Welcome email is written and wired to sign-up
 - [ ] Ask me to build email verification (confirm link) — not built yet

@@ -25,7 +25,7 @@ async function removeMembers(ids: string[]): Promise<void> {
 }
 
 /**
- * Conclave only shows real members. Older builds seeded fake profiles and shipped
+ * Interlink only shows real members. Older builds seeded fake profiles and shipped
  * an "Enter demo" account that synced itself to the server, so clear both (and
  * their graph edges) once per server process.
  */

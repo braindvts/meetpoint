@@ -859,7 +859,7 @@ export default function ProfileForm({
       >
         <div className="border border-line/70 bg-panel/40 px-3 py-3 sm:px-5 sm:py-4">
           <p className="text-[12px] leading-relaxed text-muted sm:text-sm">
-            Pick your business ideas and what you&apos;re looking for above. Conclave ranks
+            Pick your business ideas and what you&apos;re looking for above. Interlink ranks
             people who share your model, can help you build it, or work in your profession —
             then Nearby narrows that to people close to you.
           </p>

@@ -68,7 +68,7 @@ Skipping the iPhone app saves you the $99/year Apple membership, and it also mea
 - [ ] Resend → Domains → add your domain
 - [ ] Paste Resend's SPF and DKIM records into your DNS
 - [ ] Wait until the domain reads Verified
-- [ ] Set `EMAIL_FROM` to `Conclave <hello@yourdomain.com>`
+- [ ] Set `EMAIL_FROM` to `Interlink <hello@yourdomain.com>`
 - [ ] Sign up with your own email on the live site and confirm the email lands
 - [x] The welcome email itself is written and wired to sign-up
 - [ ] Ask me for email verification and password reset — not built yet

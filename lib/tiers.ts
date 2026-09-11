@@ -2,7 +2,7 @@ import { BLACK_EARNED_REQUIREMENTS } from "./black";
 import type { MyProfile, Person, PersonWork, ReputationSummary, Verification } from "./types";
 import { REQUIRED_VERIFICATIONS } from "./types";
 
-/** Conclave standing — only three levels. */
+/** Interlink standing — only three levels. */
 export type MemberTier = 1 | 2 | 3;
 
 export interface TierDefinition {

@@ -14,7 +14,7 @@ interface Props {
 
 /**
  * Crisp vector seal — never rasterized, sharp on retina.
- * Double ring + tick marks + monogram C.
+ * Double ring + tick marks + monogram I (Interlink).
  */
 export default function ConclaveLogo({
   size = 36,
@@ -23,9 +23,9 @@ export default function ConclaveLogo({
   variant = "nav",
 }: Props) {
   const uid = useId().replace(/:/g, "");
-  const rim = `conclave-rim-${uid}`;
-  const face = `conclave-face-${uid}`;
-  const sheen = `conclave-sheen-${uid}`;
+  const rim = `interlink-rim-${uid}`;
+  const face = `interlink-face-${uid}`;
+  const sheen = `interlink-sheen-${uid}`;
 
   const mark = (
     <svg
@@ -37,7 +37,7 @@ export default function ConclaveLogo({
       className="shrink-0"
       aria-hidden={withWordmark ? true : undefined}
       role={withWordmark ? undefined : "img"}
-      aria-label={withWordmark ? undefined : "Conclave"}
+      aria-label={withWordmark ? undefined : "Interlink"}
     >
       <defs>
         <linearGradient id={rim} x1="8" y1="4" x2="56" y2="60" gradientUnits="userSpaceOnUse">
@@ -106,15 +106,16 @@ export default function ConclaveLogo({
         );
       })}
 
+      {/* Monogram I */}
       <path
-        d="M42.2 24.2c-1.4-2.6-4.2-4.4-7.8-4.4-5.9 0-10.2 4.5-10.2 12.2s4.3 12.2 10.2 12.2c3.6 0 6.4-1.8 7.8-4.4"
+        d="M26.5 21.5h11M32 21.5v21M26.5 42.5h11"
         stroke="#f5f5f5"
-        strokeWidth="2.35"
+        strokeWidth="2.4"
         strokeLinecap="round"
         fill="none"
       />
       <path
-        d="M41.3 25.1c-1.2-2.2-3.6-3.7-6.9-3.7-5.1 0-8.8 3.9-8.8 11.4s3.7 11.4 8.8 11.4c3.3 0 5.7-1.5 6.9-3.7"
+        d="M27.2 22.2h9.6M32 22.2v19.6M27.2 41.8h9.6"
         stroke="#ffffff"
         strokeOpacity="0.2"
         strokeWidth="0.7"
@@ -140,7 +141,7 @@ export default function ConclaveLogo({
         className={`font-semibold tracking-tight text-ivory ${wordSize}`}
         style={{ textRendering: "geometricPrecision" }}
       >
-        Con<span className="text-accent">clave</span>
+        Inter<span className="text-accent">link</span>
       </span>
     </span>
   );

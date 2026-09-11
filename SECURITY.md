@@ -1,6 +1,6 @@
 # Security
 
-Conclave hardens the API so secrets stay on the server and user input is strictly validated.
+Interlink hardens the API so secrets stay on the server and user input is strictly validated.
 
 ## What a visitor with your link can / cannot do
 

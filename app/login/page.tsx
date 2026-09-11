@@ -57,7 +57,7 @@ function LoginContent() {
 
       <div className="relative w-full max-w-[17.5rem] sm:max-w-[18.5rem]">
         <p className="text-center text-[0.7rem] font-semibold tracking-[0.28em] text-accent">
-          CONCLAVE
+          INTERLINK
         </p>
         <h1 className="mt-5 text-center text-2xl font-semibold tracking-tight text-ivory">
           Sign in

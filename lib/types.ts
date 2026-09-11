@@ -222,7 +222,7 @@ export interface MyProfile {
   blackSource?: "paid" | "earned" | "granted";
   /** How many BLACK network connections this member holds. */
   blackConnections?: number;
-  /** Conclave Premier — monthly $20 or yearly $100 (3-day trial on yearly). */
+  /** Interlink Premier — monthly $20 or yearly $100 (3-day trial on yearly). */
   premierPlan?: {
     active: boolean;
     startedAt: string;
@@ -290,7 +290,7 @@ export interface TableProposal {
   chargePerPersonUsd?: number;
   /** Number of people charged (you + peers). */
   headcount?: number;
-  /** Total Conclave fee collected for this table. */
+  /** Total Interlink fee collected for this table. */
   totalChargedUsd?: number;
 }
 
