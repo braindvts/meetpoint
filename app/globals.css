@@ -847,6 +847,7 @@ html.mp-boot-splash body::before {
 }
 .mp-splash-seal {
   animation: splashSealIn 1.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+  overflow: visible;
 }
 .mp-splash-glow {
   animation: splashGlow 3.4s ease-in-out infinite;
@@ -905,6 +906,7 @@ html.mp-boot-splash body::before {
   justify-content: center;
   gap: 0.02em;
   min-height: 1.05em;
+  overflow: visible;
 }
 .mp-splash-letter {
   position: relative;
@@ -914,6 +916,7 @@ html.mp-boot-splash body::before {
   filter: blur(2.5px);
   text-shadow: none;
   will-change: transform, opacity, filter;
+  overflow: visible;
 }
 .mp-splash-letter--in {
   animation: splashLetterIn 0.58s cubic-bezier(0.16, 1, 0.3, 1) both;

@@ -118,12 +118,20 @@ function playClick(kind: "letter" | "final") {
 function ClickCursor({ pressing }: { pressing?: boolean }) {
   return (
     <span className={`mp-splash-cursor ${pressing ? "mp-splash-cursor--press" : ""}`} aria-hidden>
-      <svg viewBox="0 0 24 24" width="28" height="28" fill="none">
+      <svg viewBox="0 0 32 32" width="36" height="36" fill="none">
         <path
-          d="M5.2 3.1 18.6 12.2l-5.5 1.3 2.9 6.7-2.4 1-2.9-6.6-4.4 4.1z"
+          d="M7 4.2 24.8 16.4l-7.2 1.7 3.8 8.7-3.2 1.3-3.8-8.6-5.8 5.4z"
           fill="#efe6d6"
           stroke="#050505"
-          strokeWidth="1.2"
+          strokeWidth="1.6"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M7 4.2 24.8 16.4l-7.2 1.7 3.8 8.7-3.2 1.3-3.8-8.6-5.8 5.4z"
+          fill="none"
+          stroke="#d4c4a8"
+          strokeOpacity="0.55"
+          strokeWidth="0.6"
           strokeLinejoin="round"
         />
       </svg>
@@ -214,7 +222,7 @@ export default function SplashScreen() {
       timers.push(
         window.setTimeout(() => {
           setClickAt((cur) => (cur === i ? null : cur));
-        }, t + 140)
+        }, t + 200)
       );
     });
 
