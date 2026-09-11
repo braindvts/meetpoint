@@ -464,16 +464,44 @@ export function relatedEvents(event: InterlinkEvent, limit = 3): InterlinkEvent[
     .slice(0, limit);
 }
 
+/** Prefer the calendar date encoded in an offset ISO string (venue-local). */
+function venueDateParts(iso: string): { y: number; m: number; d: number; h: number; min: number } | null {
+  const m = iso.match(
+    /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::\d{2})?(?:\.\d+)?([+-]\d{2}:?\d{2}|Z)?/
+  );
+  if (!m) return null;
+  return {
+    y: Number(m[1]),
+    m: Number(m[2]),
+    d: Number(m[3]),
+    h: Number(m[4]),
+    min: Number(m[5]),
+  };
+}
+
 export function formatEventDate(iso: string): string {
-  return new Date(iso).toLocaleDateString(undefined, {
+  const parts = venueDateParts(iso);
+  const d = parts
+    ? new Date(Date.UTC(parts.y, parts.m - 1, parts.d, 12, 0, 0))
+    : new Date(iso);
+  return d.toLocaleDateString(undefined, {
     weekday: "short",
     month: "short",
     day: "numeric",
     year: "numeric",
+    timeZone: "UTC",
   });
 }
 
 export function formatEventTime(iso: string): string {
+  const parts = venueDateParts(iso);
+  if (parts) {
+    const h24 = parts.h;
+    const min = parts.min;
+    const ampm = h24 >= 12 ? "PM" : "AM";
+    const h12 = h24 % 12 || 12;
+    return `${h12}:${String(min).padStart(2, "0")} ${ampm}`;
+  }
   return new Date(iso).toLocaleTimeString(undefined, {
     hour: "numeric",
     minute: "2-digit",
@@ -481,12 +509,20 @@ export function formatEventTime(iso: string): string {
 }
 
 export function formatEventRange(start: string, end: string): string {
-  const s = new Date(start);
-  const e = new Date(end);
+  const a = venueDateParts(start);
+  const b = venueDateParts(end);
   const sameDay =
-    s.getFullYear() === e.getFullYear() &&
-    s.getMonth() === e.getMonth() &&
-    s.getDate() === e.getDate();
+    a && b
+      ? a.y === b.y && a.m === b.m && a.d === b.d
+      : (() => {
+          const s = new Date(start);
+          const e = new Date(end);
+          return (
+            s.getFullYear() === e.getFullYear() &&
+            s.getMonth() === e.getMonth() &&
+            s.getDate() === e.getDate()
+          );
+        })();
   if (sameDay) {
     return `${formatEventDate(start)} · ${formatEventTime(start)} – ${formatEventTime(end)}`;
   }

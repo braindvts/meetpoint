@@ -8,12 +8,17 @@ const csp = [
   "object-src 'none'",
   "frame-ancestors 'none'",
   "form-action 'self' https://appleid.apple.com",
-  // Next.js + Plausible; keep tight but workable
-  "script-src 'self' 'unsafe-inline' https://plausible.io",
+  // Next.js + Plausible; keep tight but workable.
+  // Dev needs unsafe-eval + ws for Fast Refresh hydration.
+  isProd
+    ? "script-src 'self' 'unsafe-inline' https://plausible.io"
+    : "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://plausible.io",
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",
-  "connect-src 'self' https://plausible.io https://*.stripe.com https://api.stripe.com",
+  isProd
+    ? "connect-src 'self' https://plausible.io https://*.stripe.com https://api.stripe.com"
+    : "connect-src 'self' ws: wss: http: https: https://plausible.io https://*.stripe.com https://api.stripe.com",
   "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://appleid.apple.com",
   ...(isProd ? ["upgrade-insecure-requests"] : []),
 ].join("; ");
