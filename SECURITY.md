@@ -2,28 +2,40 @@
 
 Conclave hardens the API so secrets stay on the server and user input is strictly validated.
 
+## What a visitor with your link can / cannot do
+
+| They can | They cannot |
+|----------|-------------|
+| See the public UI (HTML/CSS) and the **minified** browser JavaScript every website sends | Download your Next.js **server** code, Prisma schema, or private repo |
+| Inspect network calls in DevTools (same as any web app) | Read Stripe / DB / OAuth / `ADMIN_SECRET` / demo passwords from the server |
+| Sign up like any member | Clone your database or “duplicate” the full product from a link alone |
+| Try common probes (`/.env`, `/.git`, `*.map`) — we return **404** | Get readable source maps in production (`productionBrowserSourceMaps: false`) |
+
+**Honest limit:** anything that runs in the browser can be viewed. That is how the web works. Protection is keeping secrets and business logic on the server, validating every API call, and not leaving owner backdoors open on the live site.
+
+**Repo access is different:** if you give someone git access (or make the repo public), they get the full codebase. A website link alone is not that.
+
 ## What’s in place
 
 | Control | Detail |
 |---------|--------|
-| **Schema validation** | Zod `.strict()` schemas under `lib/validation/` — type checks, length limits, reject unexpected fields |
-| **Rate limits** | Per-IP in-memory limits on auth, billing, Places, SMS, reports, analytics, connections, chats, BLACK invites, members list |
-| **Login lockout** | After 8 failed password attempts per email+IP, 15-minute cooldown (`lib/authLockout.ts`) |
-| **Sessions** | Signed cookies embed `iat`/`exp`; **7-day** session + member cookie; `HttpOnly` + `SameSite=Lax` (+ `Secure` in prod) |
-| **CSRF** | Middleware rejects mutating `/api/*` requests in production when Origin/Referer don’t match the app (OAuth callbacks + service auth exempt) |
-| **Security headers** | CSP, HSTS (prod), `X-Frame-Options: DENY`, `nosniff`, Referrer-Policy, Permissions-Policy; `poweredByHeader: false` |
-| **OAuth** | Apple + Google **ID tokens verified via JWKS** (`jose`); OAuth `state` cookies |
-| **Re-auth** | `POST /api/auth/reauth` issues a **10-minute** cookie for billing / paid BLACK |
-| **Secrets** | Stripe, Twilio, Places, OAuth, `ADMIN_SECRET`, demo password — server-only |
-| **Places photos** | Proxied via `/api/places/photo` — API key never in browser URLs |
-| **Profile writes** | Cannot set `black`, `meetingsAttended`, `premier*`, or `verifications` via PUT |
-| **Members list** | `GET /api/members` requires a signed-in session |
-| **Chats** | Create only with **connected** peers; messages sanitized; membership checked |
-| **XSS hardening** | User text sanitized (control chars + `<>` stripped) on messages, names, reports |
-| **Error leakage** | Production API responses hide internal exception messages (`lib/safeError.ts`) |
-| **Passwords** | scrypt (legacy SHA-256 still verified and upgraded on login) |
-| **Admin grant** | `Authorization: Bearer <ADMIN_SECRET>` — secret not in JSON body |
-| **Probe paths** | `/.env`, `/wp-*`, `/.git`, etc. return 404 from middleware |
+| **No production source maps** | Browser maps disabled; `.map` requests 404 |
+| **Demo owner gated** | “Continue as Brian” / `demo-owner` only when `NEXT_PUBLIC_ENABLE_DEMO=1` (or `ENABLE_DEMO_OWNER=1`). Off on the live site by default |
+| **No default prod demo password** | Production requires `DEMO_OWNER_PASSWORD` if demo login is enabled |
+| **Health endpoint** | Public `/api/health` only says up/misconfigured — full checklist needs admin Bearer |
+| **Schema validation** | Zod `.strict()` schemas under `lib/validation/` |
+| **Rate limits** | Per-IP limits on auth, billing, Places, SMS, reports, analytics, connections, chats, invites |
+| **Login lockout** | After 8 failed password attempts per email+IP, 15-minute cooldown |
+| **Sessions** | Signed cookies `iat`/`exp`; **7-day**; `HttpOnly` + `SameSite=Lax` (+ `Secure` in prod) |
+| **CSRF** | Mutating `/api/*` needs matching Origin/Referer in production |
+| **Security headers** | CSP, HSTS (prod), frame deny, nosniff, COOP/CORP, Permissions-Policy |
+| **OAuth** | Apple + Google ID tokens verified via JWKS |
+| **Secrets** | Never `NEXT_PUBLIC_` for passwords/API keys |
+| **Members / chats** | Auth required; chats only with connected peers; text sanitized |
+| **Error leakage** | Production hides internal exception messages |
+| **Passwords** | scrypt |
+| **Admin** | Bearer `ADMIN_SECRET`; `/admin` noindex |
+| **Probe paths** | `/.env`, `/.git`, `package.json`, backups, etc. → 404 |
 
 ## Env (server)
 
@@ -36,7 +48,10 @@ APPLE_CLIENT_ID=
 TWILIO_* /
 NOTIFY_SECRET=
 ADMIN_SECRET=
-DEMO_OWNER_PASSWORD=  # optional override; never NEXT_PUBLIC_
+# Demo owner (keep OFF on the public site)
+# NEXT_PUBLIC_ENABLE_DEMO=1
+# ENABLE_DEMO_OWNER=1
+# DEMO_OWNER_PASSWORD=   # required in production if demo is on; never NEXT_PUBLIC_
 ```
 
 Never prefix secrets with `NEXT_PUBLIC_`.
@@ -44,12 +59,12 @@ Never prefix secrets with `NEXT_PUBLIC_`.
 ## Client rules
 
 - Sync profile with only writable fields (`lib/apiClient.syncProfileToServer`)
-- “Continue as Brian” uses `{ mode: "demo-owner" }` — password never ships in the JS bundle
+- Demo owner button only renders when demo env is on
 - Sensitive purchases may prompt `ReauthDialog` when the API returns `needsReauth`
 
 ## Optional next steps
 
 - Upstash Redis rate limits / lockouts across serverless isolates
 - Stripe webhooks for durable BLACK activation
-- Argon2id if you want a dedicated password KDF package
-- WAF / bot protection at the edge (Vercel Attack Challenge Mode)
+- Vercel Attack Challenge / WAF for bot abuse
+- Keep the git repository **private**

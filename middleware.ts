@@ -17,7 +17,6 @@ function appOrigin(): string | null {
 
 function isAllowedOrigin(origin: string, allowed: string): boolean {
   if (origin === allowed) return true;
-  // Vercel preview deployments
   try {
     const host = new URL(origin).hostname;
     if (host.endsWith(".vercel.app")) return true;
@@ -28,22 +27,41 @@ function isAllowedOrigin(origin: string, allowed: string): boolean {
   return false;
 }
 
+function isProbePath(pathname: string): boolean {
+  const p = pathname.toLowerCase();
+  if (p.endsWith(".map")) return true;
+  if (p.startsWith("/.env") || p.startsWith("/.git") || p.startsWith("/.svn")) return true;
+  if (p.startsWith("/wp-") || p === "/xmlrpc.php" || p.includes("phpinfo")) return true;
+  if (
+    p === "/package.json" ||
+    p === "/package-lock.json" ||
+    p === "/composer.json" ||
+    p === "/dockerfile" ||
+    p === "/readme.md" ||
+    p === "/keys.md" ||
+    p === "/conclave.md" ||
+    p === "/security.md" ||
+    p === "/.ds_store" ||
+    p.endsWith(".bak") ||
+    p.endsWith(".sql") ||
+    p.endsWith(".pem") ||
+    p.endsWith(".key")
+  ) {
+    return true;
+  }
+  return false;
+}
+
 /**
  * Edge middleware:
+ * - Block probes, source maps, and sensitive path guesses
  * - CSRF: mutating /api/* must send a matching Origin/Referer (except OAuth callbacks)
- * - Block obvious probe paths
  */
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const method = req.method.toUpperCase();
 
-  // Probe / scanner noise
-  if (
-    pathname.startsWith("/.env") ||
-    pathname.startsWith("/wp-") ||
-    pathname === "/xmlrpc.php" ||
-    pathname.startsWith("/.git")
-  ) {
+  if (isProbePath(pathname)) {
     return new NextResponse(null, { status: 404 });
   }
 
@@ -66,8 +84,6 @@ export function middleware(req: NextRequest) {
           ok = false;
         }
       }
-      // Same-site navigations sometimes omit Origin on GET; for POST browsers send it.
-      // Allow server-to-server with admin/notify secrets (checked in route).
       const hasServiceAuth =
         !!req.headers.get("authorization") ||
         !!req.headers.get("x-admin-secret") ||
@@ -89,11 +105,19 @@ export function middleware(req: NextRequest) {
     "Permissions-Policy",
     "camera=(), microphone=(), payment=(self), geolocation=(self)"
   );
+  if (pathname.startsWith("/admin")) {
+    res.headers.set("X-Robots-Tag", "noindex, nofollow");
+  }
   return res;
 }
 
 export const config = {
   matcher: [
+    /*
+     * Run on app routes + API. Skip normal static assets for speed.
+     * Still catch source-map probes under /_next/static.
+     */
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+    "/_next/static/:path*.map",
   ],
 };

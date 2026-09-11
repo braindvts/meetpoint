@@ -7,6 +7,7 @@ import {
 } from "@/lib/authLockout";
 import { sendWelcomeEmail } from "@/lib/email";
 import { ensureDemoOwner, matchesDemoOwner } from "@/lib/ensureDemoOwner";
+import { demoOwnerLoginAllowed } from "@/lib/demoOwnerServer";
 import { withMemberCookie } from "@/lib/memberAuth";
 import { memberToProfile } from "@/lib/memberMap";
 import {
@@ -33,6 +34,12 @@ export async function POST(req: Request) {
     // Peek mode without full parse for demo-owner
     const peek = await req.clone().json().catch(() => ({} as { mode?: string }));
     if (peek?.mode === "demo-owner") {
+      if (!demoOwnerLoginAllowed()) {
+        return NextResponse.json(
+          { ok: false, error: "Demo owner sign-in is disabled on this site." },
+          { status: 403 }
+        );
+      }
       const parsed = await parseBody(req, demoOwnerAuthSchema);
       if (!parsed.ok) return parsed.response;
       const member = await ensureDemoOwner();
@@ -66,7 +73,7 @@ export async function POST(req: Request) {
       );
     }
 
-    if (matchesDemoOwner(email, password)) {
+    if (demoOwnerLoginAllowed() && matchesDemoOwner(email, password)) {
       clearAuthFailures(email, ip);
       const member = await ensureDemoOwner();
       const res = NextResponse.json({

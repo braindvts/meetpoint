@@ -13,6 +13,9 @@ export { matchesDemoOwner };
 export async function ensureDemoOwner() {
   const email = DEMO_OWNER_EMAIL;
   const password = demoOwnerPassword();
+  if (!password) {
+    throw new Error("DEMO_OWNER_PASSWORD is required for demo owner login");
+  }
   const existing = await prisma.member.findFirst({ where: { email } });
 
   if (existing) {

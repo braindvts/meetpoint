@@ -93,6 +93,8 @@ export default function EmailAuthForm() {
   const field =
     "w-full rounded-lg border border-line/80 bg-ink/60 px-3 py-2 text-[14px] text-ivory outline-none placeholder:text-muted/55 focus:border-accent";
 
+  const showDemoOwner = process.env.NEXT_PUBLIC_ENABLE_DEMO === "1";
+
   return (
     <form onSubmit={submit} className="space-y-2.5">
       <div className="flex gap-4 text-[11px] font-semibold uppercase tracking-[0.18em]">
@@ -112,19 +114,21 @@ export default function EmailAuthForm() {
         </button>
       </div>
 
-      <button
-        type="button"
-        disabled={busy}
-        onClick={() => void signInAsBrian()}
-        className="w-full rounded-lg border border-accent/35 bg-accent/[0.07] px-3 py-2 text-left disabled:opacity-40"
-      >
-        <span className="block text-[10px] font-semibold uppercase tracking-[0.16em] text-accent">
-          Owner
-        </span>
-        <span className="mt-0.5 block text-[13px] font-medium text-ivory">
-          Continue as Brian
-        </span>
-      </button>
+      {showDemoOwner ? (
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => void signInAsBrian()}
+          className="w-full rounded-lg border border-accent/35 bg-accent/[0.07] px-3 py-2 text-left disabled:opacity-40"
+        >
+          <span className="block text-[10px] font-semibold uppercase tracking-[0.16em] text-accent">
+            Owner
+          </span>
+          <span className="mt-0.5 block text-[13px] font-medium text-ivory">
+            Continue as Brian
+          </span>
+        </button>
+      ) : null}
 
       {mode === "signup" && (
         <input

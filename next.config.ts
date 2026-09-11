@@ -42,6 +42,7 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  productionBrowserSourceMaps: false,
   // Keep the “N” badge off so product shots and /story exports stay clean.
   devIndicators: false,
   allowedDevOrigins: [
@@ -58,6 +59,14 @@ const nextConfig: NextConfig = {
       {
         source: "/:path*",
         headers: securityHeaders,
+      },
+      {
+        // Belt-and-suspenders: never serve browser source maps
+        source: "/:path*.map",
+        headers: [
+          { key: "Content-Type", value: "text/plain; charset=utf-8" },
+          { key: "Cache-Control", value: "no-store" },
+        ],
       },
     ];
   },
