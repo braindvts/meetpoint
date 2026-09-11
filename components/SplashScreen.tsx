@@ -7,8 +7,9 @@ const BRAND = "INTERLINK";
 const LETTERS = BRAND.split("");
 const SESSION_KEY = "interlink.splash.seen";
 const LEGACY_SESSION_KEY = "conclave.splash.seen";
-const LETTER_MS = 165;
-const FINAL_HOLD_MS = 1100;
+const LETTER_MS = 220;
+const START_MS = 520;
+const FINAL_HOLD_MS = 2200;
 
 function alreadySeen(): boolean {
   try {
@@ -31,61 +32,148 @@ function markSeen() {
   document.documentElement.classList.remove("mp-boot-splash");
 }
 
-/** Soft mechanical click via Web Audio (no asset download). */
-function playClick(kind: "letter" | "final") {
+type SplashAudio = {
+  ctx: AudioContext;
+  noise: AudioBuffer;
+};
+
+let splashAudio: SplashAudio | null = null;
+
+function getSplashAudio(): SplashAudio | null {
   try {
     const Ctx =
       window.AudioContext ||
       (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-    if (!Ctx) return;
-    const ctx = new Ctx();
-    const t0 = ctx.currentTime;
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    const filter = ctx.createBiquadFilter();
-    osc.type = "square";
-    filter.type = "bandpass";
-    if (kind === "letter") {
-      osc.frequency.setValueAtTime(920, t0);
-      osc.frequency.exponentialRampToValueAtTime(240, t0 + 0.045);
-      filter.frequency.value = 1800;
-      filter.Q.value = 2.2;
-      gain.gain.setValueAtTime(0.0001, t0);
-      gain.gain.exponentialRampToValueAtTime(0.085, t0 + 0.004);
-      gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.06);
-      osc.connect(filter);
-      filter.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(t0);
-      osc.stop(t0 + 0.07);
-    } else {
-      // Deeper “seal” click + brief shimmer
-      const osc2 = ctx.createOscillator();
-      const gain2 = ctx.createGain();
-      osc.frequency.setValueAtTime(180, t0);
-      osc.frequency.exponentialRampToValueAtTime(55, t0 + 0.14);
-      filter.frequency.value = 420;
-      filter.Q.value = 1.1;
-      gain.gain.setValueAtTime(0.0001, t0);
-      gain.gain.exponentialRampToValueAtTime(0.16, t0 + 0.008);
-      gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.18);
-      osc2.type = "sine";
-      osc2.frequency.setValueAtTime(1400, t0);
-      osc2.frequency.exponentialRampToValueAtTime(600, t0 + 0.12);
-      gain2.gain.setValueAtTime(0.0001, t0);
-      gain2.gain.exponentialRampToValueAtTime(0.05, t0 + 0.01);
-      gain2.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.16);
-      osc.connect(filter);
-      filter.connect(gain);
-      gain.connect(ctx.destination);
-      osc2.connect(gain2);
-      gain2.connect(ctx.destination);
-      osc.start(t0);
-      osc.stop(t0 + 0.2);
-      osc2.start(t0);
-      osc2.stop(t0 + 0.18);
+    if (!Ctx) return null;
+    if (!splashAudio || splashAudio.ctx.state === "closed") {
+      const ctx = new Ctx();
+      const noise = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.08), ctx.sampleRate);
+      const data = noise.getChannelData(0);
+      for (let i = 0; i < data.length; i++) {
+        // Fast decay white noise — reads as a hard “click”
+        data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / data.length, 3.2);
+      }
+      splashAudio = { ctx, noise };
     }
-    window.setTimeout(() => void ctx.close(), 400);
+    if (splashAudio.ctx.state === "suspended") void splashAudio.ctx.resume();
+    return splashAudio;
+  } catch {
+    return null;
+  }
+}
+
+/** Punchy mechanical click via Web Audio (shared context, no asset). */
+function playClick(kind: "letter" | "final") {
+  const audio = getSplashAudio();
+  if (!audio) return;
+  try {
+    const { ctx, noise } = audio;
+    const t0 = ctx.currentTime;
+
+    const noiseSrc = ctx.createBufferSource();
+    noiseSrc.buffer = noise;
+    const noiseFilter = ctx.createBiquadFilter();
+    noiseFilter.type = "highpass";
+    const noiseGain = ctx.createGain();
+
+    const tick = ctx.createOscillator();
+    tick.type = "square";
+    const tickFilter = ctx.createBiquadFilter();
+    tickFilter.type = "bandpass";
+    const tickGain = ctx.createGain();
+
+    if (kind === "letter") {
+      // Sharp typewriter tick — short, bright, unmistakable
+      noiseFilter.frequency.value = 2200;
+      noiseGain.gain.setValueAtTime(0.0001, t0);
+      noiseGain.gain.exponentialRampToValueAtTime(0.42, t0 + 0.0015);
+      noiseGain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.038);
+
+      tick.frequency.setValueAtTime(1950, t0);
+      tick.frequency.exponentialRampToValueAtTime(420, t0 + 0.028);
+      tickFilter.frequency.value = 2400;
+      tickFilter.Q.value = 4.5;
+      tickGain.gain.setValueAtTime(0.0001, t0);
+      tickGain.gain.exponentialRampToValueAtTime(0.22, t0 + 0.001);
+      tickGain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.045);
+
+      noiseSrc.connect(noiseFilter);
+      noiseFilter.connect(noiseGain);
+      noiseGain.connect(ctx.destination);
+      tick.connect(tickFilter);
+      tickFilter.connect(tickGain);
+      tickGain.connect(ctx.destination);
+      noiseSrc.start(t0);
+      tick.start(t0);
+      tick.stop(t0 + 0.05);
+    } else {
+      // Final seal: deep thud + double click (click-click)
+      const thud = ctx.createOscillator();
+      const thudGain = ctx.createGain();
+      thud.type = "sine";
+      thud.frequency.setValueAtTime(140, t0);
+      thud.frequency.exponentialRampToValueAtTime(48, t0 + 0.22);
+      thudGain.gain.setValueAtTime(0.0001, t0);
+      thudGain.gain.exponentialRampToValueAtTime(0.38, t0 + 0.004);
+      thudGain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.28);
+
+      noiseFilter.frequency.value = 900;
+      noiseGain.gain.setValueAtTime(0.0001, t0);
+      noiseGain.gain.exponentialRampToValueAtTime(0.55, t0 + 0.002);
+      noiseGain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.09);
+
+      tick.frequency.setValueAtTime(1600, t0);
+      tick.frequency.exponentialRampToValueAtTime(280, t0 + 0.05);
+      tickFilter.frequency.value = 1800;
+      tickFilter.Q.value = 2.8;
+      tickGain.gain.setValueAtTime(0.0001, t0);
+      tickGain.gain.exponentialRampToValueAtTime(0.28, t0 + 0.001);
+      tickGain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.07);
+
+      // Second snap a beat later — the “click click!”
+      const snap = ctx.createBufferSource();
+      snap.buffer = noise;
+      const snapFilter = ctx.createBiquadFilter();
+      snapFilter.type = "highpass";
+      snapFilter.frequency.value = 2800;
+      const snapGain = ctx.createGain();
+      const t1 = t0 + 0.085;
+      snapGain.gain.setValueAtTime(0.0001, t1);
+      snapGain.gain.exponentialRampToValueAtTime(0.48, t1 + 0.0015);
+      snapGain.gain.exponentialRampToValueAtTime(0.0001, t1 + 0.05);
+
+      const ping = ctx.createOscillator();
+      const pingGain = ctx.createGain();
+      ping.type = "triangle";
+      ping.frequency.setValueAtTime(2400, t1);
+      ping.frequency.exponentialRampToValueAtTime(700, t1 + 0.06);
+      pingGain.gain.setValueAtTime(0.0001, t1);
+      pingGain.gain.exponentialRampToValueAtTime(0.14, t1 + 0.002);
+      pingGain.gain.exponentialRampToValueAtTime(0.0001, t1 + 0.08);
+
+      thud.connect(thudGain);
+      thudGain.connect(ctx.destination);
+      noiseSrc.connect(noiseFilter);
+      noiseFilter.connect(noiseGain);
+      noiseGain.connect(ctx.destination);
+      tick.connect(tickFilter);
+      tickFilter.connect(tickGain);
+      tickGain.connect(ctx.destination);
+      snap.connect(snapFilter);
+      snapFilter.connect(snapGain);
+      snapGain.connect(ctx.destination);
+      ping.connect(pingGain);
+      pingGain.connect(ctx.destination);
+
+      thud.start(t0);
+      thud.stop(t0 + 0.3);
+      noiseSrc.start(t0);
+      tick.start(t0);
+      tick.stop(t0 + 0.08);
+      snap.start(t1);
+      ping.start(t1);
+      ping.stop(t1 + 0.09);
+    }
   } catch {
     /* autoplay / unsupported — visual still runs */
   }
@@ -132,7 +220,7 @@ export default function SplashScreen() {
       hideTimer = window.setTimeout(() => {
         setVisible(false);
         document.documentElement.classList.remove("mp-boot-splash");
-      }, 700);
+      }, 900);
     };
 
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -145,17 +233,25 @@ export default function SplashScreen() {
       };
     }
 
+    // Warm the audio graph early so the first click isn’t muted / delayed
+    getSplashAudio();
+    const unlockAudio = () => {
+      getSplashAudio();
+    };
+    window.addEventListener("pointerdown", unlockAudio, { once: true });
+    window.addEventListener("keydown", unlockAudio, { once: true });
+
     const timers: number[] = [];
     LETTERS.forEach((_, i) => {
       timers.push(
         window.setTimeout(() => {
           setShown(i + 1);
           playClick("letter");
-        }, 420 + i * LETTER_MS)
+        }, START_MS + i * LETTER_MS)
       );
     });
 
-    const finaleAt = 420 + LETTERS.length * LETTER_MS + 120;
+    const finaleAt = START_MS + LETTERS.length * LETTER_MS + 280;
     timers.push(
       window.setTimeout(() => {
         setFinale(true);
@@ -163,14 +259,17 @@ export default function SplashScreen() {
         playClick("final");
       }, finaleAt)
     );
-    timers.push(window.setTimeout(() => setRipples((n) => n + 1), finaleAt + 160));
+    timers.push(window.setTimeout(() => setRipples((n) => n + 1), finaleAt + 90));
+    timers.push(window.setTimeout(() => setRipples((n) => n + 1), finaleAt + 200));
     timers.push(window.setTimeout(() => setLeaving(true), finaleAt + FINAL_HOLD_MS));
-    timers.push(window.setTimeout(finish, finaleAt + FINAL_HOLD_MS + 650));
-    timers.push(window.setTimeout(finish, 9000));
+    timers.push(window.setTimeout(finish, finaleAt + FINAL_HOLD_MS + 900));
+    timers.push(window.setTimeout(finish, 14000));
 
     return () => {
       timers.forEach((t) => window.clearTimeout(t));
       if (hideTimer) window.clearTimeout(hideTimer);
+      window.removeEventListener("pointerdown", unlockAudio);
+      window.removeEventListener("keydown", unlockAudio);
     };
   }, []);
 
@@ -259,7 +358,7 @@ export default function SplashScreen() {
             className="mp-splash-bar-fill block h-full rounded-full bg-gradient-to-r from-accent/30 via-accent-2 to-accent/30"
             style={{
               width: `${Math.min(100, (shown / LETTERS.length) * 100)}%`,
-              transition: "width 160ms cubic-bezier(0.22, 1, 0.36, 1)",
+              transition: "width 280ms cubic-bezier(0.22, 1, 0.36, 1)",
             }}
           />
         </div>

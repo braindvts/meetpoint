@@ -842,7 +842,7 @@ html.mp-boot-splash body::before {
   animation: fadeIn 0.3s ease-out both;
 }
 .mp-splash-out {
-  animation: splashOut 0.65s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: splashOut 0.9s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   pointer-events: none;
 }
 .mp-splash-seal {
@@ -910,25 +910,26 @@ html.mp-boot-splash body::before {
   position: relative;
   display: inline-block;
   opacity: 0;
-  transform: translateY(0.55em) scale(0.55);
-  filter: blur(4px);
+  transform: translateY(0.35em) scale(0.82);
+  filter: blur(2.5px);
   text-shadow: none;
+  will-change: transform, opacity, filter;
 }
 .mp-splash-letter--in {
-  animation: splashLetterIn 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: splashLetterIn 0.58s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 @keyframes splashLetterIn {
   0% {
     opacity: 0;
-    transform: translateY(0.55em) scale(0.55);
-    filter: blur(4px);
+    transform: translateY(0.35em) scale(0.82);
+    filter: blur(2.5px);
     text-shadow: 0 0 0 transparent;
   }
-  55% {
+  42% {
     opacity: 1;
-    transform: translateY(-0.06em) scale(1.08);
+    transform: translateY(-0.04em) scale(1.045);
     filter: blur(0);
-    text-shadow: 0 0 22px rgba(212, 196, 168, 0.55);
+    text-shadow: 0 0 18px rgba(212, 196, 168, 0.4);
   }
   100% {
     opacity: 1;
@@ -941,35 +942,37 @@ html.mp-boot-splash body::before {
   position: absolute;
   left: 50%;
   top: 58%;
-  width: 7px;
-  height: 7px;
-  margin: -3.5px 0 0 -3.5px;
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
   border-radius: 50%;
-  background: radial-gradient(circle, #efe6d6 0%, rgba(212, 196, 168, 0.15) 55%, transparent 70%);
-  animation: splashLetterSpark 0.42s ease-out both;
+  background: radial-gradient(circle, #efe6d6 0%, rgba(212, 196, 168, 0.18) 50%, transparent 72%);
+  animation: splashLetterSpark 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
   pointer-events: none;
 }
 @keyframes splashLetterSpark {
   0% {
-    opacity: 0.95;
-    transform: scale(0.4);
+    opacity: 0.9;
+    transform: scale(0.35);
   }
   100% {
     opacity: 0;
-    transform: scale(3.2);
+    transform: scale(2.6);
   }
 }
 .mp-splash-type--locked {
-  animation: splashTypeLock 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: splashTypeLock 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 @keyframes splashTypeLock {
   0% {
-    letter-spacing: 0.14em;
-    filter: brightness(1.35);
-    transform: scale(1.03);
+    filter: brightness(1.45);
+    transform: scale(1.035);
+  }
+  55% {
+    filter: brightness(1.12);
+    transform: scale(0.992);
   }
   100% {
-    letter-spacing: 0.14em;
     filter: brightness(1);
     transform: scale(1);
   }
@@ -978,22 +981,22 @@ html.mp-boot-splash body::before {
   position: absolute;
   left: 50%;
   top: 46%;
-  width: 8rem;
-  height: 8rem;
-  margin: -4rem 0 0 -4rem;
+  width: 9rem;
+  height: 9rem;
+  margin: -4.5rem 0 0 -4.5rem;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(239, 230, 214, 0.45) 0%, transparent 68%);
-  animation: splashSealFlash 0.7s ease-out both;
+  background: radial-gradient(circle, rgba(239, 230, 214, 0.5) 0%, transparent 68%);
+  animation: splashSealFlash 1s cubic-bezier(0.16, 1, 0.3, 1) both;
   pointer-events: none;
 }
 @keyframes splashSealFlash {
   0% {
-    opacity: 0.9;
-    transform: scale(0.35);
+    opacity: 0.95;
+    transform: scale(0.28);
   }
   100% {
     opacity: 0;
-    transform: scale(2.4);
+    transform: scale(2.8);
   }
 }
 .mp-splash-click-burst {
@@ -1022,12 +1025,12 @@ html.mp-boot-splash body::before {
 }
 @keyframes splashClickRing {
   0% {
-    opacity: 0.95;
-    transform: scale(0.25);
+    opacity: 1;
+    transform: scale(0.2);
   }
   100% {
     opacity: 0;
-    transform: scale(4.8);
+    transform: scale(5.4);
   }
 }
 .mp-splash-finale .mp-splash-glow {
@@ -1045,10 +1048,6 @@ html.mp-boot-splash body::before {
 }
 .mp-splash-caption {
   animation: splashCaption 0.8s ease-out 0.2s both;
-}
-
-.mp-splash-tag {
-  /* tagline is gated by --show class when typing finishes */
 }
 
 /* Route enter */
