@@ -57,6 +57,48 @@ function lastPreview(chat: GroupChat): { at: string; text: string } {
   return { at, text: prefix + last.text };
 }
 
+/** Compact icon — opens group composer with people you’re connected to. */
+function GroupChatIconButton({
+  onClick,
+  className = "",
+}: {
+  onClick: () => void;
+  className?: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label="New group chat"
+      title="New group chat"
+      className={`grid h-10 w-10 shrink-0 place-items-center rounded-full border border-accent/35 text-accent transition hover:border-accent/70 hover:bg-accent/10 active:scale-95 ${className}`}
+    >
+      <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none" aria-hidden>
+        <circle cx="9" cy="9" r="2.6" stroke="currentColor" strokeWidth="1.7" />
+        <circle cx="16.2" cy="10.2" r="2.2" stroke="currentColor" strokeWidth="1.7" />
+        <path
+          d="M4.5 17.2c.7-2 2.3-3.1 4.5-3.1s3.8 1.1 4.5 3.1"
+          stroke="currentColor"
+          strokeWidth="1.7"
+          strokeLinecap="round"
+        />
+        <path
+          d="M13.2 16.8c.5-1.4 1.7-2.2 3.2-2.2 1.2 0 2.2.5 2.8 1.5"
+          stroke="currentColor"
+          strokeWidth="1.7"
+          strokeLinecap="round"
+        />
+        <path
+          d="M19.2 5.2v3.2M17.6 6.8h3.2"
+          stroke="currentColor"
+          strokeWidth="1.7"
+          strokeLinecap="round"
+        />
+      </svg>
+    </button>
+  );
+}
+
 function ChatsInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -177,13 +219,7 @@ function ChatsInner() {
                   Threads you open · groups you start
                 </p>
               </div>
-              <button
-                type="button"
-                onClick={() => setComposerOpen(true)}
-                className="mp-btn-lux shrink-0 rounded-xl bg-gradient-to-b from-accent-2 to-accent px-3 py-2 text-[11px] font-semibold text-ink"
-              >
-                New chat
-              </button>
+              <GroupChatIconButton onClick={() => setComposerOpen(true)} />
             </div>
             <label className="relative mt-3 block">
               <span className="sr-only">Search chats</span>
@@ -214,9 +250,7 @@ function ChatsInner() {
               <div className="px-2 py-8">
                 <EmptyState
                   title="No chats yet"
-                  body="Accept connections in Circle, then press New chat (or Chat on their profile) to open a thread. Groups work the same way — pick people you know."
-                  actionLabel="New chat"
-                  onAction={() => setComposerOpen(true)}
+                  body="Press Chat on someone’s profile to open a 1:1. Use the group icon above to start a group with people you’re connected to."
                 />
               </div>
             ) : filteredRows.length === 0 ? (
@@ -308,15 +342,12 @@ function ChatsInner() {
             <div className="flex h-full w-full flex-col items-center justify-center px-8 text-center">
               <p className="font-display text-2xl font-semibold text-ivory">Select a chat</p>
               <p className="mt-2 max-w-sm text-sm text-muted">
-                Pick a thread on the left, or start a new one with people you’re connected to.
+                Pick a thread on the left. For a new group with people you know, tap the group icon.
               </p>
-              <button
-                type="button"
+              <GroupChatIconButton
                 onClick={() => setComposerOpen(true)}
-                className="mp-btn-lux mt-6 rounded-xl bg-gradient-to-b from-accent-2 to-accent px-5 py-2.5 text-[12px] font-semibold text-ink"
-              >
-                New chat
-              </button>
+                className="mt-6 h-12 w-12"
+              />
             </div>
           )}
         </section>
