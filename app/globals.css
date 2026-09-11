@@ -934,142 +934,46 @@ html.mp-boot-splash body::before {
   }
 }
 
-/* Final sharp visual “click” / seal snap */
-.mp-splash-type--locked {
-  animation: splashTypeSettle 1s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
+/* Final sharp snap — one clean punch + one thin ring */
 .mp-splash-type--snap {
-  animation: splashTypeSnap 0.38s cubic-bezier(0.15, 0.95, 0.25, 1) both;
-}
-@keyframes splashTypeSettle {
-  from {
-    filter: brightness(1.08);
-  }
-  to {
-    filter: brightness(1);
-  }
+  animation: splashTypeSnap 0.28s cubic-bezier(0.2, 0.9, 0.2, 1) both;
 }
 @keyframes splashTypeSnap {
   0% {
     transform: scale(1);
-    filter: brightness(1);
-    letter-spacing: 0.14em;
   }
-  18% {
-    transform: scale(0.965);
-    filter: brightness(1.55);
-    letter-spacing: 0.1em;
-  }
-  55% {
-    transform: scale(1.025);
-    filter: brightness(1.2);
-    letter-spacing: 0.16em;
+  35% {
+    transform: scale(0.94);
   }
   100% {
     transform: scale(1);
-    filter: brightness(1);
-    letter-spacing: 0.14em;
-  }
-}
-.mp-splash-snap .mp-splash-glow {
-  animation: splashSnapGlow 0.45s ease-out both;
-}
-@keyframes splashSnapGlow {
-  0% {
-    opacity: 0.5;
-    transform: translate(-50%, -50%) scale(0.92);
-  }
-  40% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1.18);
-  }
-  100% {
-    opacity: 0.7;
-    transform: translate(-50%, -50%) scale(1.05);
   }
 }
 .mp-splash-snap-ring {
   position: absolute;
   left: 50%;
-  top: 46%;
-  width: 6rem;
-  height: 6rem;
-  margin: -3rem 0 0 -3rem;
-  border-radius: 50%;
-  border: 1.5px solid rgba(239, 230, 214, 0.9);
-  box-shadow: 0 0 24px rgba(212, 196, 168, 0.35);
-  animation: splashSnapRing 0.55s cubic-bezier(0.12, 0.9, 0.2, 1) both;
+  top: 50%;
+  width: 120%;
+  height: 160%;
+  margin: 0;
+  border-radius: 999px;
+  border: 1px solid rgba(239, 230, 214, 0.85);
+  transform: translate(-50%, -50%) scale(0.55);
+  animation: splashSnapRing 0.4s cubic-bezier(0.15, 0.9, 0.2, 1) both;
   pointer-events: none;
 }
 @keyframes splashSnapRing {
   0% {
     opacity: 1;
-    transform: scale(0.15);
+    transform: translate(-50%, -50%) scale(0.55);
   }
   100% {
     opacity: 0;
-    transform: scale(3.6);
-  }
-}
-.mp-splash-seal-flash {
-  position: absolute;
-  left: 50%;
-  top: 46%;
-  width: 10rem;
-  height: 10rem;
-  margin: -5rem 0 0 -5rem;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(239, 230, 214, 0.55) 0%, transparent 65%);
-  animation: splashSealFlash 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
-  pointer-events: none;
-}
-@keyframes splashSealFlash {
-  0% {
-    opacity: 1;
-    transform: scale(0.2);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(2.6);
-  }
-}
-.mp-splash-click-burst {
-  width: 1px;
-  height: 1px;
-  pointer-events: none;
-}
-.mp-splash-click-burst span {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 4.5rem;
-  height: 4.5rem;
-  margin: -2.25rem 0 0 -2.25rem;
-  border-radius: 50%;
-  border: 1.5px solid rgba(212, 196, 168, 0.7);
-  animation: splashClickRing 0.7s cubic-bezier(0.12, 0.9, 0.2, 1) both;
-}
-.mp-splash-click-burst span:nth-child(2) {
-  animation-delay: 0.05s;
-  border-color: rgba(239, 230, 214, 0.45);
-}
-.mp-splash-click-burst span:nth-child(3) {
-  animation-delay: 0.1s;
-  border-color: rgba(212, 196, 168, 0.25);
-}
-@keyframes splashClickRing {
-  0% {
-    opacity: 1;
-    transform: scale(0.15);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(5.8);
+    transform: translate(-50%, -50%) scale(1.35);
   }
 }
 .mp-splash-finale .mp-splash-glow {
-  animation: splashGlow 1.6s ease-in-out infinite;
-  opacity: 1;
+  opacity: 0.85;
 }
 .mp-splash-line--show {
   animation: splashLine 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
