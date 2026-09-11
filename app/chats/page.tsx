@@ -8,8 +8,8 @@ import Avatar from "@/components/Avatar";
 import NameMarks from "@/components/NameMarks";
 import ChatThreadPanel from "@/components/ChatThreadPanel";
 import EmptyState from "@/components/EmptyState";
+import NewChatSheet from "@/components/NewChatSheet";
 import {
-  createChat,
   loadChats,
   loadConnections,
   loadProfile,
@@ -33,29 +33,20 @@ function relativeTime(iso?: string): string {
   return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
-type PeopleRow =
-  | {
-      key: string;
-      kind: "person";
-      person: Person;
-      chat: GroupChat | null;
-      lastAt: string;
-      preview: string;
-    }
-  | {
-      key: string;
-      kind: "group";
-      chat: GroupChat;
-      lastAt: string;
-      preview: string;
-      lead?: Person;
-    };
+type ChatRow = {
+  key: string;
+  chat: GroupChat;
+  title: string;
+  person?: Person;
+  lastAt: string;
+  preview: string;
+  isGroup: boolean;
+};
 
-function lastPreview(chat: GroupChat | null): { at: string; text: string } {
-  if (!chat) return { at: "", text: "Start a conversation" };
+function lastPreview(chat: GroupChat): { at: string; text: string } {
   const last = [...chat.messages].reverse().find((m) => m.senderId !== "system");
   const at = last?.createdAt || chat.messages.at(-1)?.createdAt || chat.updatedAt || "";
-  if (!last) return { at, text: "Connected" };
+  if (!last) return { at, text: chat.memberIds.length > 1 ? "Group created" : "Chat opened" };
   const prefix = last.senderId === "me" ? "You: " : "";
   if (last.attachment && !last.text) {
     return {
@@ -80,6 +71,7 @@ function ChatsInner() {
   );
   const [directory, setDirectory] = useState(() => loadDirectory());
   const [query, setQuery] = useState("");
+  const [composerOpen, setComposerOpen] = useState(false);
 
   const refreshConnections = useCallback(() => setConnections(loadConnections()), []);
 
@@ -106,75 +98,46 @@ function ChatsInner() {
     };
   }, [router, refreshConnections]);
 
+  const connectedPeople = useMemo(() => {
+    return connections
+      .filter((c) => c.status === "connected")
+      .map((c) => directory.find((p) => p.id === c.peerId) || findPerson(c.peerId))
+      .filter((p): p is Person => !!p);
+  }, [connections, directory]);
+
+  /** Only threads the user has opened — never every connection. */
   const rows = useMemo(() => {
-    const connectedIds = new Set(
-      connections.filter((c) => c.status === "connected").map((c) => c.peerId)
-    );
-
-    const personRows: PeopleRow[] = [];
-    for (const peerId of connectedIds) {
-      const person = directory.find((p) => p.id === peerId) || findPerson(peerId);
-      if (!person) continue;
-      const chat =
-        chats.find((c) => c.memberIds.length === 1 && c.memberIds[0] === peerId) || null;
+    const list: ChatRow[] = chats.map((chat) => {
+      const isGroup = chat.memberIds.length > 1;
+      const person = !isGroup
+        ? directory.find((p) => p.id === chat.memberIds[0]) ||
+          findPerson(chat.memberIds[0])
+        : undefined;
       const { at, text } = lastPreview(chat);
-      personRows.push({
-        key: `person-${peerId}`,
-        kind: "person",
-        person,
+      const title = isGroup
+        ? chat.name
+        : person?.name || chat.name || "Chat";
+      return {
+        key: chat.id,
         chat,
-        lastAt: at || chat?.createdAt || "",
+        title,
+        person,
+        lastAt: at || chat.createdAt,
         preview: text,
-      });
-    }
-
-    const covered = new Set(
-      personRows
-        .map((r) => (r.kind === "person" && r.chat ? r.chat.id : null))
-        .filter(Boolean) as string[]
-    );
-
-    const groupRows: PeopleRow[] = chats
-      .filter((c) => c.memberIds.length !== 1 || !connectedIds.has(c.memberIds[0]))
-      .filter((c) => !covered.has(c.id))
-      .map((chat) => {
-        const { at, text } = lastPreview(chat);
-        const lead = directory.find((p) => chat.memberIds.includes(p.id));
-        return {
-          key: `group-${chat.id}`,
-          kind: "group" as const,
-          chat,
-          lastAt: at || chat.createdAt,
-          preview: text,
-          lead,
-        };
-      });
-
-    return [...personRows, ...groupRows].sort((a, b) =>
-      (b.lastAt || "").localeCompare(a.lastAt || "")
-    );
-  }, [chats, connections, directory]);
+        isGroup,
+      };
+    });
+    return list.sort((a, b) => (b.lastAt || "").localeCompare(a.lastAt || ""));
+  }, [chats, directory]);
 
   const filteredRows = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return rows;
     return rows.filter((row) => {
-      if (row.kind === "person") {
-        const hay = [
-          row.person.name,
-          row.person.jobTitle,
-          row.person.city?.name,
-          row.preview,
-        ]
-          .filter(Boolean)
-          .join(" ")
-          .toLowerCase();
-        return hay.includes(q);
-      }
       const memberNames = row.chat.memberIds
         .map((id) => findPerson(id)?.name || "")
         .join(" ");
-      const hay = [row.chat.name, memberNames, row.lead?.name, row.preview]
+      const hay = [row.title, row.person?.jobTitle, memberNames, row.preview]
         .filter(Boolean)
         .join(" ")
         .toLowerCase();
@@ -193,16 +156,6 @@ function ChatsInner() {
     router.replace("/chats", { scroll: false });
   }, [router]);
 
-  function openPerson(person: Person, existing: GroupChat | null) {
-    if (existing) {
-      selectChat(existing.id);
-      return;
-    }
-    const chat = createChat(person.name.split(" ")[0], [person.id]);
-    setChats(loadChats());
-    selectChat(chat.id);
-  }
-
   if (!profile) return null;
 
   const threadOpen = !!selectedId;
@@ -217,12 +170,23 @@ function ChatsInner() {
           }`}
         >
           <div className="shrink-0 border-b border-line/50 px-4 py-4">
-            <h1 className="font-display text-2xl font-semibold text-ivory">Chats</h1>
-            <p className="mt-1 text-[13px] text-muted">
-              People you’ve accepted · pick one to message
-            </p>
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h1 className="font-display text-2xl font-semibold text-ivory">Chats</h1>
+                <p className="mt-1 text-[13px] text-muted">
+                  Threads you open · groups you start
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setComposerOpen(true)}
+                className="mp-btn-lux shrink-0 rounded-xl bg-gradient-to-b from-accent-2 to-accent px-3 py-2 text-[11px] font-semibold text-ink"
+              >
+                New chat
+              </button>
+            </div>
             <label className="relative mt-3 block">
-              <span className="sr-only">Search people</span>
+              <span className="sr-only">Search chats</span>
               <svg
                 viewBox="0 0 24 24"
                 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted"
@@ -238,7 +202,7 @@ function ChatsInner() {
                 type="search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search people…"
+                placeholder="Search chats…"
                 autoComplete="off"
                 className="w-full rounded-xl border border-line/70 bg-ink/50 py-2.5 pl-10 pr-3 text-sm text-ivory outline-none placeholder:text-muted/55 focus:border-accent"
               />
@@ -249,15 +213,15 @@ function ChatsInner() {
             {rows.length === 0 ? (
               <div className="px-2 py-8">
                 <EmptyState
-                  title="No conversations yet"
-                  body="Accept someone in Circle, then message them here."
-                  actionHref="/circle"
-                  actionLabel="Open Circle"
+                  title="No chats yet"
+                  body="Accept connections in Circle, then press New chat (or Chat on their profile) to open a thread. Groups work the same way — pick people you know."
+                  actionLabel="New chat"
+                  onAction={() => setComposerOpen(true)}
                 />
               </div>
             ) : filteredRows.length === 0 ? (
               <div className="px-3 py-10 text-center">
-                <p className="text-sm text-muted">No people match “{query.trim()}”.</p>
+                <p className="text-sm text-muted">No chats match “{query.trim()}”.</p>
                 <button
                   type="button"
                   onClick={() => setQuery("")}
@@ -269,48 +233,6 @@ function ChatsInner() {
             ) : (
               <div className="mp-stagger space-y-1">
                 {filteredRows.map((row) => {
-                  if (row.kind === "person") {
-                    const active = row.chat?.id === selectedId;
-                    return (
-                      <button
-                        key={row.key}
-                        type="button"
-                        onClick={() => openPerson(row.person, row.chat)}
-                        className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition ${
-                          active
-                            ? "bg-accent/15 ring-1 ring-accent/35"
-                            : "hover:bg-white/[0.04]"
-                        }`}
-                      >
-                        <Avatar
-                          src={row.person.photoUrl}
-                          name={row.person.name}
-                          sizeCls="h-11 w-11"
-                          rounded="rounded-[12px]"
-                        />
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-baseline justify-between gap-2">
-                            <p className="flex min-w-0 items-center gap-1.5 truncate font-medium text-ivory">
-                              <span className="truncate">{row.person.name}</span>
-                              <NameMarks
-                                black={!!row.person.black}
-                                trusted={(row.person.blackConnections ?? 0) > 0}
-                                trustedCount={row.person.blackConnections}
-                                size="xs"
-                              />
-                            </p>
-                            {row.lastAt && (
-                              <span className="shrink-0 text-[11px] text-muted">
-                                {relativeTime(row.lastAt)}
-                              </span>
-                            )}
-                          </div>
-                          <p className="mt-0.5 truncate text-[12px] text-muted">{row.preview}</p>
-                        </div>
-                      </button>
-                    );
-                  }
-
                   const active = row.chat.id === selectedId;
                   return (
                     <button
@@ -324,14 +246,28 @@ function ChatsInner() {
                       }`}
                     >
                       <Avatar
-                        src={row.lead?.photoUrl}
-                        name={row.lead?.name || row.chat.name}
+                        src={row.person?.photoUrl}
+                        name={row.person?.name || row.title}
                         sizeCls="h-11 w-11"
                         rounded="rounded-[12px]"
                       />
                       <div className="min-w-0 flex-1">
                         <div className="flex items-baseline justify-between gap-2">
-                          <p className="truncate font-medium text-ivory">{row.chat.name}</p>
+                          <p className="flex min-w-0 items-center gap-1.5 truncate font-medium text-ivory">
+                            <span className="truncate">{row.title}</span>
+                            {row.isGroup ? (
+                              <span className="shrink-0 text-[10px] font-medium uppercase tracking-[0.12em] text-accent/80">
+                                Group
+                              </span>
+                            ) : row.person ? (
+                              <NameMarks
+                                black={!!row.person.black}
+                                trusted={(row.person.blackConnections ?? 0) > 0}
+                                trustedCount={row.person.blackConnections}
+                                size="xs"
+                              />
+                            ) : null}
+                          </p>
                           {row.lastAt && (
                             <span className="shrink-0 text-[11px] text-muted">
                               {relativeTime(row.lastAt)}
@@ -352,7 +288,7 @@ function ChatsInner() {
             <Link href="/circle" className="text-accent underline underline-offset-4">
               Circle
             </Link>
-            .
+            . Chats only appear after you start them.
           </div>
         </aside>
 
@@ -372,12 +308,29 @@ function ChatsInner() {
             <div className="flex h-full w-full flex-col items-center justify-center px-8 text-center">
               <p className="font-display text-2xl font-semibold text-ivory">Select a chat</p>
               <p className="mt-2 max-w-sm text-sm text-muted">
-                Pick someone on the left to open the thread here.
+                Pick a thread on the left, or start a new one with people you’re connected to.
               </p>
+              <button
+                type="button"
+                onClick={() => setComposerOpen(true)}
+                className="mp-btn-lux mt-6 rounded-xl bg-gradient-to-b from-accent-2 to-accent px-5 py-2.5 text-[12px] font-semibold text-ink"
+              >
+                New chat
+              </button>
             </div>
           )}
         </section>
       </main>
+
+      <NewChatSheet
+        open={composerOpen}
+        onClose={() => setComposerOpen(false)}
+        people={connectedPeople}
+        onCreated={(id) => {
+          setChats(loadChats());
+          selectChat(id);
+        }}
+      />
     </>
   );
 }

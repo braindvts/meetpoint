@@ -17,10 +17,11 @@ import {
   loadConnections,
   loadProfile,
   loadRatings,
+  openOrCreateDirectChat,
   requestConnection,
   saveProfile,
 } from "@/lib/store";
-import { refreshDirectory, loadDirectory } from "@/lib/directory";
+import { findPerson, refreshDirectory, loadDirectory } from "@/lib/directory";
 import { syncProfileToServer } from "@/lib/apiClient";
 import { readClientConnections, readClientProfile } from "@/lib/clientProfile";
 import { hydrateLocalProfile } from "@/lib/hydrateSession";
@@ -141,6 +142,12 @@ export default function DiscoverPage() {
 
   function connect(peerId: string) {
     setConnections(requestConnection(peerId));
+  }
+
+  function startChat(peerId: string) {
+    const person = people.find((p) => p.id === peerId) || findPerson(peerId);
+    const chat = openOrCreateDirectChat(peerId, person?.name || "Chat");
+    router.push(`/chats?c=${encodeURIComponent(chat.id)}`);
   }
 
   function needVerified() {
@@ -371,6 +378,7 @@ export default function DiscoverPage() {
                       status={connections.find((c) => c.peerId === m.person.id)?.status}
                       canConnect={allowed}
                       onConnect={connect}
+                      onChat={startChat}
                       onSkip={skip}
                       onNeedVerified={needVerified}
                       onOpenProfile={(id) => {
@@ -404,6 +412,7 @@ export default function DiscoverPage() {
             : true
         }
         onConnect={connect}
+        onChat={startChat}
         onNeedVerified={needVerified}
       />
 

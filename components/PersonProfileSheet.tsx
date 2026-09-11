@@ -18,6 +18,8 @@ interface Props {
   status?: ConnectionStatus;
   canConnect?: boolean;
   onConnect?: (peerId: string) => void;
+  /** When connected — open or create a DM only after the user presses Chat. */
+  onChat?: (peerId: string) => void;
   onNeedVerified?: () => void;
   /** When set, shows Edit profile instead of Introduce (self preview). */
   editHref?: string;
@@ -77,6 +79,7 @@ export default function PersonProfileSheet({
   status,
   canConnect = true,
   onConnect,
+  onChat,
   onNeedVerified,
   editHref,
   eyebrow,
@@ -429,17 +432,30 @@ export default function PersonProfileSheet({
                 Edit profile
               </Link>
             </div>
-          ) : onConnect ? (
+          ) : onConnect || onChat ? (
             <div className="shrink-0 border-t border-white/10 px-4 py-3 sm:px-5">
               {status === "connected" ? (
-                <p className="py-2 text-center text-[13px] font-medium text-muted">
-                  Already connected
-                </p>
+                onChat ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onChat(person.id);
+                      onClose();
+                    }}
+                    className="mp-btn-lux w-full rounded-xl bg-gradient-to-b from-accent-2 to-accent py-3 text-[13px] font-semibold text-ink"
+                  >
+                    Chat
+                  </button>
+                ) : (
+                  <p className="py-2 text-center text-[13px] font-medium text-muted">
+                    Already connected
+                  </p>
+                )
               ) : status === "requested" ? (
                 <p className="py-2 text-center text-[13px] font-medium text-muted">
                   Waiting for them to accept
                 </p>
-              ) : (
+              ) : onConnect ? (
                 <button
                   type="button"
                   onClick={() => {
@@ -459,7 +475,7 @@ export default function PersonProfileSheet({
                 >
                   {canConnect ? "Connect" : "Get Verified to connect"}
                 </button>
-              )}
+              ) : null}
               <div className="mt-2 flex gap-2">
                 <button
                   type="button"

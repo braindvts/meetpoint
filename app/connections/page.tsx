@@ -16,11 +16,11 @@ import { blackConnectionWith } from "@/lib/blackStore";
 import { RESTAURANTS } from "@/lib/data";
 import {
   acceptConnection,
-  createChat,
   declineConnection,
   loadChats,
   loadConnections,
   loadProfile,
+  openOrCreateDirectChat,
 } from "@/lib/store";
 import { findPerson, refreshDirectory } from "@/lib/directory";
 import { readClientConnections, readClientProfile } from "@/lib/clientProfile";
@@ -154,12 +154,12 @@ export default function ConnectionsPage() {
     return items.sort((a, b) => a.sortAt.localeCompare(b.sortAt));
   }, [tick]);
 
-  function acceptAndChat(person: Person) {
+  function accept(person: Person) {
     setConnections(acceptConnection(person.id));
-    const existing = loadChats().find(
-      (c) => c.memberIds.length === 1 && c.memberIds[0] === person.id
-    );
-    const chat = existing || createChat(person.name.split(" ")[0], [person.id]);
+  }
+
+  function openChat(person: Person) {
+    const chat = openOrCreateDirectChat(person.id, person.name);
     router.push(`/chats?c=${encodeURIComponent(chat.id)}`);
   }
 
@@ -251,10 +251,10 @@ export default function ConnectionsPage() {
                             <div className="flex flex-wrap items-center gap-2">
                               <button
                                 type="button"
-                                onClick={() => acceptAndChat(person)}
+                                onClick={() => accept(person)}
                                 className="rounded-md bg-gradient-to-b from-accent-2 to-accent px-3 py-1.5 text-[11px] font-medium text-ink"
                               >
-                                Accept & chat
+                                Accept
                               </button>
                               <button
                                 type="button"
@@ -409,6 +409,12 @@ export default function ConnectionsPage() {
             ? connections.find((c) => c.peerId === profilePerson.id)?.status
             : undefined
         }
+        onChat={(peerId) => {
+          const person = findPerson(peerId);
+          if (!person) return;
+          setProfilePerson(null);
+          openChat(person);
+        }}
       />
     </>
   );

@@ -248,7 +248,7 @@ function scheduleDemoAccept(peerId: string) {
     window.dispatchEvent(
       new CustomEvent("meetpoint:toast", {
         detail: {
-          message: `${first} accepted your introduction. Message them in Chats.`,
+          message: `${first} accepted your introduction. Press Chat when you’re ready to message them.`,
           peerId,
         },
       })
@@ -256,7 +256,7 @@ function scheduleDemoAccept(peerId: string) {
     void import("./notify").then(({ pushAppNotification }) =>
       pushAppNotification(
         "Introduction accepted",
-        `${first} accepted. Open Chats to message them.`,
+        `${first} accepted. Press Chat on their card when you want a thread.`,
         { url: "/chats", tag: "conclave-intro" }
       )
     );
@@ -423,6 +423,34 @@ function saveChats(chats: GroupChat[]): void {
 
 export function getChat(id: string): GroupChat | undefined {
   return loadChats().find((c) => c.id === id);
+}
+
+/** Existing 1:1 thread with a peer, if the user has opened one. */
+export function findDirectChat(peerId: string): GroupChat | undefined {
+  return loadChats().find(
+    (c) => c.memberIds.length === 1 && c.memberIds[0] === peerId
+  );
+}
+
+/**
+ * Find a chat with exactly the same member set (order-independent).
+ * Used so “Chat” doesn’t spawn duplicates for the same people.
+ */
+export function findChatByMembers(memberIds: string[]): GroupChat | undefined {
+  const want = [...new Set(memberIds)].sort().join(",");
+  return loadChats().find(
+    (c) => [...c.memberIds].sort().join(",") === want
+  );
+}
+
+/**
+ * Open an existing 1:1 or create it — only call when the user presses Chat.
+ * Connections alone never create a thread.
+ */
+export function openOrCreateDirectChat(peerId: string, displayName: string): GroupChat {
+  const existing = findDirectChat(peerId);
+  if (existing) return existing;
+  return createChat(displayName.trim().split(" ")[0] || "Chat", [peerId]);
 }
 
 /** Create a private chat with one or more connected peers. */

@@ -13,6 +13,8 @@ interface Props {
   status?: ConnectionStatus;
   canConnect?: boolean;
   onConnect?: (peerId: string) => void;
+  /** When connected — user must press Chat to open a thread. */
+  onChat?: (peerId: string) => void;
   onNeedVerified?: () => void;
   onOpenProfile?: (peerId: string) => void;
   onSkip?: (peerId: string) => void;
@@ -28,6 +30,7 @@ export default function MatchCard({
   status,
   canConnect = true,
   onConnect,
+  onChat,
   onNeedVerified,
   onOpenProfile,
   onSkip,
@@ -62,7 +65,7 @@ export default function MatchCard({
 
   function connectAria() {
     if (preview) return "Your card";
-    if (status === "connected") return "Connected";
+    if (status === "connected") return onChat ? "Chat" : "Connected";
     if (status === "requested") return "Waiting";
     if (!canConnect) return "Get Verified to connect";
     return "Connect";
@@ -70,7 +73,7 @@ export default function MatchCard({
 
   function actionLabel() {
     if (preview) return "Your card";
-    if (status === "connected") return "Connected";
+    if (status === "connected") return onChat ? "Chat" : "Connected";
     if (status === "requested") return "Waiting";
     if (!canConnect) return "Verified";
     return "Connect";
@@ -79,6 +82,10 @@ export default function MatchCard({
   function handleConnect(e: MouseEvent) {
     e.stopPropagation();
     if (preview) return;
+    if (status === "connected") {
+      onChat?.(person.id);
+      return;
+    }
     if (!canConnect) {
       onNeedVerified?.();
       return;
@@ -221,11 +228,18 @@ export default function MatchCard({
         <button
           type="button"
           aria-label={connectAria()}
-          disabled={connectLocked && status !== "connected"}
+          disabled={
+            preview ||
+            status === "requested" ||
+            (status === "connected" && !onChat) ||
+            (!status && !canConnect && !onNeedVerified)
+          }
           onClick={handleConnect}
           className={`grid h-11 w-11 shrink-0 place-items-center rounded-full transition active:scale-95 ${
             status === "connected"
-              ? "border border-accent/25 text-muted"
+              ? onChat
+                ? "bg-gradient-to-b from-accent-2 to-accent text-ink shadow-[0_8px_20px_rgba(212,196,168,0.22)]"
+                : "border border-accent/25 text-muted"
               : status === "requested"
                 ? "border border-accent/45 text-accent"
                 : !canConnect && !preview
@@ -233,7 +247,11 @@ export default function MatchCard({
                   : "bg-gradient-to-b from-accent-2 to-accent text-ink shadow-[0_8px_20px_rgba(212,196,168,0.22)]"
           }`}
         >
-          {status === "requested" ? (
+          {status === "connected" && onChat ? (
+            <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <path d="M5 6.5h14a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5H10l-4 3v-3H5A1.5 1.5 0 0 1 3.5 15V8A1.5 1.5 0 0 1 5 6.5z" strokeLinejoin="round" />
+            </svg>
+          ) : status === "requested" ? (
             <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth="1.8">
               <circle cx="12" cy="12" r="8" />
               <path d="M12 8v4.5l2.5 1.5" strokeLinecap="round" />
@@ -252,7 +270,9 @@ export default function MatchCard({
 
         <p
           className={`text-[12px] font-medium ${
-            status === "requested" || (!canConnect && !preview) ? "text-accent" : "text-ivory/70"
+            status === "requested" || (!canConnect && !preview && status !== "connected")
+              ? "text-accent"
+              : "text-ivory/70"
           }`}
         >
           {actionLabel()}
