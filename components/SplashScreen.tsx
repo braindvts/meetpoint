@@ -7,8 +7,8 @@ const BRAND = "INTERLINK";
 const LETTERS = BRAND.split("");
 const SESSION_KEY = "interlink.splash.seen";
 const LEGACY_SESSION_KEY = "conclave.splash.seen";
-const LETTER_MS = 220;
-const START_MS = 520;
+const LETTER_MS = 240;
+const START_MS = 560;
 const FINAL_HOLD_MS = 2200;
 
 function alreadySeen(): boolean {
@@ -47,11 +47,12 @@ function getSplashAudio(): SplashAudio | null {
     if (!Ctx) return null;
     if (!splashAudio || splashAudio.ctx.state === "closed") {
       const ctx = new Ctx();
-      const noise = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.08), ctx.sampleRate);
+      // Ultra-short buffer for a hard edge
+      const noise = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.025), ctx.sampleRate);
       const data = noise.getChannelData(0);
       for (let i = 0; i < data.length; i++) {
-        // Fast decay white noise — reads as a hard “click”
-        data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / data.length, 3.2);
+        const t = i / data.length;
+        data[i] = (Math.random() * 2 - 1) * Math.pow(1 - t, 8);
       }
       splashAudio = { ctx, noise };
     }
@@ -62,7 +63,7 @@ function getSplashAudio(): SplashAudio | null {
   }
 }
 
-/** Punchy mechanical click via Web Audio (shared context, no asset). */
+/** Razor-sharp mouse-button click (shared context). */
 function playClick(kind: "letter" | "final") {
   const audio = getSplashAudio();
   if (!audio) return;
@@ -70,124 +71,78 @@ function playClick(kind: "letter" | "final") {
     const { ctx, noise } = audio;
     const t0 = ctx.currentTime;
 
-    const noiseSrc = ctx.createBufferSource();
-    noiseSrc.buffer = noise;
-    const noiseFilter = ctx.createBiquadFilter();
-    noiseFilter.type = "highpass";
-    const noiseGain = ctx.createGain();
+    const fire = (at: number, gainPeak: number, hp: number) => {
+      const src = ctx.createBufferSource();
+      src.buffer = noise;
+      const hpFilter = ctx.createBiquadFilter();
+      hpFilter.type = "highpass";
+      hpFilter.frequency.value = hp;
+      hpFilter.Q.value = 0.7;
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0.0001, at);
+      g.gain.exponentialRampToValueAtTime(gainPeak, at + 0.0006);
+      g.gain.exponentialRampToValueAtTime(0.0001, at + 0.018);
 
-    const tick = ctx.createOscillator();
-    tick.type = "square";
-    const tickFilter = ctx.createBiquadFilter();
-    tickFilter.type = "bandpass";
-    const tickGain = ctx.createGain();
+      const pop = ctx.createOscillator();
+      pop.type = "square";
+      pop.frequency.setValueAtTime(3200, at);
+      pop.frequency.exponentialRampToValueAtTime(900, at + 0.012);
+      const pg = ctx.createGain();
+      pg.gain.setValueAtTime(0.0001, at);
+      pg.gain.exponentialRampToValueAtTime(gainPeak * 0.55, at + 0.0005);
+      pg.gain.exponentialRampToValueAtTime(0.0001, at + 0.014);
+
+      src.connect(hpFilter);
+      hpFilter.connect(g);
+      g.connect(ctx.destination);
+      pop.connect(pg);
+      pg.connect(ctx.destination);
+      src.start(at);
+      pop.start(at);
+      pop.stop(at + 0.016);
+    };
 
     if (kind === "letter") {
-      // Sharp typewriter tick — short, bright, unmistakable
-      noiseFilter.frequency.value = 2200;
-      noiseGain.gain.setValueAtTime(0.0001, t0);
-      noiseGain.gain.exponentialRampToValueAtTime(0.42, t0 + 0.0015);
-      noiseGain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.038);
-
-      tick.frequency.setValueAtTime(1950, t0);
-      tick.frequency.exponentialRampToValueAtTime(420, t0 + 0.028);
-      tickFilter.frequency.value = 2400;
-      tickFilter.Q.value = 4.5;
-      tickGain.gain.setValueAtTime(0.0001, t0);
-      tickGain.gain.exponentialRampToValueAtTime(0.22, t0 + 0.001);
-      tickGain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.045);
-
-      noiseSrc.connect(noiseFilter);
-      noiseFilter.connect(noiseGain);
-      noiseGain.connect(ctx.destination);
-      tick.connect(tickFilter);
-      tickFilter.connect(tickGain);
-      tickGain.connect(ctx.destination);
-      noiseSrc.start(t0);
-      tick.start(t0);
-      tick.stop(t0 + 0.05);
+      fire(t0, 0.72, 4500);
     } else {
-      // Final seal: deep thud + double click (click-click)
-      const thud = ctx.createOscillator();
-      const thudGain = ctx.createGain();
-      thud.type = "sine";
-      thud.frequency.setValueAtTime(140, t0);
-      thud.frequency.exponentialRampToValueAtTime(48, t0 + 0.22);
-      thudGain.gain.setValueAtTime(0.0001, t0);
-      thudGain.gain.exponentialRampToValueAtTime(0.38, t0 + 0.004);
-      thudGain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.28);
-
-      noiseFilter.frequency.value = 900;
-      noiseGain.gain.setValueAtTime(0.0001, t0);
-      noiseGain.gain.exponentialRampToValueAtTime(0.55, t0 + 0.002);
-      noiseGain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.09);
-
-      tick.frequency.setValueAtTime(1600, t0);
-      tick.frequency.exponentialRampToValueAtTime(280, t0 + 0.05);
-      tickFilter.frequency.value = 1800;
-      tickFilter.Q.value = 2.8;
-      tickGain.gain.setValueAtTime(0.0001, t0);
-      tickGain.gain.exponentialRampToValueAtTime(0.28, t0 + 0.001);
-      tickGain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.07);
-
-      // Second snap a beat later — the “click click!”
-      const snap = ctx.createBufferSource();
-      snap.buffer = noise;
-      const snapFilter = ctx.createBiquadFilter();
-      snapFilter.type = "highpass";
-      snapFilter.frequency.value = 2800;
-      const snapGain = ctx.createGain();
-      const t1 = t0 + 0.085;
-      snapGain.gain.setValueAtTime(0.0001, t1);
-      snapGain.gain.exponentialRampToValueAtTime(0.48, t1 + 0.0015);
-      snapGain.gain.exponentialRampToValueAtTime(0.0001, t1 + 0.05);
-
-      const ping = ctx.createOscillator();
-      const pingGain = ctx.createGain();
-      ping.type = "triangle";
-      ping.frequency.setValueAtTime(2400, t1);
-      ping.frequency.exponentialRampToValueAtTime(700, t1 + 0.06);
-      pingGain.gain.setValueAtTime(0.0001, t1);
-      pingGain.gain.exponentialRampToValueAtTime(0.14, t1 + 0.002);
-      pingGain.gain.exponentialRampToValueAtTime(0.0001, t1 + 0.08);
-
-      thud.connect(thudGain);
-      thudGain.connect(ctx.destination);
-      noiseSrc.connect(noiseFilter);
-      noiseFilter.connect(noiseGain);
-      noiseGain.connect(ctx.destination);
-      tick.connect(tickFilter);
-      tickFilter.connect(tickGain);
-      tickGain.connect(ctx.destination);
-      snap.connect(snapFilter);
-      snapFilter.connect(snapGain);
-      snapGain.connect(ctx.destination);
-      ping.connect(pingGain);
-      pingGain.connect(ctx.destination);
-
-      thud.start(t0);
-      thud.stop(t0 + 0.3);
-      noiseSrc.start(t0);
-      tick.start(t0);
-      tick.stop(t0 + 0.08);
-      snap.start(t1);
-      ping.start(t1);
-      ping.stop(t1 + 0.09);
+      // Visible double-click: click … click
+      fire(t0, 0.85, 3800);
+      fire(t0 + 0.09, 0.95, 5200);
     }
   } catch {
-    /* autoplay / unsupported — visual still runs */
+    /* autoplay / unsupported */
   }
 }
 
+/** Classic arrow cursor that visibly presses. */
+function ClickCursor({ pressing }: { pressing?: boolean }) {
+  return (
+    <span className={`mp-splash-cursor ${pressing ? "mp-splash-cursor--press" : ""}`} aria-hidden>
+      <svg viewBox="0 0 24 24" width="28" height="28" fill="none">
+        <path
+          d="M5.2 3.1 18.6 12.2l-5.5 1.3 2.9 6.7-2.4 1-2.9-6.6-4.4 4.1z"
+          fill="#efe6d6"
+          stroke="#050505"
+          strokeWidth="1.2"
+          strokeLinejoin="round"
+        />
+      </svg>
+      <i className="mp-splash-cursor-ripple" />
+    </span>
+  );
+}
+
 /**
- * First-open loading seal — INTERLINK types letter by letter with a click,
- * then a final seal-click. Once per browser tab (?splash=1 to replay).
+ * First-open loading seal — INTERLINK types with a visible cursor click
+ * on each letter, then a final double-click. (?splash=1 to replay)
  */
 export default function SplashScreen() {
   const [visible, setVisible] = useState(false);
   const [leaving, setLeaving] = useState(false);
   const [shown, setShown] = useState(0);
+  const [clickAt, setClickAt] = useState<number | null>(null);
   const [finale, setFinale] = useState(false);
+  const [finalePress, setFinalePress] = useState(false);
   const [ripples, setRipples] = useState(0);
   const finished = useRef(false);
   const line = useMemo(() => pickInterlinkLine(), []);
@@ -233,7 +188,6 @@ export default function SplashScreen() {
       };
     }
 
-    // Warm the audio graph early so the first click isn’t muted / delayed
     getSplashAudio();
     const unlockAudio = () => {
       getSplashAudio();
@@ -243,24 +197,39 @@ export default function SplashScreen() {
 
     const timers: number[] = [];
     LETTERS.forEach((_, i) => {
+      const t = START_MS + i * LETTER_MS;
+      // Cursor appears slightly before the strike
+      timers.push(
+        window.setTimeout(() => {
+          setClickAt(i);
+        }, t - 70)
+      );
       timers.push(
         window.setTimeout(() => {
           setShown(i + 1);
+          setClickAt(i);
           playClick("letter");
-        }, START_MS + i * LETTER_MS)
+        }, t)
+      );
+      timers.push(
+        window.setTimeout(() => {
+          setClickAt((cur) => (cur === i ? null : cur));
+        }, t + 140)
       );
     });
 
-    const finaleAt = START_MS + LETTERS.length * LETTER_MS + 280;
+    const finaleAt = START_MS + LETTERS.length * LETTER_MS + 320;
     timers.push(
       window.setTimeout(() => {
+        setClickAt(null);
         setFinale(true);
+        setFinalePress(true);
         setRipples((n) => n + 1);
         playClick("final");
       }, finaleAt)
     );
     timers.push(window.setTimeout(() => setRipples((n) => n + 1), finaleAt + 90));
-    timers.push(window.setTimeout(() => setRipples((n) => n + 1), finaleAt + 200));
+    timers.push(window.setTimeout(() => setFinalePress(false), finaleAt + 280));
     timers.push(window.setTimeout(() => setLeaving(true), finaleAt + FINAL_HOLD_MS));
     timers.push(window.setTimeout(finish, finaleAt + FINAL_HOLD_MS + 900));
     timers.push(window.setTimeout(finish, 14000));
@@ -301,7 +270,10 @@ export default function SplashScreen() {
         <div className="mp-splash-grain absolute inset-0 opacity-[0.06]" />
         <div className="mp-splash-vignette absolute inset-0" />
         {ripples > 0 ? (
-          <div key={ripples} className="mp-splash-click-burst absolute left-1/2 top-[46%] -translate-x-1/2 -translate-y-1/2">
+          <div
+            key={ripples}
+            className="mp-splash-click-burst absolute left-1/2 top-[46%] -translate-x-1/2 -translate-y-1/2"
+          >
             <span />
             <span />
             <span />
@@ -320,20 +292,29 @@ export default function SplashScreen() {
         <div className="mp-splash-rule my-5 h-10 w-px bg-gradient-to-b from-transparent via-accent to-transparent" />
 
         <h1
-          className={`mp-splash-type font-display text-[clamp(2.1rem,9vw,4.75rem)] font-semibold leading-[0.92] tracking-[0.14em] text-accent ${
+          className={`mp-splash-type relative font-display text-[clamp(2.1rem,9vw,4.75rem)] font-semibold leading-[0.92] tracking-[0.14em] text-accent ${
             finale ? "mp-splash-type--locked" : ""
           }`}
         >
           {LETTERS.map((ch, i) => (
             <span
               key={`${ch}-${i}`}
-              className={`mp-splash-letter ${i < shown ? "mp-splash-letter--in" : ""}`}
+              className={`mp-splash-letter ${i < shown ? "mp-splash-letter--in" : ""} ${
+                clickAt === i ? "mp-splash-letter--hit" : ""
+              }`}
               aria-hidden={i >= shown}
             >
               {ch}
+              {clickAt === i ? <ClickCursor pressing /> : null}
               {i < shown ? <i className="mp-splash-letter-spark" aria-hidden /> : null}
+              {clickAt === i ? <i className="mp-splash-hit-ring" aria-hidden /> : null}
             </span>
           ))}
+          {finale ? (
+            <span className="mp-splash-finale-cursor">
+              <ClickCursor pressing={finalePress} />
+            </span>
+          ) : null}
           <span className="sr-only">{BRAND}</span>
         </h1>
 

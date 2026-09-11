@@ -918,6 +918,9 @@ html.mp-boot-splash body::before {
 .mp-splash-letter--in {
   animation: splashLetterIn 0.58s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
+.mp-splash-letter--hit {
+  animation: splashLetterHit 0.22s cubic-bezier(0.2, 0.9, 0.25, 1) both;
+}
 @keyframes splashLetterIn {
   0% {
     opacity: 0;
@@ -936,6 +939,19 @@ html.mp-boot-splash body::before {
     transform: translateY(0) scale(1);
     filter: blur(0);
     text-shadow: 0 0 0 transparent;
+  }
+}
+@keyframes splashLetterHit {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(0.86) translateY(0.06em);
+    text-shadow: 0 0 0 transparent;
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    text-shadow: 0 0 14px rgba(239, 230, 214, 0.35);
   }
 }
 .mp-splash-letter-spark {
@@ -959,6 +975,101 @@ html.mp-boot-splash body::before {
     opacity: 0;
     transform: scale(2.6);
   }
+}
+
+/* Visible mouse cursor that clicks each letter */
+.mp-splash-cursor {
+  position: absolute;
+  left: 58%;
+  top: 62%;
+  z-index: 5;
+  width: 28px;
+  height: 28px;
+  transform: translate(-10%, -10%) scale(1);
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.55));
+  pointer-events: none;
+  animation: splashCursorIn 0.12s ease-out both;
+}
+.mp-splash-cursor svg {
+  display: block;
+}
+.mp-splash-cursor--press {
+  animation: splashCursorPress 0.2s cubic-bezier(0.2, 0.85, 0.25, 1) both;
+}
+.mp-splash-cursor-ripple {
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid rgba(239, 230, 214, 0.95);
+  opacity: 0;
+  pointer-events: none;
+}
+.mp-splash-cursor--press .mp-splash-cursor-ripple {
+  animation: splashCursorRipple 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes splashCursorIn {
+  from {
+    opacity: 0;
+    transform: translate(-10%, -35%) scale(1.15);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-10%, -10%) scale(1);
+  }
+}
+@keyframes splashCursorPress {
+  0% {
+    transform: translate(-10%, -18%) scale(1.08);
+  }
+  40% {
+    transform: translate(-10%, 6%) scale(0.86);
+  }
+  100% {
+    transform: translate(-10%, -4%) scale(1);
+  }
+}
+@keyframes splashCursorRipple {
+  0% {
+    opacity: 1;
+    transform: scale(0.35);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.8);
+  }
+}
+.mp-splash-hit-ring {
+  position: absolute;
+  left: 50%;
+  top: 55%;
+  width: 1.4em;
+  height: 1.4em;
+  margin: -0.7em 0 0 -0.7em;
+  border-radius: 50%;
+  border: 1.5px solid rgba(239, 230, 214, 0.85);
+  animation: splashHitRing 0.34s cubic-bezier(0.16, 1, 0.3, 1) both;
+  pointer-events: none;
+}
+@keyframes splashHitRing {
+  0% {
+    opacity: 1;
+    transform: scale(0.25);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.7);
+  }
+}
+.mp-splash-finale-cursor {
+  position: absolute;
+  left: 50%;
+  top: 55%;
+  z-index: 6;
+  transform: translate(-20%, -10%);
+  pointer-events: none;
 }
 .mp-splash-type--locked {
   animation: splashTypeLock 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -1156,7 +1267,12 @@ html.mp-boot-splash body::before {
   .mp-splash-word,
   .mp-splash-letter,
   .mp-splash-letter--in,
+  .mp-splash-letter--hit,
   .mp-splash-letter-spark,
+  .mp-splash-cursor,
+  .mp-splash-cursor--press,
+  .mp-splash-cursor-ripple,
+  .mp-splash-hit-ring,
   .mp-splash-type--locked,
   .mp-splash-seal-flash,
   .mp-splash-click-burst span,
