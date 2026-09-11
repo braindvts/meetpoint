@@ -13,6 +13,7 @@ Interlink introduces people matched by ambition or profession, then settles it o
 - Welcome email on sign-up (Resend) — logs and skips until keyed
 - **Postgres + Prisma** — profiles, connections, chats persist server-side
 - Discover lists real members from `/api/members`
+- **Events & Conventions** — curated professional gatherings (`/events`), RSVP/interested, filters, and `/admin/events` for local management
 - Circle with Accept / Decline; DB sync when signed in
 - Private chats (localStorage + server poll every ~4s)
 - Table proposals, booking UI, SMS hook (Twilio optional)

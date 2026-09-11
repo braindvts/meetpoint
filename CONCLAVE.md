@@ -112,6 +112,9 @@ Separate from BLACK. Shown as a **blue checkmark** next to the name (trusted). E
 | `/login` | Email + OAuth sign-in |
 | `/onboarding` | Profile setup (highlights missing fields) |
 | `/discover` | The Room — For you / Nearby match cards |
+| `/events` | Events & conventions — curated professional gatherings |
+| `/events/[id]` | Event detail, RSVP, related rooms, people attending |
+| `/admin/events` | Create / edit / publish events (ADMIN_SECRET + local overlay) |
 | `/circle` | Incoming connects + booked reservations |
 | `/chats` | People list (left) + open thread (right) |
 | `/profile` | Your card, Plans (BLACK · Free), levels |
@@ -185,6 +188,8 @@ See [MISSING.md](./MISSING.md). Big ones: email verify + password reset links, c
 | Plans (BLACK · Free) | `components/PlansSection.tsx` |
 | BLACK CONNECTION checkmark | `components/BlackConnectionBadge.tsx` |
 | Discover cards | `components/MatchCard.tsx` |
+| Events catalog | `lib/events.ts`, `lib/eventStore.ts` |
+| Event UI | `components/events/*`, `app/events/*` |
 | Signup missing fields | `components/ProfileForm.tsx` |
 | BLACK rules | `lib/black.ts` |
 | Intro reach | `lib/plans.ts` (`canIntroduceToTier`) |
