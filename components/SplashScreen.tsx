@@ -33,8 +33,8 @@ function markSeen() {
 }
 
 /**
- * First-open loading seal — INTERLINK appears letter by letter,
- * then a sharp visual snap at the end. No sound. (?splash=1 to replay)
+ * Loading seal — smooth letter reveal, then one clean sharp snap at the end.
+ * No sound. Replay with ?splash=1
  */
 export default function SplashScreen() {
   const [visible, setVisible] = useState(false);
@@ -95,14 +95,14 @@ export default function SplashScreen() {
       );
     });
 
-    const finaleAt = START_MS + LETTERS.length * LETTER_MS + 360;
+    const finaleAt = START_MS + LETTERS.length * LETTER_MS + 280;
     timers.push(
       window.setTimeout(() => {
         setFinale(true);
         setSnap(true);
       }, finaleAt)
     );
-    timers.push(window.setTimeout(() => setSnap(false), finaleAt + 420));
+    timers.push(window.setTimeout(() => setSnap(false), finaleAt + 320));
     timers.push(window.setTimeout(() => setLeaving(true), finaleAt + FINAL_HOLD_MS));
     timers.push(window.setTimeout(finish, finaleAt + FINAL_HOLD_MS + 900));
     timers.push(window.setTimeout(finish, 14000));
@@ -119,7 +119,7 @@ export default function SplashScreen() {
     <div
       className={`mp-splash fixed inset-0 z-[200] flex flex-col items-center justify-center overflow-hidden bg-ink ${
         leaving ? "mp-splash-out" : ""
-      } ${finale ? "mp-splash-finale" : ""} ${snap ? "mp-splash-snap" : ""}`}
+      } ${finale ? "mp-splash-finale" : ""}`}
       role="status"
       aria-live="polite"
       aria-label="Loading Interlink"
@@ -140,13 +140,6 @@ export default function SplashScreen() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_10%,#050505_78%)]" />
         <div className="mp-splash-grain absolute inset-0 opacity-[0.06]" />
         <div className="mp-splash-vignette absolute inset-0" />
-        {snap ? (
-          <div className="mp-splash-click-burst absolute left-1/2 top-[46%] -translate-x-1/2 -translate-y-1/2">
-            <span />
-            <span />
-            <span />
-          </div>
-        ) : null}
       </div>
 
       <div className="mp-splash-seal relative flex flex-col items-center px-6 text-center sm:px-8">
@@ -161,24 +154,21 @@ export default function SplashScreen() {
 
         <h1
           className={`mp-splash-type relative font-display text-[clamp(2.1rem,9vw,4.75rem)] font-semibold leading-[0.92] tracking-[0.14em] text-accent ${
-            finale ? "mp-splash-type--locked" : ""
-          } ${snap ? "mp-splash-type--snap" : ""}`}
+            snap ? "mp-splash-type--snap" : ""
+          }`}
         >
           {LETTERS.map((ch, i) => (
             <span
               key={`${ch}-${i}`}
               className={`mp-splash-letter ${i < shown ? "mp-splash-letter--in" : ""}`}
-              style={i < shown ? { animationDelay: "0ms" } : undefined}
               aria-hidden={i >= shown}
             >
               {ch}
             </span>
           ))}
           <span className="sr-only">{BRAND}</span>
+          {snap ? <span className="mp-splash-snap-ring" aria-hidden /> : null}
         </h1>
-
-        {snap ? <span className="mp-splash-seal-flash" aria-hidden /> : null}
-        {snap ? <span className="mp-splash-snap-ring" aria-hidden /> : null}
 
         <span
           className={`mp-splash-line mt-8 h-px w-32 origin-center bg-gradient-to-r from-transparent via-accent/90 to-transparent ${
