@@ -919,42 +919,37 @@ html.mp-boot-splash body::before {
   overflow: visible;
 }
 .mp-splash-letter--in {
-  animation: splashLetterIn 0.58s cubic-bezier(0.16, 1, 0.3, 1) both;
+  opacity: 1;
+  filter: blur(0);
+  animation: splashLetterClickIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 .mp-splash-letter--hit {
-  animation: splashLetterHit 0.22s cubic-bezier(0.2, 0.9, 0.25, 1) both;
+  /* visual press handled by splashLetterClickIn + cursor/ring */
 }
-@keyframes splashLetterIn {
+@keyframes splashLetterClickIn {
   0% {
     opacity: 0;
-    transform: translateY(0.35em) scale(0.82);
-    filter: blur(2.5px);
+    transform: translateY(0.32em) scale(0.8);
+    filter: blur(2px);
     text-shadow: 0 0 0 transparent;
   }
-  42% {
+  28% {
     opacity: 1;
-    transform: translateY(-0.04em) scale(1.045);
+    transform: translateY(0.1em) scale(0.84);
     filter: blur(0);
-    text-shadow: 0 0 18px rgba(212, 196, 168, 0.4);
+    text-shadow: 0 0 0 transparent;
+  }
+  55% {
+    opacity: 1;
+    transform: translateY(0.08em) scale(0.9);
+    filter: blur(0);
+    text-shadow: 0 0 12px rgba(239, 230, 214, 0.45);
   }
   100% {
     opacity: 1;
     transform: translateY(0) scale(1);
     filter: blur(0);
     text-shadow: 0 0 0 transparent;
-  }
-}
-@keyframes splashLetterHit {
-  0% {
-    transform: scale(1);
-  }
-  35% {
-    transform: scale(0.86) translateY(0.06em);
-    text-shadow: 0 0 0 transparent;
-  }
-  100% {
-    transform: scale(1) translateY(0);
-    text-shadow: 0 0 14px rgba(239, 230, 214, 0.35);
   }
 }
 .mp-splash-letter-spark {
@@ -983,15 +978,15 @@ html.mp-boot-splash body::before {
 /* Visible mouse cursor that clicks each letter */
 .mp-splash-cursor {
   position: absolute;
-  left: 58%;
-  top: 62%;
-  z-index: 5;
-  width: 28px;
-  height: 28px;
-  transform: translate(-10%, -10%) scale(1);
-  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.55));
+  left: 55%;
+  top: 48%;
+  z-index: 8;
+  width: 36px;
+  height: 36px;
+  transform: translate(-12%, -12%) scale(1);
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.7));
   pointer-events: none;
-  animation: splashCursorIn 0.12s ease-out both;
+  animation: splashCursorIn 0.14s ease-out both;
 }
 .mp-splash-cursor svg {
   display: block;
