@@ -899,7 +899,7 @@ html.mp-boot-splash body::before {
   animation: splashWord 1.15s cubic-bezier(0.22, 1, 0.36, 1) 0.4s both;
 }
 
-/* Letter-by-letter Interlink type-in */
+/* Letter-by-letter Interlink type-in (smooth, no cursor/sound) */
 .mp-splash-type {
   display: flex;
   flex-wrap: wrap;
@@ -912,200 +912,125 @@ html.mp-boot-splash body::before {
   position: relative;
   display: inline-block;
   opacity: 0;
-  transform: translateY(0.35em) scale(0.82);
-  filter: blur(2.5px);
-  text-shadow: none;
+  transform: translateY(0.28em);
+  filter: blur(3px);
   will-change: transform, opacity, filter;
-  overflow: visible;
 }
 .mp-splash-letter--in {
   opacity: 1;
   filter: blur(0);
-  animation: splashLetterClickIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: splashLetterIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
-.mp-splash-letter--hit {
-  /* visual press handled by splashLetterClickIn + cursor/ring */
-}
-@keyframes splashLetterClickIn {
+@keyframes splashLetterIn {
   0% {
     opacity: 0;
-    transform: translateY(0.32em) scale(0.8);
-    filter: blur(2px);
-    text-shadow: 0 0 0 transparent;
-  }
-  28% {
-    opacity: 1;
-    transform: translateY(0.1em) scale(0.84);
-    filter: blur(0);
-    text-shadow: 0 0 0 transparent;
-  }
-  55% {
-    opacity: 1;
-    transform: translateY(0.08em) scale(0.9);
-    filter: blur(0);
-    text-shadow: 0 0 12px rgba(239, 230, 214, 0.45);
+    transform: translateY(0.28em);
+    filter: blur(3px);
   }
   100% {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
     filter: blur(0);
-    text-shadow: 0 0 0 transparent;
-  }
-}
-.mp-splash-letter-spark {
-  position: absolute;
-  left: 50%;
-  top: 58%;
-  width: 6px;
-  height: 6px;
-  margin: -3px 0 0 -3px;
-  border-radius: 50%;
-  background: radial-gradient(circle, #efe6d6 0%, rgba(212, 196, 168, 0.18) 50%, transparent 72%);
-  animation: splashLetterSpark 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
-  pointer-events: none;
-}
-@keyframes splashLetterSpark {
-  0% {
-    opacity: 0.9;
-    transform: scale(0.35);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(2.6);
   }
 }
 
-/* Visible mouse cursor that clicks each letter */
-.mp-splash-cursor {
-  position: absolute;
-  left: 55%;
-  top: 48%;
-  z-index: 8;
-  width: 36px;
-  height: 36px;
-  transform: translate(-12%, -12%) scale(1);
-  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.7));
-  pointer-events: none;
-  animation: splashCursorIn 0.14s ease-out both;
+/* Final sharp visual “click” / seal snap */
+.mp-splash-type--locked {
+  animation: splashTypeSettle 1s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
-.mp-splash-cursor svg {
-  display: block;
+.mp-splash-type--snap {
+  animation: splashTypeSnap 0.38s cubic-bezier(0.15, 0.95, 0.25, 1) both;
 }
-.mp-splash-cursor--press {
-  animation: splashCursorPress 0.2s cubic-bezier(0.2, 0.85, 0.25, 1) both;
-}
-.mp-splash-cursor-ripple {
-  position: absolute;
-  left: 4px;
-  top: 4px;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  border: 2px solid rgba(239, 230, 214, 0.95);
-  opacity: 0;
-  pointer-events: none;
-}
-.mp-splash-cursor--press .mp-splash-cursor-ripple {
-  animation: splashCursorRipple 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-@keyframes splashCursorIn {
+@keyframes splashTypeSettle {
   from {
-    opacity: 0;
-    transform: translate(-10%, -35%) scale(1.15);
+    filter: brightness(1.08);
   }
   to {
-    opacity: 1;
-    transform: translate(-10%, -10%) scale(1);
+    filter: brightness(1);
   }
 }
-@keyframes splashCursorPress {
+@keyframes splashTypeSnap {
   0% {
-    transform: translate(-10%, -18%) scale(1.08);
+    transform: scale(1);
+    filter: brightness(1);
+    letter-spacing: 0.14em;
   }
-  40% {
-    transform: translate(-10%, 6%) scale(0.86);
-  }
-  100% {
-    transform: translate(-10%, -4%) scale(1);
-  }
-}
-@keyframes splashCursorRipple {
-  0% {
-    opacity: 1;
-    transform: scale(0.35);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(2.8);
-  }
-}
-.mp-splash-hit-ring {
-  position: absolute;
-  left: 50%;
-  top: 55%;
-  width: 1.4em;
-  height: 1.4em;
-  margin: -0.7em 0 0 -0.7em;
-  border-radius: 50%;
-  border: 1.5px solid rgba(239, 230, 214, 0.85);
-  animation: splashHitRing 0.34s cubic-bezier(0.16, 1, 0.3, 1) both;
-  pointer-events: none;
-}
-@keyframes splashHitRing {
-  0% {
-    opacity: 1;
-    transform: scale(0.25);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(1.7);
-  }
-}
-.mp-splash-finale-cursor {
-  position: absolute;
-  left: 50%;
-  top: 55%;
-  z-index: 6;
-  transform: translate(-20%, -10%);
-  pointer-events: none;
-}
-.mp-splash-type--locked {
-  animation: splashTypeLock 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-@keyframes splashTypeLock {
-  0% {
-    filter: brightness(1.45);
-    transform: scale(1.035);
+  18% {
+    transform: scale(0.965);
+    filter: brightness(1.55);
+    letter-spacing: 0.1em;
   }
   55% {
-    filter: brightness(1.12);
-    transform: scale(0.992);
+    transform: scale(1.025);
+    filter: brightness(1.2);
+    letter-spacing: 0.16em;
   }
   100% {
-    filter: brightness(1);
     transform: scale(1);
+    filter: brightness(1);
+    letter-spacing: 0.14em;
+  }
+}
+.mp-splash-snap .mp-splash-glow {
+  animation: splashSnapGlow 0.45s ease-out both;
+}
+@keyframes splashSnapGlow {
+  0% {
+    opacity: 0.5;
+    transform: translate(-50%, -50%) scale(0.92);
+  }
+  40% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.18);
+  }
+  100% {
+    opacity: 0.7;
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+}
+.mp-splash-snap-ring {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: 6rem;
+  height: 6rem;
+  margin: -3rem 0 0 -3rem;
+  border-radius: 50%;
+  border: 1.5px solid rgba(239, 230, 214, 0.9);
+  box-shadow: 0 0 24px rgba(212, 196, 168, 0.35);
+  animation: splashSnapRing 0.55s cubic-bezier(0.12, 0.9, 0.2, 1) both;
+  pointer-events: none;
+}
+@keyframes splashSnapRing {
+  0% {
+    opacity: 1;
+    transform: scale(0.15);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(3.6);
   }
 }
 .mp-splash-seal-flash {
   position: absolute;
   left: 50%;
   top: 46%;
-  width: 9rem;
-  height: 9rem;
-  margin: -4.5rem 0 0 -4.5rem;
+  width: 10rem;
+  height: 10rem;
+  margin: -5rem 0 0 -5rem;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(239, 230, 214, 0.5) 0%, transparent 68%);
-  animation: splashSealFlash 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+  background: radial-gradient(circle, rgba(239, 230, 214, 0.55) 0%, transparent 65%);
+  animation: splashSealFlash 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
   pointer-events: none;
 }
 @keyframes splashSealFlash {
   0% {
-    opacity: 0.95;
-    transform: scale(0.28);
+    opacity: 1;
+    transform: scale(0.2);
   }
   100% {
     opacity: 0;
-    transform: scale(2.8);
+    transform: scale(2.6);
   }
 }
 .mp-splash-click-burst {
@@ -1121,25 +1046,25 @@ html.mp-boot-splash body::before {
   height: 4.5rem;
   margin: -2.25rem 0 0 -2.25rem;
   border-radius: 50%;
-  border: 1.5px solid rgba(212, 196, 168, 0.65);
-  animation: splashClickRing 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+  border: 1.5px solid rgba(212, 196, 168, 0.7);
+  animation: splashClickRing 0.7s cubic-bezier(0.12, 0.9, 0.2, 1) both;
 }
 .mp-splash-click-burst span:nth-child(2) {
-  animation-delay: 0.08s;
-  border-color: rgba(239, 230, 214, 0.4);
+  animation-delay: 0.05s;
+  border-color: rgba(239, 230, 214, 0.45);
 }
 .mp-splash-click-burst span:nth-child(3) {
-  animation-delay: 0.16s;
-  border-color: rgba(212, 196, 168, 0.22);
+  animation-delay: 0.1s;
+  border-color: rgba(212, 196, 168, 0.25);
 }
 @keyframes splashClickRing {
   0% {
     opacity: 1;
-    transform: scale(0.2);
+    transform: scale(0.15);
   }
   100% {
     opacity: 0;
-    transform: scale(5.4);
+    transform: scale(5.8);
   }
 }
 .mp-splash-finale .mp-splash-glow {
@@ -1147,10 +1072,10 @@ html.mp-boot-splash body::before {
   opacity: 1;
 }
 .mp-splash-line--show {
-  animation: splashLine 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: splashLine 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 .mp-splash-tag--show {
-  animation: splashTag 0.7s ease-out both;
+  animation: splashTag 0.85s ease-out both;
 }
 .mp-splash-bar-fill {
   transform-origin: left center;
@@ -1265,13 +1190,9 @@ html.mp-boot-splash body::before {
   .mp-splash-word,
   .mp-splash-letter,
   .mp-splash-letter--in,
-  .mp-splash-letter--hit,
-  .mp-splash-letter-spark,
-  .mp-splash-cursor,
-  .mp-splash-cursor--press,
-  .mp-splash-cursor-ripple,
-  .mp-splash-hit-ring,
   .mp-splash-type--locked,
+  .mp-splash-type--snap,
+  .mp-splash-snap-ring,
   .mp-splash-seal-flash,
   .mp-splash-click-burst span,
   .mp-splash-tag,
