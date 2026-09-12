@@ -102,7 +102,7 @@ export default function ChatOverflowMenu({
       window.removeEventListener("scroll", onReposition, true);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, isGroup]);
+  }, [open, isGroup, compact]);
 
   useEffect(() => {
     if (!open) return;
