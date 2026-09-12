@@ -562,7 +562,7 @@ export default function ChatThreadPanel({ chatId, embedded = false, onBack }: Pr
               <button
                 type="submit"
                 disabled={!text.trim()}
-                className="rounded-sm bg-ivory px-5 py-2.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink transition enabled:hover:brightness-110 disabled:opacity-40 sm:px-6"
+                className="rounded-lg bg-ivory px-5 py-2.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink transition enabled:hover:brightness-110 disabled:opacity-40 sm:px-6"
               >
                 Send
               </button>

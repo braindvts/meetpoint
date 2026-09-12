@@ -263,7 +263,7 @@ export default function BookingPaymentSheet({
                 <button
                   type="submit"
                   disabled={!cardOk || paying}
-                  className="mp-btn-lux mt-1 min-h-[52px] w-full rounded-sm bg-ivory py-3.5 text-[17px] font-semibold text-ink enabled:active:scale-[0.98] disabled:opacity-40"
+                  className="mp-btn-lux mt-1 min-h-[52px] w-full rounded-lg bg-ivory py-3.5 text-[17px] font-semibold text-ink enabled:active:scale-[0.98] disabled:opacity-40"
                 >
                   {paying ? "Processing…" : `Pay ${amount}`}
                 </button>

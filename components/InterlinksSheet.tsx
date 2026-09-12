@@ -90,7 +90,7 @@ export default function InterlinksSheet({ open, onClose, people, onMessage }: Pr
                   <button
                     type="button"
                     onClick={() => onMessage(p)}
-                    className="shrink-0 rounded-sm border border-accent/35 px-3 py-2 text-[11px] font-semibold text-accent transition hover:border-accent/60 hover:bg-accent/10"
+                    className="shrink-0 rounded-lg border border-accent/35 px-3 py-2 text-[11px] font-semibold text-accent transition hover:border-accent/60 hover:bg-accent/10"
                   >
                     Message
                   </button>

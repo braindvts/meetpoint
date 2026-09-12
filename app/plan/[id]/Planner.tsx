@@ -119,7 +119,7 @@ export default function Planner({ peerId }: { peerId: string }) {
           </div>
           <Link
             href="/circle"
-            className="mt-10 inline-block rounded-sm bg-ivory px-8 py-3.5 text-sm font-semibold text-ink transition hover:brightness-110"
+            className="mt-10 inline-block rounded-lg bg-ivory px-8 py-3.5 text-sm font-semibold text-ink transition hover:brightness-110"
           >
             View your reservations
           </Link>
@@ -261,7 +261,7 @@ export default function Planner({ peerId }: { peerId: string }) {
           <button
             onClick={confirm}
             disabled={!restaurantId || !date}
-            className="rounded-sm bg-ivory px-10 py-3.5 text-sm font-semibold tracking-wide text-ink shadow-[0_8px_28px_rgba(255,255,255,0.12)] transition enabled:hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
+            className="rounded-lg bg-ivory px-10 py-3.5 text-sm font-semibold tracking-wide text-ink shadow-[0_8px_28px_rgba(255,255,255,0.12)] transition enabled:hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
           >
             Confirm the table
           </button>

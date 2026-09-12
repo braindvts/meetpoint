@@ -62,7 +62,7 @@ export default function FoodSuggestPopup({
             <button
               type="button"
               onClick={onExpand}
-              className="mp-btn-lux mt-4 w-full rounded-sm bg-ivory py-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-ink hover:brightness-110"
+              className="mp-btn-lux mt-4 w-full rounded-lg bg-ivory py-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-ink hover:brightness-110"
             >
               See table ideas
             </button>
@@ -153,7 +153,7 @@ export default function FoodSuggestPopup({
                         onCollapse();
                         onDismissHint();
                       }}
-                      className="mt-2.5 w-full rounded-sm bg-ivory py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-ink"
+                      className="mt-2.5 w-full rounded-lg bg-ivory py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-ink"
                     >
                       Propose table
                     </button>

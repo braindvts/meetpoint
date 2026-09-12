@@ -61,8 +61,8 @@ function WorkBlock({ work, owner = false }: { work: PersonWork; owner?: boolean 
     </>
   );
   const cls = owner
-    ? "block rounded-sm border border-accent/35 bg-accent/[0.08] px-3 py-3"
-    : "block rounded-sm border border-accent/15 bg-ink/40 px-3 py-2.5";
+    ? "block rounded-lg border border-accent/35 bg-accent/[0.08] px-3 py-3"
+    : "block rounded-lg border border-accent/15 bg-ink/40 px-3 py-2.5";
   return work.url ? (
     <a href={work.url} target="_blank" rel="noopener noreferrer" className={cls}>
       {inner}
@@ -187,7 +187,7 @@ export default function PersonProfileSheet({
         style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
       >
         <div
-          className={`relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-t-lg border border-b-0 sm:rounded-md sm:border-b ${
+          className={`relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-t-2xl border border-b-0 sm:rounded-2xl sm:border-b ${
             black
               ? "black-profile-shell"
               : "border-white/10 bg-[#0a0a0a]"
@@ -208,7 +208,7 @@ export default function PersonProfileSheet({
           <button
             type="button"
             onClick={onClose}
-            className="absolute right-3 top-3 z-20 rounded-sm border border-white/15 bg-black/70 px-2.5 py-1 text-[11px] uppercase tracking-[0.12em] text-white/85 sm:right-4 sm:top-4"
+            className="absolute right-3 top-3 z-20 rounded-lg border border-white/15 bg-black/70 px-2.5 py-1 text-[11px] uppercase tracking-[0.12em] text-white/85 sm:right-4 sm:top-4"
           >
             Close
           </button>
@@ -374,7 +374,7 @@ export default function PersonProfileSheet({
                     href={person.linkedInUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-between gap-3 rounded-sm border border-accent/20 bg-ink/40 px-3 py-2.5 text-[13px] text-ivory"
+                    className="flex items-center justify-between gap-3 rounded-lg border border-accent/20 bg-ink/40 px-3 py-2.5 text-[13px] text-ivory"
                   >
                     <span className="font-medium">LinkedIn</span>
                     <span className="truncate text-[11px] text-muted">
@@ -387,7 +387,7 @@ export default function PersonProfileSheet({
                     href={person.websiteUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-between gap-3 rounded-sm border border-accent/20 bg-ink/40 px-3 py-2.5 text-[13px] text-ivory"
+                    className="flex items-center justify-between gap-3 rounded-lg border border-accent/20 bg-ink/40 px-3 py-2.5 text-[13px] text-ivory"
                   >
                     <span className="font-medium">Website</span>
                     <span className="truncate text-[11px] text-muted">
@@ -400,7 +400,7 @@ export default function PersonProfileSheet({
                     href={person.portfolioUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-between gap-3 rounded-sm border border-accent/20 bg-ink/40 px-3 py-2.5 text-[13px] text-ivory"
+                    className="flex items-center justify-between gap-3 rounded-lg border border-accent/20 bg-ink/40 px-3 py-2.5 text-[13px] text-ivory"
                   >
                     <span className="font-medium">Portfolio</span>
                     <span className="truncate text-[11px] text-muted">
@@ -425,7 +425,7 @@ export default function PersonProfileSheet({
               <Link
                 href={editHref}
                 onClick={onClose}
-                className="block w-full rounded-sm bg-ivory py-3 text-center text-[13px] font-semibold text-ink"
+                className="block w-full rounded-lg bg-ivory py-3 text-center text-[13px] font-semibold text-ink"
               >
                 Edit profile
               </Link>
@@ -440,7 +440,7 @@ export default function PersonProfileSheet({
                       onChat(person.id);
                       onClose();
                     }}
-                    className="mp-btn-lux w-full rounded-sm bg-ivory py-3 text-[13px] font-semibold text-ink"
+                    className="mp-btn-lux w-full rounded-lg bg-ivory py-3 text-[13px] font-semibold text-ink"
                   >
                     Chat
                   </button>
@@ -465,7 +465,7 @@ export default function PersonProfileSheet({
                     onConnect(person.id);
                     onClose();
                   }}
-                  className={`w-full rounded-sm py-3 text-[13px] font-semibold ${
+                  className={`w-full rounded-lg py-3 text-[13px] font-semibold ${
                     canConnect
                       ? "mp-btn-lux text-ink"
                       : "border border-accent/40 text-accent"

@@ -90,7 +90,7 @@ function Section({
               {title}
             </h2>
             {missing && (
-              <span className="rounded-sm border border-accent/40 bg-accent/10 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.14em] text-accent-2">
+              <span className="rounded-lg border border-accent/40 bg-accent/10 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.14em] text-accent-2">
                 Needed
               </span>
             )}
@@ -604,7 +604,7 @@ export default function ProfileForm({
               <button
                 type="button"
                 onClick={addCustomTag}
-                className="rounded-sm border border-dashed border-accent/45 px-2 py-1 text-[11px] text-accent-2 transition hover:bg-accent/10 sm:px-3 sm:py-1.5 sm:text-sm"
+                className="rounded-lg border border-dashed border-accent/45 px-2 py-1 text-[11px] text-accent-2 transition hover:bg-accent/10 sm:px-3 sm:py-1.5 sm:text-sm"
               >
                 + Add “{query}”
               </button>
@@ -716,7 +716,7 @@ export default function ProfileForm({
           <div
             className={`space-y-3 ${
               highlightVerify || fieldErrors.verification
-                ? "rounded-sm border border-accent/45 bg-accent/[0.05] p-2.5 sm:p-3"
+                ? "rounded-lg border border-accent/45 bg-accent/[0.05] p-2.5 sm:p-3"
                 : ""
             }`}
           >
@@ -831,7 +831,7 @@ export default function ProfileForm({
 
           <div>
             <span className={labelCls}>Travel range</span>
-            <div className="mt-1.5 grid grid-cols-3 gap-px overflow-hidden rounded-sm border border-line bg-line sm:mt-3">
+            <div className="mt-1.5 grid grid-cols-3 gap-px overflow-hidden rounded-lg border border-line bg-line sm:mt-3">
               {TRAVEL_OPTIONS.map((o) => (
                 <button
                   key={o.value}
@@ -928,7 +928,7 @@ export default function ProfileForm({
       </Section>
 
       {error && (
-        <p className="rounded-sm border border-ivory/25 bg-ivory/5 px-3 py-2 text-[11px] text-ivory sm:px-4 sm:py-3 sm:text-sm">
+        <p className="rounded-lg border border-ivory/25 bg-ivory/5 px-3 py-2 text-[11px] text-ivory sm:px-4 sm:py-3 sm:text-sm">
           {error}
         </p>
       )}
@@ -940,7 +940,7 @@ export default function ProfileForm({
         <button
           type="submit"
           disabled={saving}
-          className="mp-btn-lux rounded-sm bg-ivory px-10 py-3.5 text-[13px] font-semibold text-ink disabled:opacity-50"
+          className="mp-btn-lux rounded-lg bg-ivory px-10 py-3.5 text-[13px] font-semibold text-ink disabled:opacity-50"
         >
           {saving
             ? "Saving…"

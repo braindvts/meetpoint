@@ -52,7 +52,7 @@ const emptyForm = (): Partial<InterlinkEvent> => ({
 });
 
 const field =
-  "w-full rounded-sm border border-accent/20 bg-ink/60 px-3 py-2.5 text-sm text-ivory outline-none focus:border-accent/45";
+  "w-full rounded-lg border border-accent/20 bg-ink/60 px-3 py-2.5 text-sm text-ivory outline-none focus:border-accent/45";
 
 /** Local admin CRUD for events — unlock with ADMIN_SECRET (same as other admin tools). */
 export default function AdminEventsPage() {
@@ -204,7 +204,7 @@ export default function AdminEventsPage() {
         <button
           type="button"
           onClick={() => void unlock()}
-          className="mp-btn-lux w-full rounded-sm bg-ivory py-3 text-[12px] font-semibold text-ink"
+          className="mp-btn-lux w-full rounded-lg bg-ivory py-3 text-[12px] font-semibold text-ink"
         >
           Unlock
         </button>
@@ -225,7 +225,7 @@ export default function AdminEventsPage() {
         <button
           type="button"
           onClick={startCreate}
-          className="rounded-sm border border-accent/30 px-4 py-2 text-[12px] font-medium text-accent"
+          className="rounded-lg border border-accent/30 px-4 py-2 text-[12px] font-medium text-accent"
         >
           New event
         </button>
@@ -455,7 +455,7 @@ export default function AdminEventsPage() {
         <button
           type="button"
           onClick={save}
-          className="mp-btn-lux mt-2 rounded-sm bg-ivory px-6 py-3 text-[12px] font-semibold text-ink"
+          className="mp-btn-lux mt-2 rounded-lg bg-ivory px-6 py-3 text-[12px] font-semibold text-ink"
         >
           {editingId ? "Save changes" : "Create event"}
         </button>

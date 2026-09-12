@@ -152,7 +152,7 @@ export default function BlackInvitePanel({ chatId, peers }: Props) {
               type="button"
               disabled={busy}
               onClick={() => answer(incoming.id, "accept")}
-              className="flex-1 rounded-sm bg-ivory py-2.5 text-[12px] font-semibold text-ink disabled:opacity-40"
+              className="flex-1 rounded-lg bg-ivory py-2.5 text-[12px] font-semibold text-ink disabled:opacity-40"
             >
               Accept
             </button>
@@ -160,7 +160,7 @@ export default function BlackInvitePanel({ chatId, peers }: Props) {
               type="button"
               disabled={busy}
               onClick={() => answer(incoming.id, "decline")}
-              className="flex-1 rounded-sm border border-white/18 py-2.5 text-[12px] font-medium text-ivory/70 disabled:opacity-40"
+              className="flex-1 rounded-lg border border-white/18 py-2.5 text-[12px] font-medium text-ivory/70 disabled:opacity-40"
             >
               Decline
             </button>
@@ -184,7 +184,7 @@ export default function BlackInvitePanel({ chatId, peers }: Props) {
               type="button"
               disabled={busy}
               onClick={() => raise("connection")}
-              className="rounded-sm bg-ivory px-4 py-2.5 text-[12px] font-semibold text-ink disabled:opacity-40"
+              className="rounded-lg bg-ivory px-4 py-2.5 text-[12px] font-semibold text-ink disabled:opacity-40"
             >
               {mine ? "Extend BLACK connection" : "Request BLACK connection"}
             </button>
@@ -192,7 +192,7 @@ export default function BlackInvitePanel({ chatId, peers }: Props) {
               type="button"
               disabled={busy}
               onClick={() => raise("meeting")}
-              className="rounded-sm border border-accent/40 px-4 py-2.5 text-[12px] font-medium text-accent disabled:opacity-40"
+              className="rounded-lg border border-accent/40 px-4 py-2.5 text-[12px] font-medium text-accent disabled:opacity-40"
             >
               Request business meeting
             </button>

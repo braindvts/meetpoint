@@ -11,17 +11,17 @@ export default function SkeletonCard() {
         </div>
       </div>
       <div className="space-y-2.5 border-t border-white/[0.07] px-4 py-3.5">
-        <div className="h-2.5 w-full rounded-sm bg-white/[0.04]" />
+        <div className="h-2.5 w-full rounded-lg bg-white/[0.04]" />
         <div className="h-2.5 w-11/12 rounded-sm bg-white/[0.04]" />
         <div className="h-2.5 w-3/4 rounded-sm bg-white/[0.04]" />
         <div className="flex gap-2 pt-1">
-          <div className="h-6 w-24 bg-white/[0.04]" />
-          <div className="h-6 w-20 bg-white/[0.04]" />
+          <div className="h-6 w-24 rounded-md bg-white/[0.04]" />
+          <div className="h-6 w-20 rounded-md bg-white/[0.04]" />
         </div>
       </div>
       <div className="flex gap-3 border-t border-white/[0.07] px-4 py-3">
-        <div className="h-9 w-16 rounded-sm bg-white/[0.05]" />
-        <div className="h-9 w-20 rounded-sm bg-white/[0.08]" />
+        <div className="h-10 w-10 rounded-full bg-white/[0.05]" />
+        <div className="h-10 w-10 rounded-full bg-white/[0.08]" />
       </div>
     </div>
   );

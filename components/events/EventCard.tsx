@@ -32,7 +32,7 @@ export default function EventCard({
 
   return (
     <article
-      className={`group relative overflow-hidden rounded-md border border-white/10 bg-[#0a0a0a] transition duration-300 hover:border-accent/35 ${
+      className={`group relative overflow-hidden rounded-2xl border border-white/10 bg-[#0a0a0a] transition duration-300 hover:border-accent/35 ${
         compact ? "" : "mp-reveal"
       }`}
     >
@@ -102,7 +102,7 @@ export default function EventCard({
       <div className="flex items-center gap-2 border-t border-accent/10 px-4 py-3 sm:px-5">
         <Link
           href={`/events/${event.slug}`}
-          className="mp-btn-lux inline-flex flex-1 items-center justify-center rounded-sm bg-ivory px-4 py-2.5 text-[11px] font-semibold text-ink"
+          className="mp-btn-lux inline-flex flex-1 items-center justify-center rounded-lg bg-ivory px-4 py-2.5 text-[11px] font-semibold text-ink"
         >
           View Event
         </Link>

@@ -18,7 +18,7 @@ export default function EmptyState({
   onAction,
 }: Props) {
   return (
-    <div className="mp-reveal relative border border-white/[0.08] bg-[#0a0a0a] px-6 py-16 text-center">
+    <div className="mp-reveal relative rounded-xl border border-white/[0.08] bg-[#0a0a0a] px-6 py-16 text-center">
       <div className="relative">
         <span className="mx-auto mb-6 block h-px w-10 bg-accent/40" />
         <p className="text-2xl font-medium tracking-tight text-ivory sm:text-3xl">

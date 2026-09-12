@@ -25,7 +25,7 @@ export default function DemoEnterButton({
       onClick={enter}
       className={
         className ||
-        "inline-flex w-full items-center justify-center rounded-sm border border-white/20 px-6 py-3.5 text-[13px] font-medium text-ivory/85 transition hover:border-accent/40 hover:text-accent"
+        "inline-flex w-full items-center justify-center rounded-lg border border-white/20 px-6 py-3.5 text-[13px] font-medium text-ivory/85 transition hover:border-accent/40 hover:text-accent"
       }
     >
       {label}

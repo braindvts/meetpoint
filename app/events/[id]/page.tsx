@@ -220,7 +220,7 @@ export default function EventDetailPage() {
                   }
                   refresh();
                 }}
-                className="mp-btn-lux inline-flex flex-1 items-center justify-center rounded-sm bg-ivory px-5 py-3.5 text-[12px] font-semibold text-ink"
+                className="mp-btn-lux inline-flex flex-1 items-center justify-center rounded-lg bg-ivory px-5 py-3.5 text-[12px] font-semibold text-ink"
               >
                 {myRsvp === "going" ? "Attending ✓" : "Attend / Register"}
               </button>
@@ -254,7 +254,7 @@ export default function EventDetailPage() {
                   href={event.registrationUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex flex-1 items-center justify-center rounded-sm border border-accent/25 px-5 py-3.5 text-[12px] font-medium text-ivory/90 transition hover:border-accent/50 sm:flex-none"
+                  className="inline-flex flex-1 items-center justify-center rounded-lg border border-accent/25 px-5 py-3.5 text-[12px] font-medium text-ivory/90 transition hover:border-accent/50 sm:flex-none"
                 >
                   External register
                 </a>

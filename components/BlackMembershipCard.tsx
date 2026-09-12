@@ -138,7 +138,7 @@ export default function BlackMembershipCard({
               type="button"
               disabled={!verified || busy !== null}
               onClick={() => buy("month")}
-              className="rounded-sm border border-accent/35 px-4 py-3 text-[12px] font-medium text-accent disabled:opacity-40"
+              className="rounded-lg border border-accent/35 px-4 py-3 text-[12px] font-medium text-accent disabled:opacity-40"
             >
               {busy === "month" ? "Opening…" : `Monthly · ${formatBlackPrice("month")}`}
             </button>
@@ -160,7 +160,7 @@ export default function BlackMembershipCard({
               type="button"
               disabled={!earnedReady || busy !== null}
               onClick={claimEarned}
-              className="mt-3 rounded-sm border border-accent/35 px-4 py-2.5 text-[12px] font-medium text-accent disabled:opacity-40"
+              className="mt-3 rounded-lg border border-accent/35 px-4 py-2.5 text-[12px] font-medium text-accent disabled:opacity-40"
             >
               {busy === "earned" ? "Checking…" : earnedReady ? "Claim earned BLACK" : "Not yet eligible"}
             </button>

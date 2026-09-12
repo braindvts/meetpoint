@@ -100,7 +100,7 @@ export default function GroupChatSettingsSheet({ open, chat, onClose, onSaved }:
               <button
                 type="button"
                 onClick={() => fileRef.current?.click()}
-                className="rounded-sm border border-accent/30 px-3 py-2 text-[11px] font-medium text-accent"
+                className="rounded-lg border border-accent/30 px-3 py-2 text-[11px] font-medium text-accent"
               >
                 Upload photo
               </button>
@@ -108,7 +108,7 @@ export default function GroupChatSettingsSheet({ open, chat, onClose, onSaved }:
                 <button
                   type="button"
                   onClick={() => setPhoto("")}
-                  className="rounded-sm border border-line px-3 py-2 text-[11px] font-medium text-muted"
+                  className="rounded-lg border border-line px-3 py-2 text-[11px] font-medium text-muted"
                 >
                   Remove
                 </button>
@@ -135,14 +135,14 @@ export default function GroupChatSettingsSheet({ open, chat, onClose, onSaved }:
               value={name}
               maxLength={80}
               onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-sm border border-accent/20 bg-ink/60 px-3 py-2.5 text-sm text-ivory outline-none focus:border-accent/45"
+              className="w-full rounded-lg border border-accent/20 bg-ink/60 px-3 py-2.5 text-sm text-ivory outline-none focus:border-accent/45"
             />
           </label>
 
           <button
             type="button"
             onClick={save}
-            className="mp-btn-lux w-full rounded-sm bg-ivory py-3 text-[12px] font-semibold text-ink"
+            className="mp-btn-lux w-full rounded-lg bg-ivory py-3 text-[12px] font-semibold text-ink"
           >
             Save
           </button>

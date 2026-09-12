@@ -36,13 +36,13 @@ const DATES: { id: EventDateWindow; label: string }[] = [
 ];
 
 const field =
-  "w-full rounded-sm border border-accent/20 bg-ink/60 px-3 py-2.5 text-sm text-ivory outline-none transition placeholder:text-muted/60 focus:border-accent/45";
+  "w-full rounded-lg border border-accent/20 bg-ink/60 px-3 py-2.5 text-sm text-ivory outline-none transition placeholder:text-muted/60 focus:border-accent/45";
 
 export default function EventFiltersBar({ value, onChange }: Props) {
   const set = (patch: Partial<EventFilters>) => onChange({ ...value, ...patch });
 
   return (
-    <div className="space-y-3 rounded-md border border-white/10 bg-[#0a0a0a]/80 p-3 sm:p-4">
+    <div className="space-y-3 rounded-2xl border border-white/10 bg-[#0a0a0a]/80 p-3 sm:p-4">
       <label className="block">
         <span className="sr-only">Search events</span>
         <input

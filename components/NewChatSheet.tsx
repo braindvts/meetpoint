@@ -116,7 +116,7 @@ export default function NewChatSheet({ open, onClose, people, onCreated }: Props
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search people you know…"
-              className="w-full rounded-sm border border-accent/20 bg-ink/60 px-3 py-2.5 text-sm text-ivory outline-none placeholder:text-muted/60 focus:border-accent/45"
+              className="w-full rounded-lg border border-accent/20 bg-ink/60 px-3 py-2.5 text-sm text-ivory outline-none placeholder:text-muted/60 focus:border-accent/45"
             />
           </label>
           <label className="mt-2 block">
@@ -128,7 +128,7 @@ export default function NewChatSheet({ open, onClose, people, onCreated }: Props
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Founders dinner"
-              className="w-full rounded-sm border border-accent/20 bg-ink/60 px-3 py-2.5 text-sm text-ivory outline-none placeholder:text-muted/60 focus:border-accent/45"
+              className="w-full rounded-lg border border-accent/20 bg-ink/60 px-3 py-2.5 text-sm text-ivory outline-none placeholder:text-muted/60 focus:border-accent/45"
             />
           </label>
         </div>
@@ -195,7 +195,7 @@ export default function NewChatSheet({ open, onClose, people, onCreated }: Props
             type="button"
             onClick={start}
             disabled={selected.length < 2}
-            className="mp-btn-lux w-full rounded-sm bg-ivory py-3 text-[12px] font-semibold text-ink disabled:opacity-40"
+            className="mp-btn-lux w-full rounded-lg bg-ivory py-3 text-[12px] font-semibold text-ink disabled:opacity-40"
           >
             {selected.length < 2
               ? "Select 2+ people"

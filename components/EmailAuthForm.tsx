@@ -162,7 +162,7 @@ export default function EmailAuthForm() {
       <button
         type="submit"
         disabled={busy}
-        className="mp-btn-lux w-full rounded-sm bg-ivory py-2.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink disabled:opacity-40"
+        className="mp-btn-lux w-full rounded-lg bg-ivory py-2.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink disabled:opacity-40"
       >
         {busy ? "Please wait…" : mode === "signup" ? "Create account" : "Sign in"}
       </button>

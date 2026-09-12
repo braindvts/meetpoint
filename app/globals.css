@@ -115,13 +115,13 @@ body:has([data-shot]) nextjs-portal {
 .mp-person-card {
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: #0a0a0a;
-  border-radius: 4px;
+  border-radius: 12px;
 }
 
 .mp-card-poster {
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: #0a0a0a;
-  border-radius: 4px;
+  border-radius: 12px;
 }
 
 .mp-panel {
@@ -634,11 +634,11 @@ svg {
   animation: tabUnderline 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-/* Primary CTA — flat surface, sharp corners, no sheen */
+/* Primary CTA — soft rectangle, not a pill */
 .mp-btn-lux {
   position: relative;
   overflow: hidden;
-  border-radius: 4px;
+  border-radius: 8px;
   background: var(--color-ivory) !important;
   color: var(--color-ink) !important;
   background-image: none !important;
@@ -1129,32 +1129,42 @@ html.mp-boot-splash body::before {
 .level-mark {
   position: relative;
   overflow: hidden;
-  border-radius: 0;
+  border-radius: 4px;
   isolation: isolate;
 }
 .level-mark-sheen {
-  display: none;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: linear-gradient(
+    125deg,
+    rgba(255, 255, 255, 0.14) 0%,
+    transparent 42%,
+    transparent 62%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
 }
 .level-mark-sheen--live::after {
   content: none;
 }
 
-/* Member — cool steel, flat */
+/* Member — cool steel */
 .level-mark--member {
   color: #e8eef6;
-  background: #6a7a8e;
+  background: linear-gradient(145deg, #8a9bb0 0%, #5c6d82 42%, #3a4656 100%);
   box-shadow:
     0 0 0 1px #2a3440,
-    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
 }
 
-/* Verified — flat champagne metal, no soft pill feel */
+/* Verified — champagne gold */
 .level-mark--verified {
   color: #1a1610;
-  background: #c4b496;
+  background: linear-gradient(145deg, #e8dcc8 0%, #c4b08e 45%, #9a8664 100%);
   box-shadow:
-    0 0 0 1px #6a5a40,
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    0 0 0 1px #5a4c36,
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 
 /* BLACK — solid black + thin bronze edge */
@@ -1176,7 +1186,7 @@ html.mp-boot-splash body::before {
   background: #000000 !important;
   isolation: isolate;
   border: 1px solid rgba(196, 180, 150, 0.28) !important;
-  border-radius: 6px !important;
+  border-radius: 12px !important;
   box-shadow: none;
 }
 .black-centurion::before {
@@ -1198,6 +1208,7 @@ html.mp-boot-splash body::before {
   background: #000000 !important;
   border: 1px solid rgba(196, 180, 150, 0.22) !important;
   box-shadow: 0 20px 48px rgba(0, 0, 0, 0.85);
+  border-radius: 16px;
 }
 
 @media (prefers-reduced-motion: reduce) {

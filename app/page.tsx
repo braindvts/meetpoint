@@ -19,7 +19,7 @@ export default function Landing() {
           </Link>
           <Link
             href="/login"
-            className="rounded-sm bg-ivory px-4 py-2 text-[12px] font-semibold tracking-wide text-ink"
+            className="rounded-lg bg-ivory px-4 py-2 text-[12px] font-semibold tracking-wide text-ink"
           >
             Get started
           </Link>
@@ -46,13 +46,13 @@ export default function Landing() {
           <div className="mp-reveal mp-reveal-delay-3 mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
             <Link
               href="/login"
-              className="inline-flex min-w-[12rem] items-center justify-center rounded-sm bg-ivory px-8 py-3.5 text-[12px] font-semibold tracking-wide text-ink"
+              className="inline-flex min-w-[12rem] items-center justify-center rounded-lg bg-ivory px-8 py-3.5 text-[12px] font-semibold tracking-wide text-ink"
             >
               Join on the web
             </Link>
             <Link
               href="/login"
-              className="inline-flex min-w-[12rem] items-center justify-center rounded-sm border border-white/20 px-8 py-3.5 text-[12px] font-medium tracking-wide text-ivory/80 transition hover:border-accent/40 hover:text-accent"
+              className="inline-flex min-w-[12rem] items-center justify-center rounded-lg border border-white/20 px-8 py-3.5 text-[12px] font-medium tracking-wide text-ivory/80 transition hover:border-accent/40 hover:text-accent"
             >
               Sign in
             </Link>
@@ -98,7 +98,7 @@ export default function Landing() {
           </p>
           <Link
             href="/login"
-            className="mt-8 inline-flex rounded-sm border border-accent/30 px-6 py-3 text-[12px] font-medium tracking-wide text-accent transition hover:bg-accent/5"
+            className="mt-8 inline-flex rounded-lg border border-accent/30 px-6 py-3 text-[12px] font-medium tracking-wide text-accent transition hover:bg-accent/5"
           >
             Sign in to browse Events
           </Link>
@@ -149,7 +149,7 @@ export default function Landing() {
           </h2>
           <Link
             href="/login"
-            className="inline-flex items-center justify-center rounded-sm bg-ivory px-8 py-3.5 text-[12px] font-semibold tracking-wide text-ink"
+            className="inline-flex items-center justify-center rounded-lg bg-ivory px-8 py-3.5 text-[12px] font-semibold tracking-wide text-ink"
           >
             Get started
           </Link>
