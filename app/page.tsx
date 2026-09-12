@@ -85,6 +85,27 @@ export default function Landing() {
       </section>
 
       <section className="border-t border-line/60 px-6 py-20">
+        <div className="mx-auto max-w-3xl text-center">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-accent">
+            Events &amp; conventions
+          </p>
+          <h2 className="mt-4 text-2xl font-semibold tracking-tight text-ivory sm:text-3xl">
+            Nearby rooms. Global stages.
+          </h2>
+          <p className="mx-auto mt-4 max-w-xl text-[15px] leading-relaxed text-muted">
+            See professional dinners, conferences, and conventions coming up in your
+            city — or across the world — then meet the people who will be there.
+          </p>
+          <Link
+            href="/login"
+            className="mt-8 inline-flex rounded-xl border border-accent/30 px-6 py-3 text-[12px] font-medium tracking-wide text-accent transition hover:bg-accent/5"
+          >
+            Sign in to browse Events
+          </Link>
+        </div>
+      </section>
+
+      <section className="border-t border-line/60 px-6 py-20">
         <div className="mx-auto max-w-4xl">
           <p className="text-center text-[10px] font-semibold uppercase tracking-[0.28em] text-accent">
             Levels

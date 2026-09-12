@@ -195,7 +195,11 @@ export default function DiscoverPage() {
             Discover
           </h1>
           <p className="mt-1 text-[13px] leading-snug text-ivory/60 md:mt-2">
-            Curated professionals. Meaningful connections.
+            Curated professionals. Meaningful connections.{" "}
+            <Link href="/events" className="text-accent underline-offset-4 hover:underline">
+              See upcoming events nearby & worldwide
+            </Link>
+            .
           </p>
           {myTier === 1 && (
             <button

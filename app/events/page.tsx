@@ -226,9 +226,59 @@ export default function EventsPage() {
 
         <div className="space-y-3">
           <p className="max-w-2xl text-sm leading-relaxed text-muted sm:text-[15px]">
-            Curated gatherings where Interlink members meet in person — dinners,
-            conferences, and conventions worth clearing your calendar for.
+            Upcoming dinners, conferences, and conventions — near you and across
+            the globe. Filter by city or browse worldwide rooms worth clearing
+            your calendar for.
           </p>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                const city = cityHint || "";
+                setFilters((f) => ({
+                  ...f,
+                  query: "",
+                  category: "all",
+                  industry: "all",
+                  format: "all",
+                  kind: "all",
+                  dateWindow: "all",
+                  city: city || f.city,
+                }));
+                document.getElementById("near-you")?.scrollIntoView({ behavior: "smooth" });
+              }}
+              className="rounded-full border border-accent/30 px-3.5 py-1.5 text-[11px] font-medium text-accent transition hover:border-accent/55 hover:bg-accent/10"
+            >
+              Near you{cityHint ? ` · ${cityHint}` : ""}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setFilters({
+                  query: "",
+                  category: "all",
+                  industry: "all",
+                  format: "all",
+                  kind: "all",
+                  city: "",
+                  dateWindow: "all",
+                });
+                document.getElementById("worldwide")?.scrollIntoView({ behavior: "smooth" });
+              }}
+              className="rounded-full border border-line px-3.5 py-1.5 text-[11px] font-medium text-muted transition hover:border-accent/40 hover:text-ivory"
+            >
+              Around the world
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                document.getElementById("conventions")?.scrollIntoView({ behavior: "smooth" })
+              }
+              className="rounded-full border border-line px-3.5 py-1.5 text-[11px] font-medium text-muted transition hover:border-accent/40 hover:text-ivory"
+            >
+              Conventions
+            </button>
+          </div>
           <EventFiltersBar value={filters} onChange={setFilters} />
         </div>
 
@@ -277,7 +327,7 @@ export default function EventsPage() {
               </Section>
             ) : null}
 
-            <Section title="Upcoming" subtitle="Soonest on the calendar.">
+            <Section title="Upcoming" id="worldwide" subtitle="Soonest on the calendar — cities worldwide.">
               <Grid>
                 {upcoming.map((e) => (
                   <EventCard key={e.id} {...cardProps(e)} />
@@ -294,11 +344,12 @@ export default function EventsPage() {
             </Section>
 
             <Section
+              id="near-you"
               title="Near you"
               subtitle={
                 cityHint
                   ? `Based on ${cityHint} — plus online rooms you can join from anywhere.`
-                  : "Online and in-person gatherings across the network."
+                  : "Online and in-person gatherings across the network. Set your city on Profile to prioritize nearby rooms."
               }
             >
               <Grid>
