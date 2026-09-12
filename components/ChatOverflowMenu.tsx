@@ -66,15 +66,15 @@ export default function ChatOverflowMenu({
     const spaceBelow = window.innerHeight - r.bottom;
     const openUp = spaceBelow < estimatedH + 12 && r.top > spaceBelow;
 
-    // List rows: open into the main pane (right of the trigger) so the menu
-    // isn’t cramped inside the narrow inbox rail.
+    // List rows: clear the inbox rail entirely, then open in the main pane.
     let left: number;
     if (compact) {
-      const rightSide = r.right + gap;
-      const fitsRight = rightSide + menuW <= window.innerWidth - 8;
-      left = fitsRight
-        ? rightSide
-        : Math.max(8, r.left - menuW - gap);
+      const rail = document.querySelector(".mp-chats-rail");
+      const railRight = rail?.getBoundingClientRect().right ?? 0;
+      left = Math.max(r.right + 8, railRight + 8);
+      if (left + menuW > window.innerWidth - 8) {
+        left = Math.max(8, Math.min(r.left, railRight) - menuW - 8);
+      }
     } else {
       left = Math.min(
         Math.max(8, r.right - menuW),
@@ -177,7 +177,7 @@ export default function ChatOverflowMenu({
               left: pos.left,
               width: 184,
             }}
-            className="z-[200] overflow-hidden rounded-xl border border-white/12 bg-[#0c0c0c] py-1 shadow-[0_16px_40px_rgba(0,0,0,0.65)]"
+            className="z-[9999] overflow-hidden rounded-xl border border-white/18 bg-[#141414] py-1 shadow-[0_20px_50px_rgba(0,0,0,0.75)]"
           >
             <button type="button" role="menuitem" className={`${item} text-ivory`} onClick={muteToggle}>
               {muted ? "Unmute" : "Mute"}
