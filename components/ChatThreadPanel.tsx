@@ -98,6 +98,10 @@ export default function ChatThreadPanel({ chatId, embedded = false, onBack }: Pr
     lastScannedRef.current = c.messages[c.messages.length - 1]?.id || "";
     lastUpdatedRef.current = c.updatedAt;
     void refreshDirectory();
+    void import("@/lib/chatUnread").then(({ setActiveChatId, markChatRead }) => {
+      setActiveChatId(chatId);
+      markChatRead(c);
+    });
 
     const refresh = () => {
       const next = getChat(chatId);
@@ -110,6 +114,7 @@ export default function ChatThreadPanel({ chatId, embedded = false, onBack }: Pr
       if (next.updatedAt === lastUpdatedRef.current) return;
       lastUpdatedRef.current = next.updatedAt;
       setChat({ ...next, messages: [...next.messages] });
+      void import("@/lib/chatUnread").then(({ markChatRead }) => markChatRead(next));
 
       const last = next.messages[next.messages.length - 1];
       if (!last || last.id === lastScannedRef.current || last.senderId === "system") return;
@@ -143,11 +148,26 @@ export default function ChatThreadPanel({ chatId, embedded = false, onBack }: Pr
           const known = new Set(prev.messages.map((m) => m.id));
           const incoming = data.messages!.filter((m) => !known.has(m.id));
           if (!incoming.length) return prev;
-          return {
+          const next = {
             ...prev,
             messages: [...prev.messages, ...incoming],
             updatedAt: new Date().toISOString(),
           };
+          void import("@/lib/chatUnread").then(({ markChatRead, getActiveChatId, noteIncomingMessage }) => {
+            if (getActiveChatId() === chatId) markChatRead(next);
+            else {
+              for (const m of incoming) {
+                if (m.senderId === "me" || m.senderId === "system") continue;
+                noteIncomingMessage({
+                  chatId,
+                  messageId: m.id,
+                  title: "New message",
+                  preview: m.text,
+                });
+              }
+            }
+          });
+          return next;
         });
       } catch {
         /* local-only chat still works */
@@ -157,6 +177,7 @@ export default function ChatThreadPanel({ chatId, embedded = false, onBack }: Pr
     return () => {
       window.removeEventListener("meetpoint:chats-changed", refresh);
       window.clearInterval(poll);
+      void import("@/lib/chatUnread").then(({ setActiveChatId }) => setActiveChatId(null));
     };
   }, [chatId, router]);
 

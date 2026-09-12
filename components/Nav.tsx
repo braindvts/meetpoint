@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
+import { loadChats } from "@/lib/store";
+import { totalUnread } from "@/lib/chatUnread";
 
 const LINKS = [
   { href: "/discover", label: "Discover" },
@@ -20,11 +22,24 @@ const LINKS = [
 export default function Nav() {
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
+  const [chatUnread, setChatUnread] = useState(0);
   const inChatThread = /^\/chats\/[^/]+/.test(pathname);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+    const refresh = () => setChatUnread(totalUnread(loadChats()));
+    refresh();
+    window.addEventListener("meetpoint:chats-changed", refresh);
+    window.addEventListener("meetpoint:unread-changed", refresh);
+    return () => {
+      window.removeEventListener("meetpoint:chats-changed", refresh);
+      window.removeEventListener("meetpoint:unread-changed", refresh);
+    };
+  }, [mounted]);
 
   useEffect(() => {
     if (!mounted || inChatThread) {
@@ -46,15 +61,21 @@ export default function Nav() {
         <div className="mp-site-nav-links" role="list">
           {LINKS.map((l) => {
             const active = pathname.startsWith(l.href);
+            const showBadge = l.href === "/chats" && chatUnread > 0;
             return (
               <Link
                 key={l.href}
                 href={l.href}
                 role="listitem"
                 aria-current={active ? "page" : undefined}
-                className={`mp-site-nav-link ${active ? "is-active" : ""}`}
+                className={`mp-site-nav-link relative ${active ? "is-active" : ""}`}
               >
                 {l.label}
+                {showBadge ? (
+                  <span className="absolute -right-1 -top-1 grid min-h-[1rem] min-w-[1rem] place-items-center rounded-full bg-red-500 px-1 text-[9px] font-bold leading-none text-white">
+                    {chatUnread > 99 ? "99+" : chatUnread}
+                  </span>
+                ) : null}
               </Link>
             );
           })}

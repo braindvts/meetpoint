@@ -496,6 +496,7 @@ export function createChat(name: string, memberIds: string[]): GroupChat {
   };
   const chats = [chat, ...loadChats()];
   saveChats(chats);
+  void import("./chatUnread").then(({ markChatRead }) => markChatRead(chat));
 
   // A chat with sample members stays in this browser.
   if (chat.memberIds.some(isDemoPeer)) return chat;
@@ -572,14 +573,24 @@ export function sendChatMessage(
         const latest = loadChats();
         const c = latest.find((x) => x.id === chatId);
         if (!c) return;
-        c.messages.push({
+        const reply = {
           id: uid(),
           senderId: peerId,
           text: replies[Math.floor(Math.random() * replies.length)],
           createdAt: new Date().toISOString(),
-        });
+        };
+        c.messages.push(reply);
         c.updatedAt = new Date().toISOString();
         saveChats(latest);
+        const peer = DEMO_PEOPLE.find((p) => p.id === peerId);
+        void import("./chatUnread").then(({ noteIncomingMessage }) =>
+          noteIncomingMessage({
+            chatId,
+            messageId: reply.id,
+            title: peer?.name || c.name || "New message",
+            preview: reply.text,
+          })
+        );
       }, 1200 + Math.random() * 1800);
     }
   }

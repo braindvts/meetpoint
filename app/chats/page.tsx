@@ -16,6 +16,12 @@ import {
   loadProfile,
   openOrCreateDirectChat,
 } from "@/lib/store";
+import {
+  ensureReadBaseline,
+  markChatRead,
+  unreadCountForChat,
+} from "@/lib/chatUnread";
+import NotifyPrompt from "@/components/NotifyPrompt";
 import { findPerson, loadDirectory, refreshDirectory } from "@/lib/directory";
 import { readClientConnections, readClientProfile } from "@/lib/clientProfile";
 import type { Connection, GroupChat, MyProfile, Person } from "@/lib/types";
@@ -117,6 +123,7 @@ function ChatsInner() {
   const [query, setQuery] = useState("");
   const [composerOpen, setComposerOpen] = useState(false);
   const [interlinksOpen, setInterlinksOpen] = useState(false);
+  const [unreadTick, setUnreadTick] = useState(0);
 
   const refreshConnections = useCallback(() => setConnections(loadConnections()), []);
 
@@ -127,17 +134,22 @@ function ChatsInner() {
       return;
     }
     setProfile(p);
-    setChats(loadChats());
+    const loaded = loadChats();
+    ensureReadBaseline(loaded);
+    setChats(loaded);
     refreshConnections();
     void refreshDirectory().then(setDirectory);
 
     const refreshChats = () => setChats(loadChats());
+    const onUnread = () => setUnreadTick((n) => n + 1);
     const onDir = () => setDirectory(loadDirectory());
     window.addEventListener("meetpoint:chats-changed", refreshChats);
+    window.addEventListener("meetpoint:unread-changed", onUnread);
     window.addEventListener("meetpoint:connections-changed", refreshConnections);
     window.addEventListener("meetpoint:directory-changed", onDir);
     return () => {
       window.removeEventListener("meetpoint:chats-changed", refreshChats);
+      window.removeEventListener("meetpoint:unread-changed", onUnread);
       window.removeEventListener("meetpoint:connections-changed", refreshConnections);
       window.removeEventListener("meetpoint:directory-changed", onDir);
     };
@@ -152,6 +164,7 @@ function ChatsInner() {
 
   /** Only threads the user has opened — never every connection. */
   const rows = useMemo(() => {
+    void unreadTick;
     const list: ChatRow[] = chats.map((chat) => {
       const isGroup = chat.memberIds.length > 1;
       const person = !isGroup
@@ -173,7 +186,7 @@ function ChatsInner() {
       };
     });
     return list.sort((a, b) => (b.lastAt || "").localeCompare(a.lastAt || ""));
-  }, [chats, directory]);
+  }, [chats, directory, unreadTick]);
 
   const filteredRows = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -192,6 +205,8 @@ function ChatsInner() {
 
   const selectChat = useCallback(
     (chatId: string) => {
+      const chat = loadChats().find((c) => c.id === chatId);
+      if (chat) markChatRead(chat);
       router.replace(`/chats?c=${encodeURIComponent(chatId)}`, { scroll: false });
     },
     [router]
@@ -306,6 +321,7 @@ function ChatsInner() {
               <div className="mp-stagger space-y-1">
                 {filteredRows.map((row) => {
                   const active = row.chat.id === selectedId;
+                  const unread = unreadCountForChat(row.chat);
                   return (
                     <button
                       key={row.key}
@@ -317,20 +333,28 @@ function ChatsInner() {
                           : "hover:bg-white/[0.04]"
                       }`}
                     >
-                      <Avatar
-                        src={
-                          row.isGroup
-                            ? row.chat.photo || row.person?.photoUrl
-                            : row.person?.photoUrl
-                        }
-                        name={row.person?.name || row.title}
-                        sizeCls="h-11 w-11"
-                        rounded="rounded-[12px]"
-                      />
+                      <div className="relative shrink-0">
+                        <Avatar
+                          src={
+                            row.isGroup
+                              ? row.chat.photo || row.person?.photoUrl
+                              : row.person?.photoUrl
+                          }
+                          name={row.person?.name || row.title}
+                          sizeCls="h-11 w-11"
+                          rounded="rounded-[12px]"
+                        />
+                      </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-baseline justify-between gap-2">
-                          <p className="flex min-w-0 items-center gap-1.5 truncate font-medium text-ivory">
-                            <span className="truncate">{row.title}</span>
+                          <p
+                            className={`flex min-w-0 items-center gap-1.5 truncate font-medium ${
+                              unread > 0 ? "text-ivory" : "text-ivory"
+                            }`}
+                          >
+                            <span className={`truncate ${unread > 0 ? "font-semibold" : ""}`}>
+                              {row.title}
+                            </span>
                             {row.isGroup ? (
                               <span className="shrink-0 text-[10px] font-medium uppercase tracking-[0.12em] text-accent/80">
                                 Group
@@ -350,8 +374,19 @@ function ChatsInner() {
                             </span>
                           )}
                         </div>
-                        <p className="mt-0.5 truncate text-[12px] text-muted">{row.preview}</p>
+                        <p
+                          className={`mt-0.5 truncate text-[12px] ${
+                            unread > 0 ? "font-medium text-ivory/85" : "text-muted"
+                          }`}
+                        >
+                          {row.preview}
+                        </p>
                       </div>
+                      {unread > 0 ? (
+                        <span className="grid h-5 min-w-5 shrink-0 place-items-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold text-white">
+                          {unread > 99 ? "99+" : unread}
+                        </span>
+                      ) : null}
                     </button>
                   );
                 })}
@@ -425,6 +460,7 @@ function ChatsInner() {
           selectChat(chat.id);
         }}
       />
+      <NotifyPrompt />
     </>
   );
 }

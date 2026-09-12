@@ -50,7 +50,7 @@ export default function NotifyPrompt() {
           Alerts
         </p>
         <p className="mt-1.5 text-sm leading-snug text-ivory">
-          Get notified when someone accepts an introduction or a table is confirmed.
+          Get notified for new chat messages, accepted intros, and table confirmations.
         </p>
         <div className="mt-3 flex gap-2">
           <button

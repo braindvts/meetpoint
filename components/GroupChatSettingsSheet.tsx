@@ -121,18 +121,9 @@ export default function GroupChatSettingsSheet({ open, chat, onClose, onSaved }:
               className="hidden"
               onChange={(e) => onFile(e.target.files?.[0])}
             />
-            <label className="w-full">
-              <span className="mb-1 block text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">
-                Or paste image URL
-              </span>
-              <input
-                type="url"
-                value={photo.startsWith("data:") ? "" : photo}
-                onChange={(e) => setPhoto(e.target.value)}
-                placeholder="https://…"
-                className="w-full rounded-xl border border-accent/20 bg-ink/60 px-3 py-2.5 text-sm text-ivory outline-none placeholder:text-muted/60 focus:border-accent/45"
-              />
-            </label>
+            <p className="text-center text-[12px] text-muted">
+              Upload a photo from your device — no URL needed.
+            </p>
           </div>
 
           <label className="block">

@@ -157,7 +157,7 @@ function ProfileContent() {
         <section className="mp-person-card mb-5 p-4">
           <p className="text-[12px] font-medium text-accent">Alerts</p>
           <p className="mt-1 text-sm text-muted">
-            Browser notifications for intros and table confirmations.
+            Browser notifications for chat messages, intros, and table confirmations.
           </p>
           <button
             type="button"
