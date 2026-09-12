@@ -52,7 +52,7 @@ export default function ReauthDialog({
     <div className="fixed inset-0 z-[120] flex items-end justify-center bg-black/70 p-4 sm:items-center">
       <form
         onSubmit={submit}
-        className="w-full max-w-sm rounded-2xl border border-line bg-[#12110f] p-5 shadow-2xl"
+        className="w-full max-w-sm rounded-md border border-white/10 bg-[#0a0a0a] p-5 shadow-2xl"
       >
         <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-accent">
           Secure step

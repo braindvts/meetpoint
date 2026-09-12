@@ -13,7 +13,7 @@ type Props = {
 /** Larger convention / conference card for the conventions strip. */
 export default function ConventionCard({ event }: Props) {
   return (
-    <article className="mp-reveal group relative flex h-full flex-col overflow-hidden rounded-2xl border border-accent/15 bg-[#12110f] transition hover:border-accent/35">
+    <article className="mp-reveal group relative flex h-full flex-col overflow-hidden rounded-md border border-white/10 bg-[#0a0a0a] transition hover:border-accent/35">
       <Link href={`/events/${event.slug}`} className="flex flex-1 flex-col">
         <div className="relative aspect-[2/1] overflow-hidden sm:aspect-[21/9]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -73,7 +73,7 @@ export default function ConventionCard({ event }: Props) {
             href={event.registrationUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center rounded-xl border border-accent/25 px-4 py-2.5 text-[11px] font-medium text-ivory/90 transition hover:border-accent/50"
+            className="inline-flex items-center justify-center rounded-sm border border-accent/25 px-4 py-2.5 text-[11px] font-medium text-ivory/90 transition hover:border-accent/50"
           >
             Register
           </a>

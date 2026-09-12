@@ -32,7 +32,7 @@ export default function EventCard({
 
   return (
     <article
-      className={`group relative overflow-hidden rounded-2xl border border-accent/15 bg-[#12110f] transition duration-300 hover:border-accent/35 ${
+      className={`group relative overflow-hidden rounded-md border border-white/10 bg-[#0a0a0a] transition duration-300 hover:border-accent/35 ${
         compact ? "" : "mp-reveal"
       }`}
     >

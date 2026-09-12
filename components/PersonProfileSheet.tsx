@@ -61,8 +61,8 @@ function WorkBlock({ work, owner = false }: { work: PersonWork; owner?: boolean 
     </>
   );
   const cls = owner
-    ? "block rounded-xl border border-accent/35 bg-accent/[0.08] px-3 py-3"
-    : "block rounded-xl border border-accent/15 bg-ink/40 px-3 py-2.5";
+    ? "block rounded-sm border border-accent/35 bg-accent/[0.08] px-3 py-3"
+    : "block rounded-sm border border-accent/15 bg-ink/40 px-3 py-2.5";
   return work.url ? (
     <a href={work.url} target="_blank" rel="noopener noreferrer" className={cls}>
       {inner}
@@ -374,7 +374,7 @@ export default function PersonProfileSheet({
                     href={person.linkedInUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-between gap-3 rounded-xl border border-accent/20 bg-ink/40 px-3 py-2.5 text-[13px] text-ivory"
+                    className="flex items-center justify-between gap-3 rounded-sm border border-accent/20 bg-ink/40 px-3 py-2.5 text-[13px] text-ivory"
                   >
                     <span className="font-medium">LinkedIn</span>
                     <span className="truncate text-[11px] text-muted">
@@ -387,7 +387,7 @@ export default function PersonProfileSheet({
                     href={person.websiteUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-between gap-3 rounded-xl border border-accent/20 bg-ink/40 px-3 py-2.5 text-[13px] text-ivory"
+                    className="flex items-center justify-between gap-3 rounded-sm border border-accent/20 bg-ink/40 px-3 py-2.5 text-[13px] text-ivory"
                   >
                     <span className="font-medium">Website</span>
                     <span className="truncate text-[11px] text-muted">
@@ -400,7 +400,7 @@ export default function PersonProfileSheet({
                     href={person.portfolioUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-between gap-3 rounded-xl border border-accent/20 bg-ink/40 px-3 py-2.5 text-[13px] text-ivory"
+                    className="flex items-center justify-between gap-3 rounded-sm border border-accent/20 bg-ink/40 px-3 py-2.5 text-[13px] text-ivory"
                   >
                     <span className="font-medium">Portfolio</span>
                     <span className="truncate text-[11px] text-muted">

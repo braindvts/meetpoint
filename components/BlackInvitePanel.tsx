@@ -115,7 +115,7 @@ export default function BlackInvitePanel({ chatId, peers }: Props) {
   }
 
   return (
-    <section className="rounded-2xl border border-white/12 bg-[#0b0a09] px-4 py-3.5">
+    <section className="rounded-md border border-white/10 bg-[#0a0a0a] px-4 py-3.5">
       <div className="flex items-center justify-between gap-2">
         <div className="flex min-w-0 items-center gap-2">
           <BlackBadge size="xs" />

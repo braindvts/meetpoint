@@ -52,7 +52,7 @@ const emptyForm = (): Partial<InterlinkEvent> => ({
 });
 
 const field =
-  "w-full rounded-xl border border-accent/20 bg-ink/60 px-3 py-2.5 text-sm text-ivory outline-none focus:border-accent/45";
+  "w-full rounded-sm border border-accent/20 bg-ink/60 px-3 py-2.5 text-sm text-ivory outline-none focus:border-accent/45";
 
 /** Local admin CRUD for events — unlock with ADMIN_SECRET (same as other admin tools). */
 export default function AdminEventsPage() {
@@ -225,14 +225,14 @@ export default function AdminEventsPage() {
         <button
           type="button"
           onClick={startCreate}
-          className="rounded-xl border border-accent/30 px-4 py-2 text-[12px] font-medium text-accent"
+          className="rounded-sm border border-accent/30 px-4 py-2 text-[12px] font-medium text-accent"
         >
           New event
         </button>
       </div>
       {message ? <p className="text-sm text-accent">{message}</p> : null}
 
-      <section className="space-y-3 rounded-2xl border border-accent/15 bg-[#12110f] p-4 sm:p-6">
+      <section className="space-y-3 rounded-md border border-white/10 bg-[#0a0a0a] p-4 sm:p-6">
         <h2 className="text-lg font-medium text-ivory">
           {editingId ? "Edit event" : "Create event"}
         </h2>

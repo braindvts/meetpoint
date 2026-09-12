@@ -33,7 +33,7 @@ export default function StoryPage() {
         <a
           href="/conclave-instagram.pdf"
           download="conclave-instagram.pdf"
-          className="rounded-xl border border-accent/30 py-3.5 text-[12px] font-semibold text-ivory"
+          className="rounded-sm border border-accent/30 py-3.5 text-[12px] font-semibold text-ivory"
         >
           Save PDF
         </a>

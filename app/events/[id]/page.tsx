@@ -139,7 +139,7 @@ export default function EventDetailPage() {
           }
         />
 
-        <div className="overflow-hidden rounded-2xl border border-accent/15 bg-[#12110f]">
+        <div className="overflow-hidden rounded-md border border-white/10 bg-[#0a0a0a]">
           <div className="relative aspect-[16/9] sm:aspect-[2/1]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -254,7 +254,7 @@ export default function EventDetailPage() {
                   href={event.registrationUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex flex-1 items-center justify-center rounded-xl border border-accent/25 px-5 py-3.5 text-[12px] font-medium text-ivory/90 transition hover:border-accent/50 sm:flex-none"
+                  className="inline-flex flex-1 items-center justify-center rounded-sm border border-accent/25 px-5 py-3.5 text-[12px] font-medium text-ivory/90 transition hover:border-accent/50 sm:flex-none"
                 >
                   External register
                 </a>
@@ -270,7 +270,7 @@ export default function EventDetailPage() {
           </p>
         </section>
 
-        <section className="rounded-2xl border border-accent/15 bg-[#12110f] px-5 py-5">
+        <section className="rounded-md border border-white/10 bg-[#0a0a0a] px-5 py-5">
           <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-accent">
             Organizer
           </p>
@@ -281,7 +281,7 @@ export default function EventDetailPage() {
         </section>
 
         {event.speakers?.length || event.companies?.length ? (
-          <section className="space-y-3 rounded-2xl border border-accent/15 bg-[#12110f] px-5 py-5">
+          <section className="space-y-3 rounded-md border border-white/10 bg-[#0a0a0a] px-5 py-5">
             {event.speakers?.length ? (
               <div>
                 <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-accent">
@@ -309,7 +309,7 @@ export default function EventDetailPage() {
         {event.format !== "online" ? (
           <section className="space-y-3">
             <h2 className="text-lg font-medium tracking-tight text-ivory">Location</h2>
-            <div className="overflow-hidden rounded-2xl border border-accent/15 bg-[#12110f]">
+            <div className="overflow-hidden rounded-md border border-white/10 bg-[#0a0a0a]">
               <div className="flex aspect-[2/1] items-center justify-center bg-[radial-gradient(ellipse_at_center,rgba(212,196,168,0.08),transparent_60%)] px-6 text-center">
                 <div>
                   <p className="text-base font-medium text-ivory">{event.venue}</p>

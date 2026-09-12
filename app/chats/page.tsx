@@ -293,7 +293,7 @@ function ChatsInner() {
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search chats…"
                 autoComplete="off"
-                className="w-full rounded-xl border border-line/70 bg-ink/50 py-2.5 pl-10 pr-3 text-sm text-ivory outline-none placeholder:text-muted/55 focus:border-accent"
+                className="w-full rounded-sm border border-line/70 bg-ink/50 py-2.5 pl-10 pr-3 text-sm text-ivory outline-none placeholder:text-muted/55 focus:border-accent"
               />
             </label>
           </div>

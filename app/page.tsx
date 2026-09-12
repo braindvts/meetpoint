@@ -98,7 +98,7 @@ export default function Landing() {
           </p>
           <Link
             href="/login"
-            className="mt-8 inline-flex rounded-xl border border-accent/30 px-6 py-3 text-[12px] font-medium tracking-wide text-accent transition hover:bg-accent/5"
+            className="mt-8 inline-flex rounded-sm border border-accent/30 px-6 py-3 text-[12px] font-medium tracking-wide text-accent transition hover:bg-accent/5"
           >
             Sign in to browse Events
           </Link>
