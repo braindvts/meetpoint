@@ -1129,7 +1129,7 @@ html.mp-boot-splash body::before {
 .level-mark {
   position: relative;
   overflow: hidden;
-  border-radius: 2px;
+  border-radius: 0;
   isolation: isolate;
 }
 .level-mark-sheen {
