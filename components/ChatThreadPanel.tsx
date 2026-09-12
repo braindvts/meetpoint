@@ -8,6 +8,7 @@ import FoodSuggestPopup from "@/components/FoodSuggestPopup";
 import TableProposalCard, { takePendingBooking } from "@/components/TableProposalCard";
 import BlackInvitePanel from "@/components/BlackInvitePanel";
 import NameMarks from "@/components/NameMarks";
+import GroupChatSettingsSheet from "@/components/GroupChatSettingsSheet";
 import { settleBlackMeeting, blackConnectionWith } from "@/lib/blackStore";
 import {
   shouldSuggestMeetingSpots,
@@ -56,6 +57,7 @@ export default function ChatThreadPanel({ chatId, embedded = false, onBack }: Pr
   const [foodHint, setFoodHint] = useState(false);
   const [foodExpanded, setFoodExpanded] = useState(false);
   const [foodSuggestions, setFoodSuggestions] = useState<FoodSuggestion[]>([]);
+  const [groupSettingsOpen, setGroupSettingsOpen] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const typingRef = useRef(false);
   const lastScannedRef = useRef<string>("");
@@ -257,6 +259,7 @@ export default function ChatThreadPanel({ chatId, embedded = false, onBack }: Pr
   }
 
   const members = loadDirectory().filter((p) => chat.memberIds.includes(p.id));
+  const isGroup = chat.memberIds.length > 1;
 
   function senderName(senderId: string) {
     if (senderId === "me") return profile!.name.split(" ")[0];
@@ -320,13 +323,45 @@ export default function ChatThreadPanel({ chatId, embedded = false, onBack }: Pr
                   ← Back
                 </Link>
               )}
+              {isGroup ? (
+                <button
+                  type="button"
+                  onClick={() => setGroupSettingsOpen(true)}
+                  className="shrink-0"
+                  aria-label="Edit group"
+                >
+                  <Avatar
+                    src={chat.photo}
+                    name={chat.name}
+                    sizeCls="h-10 w-10"
+                    rounded="rounded-[12px]"
+                  />
+                </button>
+              ) : null}
               <div className="min-w-0 flex-1">
-                <h1 className="truncate font-display text-xl font-semibold tracking-tight sm:text-2xl">
-                  {chat.name}
-                </h1>
-                <p className="truncate text-[9px] font-semibold uppercase tracking-[0.16em] text-muted sm:text-[10px]">
-                  You · {members.map((m) => m.name.split(" ")[0]).join(" · ")}
-                </p>
+                {isGroup ? (
+                  <button
+                    type="button"
+                    onClick={() => setGroupSettingsOpen(true)}
+                    className="block w-full min-w-0 text-left"
+                  >
+                    <h1 className="truncate font-display text-xl font-semibold tracking-tight sm:text-2xl">
+                      {chat.name}
+                    </h1>
+                    <p className="truncate text-[9px] font-semibold uppercase tracking-[0.16em] text-accent/80 sm:text-[10px]">
+                      Edit name & photo · {members.length + 1} people
+                    </p>
+                  </button>
+                ) : (
+                  <>
+                    <h1 className="truncate font-display text-xl font-semibold tracking-tight sm:text-2xl">
+                      {chat.name}
+                    </h1>
+                    <p className="truncate text-[9px] font-semibold uppercase tracking-[0.16em] text-muted sm:text-[10px]">
+                      You · {members.map((m) => m.name.split(" ")[0]).join(" · ")}
+                    </p>
+                  </>
+                )}
               </div>
               <div className="flex shrink-0 items-center gap-2">
                 {members.length === 1 && (
@@ -337,12 +372,22 @@ export default function ChatThreadPanel({ chatId, embedded = false, onBack }: Pr
                     Plan table
                   </Link>
                 )}
-                <div className="flex -space-x-2">
-                  <Avatar src={profile.photo} name={profile.name} sizeCls="h-8 w-8" />
-                  {members.slice(0, 3).map((m) => (
-                    <Avatar key={m.id} src={m.photoUrl} name={m.name} sizeCls="h-8 w-8" />
-                  ))}
-                </div>
+                {isGroup ? (
+                  <button
+                    type="button"
+                    onClick={() => setGroupSettingsOpen(true)}
+                    className="rounded-lg border border-accent/25 px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-accent"
+                  >
+                    Edit
+                  </button>
+                ) : (
+                  <div className="flex -space-x-2">
+                    <Avatar src={profile.photo} name={profile.name} sizeCls="h-8 w-8" />
+                    {members.slice(0, 3).map((m) => (
+                      <Avatar key={m.id} src={m.photoUrl} name={m.name} sizeCls="h-8 w-8" />
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </header>
@@ -520,6 +565,15 @@ export default function ChatThreadPanel({ chatId, embedded = false, onBack }: Pr
           runChatWrite(() => proposeTable(chat.id, s));
         }}
       />
+
+      {isGroup ? (
+        <GroupChatSettingsSheet
+          open={groupSettingsOpen}
+          chat={chat}
+          onClose={() => setGroupSettingsOpen(false)}
+          onSaved={(updated) => setChat(updated)}
+        />
+      ) : null}
     </>
   );
 }

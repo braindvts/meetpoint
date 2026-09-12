@@ -258,6 +258,8 @@ export interface ChatMessage {
 export interface GroupChat {
   id: string;
   name: string;
+  /** Optional group avatar (URL or data URL). Ignored for 1:1 — use peer photo. */
+  photo?: string;
   /** Connected peer IDs in this private chat (current user is always included). */
   memberIds: string[];
   messages: ChatMessage[];

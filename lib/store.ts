@@ -425,6 +425,29 @@ export function getChat(id: string): GroupChat | undefined {
   return loadChats().find((c) => c.id === id);
 }
 
+/** Rename a chat and/or set a group photo. Stored with local chats (API-ready later). */
+export function updateChatMeta(
+  chatId: string,
+  patch: { name?: string; photo?: string | null }
+): GroupChat | undefined {
+  const chats = loadChats();
+  const chat = chats.find((c) => c.id === chatId);
+  if (!chat) return undefined;
+
+  if (typeof patch.name === "string") {
+    const next = patch.name.trim();
+    if (next) chat.name = next.slice(0, 80);
+  }
+  if (patch.photo === null) {
+    delete chat.photo;
+  } else if (typeof patch.photo === "string") {
+    chat.photo = patch.photo;
+  }
+  chat.updatedAt = new Date().toISOString();
+  saveChats(chats);
+  return chat;
+}
+
 /** Existing 1:1 thread with a peer, if the user has opened one. */
 export function findDirectChat(peerId: string): GroupChat | undefined {
   return loadChats().find(

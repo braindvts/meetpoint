@@ -9,10 +9,12 @@ import NameMarks from "@/components/NameMarks";
 import ChatThreadPanel from "@/components/ChatThreadPanel";
 import EmptyState from "@/components/EmptyState";
 import NewChatSheet from "@/components/NewChatSheet";
+import InterlinksSheet from "@/components/InterlinksSheet";
 import {
   loadChats,
   loadConnections,
   loadProfile,
+  openOrCreateDirectChat,
 } from "@/lib/store";
 import { findPerson, loadDirectory, refreshDirectory } from "@/lib/directory";
 import { readClientConnections, readClientProfile } from "@/lib/clientProfile";
@@ -114,6 +116,7 @@ function ChatsInner() {
   const [directory, setDirectory] = useState(() => loadDirectory());
   const [query, setQuery] = useState("");
   const [composerOpen, setComposerOpen] = useState(false);
+  const [interlinksOpen, setInterlinksOpen] = useState(false);
 
   const refreshConnections = useCallback(() => setConnections(loadConnections()), []);
 
@@ -219,9 +222,44 @@ function ChatsInner() {
                   Threads you open · groups you start
                 </p>
               </div>
-              <GroupChatIconButton onClick={() => setComposerOpen(true)} />
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setInterlinksOpen(true)}
+                  aria-label={`Interlinks, ${connectedPeople.length} connections`}
+                  title="Interlinks"
+                  className="inline-flex h-10 items-center gap-1.5 rounded-full border border-accent/30 px-2.5 text-accent transition hover:border-accent/55 hover:bg-accent/10"
+                >
+                  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" aria-hidden>
+                    <circle cx="8.5" cy="9" r="2.4" stroke="currentColor" strokeWidth="1.7" />
+                    <circle cx="15.5" cy="9" r="2.4" stroke="currentColor" strokeWidth="1.7" />
+                    <path
+                      d="M4.2 17c.6-1.9 2-3 4.3-3s3.7 1.1 4.3 3M11.5 17c.5-1.5 1.6-2.4 3.2-2.4 1.5 0 2.6.8 3.1 2.1"
+                      stroke="currentColor"
+                      strokeWidth="1.7"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                  <span className="text-[11px] font-semibold tabular-nums">
+                    {connectedPeople.length}
+                  </span>
+                </button>
+                <GroupChatIconButton onClick={() => setComposerOpen(true)} />
+              </div>
             </div>
-            <label className="relative mt-3 block">
+            <p className="mt-2 text-[11px] text-muted">
+              <button
+                type="button"
+                onClick={() => setInterlinksOpen(true)}
+                className="text-accent hover:underline"
+              >
+                Interlinks
+              </button>
+              <span className="text-line"> · </span>
+              {connectedPeople.length} connection
+              {connectedPeople.length === 1 ? "" : "s"}
+            </p>
+            <label className="relative mt-2 block">
               <span className="sr-only">Search chats</span>
               <svg
                 viewBox="0 0 24 24"
@@ -250,7 +288,7 @@ function ChatsInner() {
               <div className="px-2 py-8">
                 <EmptyState
                   title="No chats yet"
-                  body="Press Chat on someone’s profile to open a 1:1. Use the group icon above to start a group with people you’re connected to."
+                  body="Open Interlinks to message someone you’re connected to, or use the group icon to start a group."
                 />
               </div>
             ) : filteredRows.length === 0 ? (
@@ -280,7 +318,11 @@ function ChatsInner() {
                       }`}
                     >
                       <Avatar
-                        src={row.person?.photoUrl}
+                        src={
+                          row.isGroup
+                            ? row.chat.photo || row.person?.photoUrl
+                            : row.person?.photoUrl
+                        }
                         name={row.person?.name || row.title}
                         sizeCls="h-11 w-11"
                         rounded="rounded-[12px]"
@@ -342,12 +384,22 @@ function ChatsInner() {
             <div className="flex h-full w-full flex-col items-center justify-center px-8 text-center">
               <p className="font-display text-2xl font-semibold text-ivory">Select a chat</p>
               <p className="mt-2 max-w-sm text-sm text-muted">
-                Pick a thread on the left. For a new group with people you know, tap the group icon.
+                Pick a thread on the left, open Interlinks to message a connection, or tap the
+                group icon for a new group.
               </p>
-              <GroupChatIconButton
-                onClick={() => setComposerOpen(true)}
-                className="mt-6 h-12 w-12"
-              />
+              <div className="mt-6 flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setInterlinksOpen(true)}
+                  className="inline-flex h-12 items-center gap-2 rounded-full border border-accent/35 px-4 text-[12px] font-medium text-accent"
+                >
+                  Interlinks · {connectedPeople.length}
+                </button>
+                <GroupChatIconButton
+                  onClick={() => setComposerOpen(true)}
+                  className="h-12 w-12"
+                />
+              </div>
             </div>
           )}
         </section>
@@ -360,6 +412,17 @@ function ChatsInner() {
         onCreated={(id) => {
           setChats(loadChats());
           selectChat(id);
+        }}
+      />
+      <InterlinksSheet
+        open={interlinksOpen}
+        onClose={() => setInterlinksOpen(false)}
+        people={connectedPeople}
+        onMessage={(person) => {
+          const chat = openOrCreateDirectChat(person.id, person.name);
+          setInterlinksOpen(false);
+          setChats(loadChats());
+          selectChat(chat.id);
         }}
       />
     </>
