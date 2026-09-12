@@ -1039,6 +1039,109 @@ html.mp-boot-splash body::before {
     opacity: 0.7;
   }
 }
+
+/* Discover card — Pass: smooth drift + fade */
+@keyframes mpPassOut {
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+    filter: blur(0);
+  }
+  28% {
+    opacity: 0.92;
+    transform: translate3d(-10%, -2%, 0) scale(0.985) rotate(-1.2deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(-38%, 4%, 0) scale(0.94) rotate(-3.5deg);
+    filter: blur(1.5px);
+  }
+}
+
+/* Discover card — Connect: champagne pulse + settle */
+@keyframes mpConnectPulse {
+  0% {
+    transform: scale(1);
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.08),
+      0 0 0 0 rgba(196, 180, 150, 0);
+  }
+  32% {
+    transform: scale(1.025);
+    box-shadow:
+      0 0 0 1px rgba(196, 180, 150, 0.7),
+      0 0 36px rgba(196, 180, 150, 0.28);
+  }
+  62% {
+    transform: scale(0.995);
+    box-shadow:
+      0 0 0 1px rgba(196, 180, 150, 0.35),
+      0 12px 28px rgba(0, 0, 0, 0.35);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.1),
+      0 8px 24px rgba(0, 0, 0, 0.25);
+  }
+}
+
+@keyframes mpConnectBurst {
+  0% {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  35% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.15);
+  }
+}
+
+.mp-card-pass {
+  animation: mpPassOut 0.52s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  pointer-events: none;
+  will-change: transform, opacity, filter;
+  z-index: 2;
+}
+
+.mp-card-connect {
+  animation: mpConnectPulse 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+  will-change: transform, box-shadow;
+  position: relative;
+  z-index: 2;
+}
+
+.mp-card-connect-burst {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(
+    circle at center,
+    rgba(196, 180, 150, 0.18),
+    transparent 62%
+  );
+  animation: mpConnectBurst 0.55s ease-out both;
+}
+
+.mp-card-connect-burst span {
+  border: 1px solid rgba(236, 232, 224, 0.85);
+  background: rgba(5, 5, 5, 0.72);
+  color: #ece8e0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 0.55rem 0.95rem;
+  border-radius: 8px;
+  backdrop-filter: blur(6px);
+}
 .mp-ambient {
   animation: ambientPulse 2.4s ease-in-out infinite;
 }
@@ -1105,7 +1208,11 @@ html.mp-boot-splash body::before {
   }
   .mp-card-motion,
   .mp-card-photo,
+  .mp-card-pass,
+  .mp-card-connect,
+  .mp-card-connect-burst,
   .mp-row {
+    animation: none !important;
     transition: none !important;
   }
   .mp-card-motion:hover,

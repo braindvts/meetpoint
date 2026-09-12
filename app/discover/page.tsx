@@ -160,7 +160,7 @@ export default function DiscoverPage() {
     window.setTimeout(() => {
       setSkipped((s) => (s.includes(id) ? s : [...s, id]));
       setExiting(null);
-    }, 220);
+    }, 520);
   }
 
   if (!profile) return null;
@@ -375,14 +375,13 @@ export default function DiscoverPage() {
                 return (
                   <div
                     key={m.person.id}
-                    className={`transition duration-200 ease-out ${
-                      leaving ? "-translate-x-8 opacity-0" : "translate-x-0 opacity-100"
-                    }`}
+                    className={leaving ? "relative z-[2]" : undefined}
                   >
                     <MatchCard
                       match={m}
                       status={connections.find((c) => c.peerId === m.person.id)?.status}
                       canConnect={allowed}
+                      leaving={leaving}
                       onConnect={connect}
                       onChat={startChat}
                       onSkip={skip}

@@ -1,6 +1,7 @@
 "use client";
 
 import type { KeyboardEvent, MouseEvent } from "react";
+import { useState } from "react";
 import NameMarks from "@/components/NameMarks";
 import TierBadge from "@/components/TierBadge";
 import { blackConnectionWith } from "@/lib/blackStore";
@@ -18,6 +19,8 @@ interface Props {
   onNeedVerified?: () => void;
   onOpenProfile?: (peerId: string) => void;
   onSkip?: (peerId: string) => void;
+  /** Parent-driven Pass exit animation. */
+  leaving?: boolean;
   preview?: boolean;
 }
 
@@ -34,6 +37,7 @@ export default function MatchCard({
   onNeedVerified,
   onOpenProfile,
   onSkip,
+  leaving = false,
   preview = false,
 }: Props) {
   const {
@@ -46,6 +50,8 @@ export default function MatchCard({
     distance,
     isLocal,
   } = match;
+
+  const [connecting, setConnecting] = useState(false);
 
   const settledWithMe = preview ? undefined : blackConnectionWith(person.id);
   const blackConnections =
@@ -62,11 +68,12 @@ export default function MatchCard({
 
   const isNew = !preview && !status;
   const connectLocked = preview || status === "connected" || status === "requested";
+  const showRequested = status === "requested" || connecting;
 
   function connectAria() {
     if (preview) return "Your card";
     if (status === "connected") return onChat ? "Chat" : "Connected";
-    if (status === "requested") return "Waiting";
+    if (showRequested) return "Waiting";
     if (!canConnect) return "Get Verified to connect";
     return "Connect";
   }
@@ -74,6 +81,7 @@ export default function MatchCard({
   function actionLabel() {
     if (preview) return "Your card";
     if (status === "connected") return onChat ? "Chat" : "Connected";
+    if (connecting) return "Sent";
     if (status === "requested") return "Waiting";
     if (!canConnect) return "Verified";
     return "Connect";
@@ -81,7 +89,7 @@ export default function MatchCard({
 
   function handleConnect(e: MouseEvent) {
     e.stopPropagation();
-    if (preview) return;
+    if (preview || connecting || leaving) return;
     if (status === "connected") {
       onChat?.(person.id);
       return;
@@ -90,7 +98,11 @@ export default function MatchCard({
       onNeedVerified?.();
       return;
     }
-    if (!connectLocked) onConnect?.(person.id);
+    if (connectLocked) return;
+
+    setConnecting(true);
+    window.setTimeout(() => onConnect?.(person.id), 180);
+    window.setTimeout(() => setConnecting(false), 560);
   }
 
   function handleKey(e: KeyboardEvent) {
@@ -107,10 +119,16 @@ export default function MatchCard({
       tabIndex={onOpenProfile ? 0 : undefined}
       onClick={() => onOpenProfile?.(person.id)}
       onKeyDown={handleKey}
-      className={`flex h-full min-h-[320px] flex-col overflow-hidden rounded-xl border border-white/[0.08] bg-[#0a0a0a] ${
+      className={`relative flex h-full min-h-[320px] flex-col overflow-hidden rounded-xl border border-white/[0.08] bg-[#0a0a0a] ${
         onOpenProfile || preview ? "cursor-pointer [-webkit-tap-highlight-color:transparent]" : ""
-      }`}
+      } ${leaving ? "mp-card-pass" : ""} ${connecting ? "mp-card-connect" : ""}`}
     >
+      {connecting ? (
+        <div className="mp-card-connect-burst" aria-hidden>
+          <span>Sent</span>
+        </div>
+      ) : null}
+
       <div className="flex gap-3.5 px-4 pb-3 pt-4">
         <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full border border-white/10 bg-black sm:h-[72px] sm:w-[72px]">
           {person.photoUrl ? (
@@ -143,7 +161,7 @@ export default function MatchCard({
                 size="sm"
               />
             </h3>
-            {isNew ? (
+            {isNew && !showRequested ? (
               <span className="shrink-0 border border-white/15 px-2 py-0.5 text-[9.5px] font-semibold uppercase tracking-[0.14em] text-muted">
                 New
               </span>
@@ -213,11 +231,12 @@ export default function MatchCard({
           <button
             type="button"
             aria-label="Pass"
+            disabled={leaving || connecting}
             onClick={(e) => {
               e.stopPropagation();
               onSkip(person.id);
             }}
-            className="rounded-lg border border-white/15 px-3 py-2 text-[11px] font-medium uppercase tracking-[0.12em] text-muted transition hover:border-white/30 hover:text-ivory active:scale-[0.99]"
+            className="rounded-lg border border-white/15 px-3 py-2 text-[11px] font-medium uppercase tracking-[0.12em] text-muted transition hover:border-white/30 hover:text-ivory active:scale-[0.98] disabled:opacity-40"
           >
             Pass
           </button>
@@ -228,18 +247,20 @@ export default function MatchCard({
           aria-label={connectAria()}
           disabled={
             preview ||
+            leaving ||
+            connecting ||
             status === "requested" ||
             (status === "connected" && !onChat) ||
             (!status && !canConnect && !onNeedVerified)
           }
           onClick={handleConnect}
-          className={`rounded-lg px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] transition active:scale-[0.99] disabled:opacity-45 ${
+          className={`rounded-lg px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] transition active:scale-[0.98] disabled:opacity-45 ${
             status === "connected"
               ? onChat
                 ? "bg-ivory text-ink"
                 : "border border-white/15 text-muted"
-              : status === "requested"
-                ? "border border-white/20 text-muted"
+              : showRequested
+                ? "border border-accent/45 bg-accent/10 text-accent"
                 : !canConnect && !preview
                   ? "border border-accent/40 text-accent"
                   : "bg-ivory text-ink"
