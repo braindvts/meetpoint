@@ -65,10 +65,23 @@ export default function ChatOverflowMenu({
     const estimatedH = isGroup ? 160 : 200;
     const spaceBelow = window.innerHeight - r.bottom;
     const openUp = spaceBelow < estimatedH + 12 && r.top > spaceBelow;
-    const left = Math.min(
-      Math.max(8, r.right - menuW),
-      window.innerWidth - menuW - 8
-    );
+
+    // List rows: open into the main pane (right of the trigger) so the menu
+    // isn’t cramped inside the narrow inbox rail.
+    let left: number;
+    if (compact) {
+      const rightSide = r.right + gap;
+      const fitsRight = rightSide + menuW <= window.innerWidth - 8;
+      left = fitsRight
+        ? rightSide
+        : Math.max(8, r.left - menuW - gap);
+    } else {
+      left = Math.min(
+        Math.max(8, r.right - menuW),
+        window.innerWidth - menuW - 8
+      );
+    }
+
     const top = openUp ? r.top - gap : r.bottom + gap;
     setPos({ top, left, openUp });
   }
