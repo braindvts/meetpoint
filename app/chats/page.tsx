@@ -326,7 +326,7 @@ function ChatsInner() {
               </div>
             ) : (
               <div className="mp-stagger space-y-1">
-                {filteredRows.map((row, index) => {
+                {filteredRows.map((row) => {
                   const active = row.chat.id === selectedId;
                   const unread = unreadCountForChat(row.chat);
                   const muted = isChatMuted(row.chat.id);
@@ -403,7 +403,6 @@ function ChatsInner() {
                       <ChatOverflowMenu
                         chat={row.chat}
                         compact
-                        menuUp={index > filteredRows.length - 3}
                         isGroup={row.isGroup}
                         peerId={!row.isGroup ? row.chat.memberIds[0] : undefined}
                         peerName={!row.isGroup ? row.person?.name || row.title : undefined}
