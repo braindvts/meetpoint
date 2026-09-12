@@ -21,6 +21,7 @@ import {
   markChatRead,
   unreadCountForChat,
 } from "@/lib/chatUnread";
+import { isChatMuted } from "@/lib/chatMute";
 import NotifyPrompt from "@/components/NotifyPrompt";
 import { findPerson, loadDirectory, refreshDirectory } from "@/lib/directory";
 import { readClientConnections, readClientProfile } from "@/lib/clientProfile";
@@ -124,6 +125,7 @@ function ChatsInner() {
   const [composerOpen, setComposerOpen] = useState(false);
   const [interlinksOpen, setInterlinksOpen] = useState(false);
   const [unreadTick, setUnreadTick] = useState(0);
+  const [muteTick, setMuteTick] = useState(0);
 
   const refreshConnections = useCallback(() => setConnections(loadConnections()), []);
 
@@ -142,14 +144,17 @@ function ChatsInner() {
 
     const refreshChats = () => setChats(loadChats());
     const onUnread = () => setUnreadTick((n) => n + 1);
+    const onMute = () => setMuteTick((n) => n + 1);
     const onDir = () => setDirectory(loadDirectory());
     window.addEventListener("meetpoint:chats-changed", refreshChats);
     window.addEventListener("meetpoint:unread-changed", onUnread);
+    window.addEventListener("meetpoint:mute-changed", onMute);
     window.addEventListener("meetpoint:connections-changed", refreshConnections);
     window.addEventListener("meetpoint:directory-changed", onDir);
     return () => {
       window.removeEventListener("meetpoint:chats-changed", refreshChats);
       window.removeEventListener("meetpoint:unread-changed", onUnread);
+      window.removeEventListener("meetpoint:mute-changed", onMute);
       window.removeEventListener("meetpoint:connections-changed", refreshConnections);
       window.removeEventListener("meetpoint:directory-changed", onDir);
     };
@@ -165,6 +170,7 @@ function ChatsInner() {
   /** Only threads the user has opened — never every connection. */
   const rows = useMemo(() => {
     void unreadTick;
+    void muteTick;
     const list: ChatRow[] = chats.map((chat) => {
       const isGroup = chat.memberIds.length > 1;
       const person = !isGroup
@@ -186,7 +192,7 @@ function ChatsInner() {
       };
     });
     return list.sort((a, b) => (b.lastAt || "").localeCompare(a.lastAt || ""));
-  }, [chats, directory, unreadTick]);
+  }, [chats, directory, unreadTick, muteTick]);
 
   const filteredRows = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -322,6 +328,7 @@ function ChatsInner() {
                 {filteredRows.map((row) => {
                   const active = row.chat.id === selectedId;
                   const unread = unreadCountForChat(row.chat);
+                  const muted = isChatMuted(row.chat.id);
                   return (
                     <button
                       key={row.key}
@@ -355,6 +362,11 @@ function ChatsInner() {
                             <span className={`truncate ${unread > 0 ? "font-semibold" : ""}`}>
                               {row.title}
                             </span>
+                            {muted ? (
+                              <span className="shrink-0 text-[10px] font-medium uppercase tracking-[0.12em] text-muted">
+                                Muted
+                              </span>
+                            ) : null}
                             {row.isGroup ? (
                               <span className="shrink-0 text-[10px] font-medium uppercase tracking-[0.12em] text-accent/80">
                                 Group

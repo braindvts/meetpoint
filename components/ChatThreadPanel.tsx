@@ -9,7 +9,9 @@ import TableProposalCard, { takePendingBooking } from "@/components/TableProposa
 import BlackInvitePanel from "@/components/BlackInvitePanel";
 import NameMarks from "@/components/NameMarks";
 import GroupChatSettingsSheet from "@/components/GroupChatSettingsSheet";
+import ChatOverflowMenu from "@/components/ChatOverflowMenu";
 import { settleBlackMeeting, blackConnectionWith } from "@/lib/blackStore";
+import { isChatMuted } from "@/lib/chatMute";
 import {
   shouldSuggestMeetingSpots,
   suggestSpotsForChatLive,
@@ -58,6 +60,7 @@ export default function ChatThreadPanel({ chatId, embedded = false, onBack }: Pr
   const [foodExpanded, setFoodExpanded] = useState(false);
   const [foodSuggestions, setFoodSuggestions] = useState<FoodSuggestion[]>([]);
   const [groupSettingsOpen, setGroupSettingsOpen] = useState(false);
+  const [muted, setMuted] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const typingRef = useRef(false);
   const lastScannedRef = useRef<string>("");
@@ -95,6 +98,7 @@ export default function ChatThreadPanel({ chatId, embedded = false, onBack }: Pr
     setText("");
     setFoodHint(false);
     setFoodExpanded(false);
+    setMuted(isChatMuted(chatId));
     lastScannedRef.current = c.messages[c.messages.length - 1]?.id || "";
     lastUpdatedRef.current = c.updatedAt;
     void refreshDirectory();
@@ -102,6 +106,9 @@ export default function ChatThreadPanel({ chatId, embedded = false, onBack }: Pr
       setActiveChatId(chatId);
       markChatRead(c);
     });
+
+    const onMute = () => setMuted(isChatMuted(chatId));
+    window.addEventListener("meetpoint:mute-changed", onMute);
 
     const refresh = () => {
       const next = getChat(chatId);
@@ -176,6 +183,7 @@ export default function ChatThreadPanel({ chatId, embedded = false, onBack }: Pr
 
     return () => {
       window.removeEventListener("meetpoint:chats-changed", refresh);
+      window.removeEventListener("meetpoint:mute-changed", onMute);
       window.clearInterval(poll);
       void import("@/lib/chatUnread").then(({ setActiveChatId }) => setActiveChatId(null));
     };
@@ -370,6 +378,7 @@ export default function ChatThreadPanel({ chatId, embedded = false, onBack }: Pr
                       {chat.name}
                     </h1>
                     <p className="truncate text-[9px] font-semibold uppercase tracking-[0.16em] text-accent/80 sm:text-[10px]">
+                      {muted ? "Muted · " : ""}
                       Edit name & photo · {members.length + 1} people
                     </p>
                   </button>
@@ -379,6 +388,7 @@ export default function ChatThreadPanel({ chatId, embedded = false, onBack }: Pr
                       {chat.name}
                     </h1>
                     <p className="truncate text-[9px] font-semibold uppercase tracking-[0.16em] text-muted sm:text-[10px]">
+                      {muted ? "Muted · " : ""}
                       You · {members.map((m) => m.name.split(" ")[0]).join(" · ")}
                     </p>
                   </>
@@ -393,22 +403,25 @@ export default function ChatThreadPanel({ chatId, embedded = false, onBack }: Pr
                     Plan table
                   </Link>
                 )}
-                {isGroup ? (
-                  <button
-                    type="button"
-                    onClick={() => setGroupSettingsOpen(true)}
-                    className="rounded-lg border border-accent/25 px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-accent"
-                  >
-                    Edit
-                  </button>
-                ) : (
-                  <div className="flex -space-x-2">
+                {!isGroup ? (
+                  <div className="hidden -space-x-2 sm:flex">
                     <Avatar src={profile.photo} name={profile.name} sizeCls="h-8 w-8" />
                     {members.slice(0, 3).map((m) => (
                       <Avatar key={m.id} src={m.photoUrl} name={m.name} sizeCls="h-8 w-8" />
                     ))}
                   </div>
-                )}
+                ) : null}
+                <ChatOverflowMenu
+                  chat={chat}
+                  isGroup={isGroup}
+                  peerId={!isGroup ? members[0]?.id : undefined}
+                  peerName={!isGroup ? members[0]?.name : undefined}
+                  onEditGroup={isGroup ? () => setGroupSettingsOpen(true) : undefined}
+                  onLeft={() => {
+                    if (onBack) onBack();
+                    else router.replace("/chats");
+                  }}
+                />
               </div>
             </div>
           </header>

@@ -124,10 +124,13 @@ export function noteIncomingMessage(opts: {
     return;
   }
   window.dispatchEvent(new CustomEvent("meetpoint:unread-changed"));
-  void import("./notify").then(({ pushAppNotification }) =>
-    pushAppNotification(opts.title, opts.preview, {
-      url: `/chats?c=${encodeURIComponent(opts.chatId)}`,
-      tag: `chat-${opts.chatId}`,
-    })
-  );
+  void import("./chatMute").then(({ isChatMuted }) => {
+    if (isChatMuted(opts.chatId)) return;
+    void import("./notify").then(({ pushAppNotification }) =>
+      pushAppNotification(opts.title, opts.preview, {
+        url: `/chats?c=${encodeURIComponent(opts.chatId)}`,
+        tag: `chat-${opts.chatId}`,
+      })
+    );
+  });
 }

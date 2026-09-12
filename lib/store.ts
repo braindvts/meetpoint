@@ -601,6 +601,7 @@ export function sendChatMessage(
 export function deleteChat(chatId: string): GroupChat[] {
   const chats = loadChats().filter((c) => c.id !== chatId);
   saveChats(chats);
+  void import("./chatMute").then(({ clearChatMute }) => clearChatMute(chatId));
   return chats;
 }
 
