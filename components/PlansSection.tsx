@@ -164,7 +164,7 @@ export default function PlansSection({
                     type="button"
                     disabled={!verified || busy !== null}
                     onClick={() => void buyBlack("year")}
-                    className="rounded-sm bg-ivory py-2.5 text-[12px] font-semibold text-ink disabled:opacity-40"
+                    className="rounded-sm border border-accent/50 bg-accent/15 py-2.5 text-[12px] font-semibold text-accent disabled:opacity-40"
                   >
                     {busy === "year" ? "…" : formatBlackPrice("year")}
                   </button>

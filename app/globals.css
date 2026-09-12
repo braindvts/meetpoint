@@ -1133,38 +1133,28 @@ html.mp-boot-splash body::before {
   isolation: isolate;
 }
 .level-mark-sheen {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  background: linear-gradient(
-    125deg,
-    rgba(255, 255, 255, 0.16) 0%,
-    transparent 42%,
-    transparent 62%,
-    rgba(255, 255, 255, 0.06) 100%
-  );
+  display: none;
 }
 .level-mark-sheen--live::after {
   content: none;
 }
 
-/* Member — cool steel */
+/* Member — cool steel, flat */
 .level-mark--member {
   color: #e8eef6;
-  background: linear-gradient(145deg, #8a9bb0 0%, #5c6d82 42%, #3a4656 100%);
+  background: #6a7a8e;
   box-shadow:
     0 0 0 1px #2a3440,
-    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 
-/* Verified — champagne gold (Interlink accent family) */
+/* Verified — flat champagne metal, no soft pill feel */
 .level-mark--verified {
   color: #1a1610;
-  background: linear-gradient(145deg, #e8dcc8 0%, #c4b08e 45%, #9a8664 100%);
+  background: #c4b496;
   box-shadow:
-    0 0 0 1px #5a4c36,
-    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    0 0 0 1px #6a5a40,
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 /* BLACK — solid black + thin bronze edge */

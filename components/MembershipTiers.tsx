@@ -37,10 +37,8 @@ export default function MembershipTiers({ input, missing, missingHint }: Props) 
             <div
               key={t.tier}
               className={`border px-2.5 py-2 sm:px-3.5 sm:py-3 ${TIER_CARD[t.tier].row} ${
-                active && !black ? "outline outline-1 outline-white/15" : ""
-              } ${active && black ? "border-accent/45" : ""} ${
-                black ? "py-3 sm:py-3.5" : ""
-              }`}
+                active ? (black ? "border-accent/50" : "border-white/20") : ""
+              } ${black ? "py-3 sm:py-3.5" : ""}`}
             >
               <div className="relative z-[1] flex items-center gap-2.5">
                 <TierBadge tier={t.tier} size="sm" />
