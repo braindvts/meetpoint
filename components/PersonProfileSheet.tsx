@@ -187,14 +187,12 @@ export default function PersonProfileSheet({
         style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
       >
         <div
-          className={`relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-t-[20px] border border-b-0 sm:rounded-[24px] sm:border-b ${
+          className={`relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-t-lg border border-b-0 sm:rounded-md sm:border-b ${
             black
-              ? "black-profile-shell black-centurion border-white/20"
-              : "border-accent/20 bg-[#12110f]"
+              ? "black-profile-shell"
+              : "border-white/10 bg-[#0a0a0a]"
           }`}
         >
-          {black && <span className="black-sheen" aria-hidden />}
-
           {/* Drag handle only — does not cover the photo / block scroll */}
           <div
             className="absolute inset-x-0 top-0 z-20 flex h-11 touch-none items-start justify-center pt-2.5 sm:hidden"
@@ -204,13 +202,13 @@ export default function PersonProfileSheet({
             onPointerCancel={onHandlePointerUp}
             aria-label="Swipe down to close"
           >
-            <span className="h-1 w-10 rounded-full bg-white/70 shadow-sm" />
+            <span className="h-0.5 w-8 bg-white/40" />
           </div>
 
           <button
             type="button"
             onClick={onClose}
-            className="absolute right-3 top-3 z-20 rounded-full bg-black/55 px-3 py-1 text-[12px] text-white/90 sm:right-4 sm:top-4"
+            className="absolute right-3 top-3 z-20 rounded-sm border border-white/15 bg-black/70 px-2.5 py-1 text-[11px] uppercase tracking-[0.12em] text-white/85 sm:right-4 sm:top-4"
           >
             Close
           </button>
@@ -243,7 +241,7 @@ export default function PersonProfileSheet({
               />
               {black && (
                 <div
-                  className="pointer-events-none absolute inset-0 bg-[linear-gradient(125deg,rgba(255,255,255,0.12)_0%,transparent_30%,transparent_62%,rgba(255,255,255,0.05)_100%)]"
+                  className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,transparent_55%,rgba(0,0,0,0.35)_100%)]"
                   aria-hidden
                 />
               )}
@@ -427,7 +425,7 @@ export default function PersonProfileSheet({
               <Link
                 href={editHref}
                 onClick={onClose}
-                className="block w-full rounded-xl bg-gradient-to-b from-accent-2 to-accent py-3 text-center text-[13px] font-semibold text-ink"
+                className="block w-full rounded-sm bg-ivory py-3 text-center text-[13px] font-semibold text-ink"
               >
                 Edit profile
               </Link>
@@ -442,7 +440,7 @@ export default function PersonProfileSheet({
                       onChat(person.id);
                       onClose();
                     }}
-                    className="mp-btn-lux w-full rounded-xl bg-gradient-to-b from-accent-2 to-accent py-3 text-[13px] font-semibold text-ink"
+                    className="mp-btn-lux w-full rounded-sm bg-ivory py-3 text-[13px] font-semibold text-ink"
                   >
                     Chat
                   </button>
@@ -467,10 +465,10 @@ export default function PersonProfileSheet({
                     onConnect(person.id);
                     onClose();
                   }}
-                  className={`w-full rounded-xl py-3 text-[13px] font-semibold ${
+                  className={`w-full rounded-sm py-3 text-[13px] font-semibold ${
                     canConnect
-                      ? "bg-gradient-to-b from-accent-2 to-accent text-ink"
-                      : "border border-accent/40 text-accent-2"
+                      ? "mp-btn-lux text-ink"
+                      : "border border-accent/40 text-accent"
                   }`}
                 >
                   {canConnect ? "Connect" : "Get Verified to connect"}

@@ -940,7 +940,7 @@ export default function ProfileForm({
         <button
           type="submit"
           disabled={saving}
-          className="mp-btn-lux rounded-xl bg-gradient-to-b from-accent-2 to-accent px-10 py-3.5 text-[13px] font-semibold text-ink disabled:opacity-50"
+          className="mp-btn-lux rounded-sm bg-ivory px-10 py-3.5 text-[13px] font-semibold text-ink disabled:opacity-50"
         >
           {saving
             ? "Saving…"

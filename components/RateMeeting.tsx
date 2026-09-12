@@ -100,7 +100,7 @@ export default function RateMeeting({ peerId, peerName, onSaved }: Props) {
         <button
           type="button"
           onClick={submit}
-          className="rounded-full bg-gradient-to-b from-accent-2 to-accent px-6 py-2.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink transition hover:brightness-110"
+          className="rounded-sm bg-ivory px-6 py-2.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink transition hover:brightness-110"
         >
           Submit standing
         </button>

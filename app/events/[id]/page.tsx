@@ -220,7 +220,7 @@ export default function EventDetailPage() {
                   }
                   refresh();
                 }}
-                className="mp-btn-lux inline-flex flex-1 items-center justify-center rounded-xl bg-gradient-to-b from-accent-2 to-accent px-5 py-3.5 text-[12px] font-semibold text-ink"
+                className="mp-btn-lux inline-flex flex-1 items-center justify-center rounded-sm bg-ivory px-5 py-3.5 text-[12px] font-semibold text-ink"
               >
                 {myRsvp === "going" ? "Attending ✓" : "Attend / Register"}
               </button>

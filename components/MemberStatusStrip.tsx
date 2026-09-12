@@ -31,7 +31,7 @@ export default function MemberStatusStrip({ profile, tier }: Props) {
   return (
     <div className="mb-5 flex flex-wrap items-center gap-2">
       <span
-        className="inline-flex shrink-0 items-center rounded-full border border-white/12 bg-white/[0.03] px-2.5 py-1 text-[9.5px] font-semibold uppercase tracking-[0.18em] text-muted"
+        className="inline-flex shrink-0 items-center border border-white/12 bg-transparent px-2 py-1 text-[9.5px] font-semibold uppercase tracking-[0.16em] text-muted"
         title="Free standing — get Verified to meet anyone"
       >
         Free member

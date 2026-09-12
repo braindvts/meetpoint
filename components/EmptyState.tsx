@@ -18,13 +18,9 @@ export default function EmptyState({
   onAction,
 }: Props) {
   return (
-    <div className="mp-reveal relative overflow-hidden rounded-2xl border border-accent/15 bg-[#12110f] px-6 py-16 text-center">
-      <span
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(212,196,168,0.08),transparent_55%)]"
-        aria-hidden
-      />
+    <div className="mp-reveal relative border border-white/[0.08] bg-[#0a0a0a] px-6 py-16 text-center">
       <div className="relative">
-        <span className="mx-auto mb-6 block h-px w-12 bg-accent/50" />
+        <span className="mx-auto mb-6 block h-px w-10 bg-accent/40" />
         <p className="text-2xl font-medium tracking-tight text-ivory sm:text-3xl">
           {title}
         </p>
@@ -34,7 +30,7 @@ export default function EmptyState({
             {actionHref ? (
               <Link
                 href={actionHref}
-                className="mp-btn-lux inline-flex rounded-xl bg-gradient-to-b from-accent-2 to-accent px-9 py-3.5 text-[12px] font-semibold text-ink"
+                className="mp-btn-lux inline-flex px-8 py-3 text-[12px] font-semibold"
               >
                 {actionLabel}
               </Link>
@@ -42,7 +38,7 @@ export default function EmptyState({
               <button
                 type="button"
                 onClick={onAction}
-                className="mp-btn-lux inline-flex rounded-xl bg-gradient-to-b from-accent-2 to-accent px-9 py-3.5 text-[12px] font-semibold text-ink"
+                className="mp-btn-lux inline-flex px-8 py-3 text-[12px] font-semibold"
               >
                 {actionLabel}
               </button>

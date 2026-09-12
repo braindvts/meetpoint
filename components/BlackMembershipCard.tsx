@@ -77,21 +77,25 @@ export default function BlackMembershipCard({
 
   return (
     <section
-      className={`mb-5 rounded-2xl p-4 sm:p-5 ${
-        isBlack ? "black-centurion border border-white/20" : "border border-line/70 bg-panel/60"
+      className={`mb-5 p-4 sm:p-5 ${
+        isBlack ? "black-centurion" : "border border-line/70 bg-panel/60"
       }`}
     >
-      {isBlack && <span className="black-sheen" aria-hidden />}
-
       <div className="relative flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             <BlackBadge size="md" />
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-accent/80">
+                Standing
+              </p>
+              <p className="text-[15px] font-semibold tracking-wide text-ivory">BLACK</p>
+            </div>
             {isBlack && level.count > 0 ? (
               <BlackConnectionBadge count={level.count} showCount />
             ) : null}
           </div>
-          <p className="mt-2 text-[13px] leading-relaxed text-ivory/75">
+          <p className="mt-3 text-[13px] leading-relaxed text-ivory/70">
             {isBlack
               ? "Your BLACK membership is active. You can extend a BLACK connection from any private conversation."
               : "The top of the room: verified, premium, serious. Meet anyone, and extend BLACK connections privately."}
@@ -100,7 +104,7 @@ export default function BlackMembershipCard({
       </div>
 
       {isBlack ? (
-        <p className="relative mt-3 text-[11px] uppercase tracking-[0.18em] text-white/45">
+        <p className="relative mt-3 text-[11px] uppercase tracking-[0.16em] text-muted">
           {profile.blackSource === "earned"
             ? "Earned"
             : profile.blackSource === "granted"
@@ -116,7 +120,7 @@ export default function BlackMembershipCard({
       ) : (
         <>
           {!verified && (
-            <p className="mt-3 rounded-xl border border-accent/30 bg-accent/5 px-3 py-2 text-[12px] leading-snug text-accent-2">
+            <p className="mt-3 border border-accent/25 bg-transparent px-3 py-2 text-[12px] leading-snug text-accent">
               Verify your profile first. Paying doesn&apos;t skip verification.
             </p>
           )}
@@ -126,7 +130,7 @@ export default function BlackMembershipCard({
               type="button"
               disabled={!verified || busy !== null}
               onClick={() => buy("year")}
-              className="rounded-xl bg-gradient-to-b from-accent-2 to-accent px-4 py-3 text-[12px] font-semibold text-ink disabled:opacity-40"
+              className="mp-btn-lux px-4 py-3 text-[12px] font-semibold disabled:opacity-40"
             >
               {busy === "year" ? "Opening…" : `Buy BLACK · ${formatBlackPrice("year")}`}
             </button>
@@ -134,14 +138,14 @@ export default function BlackMembershipCard({
               type="button"
               disabled={!verified || busy !== null}
               onClick={() => buy("month")}
-              className="rounded-xl border border-accent/40 px-4 py-3 text-[12px] font-medium text-accent disabled:opacity-40"
+              className="rounded-sm border border-accent/35 px-4 py-3 text-[12px] font-medium text-accent disabled:opacity-40"
             >
               {busy === "month" ? "Opening…" : `Monthly · ${formatBlackPrice("month")}`}
             </button>
           </div>
 
           <div className="mt-4 border-t border-white/[0.07] pt-3">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-accent/70">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-accent/70">
               Or earn it
             </p>
             <p className="mt-1.5 text-[12px] leading-relaxed text-muted">
@@ -156,7 +160,7 @@ export default function BlackMembershipCard({
               type="button"
               disabled={!earnedReady || busy !== null}
               onClick={claimEarned}
-              className="mt-3 rounded-xl border border-accent/40 px-4 py-2.5 text-[12px] font-medium text-accent disabled:opacity-40"
+              className="mt-3 rounded-sm border border-accent/35 px-4 py-2.5 text-[12px] font-medium text-accent disabled:opacity-40"
             >
               {busy === "earned" ? "Checking…" : earnedReady ? "Claim earned BLACK" : "Not yet eligible"}
             </button>

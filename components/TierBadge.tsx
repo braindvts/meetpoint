@@ -27,7 +27,7 @@ export const TIER_CARD: Record<
   3: {
     mark: "level-mark level-mark--black",
     label: "text-[#f5f5f5]",
-    row: "border-white/15 bg-black relative overflow-hidden black-centurion",
+    row: "border-accent/30 bg-black relative",
   },
 };
 

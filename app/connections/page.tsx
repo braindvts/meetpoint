@@ -252,7 +252,7 @@ export default function ConnectionsPage() {
                               <button
                                 type="button"
                                 onClick={() => accept(person)}
-                                className="rounded-md bg-gradient-to-b from-accent-2 to-accent px-3 py-1.5 text-[11px] font-medium text-ink"
+                                className="rounded-md bg-ivory px-3 py-1.5 text-[11px] font-medium text-ink"
                               >
                                 Accept
                               </button>
@@ -348,7 +348,7 @@ export default function ConnectionsPage() {
                       return (
                         <article
                           key={item.id}
-                          className="mp-person-card border border-accent/25 bg-gradient-to-b from-accent/[0.08] to-transparent p-4"
+                          className="mp-person-card border border-white/10 bg-[#0a0a0a] p-4"
                         >
                           <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-accent">
                             Booked reservation

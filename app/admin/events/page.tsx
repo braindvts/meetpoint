@@ -204,7 +204,7 @@ export default function AdminEventsPage() {
         <button
           type="button"
           onClick={() => void unlock()}
-          className="mp-btn-lux w-full rounded-xl bg-gradient-to-b from-accent-2 to-accent py-3 text-[12px] font-semibold text-ink"
+          className="mp-btn-lux w-full rounded-sm bg-ivory py-3 text-[12px] font-semibold text-ink"
         >
           Unlock
         </button>
@@ -455,7 +455,7 @@ export default function AdminEventsPage() {
         <button
           type="button"
           onClick={save}
-          className="mp-btn-lux mt-2 rounded-xl bg-gradient-to-b from-accent-2 to-accent px-6 py-3 text-[12px] font-semibold text-ink"
+          className="mp-btn-lux mt-2 rounded-sm bg-ivory px-6 py-3 text-[12px] font-semibold text-ink"
         >
           {editingId ? "Save changes" : "Create event"}
         </button>

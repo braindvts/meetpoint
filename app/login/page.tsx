@@ -52,7 +52,7 @@ function LoginContent() {
         className="pointer-events-none absolute inset-0 overflow-hidden"
         aria-hidden
       >
-        <div className="absolute left-1/2 top-[28%] h-64 w-64 -translate-x-1/2 rounded-full bg-accent/10 blur-3xl" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_30%,rgba(196,180,150,0.05),transparent_50%)]" />
       </div>
 
       <div className="relative w-full max-w-[17.5rem] sm:max-w-[18.5rem]">

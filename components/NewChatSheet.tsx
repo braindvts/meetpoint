@@ -195,7 +195,7 @@ export default function NewChatSheet({ open, onClose, people, onCreated }: Props
             type="button"
             onClick={start}
             disabled={selected.length < 2}
-            className="mp-btn-lux w-full rounded-xl bg-gradient-to-b from-accent-2 to-accent py-3 text-[12px] font-semibold text-ink disabled:opacity-40"
+            className="mp-btn-lux w-full rounded-sm bg-ivory py-3 text-[12px] font-semibold text-ink disabled:opacity-40"
           >
             {selected.length < 2
               ? "Select 2+ people"

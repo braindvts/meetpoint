@@ -10,7 +10,7 @@ const SIZE = {
 } as const;
 
 /**
- * BLACK standing mark — solid black verification check (not a “BLACK” word badge).
+ * BLACK standing mark — sharp black square with check (not a circular bubble).
  */
 export default function BlackBadge({ size = "sm", className = "" }: Props) {
   return (
@@ -20,14 +20,23 @@ export default function BlackBadge({ size = "sm", className = "" }: Props) {
       aria-label="BLACK"
     >
       <svg viewBox="0 0 24 24" className={SIZE[size]} aria-hidden>
-        <circle cx="12" cy="12" r="11" fill="#0a0a0a" stroke="#3a3a3a" strokeWidth="1" />
+        <rect
+          x="1.5"
+          y="1.5"
+          width="21"
+          height="21"
+          rx="2"
+          fill="#050505"
+          stroke="#c4b496"
+          strokeWidth="1.25"
+        />
         <path
           d="M7.2 12.3l3.1 3.1 6.5-6.8"
           fill="none"
-          stroke="#f5f5f5"
-          strokeWidth="2.4"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+          stroke="#ece8e0"
+          strokeWidth="2.2"
+          strokeLinecap="square"
+          strokeLinejoin="miter"
         />
       </svg>
     </span>

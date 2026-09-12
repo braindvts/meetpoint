@@ -64,7 +64,7 @@ export default function ConventionCard({ event }: Props) {
       <div className="flex gap-2 border-t border-accent/10 px-4 py-3 sm:px-6">
         <Link
           href={`/events/${event.slug}`}
-          className="mp-btn-lux inline-flex flex-1 items-center justify-center rounded-xl bg-gradient-to-b from-accent-2 to-accent px-4 py-2.5 text-[11px] font-semibold text-ink"
+          className="mp-btn-lux inline-flex flex-1 items-center justify-center rounded-sm bg-ivory px-4 py-2.5 text-[11px] font-semibold text-ink"
         >
           View convention
         </Link>

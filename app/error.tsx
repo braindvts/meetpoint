@@ -27,7 +27,7 @@ export default function GlobalError({
         <button
           type="button"
           onClick={reset}
-          className="bg-gradient-to-b from-accent-2 to-accent px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-ink"
+          className="bg-ivory px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-ink"
         >
           Try again
         </button>

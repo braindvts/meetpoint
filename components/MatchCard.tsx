@@ -107,12 +107,12 @@ export default function MatchCard({
       tabIndex={onOpenProfile ? 0 : undefined}
       onClick={() => onOpenProfile?.(person.id)}
       onKeyDown={handleKey}
-      className={`flex h-full min-h-[320px] flex-col overflow-hidden rounded-[18px] border border-accent/20 bg-[#12110f] ${
+      className={`flex h-full min-h-[320px] flex-col overflow-hidden rounded-lg border border-white/[0.08] bg-[#0a0a0a] ${
         onOpenProfile || preview ? "cursor-pointer [-webkit-tap-highlight-color:transparent]" : ""
       }`}
     >
       <div className="flex gap-3.5 px-4 pb-3 pt-4">
-        <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-[12px] border border-accent/20 bg-black sm:h-[72px] sm:w-[72px]">
+        <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-md border border-white/10 bg-black sm:h-[72px] sm:w-[72px]">
           {person.photoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -144,12 +144,12 @@ export default function MatchCard({
               />
             </h3>
             {isNew ? (
-              <span className="shrink-0 rounded-full bg-accent px-2 py-0.5 text-[9.5px] font-semibold uppercase tracking-[0.14em] text-ink">
+              <span className="shrink-0 border border-white/15 px-2 py-0.5 text-[9.5px] font-semibold uppercase tracking-[0.14em] text-muted">
                 New
               </span>
             ) : null}
           </div>
-          <p className="mt-0.5 truncate text-[13px] font-medium text-accent">{person.jobTitle}</p>
+          <p className="mt-0.5 truncate text-[13px] font-medium text-ivory/70">{person.jobTitle}</p>
           <p className="mt-0.5 truncate text-[12px] text-ivory/55">
             {person.city.name}, {person.city.country}
             {distance > 0 ? ` · ${formatDistance(distance)}` : ""}
@@ -172,10 +172,10 @@ export default function MatchCard({
               return (
                 <span
                   key={tag}
-                  className={`rounded-full border px-2 py-[3px] text-[11px] ${
+                  className={`border px-2 py-[3px] text-[11px] ${
                     shared
-                      ? "border-accent/45 bg-accent/10 text-accent"
-                      : "border-white/12 bg-white/[0.04] text-ivory/70"
+                      ? "border-white/25 bg-white/[0.06] text-ivory"
+                      : "border-white/10 bg-transparent text-ivory/65"
                   }`}
                 >
                   {tag}
@@ -208,7 +208,7 @@ export default function MatchCard({
         </p>
       </div>
 
-      <div className="mt-auto flex items-center gap-3 border-t border-white/[0.07] px-4 py-3">
+      <div className="mt-auto flex items-center gap-2 border-t border-white/[0.07] px-4 py-3">
         {onSkip && !preview ? (
           <button
             type="button"
@@ -217,11 +217,9 @@ export default function MatchCard({
               e.stopPropagation();
               onSkip(person.id);
             }}
-            className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-white/18 text-ivory/80 transition active:scale-95"
+            className="rounded-md border border-white/15 px-3 py-2 text-[11px] font-medium uppercase tracking-[0.12em] text-muted transition hover:border-white/30 hover:text-ivory active:scale-[0.99]"
           >
-            <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth="1.8">
-              <path d="M7 7l10 10M17 7 7 17" strokeLinecap="round" />
-            </svg>
+            Pass
           </button>
         ) : null}
 
@@ -235,51 +233,23 @@ export default function MatchCard({
             (!status && !canConnect && !onNeedVerified)
           }
           onClick={handleConnect}
-          className={`grid h-11 w-11 shrink-0 place-items-center rounded-full transition active:scale-95 ${
+          className={`rounded-md px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] transition active:scale-[0.99] disabled:opacity-45 ${
             status === "connected"
               ? onChat
-                ? "bg-gradient-to-b from-accent-2 to-accent text-ink shadow-[0_8px_20px_rgba(212,196,168,0.22)]"
-                : "border border-accent/25 text-muted"
+                ? "bg-ivory text-ink"
+                : "border border-white/15 text-muted"
               : status === "requested"
-                ? "border border-accent/45 text-accent"
+                ? "border border-white/20 text-muted"
                 : !canConnect && !preview
                   ? "border border-accent/40 text-accent"
-                  : "bg-gradient-to-b from-accent-2 to-accent text-ink shadow-[0_8px_20px_rgba(212,196,168,0.22)]"
-          }`}
-        >
-          {status === "connected" && onChat ? (
-            <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth="1.8">
-              <path d="M5 6.5h14a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5H10l-4 3v-3H5A1.5 1.5 0 0 1 3.5 15V8A1.5 1.5 0 0 1 5 6.5z" strokeLinejoin="round" />
-            </svg>
-          ) : status === "requested" ? (
-            <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth="1.8">
-              <circle cx="12" cy="12" r="8" />
-              <path d="M12 8v4.5l2.5 1.5" strokeLinecap="round" />
-            </svg>
-          ) : !canConnect && !preview && !status ? (
-            <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth="1.8">
-              <rect x="6" y="11" width="12" height="8" rx="1.5" />
-              <path d="M8.5 11V8.5a3.5 3.5 0 0 1 7 0V11" strokeLinecap="round" />
-            </svg>
-          ) : (
-            <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth="2.2">
-              <path d="M5 12.5l4.2 4.2L19 7.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          )}
-        </button>
-
-        <p
-          className={`text-[12px] font-medium ${
-            status === "requested" || (!canConnect && !preview && status !== "connected")
-              ? "text-accent"
-              : "text-ivory/70"
+                  : "bg-ivory text-ink"
           }`}
         >
           {actionLabel()}
-        </p>
+        </button>
 
         {onOpenProfile && !preview ? (
-          <span className="ml-auto text-[11.5px] text-muted">Full profile →</span>
+          <span className="ml-auto text-[11.5px] text-muted">Profile →</span>
         ) : null}
       </div>
     </article>

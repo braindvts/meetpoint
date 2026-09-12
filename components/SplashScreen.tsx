@@ -135,8 +135,8 @@ export default function SplashScreen() {
       }}
     >
       <div className="pointer-events-none absolute inset-0" aria-hidden>
-        <div className="mp-splash-glow absolute left-[28%] top-[30%] h-[22rem] w-[22rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/14 blur-3xl" />
-        <div className="mp-splash-glow mp-splash-glow--late absolute right-[18%] top-[58%] h-[18rem] w-[18rem] translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/10 blur-3xl" />
+        <div className="mp-splash-glow absolute inset-0 bg-[radial-gradient(ellipse_at_40%_35%,rgba(196,180,150,0.07),transparent_55%)]" />
+        <div className="mp-splash-glow mp-splash-glow--late absolute inset-0 bg-[radial-gradient(ellipse_at_70%_65%,rgba(196,180,150,0.04),transparent_50%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_10%,#050505_78%)]" />
         <div className="mp-splash-grain absolute inset-0 opacity-[0.06]" />
         <div className="mp-splash-vignette absolute inset-0" />
@@ -184,9 +184,9 @@ export default function SplashScreen() {
           {line}
         </p>
 
-        <div className="mp-splash-bar mt-12 h-[2px] w-44 overflow-hidden rounded-full bg-white/[0.08] sm:w-52">
+        <div className="mp-splash-bar mt-12 h-px w-44 overflow-hidden bg-white/[0.1] sm:w-52">
           <span
-            className="mp-splash-bar-fill block h-full rounded-full bg-gradient-to-r from-accent/30 via-accent-2 to-accent/30"
+            className="mp-splash-bar-fill block h-full bg-accent/70"
             style={{
               width: `${Math.min(100, (shown / LETTERS.length) * 100)}%`,
               transition: "width 320ms cubic-bezier(0.22, 1, 0.36, 1)",

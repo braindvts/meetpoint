@@ -56,7 +56,7 @@ export default function NotifyPrompt() {
           <button
             type="button"
             onClick={enable}
-            className="flex-1 bg-gradient-to-b from-accent-2 to-accent py-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-ink"
+            className="flex-1 bg-ivory py-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-ink"
           >
             Enable
           </button>

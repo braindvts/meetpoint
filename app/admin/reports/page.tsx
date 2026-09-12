@@ -173,7 +173,7 @@ export default function ReportsAdminPage() {
           <button
             type="submit"
             disabled={busy || !secret.trim()}
-            className="mt-4 w-full bg-gradient-to-b from-accent-2 to-accent py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink disabled:opacity-40"
+            className="mt-4 w-full bg-ivory py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink disabled:opacity-40"
           >
             {busy ? "Opening…" : "Open queue"}
           </button>

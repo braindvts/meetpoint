@@ -180,7 +180,7 @@ export default function ReportDialog({
           <button
             type="submit"
             disabled={busy}
-            className="flex-1 bg-gradient-to-b from-accent-2 to-accent py-2.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink disabled:opacity-40"
+            className="flex-1 bg-ivory py-2.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink disabled:opacity-40"
           >
             {busy ? "Sending…" : "Submit report"}
           </button>

@@ -37,24 +37,18 @@ export default function MembershipTiers({ input, missing, missingHint }: Props) 
             <div
               key={t.tier}
               className={`border px-2.5 py-2 sm:px-3.5 sm:py-3 ${TIER_CARD[t.tier].row} ${
-                active && !black ? "ring-1 ring-ivory/20" : ""
-              } ${active && black ? "ring-1 ring-white/25" : ""} ${
+                active && !black ? "outline outline-1 outline-white/15" : ""
+              } ${active && black ? "border-accent/45" : ""} ${
                 black ? "py-3 sm:py-3.5" : ""
               }`}
             >
-              {black && (
-                <span
-                  className="pointer-events-none absolute inset-0 bg-[linear-gradient(118deg,rgba(255,255,255,0.1)_0%,transparent_40%)]"
-                  aria-hidden
-                />
-              )}
               <div className="relative z-[1] flex items-center gap-2.5">
                 <TierBadge tier={t.tier} size="sm" />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <p
                       className={`truncate font-semibold text-[13px] sm:text-base ${
-                        black ? "text-[#f5f5f5]" : TIER_CARD[t.tier].label
+                        black ? "text-ivory" : TIER_CARD[t.tier].label
                       }`}
                     >
                       {t.name}
@@ -62,7 +56,7 @@ export default function MembershipTiers({ input, missing, missingHint }: Props) 
                     {active && (
                       <span
                         className={`shrink-0 text-[8px] font-semibold uppercase tracking-[0.14em] ${
-                          black ? "text-[#f5f5f5]" : "text-accent-2"
+                          black ? "text-accent" : "text-accent-2"
                         }`}
                       >
                         You
@@ -71,7 +65,7 @@ export default function MembershipTiers({ input, missing, missingHint }: Props) 
                   </div>
                   <p
                     className={`truncate text-[10px] sm:text-[11px] ${
-                      black ? "text-[#a8a8a8]" : "text-muted"
+                      black ? "text-muted" : "text-muted"
                     }`}
                   >
                     {t.howToEarn}

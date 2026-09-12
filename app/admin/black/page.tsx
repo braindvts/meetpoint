@@ -78,7 +78,7 @@ export default function BlackAdminPage() {
           type="button"
           disabled={busy || !secret || !memberId}
           onClick={() => grant(true)}
-          className="flex-1 bg-gradient-to-b from-accent-2 to-accent py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink disabled:opacity-40"
+          className="flex-1 bg-ivory py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink disabled:opacity-40"
         >
           Grant BLACK
         </button>

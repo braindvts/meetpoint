@@ -213,14 +213,16 @@ export default function DiscoverPage() {
         </header>
 
         <div className="px-4 pt-3 md:px-0 md:pt-4">
-          <div className="flex max-w-md rounded-full border border-white/12 bg-[#12110f] p-1 md:max-w-lg">
+          <div className="flex max-w-md border border-white/10 bg-[#0a0a0a] p-0.5 md:max-w-lg">
             {(["open", "local"] as Filter[]).map((key) => (
               <button
                 key={key}
                 type="button"
                 onClick={() => setFilter(key)}
-                className={`flex-1 rounded-full py-2 text-[12px] font-medium transition ${
-                  filter === key ? "bg-accent text-ink" : "text-ivory/70"
+                className={`flex-1 py-2 text-[12px] font-medium transition ${
+                  filter === key
+                    ? "bg-ivory text-ink"
+                    : "text-ivory/65 hover:text-ivory"
                 }`}
               >
                 {key === "open"

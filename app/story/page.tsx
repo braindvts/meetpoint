@@ -26,7 +26,7 @@ export default function StoryPage() {
         <a
           href="/conclave-instagram.png"
           download="conclave-instagram.png"
-          className="rounded-xl bg-gradient-to-b from-accent-2 to-accent py-3.5 text-[12px] font-semibold text-ink"
+          className="rounded-sm bg-ivory py-3.5 text-[12px] font-semibold text-ink"
         >
           Save picture (PNG)
         </a>

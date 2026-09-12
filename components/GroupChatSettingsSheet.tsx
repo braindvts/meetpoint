@@ -142,7 +142,7 @@ export default function GroupChatSettingsSheet({ open, chat, onClose, onSaved }:
           <button
             type="button"
             onClick={save}
-            className="mp-btn-lux w-full rounded-xl bg-gradient-to-b from-accent-2 to-accent py-3 text-[12px] font-semibold text-ink"
+            className="mp-btn-lux w-full rounded-sm bg-ivory py-3 text-[12px] font-semibold text-ink"
           >
             Save
           </button>

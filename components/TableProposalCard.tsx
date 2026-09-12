@@ -230,7 +230,7 @@ export default function TableProposalCard({
               <button
                 type="button"
                 onClick={cancelBookingFlow}
-                className="shrink-0 rounded-full border border-white/25 bg-black/50 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-white"
+                className="shrink-0 rounded-sm border border-white/25 bg-black/50 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-white"
               >
                 Close
               </button>
@@ -296,14 +296,14 @@ export default function TableProposalCard({
                   setPhone((p) => p || profilePhone);
                   setStep("phone");
                 }}
-                className="rounded-full bg-gradient-to-b from-accent-2 to-accent px-5 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-ink disabled:opacity-40"
+                className="rounded-sm bg-ivory px-5 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-ink disabled:opacity-40"
               >
                 Continue
               </button>
               <button
                 type="button"
                 onClick={cancelBookingFlow}
-                className="rounded-full border border-line px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted"
+                className="rounded-sm border border-line px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted"
               >
                 Cancel
               </button>
@@ -334,7 +334,7 @@ export default function TableProposalCard({
                 type="button"
                 disabled={!phoneValid}
                 onClick={() => setStep("pay")}
-                className="rounded-full bg-gradient-to-b from-accent-2 to-accent px-5 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-ink disabled:opacity-40"
+                className="rounded-sm bg-ivory px-5 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-ink disabled:opacity-40"
               >
                 Continue
               </button>
@@ -370,7 +370,7 @@ export default function TableProposalCard({
                 type="button"
                 disabled={paying || !scheduleValid || !phoneValid}
                 onClick={() => payInline("apple-pay")}
-                className="w-full rounded-full bg-white py-3 text-[13px] font-semibold text-black disabled:opacity-40"
+                className="w-full rounded-sm bg-white py-3 text-[13px] font-semibold text-black disabled:opacity-40"
               >
                 {paying ? "Authorizing…" : `Pay ${perPerson} with Apple Pay`}
               </button>
@@ -378,7 +378,7 @@ export default function TableProposalCard({
                 type="button"
                 disabled={paying || !scheduleValid || !phoneValid}
                 onClick={() => payInline("card")}
-                className="w-full rounded-full border border-white/25 py-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-ivory disabled:opacity-40"
+                className="w-full rounded-sm border border-white/25 py-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-ivory disabled:opacity-40"
               >
                 Pay with card instead
               </button>
@@ -398,7 +398,7 @@ export default function TableProposalCard({
               <button
                 type="button"
                 onClick={onAgree}
-                className="rounded-full bg-gradient-to-b from-accent-2 to-accent px-5 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-ink"
+                className="rounded-sm bg-ivory px-5 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-ink"
               >
                 I agree
               </button>
@@ -407,7 +407,7 @@ export default function TableProposalCard({
               <button
                 type="button"
                 onClick={() => setStep("schedule")}
-                className="rounded-full bg-gradient-to-b from-accent-2 to-accent px-5 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-ink"
+                className="rounded-sm bg-ivory px-5 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-ink"
               >
                 Set time & book
               </button>
