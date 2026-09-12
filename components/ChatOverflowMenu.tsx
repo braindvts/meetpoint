@@ -16,6 +16,10 @@ type Props = {
   onEditGroup?: () => void;
   /** After leave / delete / block — leave the thread. */
   onLeft?: () => void;
+  /** Smaller trigger for the inbox row. */
+  compact?: boolean;
+  /** Open the menu upward (useful near the bottom of the list). */
+  menuUp?: boolean;
 };
 
 /**
@@ -28,6 +32,8 @@ export default function ChatOverflowMenu({
   isGroup,
   onEditGroup,
   onLeft,
+  compact = false,
+  menuUp = false,
 }: Props) {
   const [open, setOpen] = useState(false);
   const [muted, setMuted] = useState(false);
@@ -106,10 +112,17 @@ export default function ChatOverflowMenu({
         aria-label="Chat options"
         aria-haspopup="menu"
         aria-expanded={open}
-        onClick={() => setOpen((v) => !v)}
-        className="grid h-9 w-9 place-items-center rounded-lg border border-white/12 text-ivory/80 transition hover:border-accent/40 hover:text-accent"
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpen((v) => !v);
+        }}
+        className={
+          compact
+            ? "grid h-7 w-7 place-items-center rounded-md text-muted transition hover:bg-white/[0.06] hover:text-ivory"
+            : "grid h-9 w-9 place-items-center rounded-lg border border-white/12 text-ivory/80 transition hover:border-accent/40 hover:text-accent"
+        }
       >
-        <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor" aria-hidden>
+        <svg viewBox="0 0 24 24" className={compact ? "h-3.5 w-3.5" : "h-4 w-4"} fill="currentColor" aria-hidden>
           <circle cx="5" cy="12" r="1.6" />
           <circle cx="12" cy="12" r="1.6" />
           <circle cx="19" cy="12" r="1.6" />
@@ -119,7 +132,9 @@ export default function ChatOverflowMenu({
       {open ? (
         <div
           role="menu"
-          className="absolute right-0 top-[calc(100%+6px)] z-40 min-w-[11.5rem] overflow-hidden rounded-xl border border-white/12 bg-[#0c0c0c] py-1 shadow-[0_16px_40px_rgba(0,0,0,0.65)]"
+          className={`absolute right-0 z-50 min-w-[11.5rem] overflow-hidden rounded-xl border border-white/12 bg-[#0c0c0c] py-1 shadow-[0_16px_40px_rgba(0,0,0,0.65)] ${
+            menuUp ? "bottom-[calc(100%+6px)]" : "top-[calc(100%+6px)]"
+          }`}
         >
           <button type="button" role="menuitem" className={`${item} text-ivory`} onClick={muteToggle}>
             {muted ? "Unmute" : "Mute"}

@@ -10,6 +10,7 @@ import ChatThreadPanel from "@/components/ChatThreadPanel";
 import EmptyState from "@/components/EmptyState";
 import NewChatSheet from "@/components/NewChatSheet";
 import InterlinksSheet from "@/components/InterlinksSheet";
+import ChatOverflowMenu from "@/components/ChatOverflowMenu";
 import {
   loadChats,
   loadConnections,
@@ -325,81 +326,92 @@ function ChatsInner() {
               </div>
             ) : (
               <div className="mp-stagger space-y-1">
-                {filteredRows.map((row) => {
+                {filteredRows.map((row, index) => {
                   const active = row.chat.id === selectedId;
                   const unread = unreadCountForChat(row.chat);
                   const muted = isChatMuted(row.chat.id);
                   return (
-                    <button
+                    <div
                       key={row.key}
-                      type="button"
-                      onClick={() => selectChat(row.chat.id)}
-                      className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition ${
+                      className={`flex w-full items-center gap-2 rounded-xl px-2 py-2.5 transition ${
                         active
                           ? "bg-accent/15 ring-1 ring-accent/35"
                           : "hover:bg-white/[0.04]"
                       }`}
                     >
-                      <div className="relative shrink-0">
-                        <Avatar
-                          src={
-                            row.isGroup
-                              ? row.chat.photo || row.person?.photoUrl
-                              : row.person?.photoUrl
-                          }
-                          name={row.person?.name || row.title}
-                          sizeCls="h-11 w-11"
-                          rounded="rounded-[12px]"
-                        />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-baseline justify-between gap-2">
+                      <button
+                        type="button"
+                        onClick={() => selectChat(row.chat.id)}
+                        className="flex min-w-0 flex-1 items-center gap-3 px-1 py-0.5 text-left"
+                      >
+                        <div className="relative shrink-0">
+                          <Avatar
+                            src={
+                              row.isGroup
+                                ? row.chat.photo || row.person?.photoUrl
+                                : row.person?.photoUrl
+                            }
+                            name={row.person?.name || row.title}
+                            sizeCls="h-11 w-11"
+                            rounded="rounded-[12px]"
+                          />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-baseline justify-between gap-2">
+                            <p className="flex min-w-0 items-center gap-1.5 truncate font-medium text-ivory">
+                              <span className={`truncate ${unread > 0 ? "font-semibold" : ""}`}>
+                                {row.title}
+                              </span>
+                              {muted ? (
+                                <span className="shrink-0 text-[10px] font-medium uppercase tracking-[0.12em] text-muted">
+                                  Muted
+                                </span>
+                              ) : null}
+                              {row.isGroup ? (
+                                <span className="shrink-0 text-[10px] font-medium uppercase tracking-[0.12em] text-accent/80">
+                                  Group
+                                </span>
+                              ) : row.person ? (
+                                <NameMarks
+                                  black={!!row.person.black}
+                                  trusted={(row.person.blackConnections ?? 0) > 0}
+                                  trustedCount={row.person.blackConnections}
+                                  size="xs"
+                                />
+                              ) : null}
+                            </p>
+                            {row.lastAt ? (
+                              <span className="shrink-0 text-[11px] text-muted">
+                                {relativeTime(row.lastAt)}
+                              </span>
+                            ) : null}
+                          </div>
                           <p
-                            className={`flex min-w-0 items-center gap-1.5 truncate font-medium ${
-                              unread > 0 ? "text-ivory" : "text-ivory"
+                            className={`mt-0.5 truncate text-[12px] ${
+                              unread > 0 ? "font-medium text-ivory/85" : "text-muted"
                             }`}
                           >
-                            <span className={`truncate ${unread > 0 ? "font-semibold" : ""}`}>
-                              {row.title}
-                            </span>
-                            {muted ? (
-                              <span className="shrink-0 text-[10px] font-medium uppercase tracking-[0.12em] text-muted">
-                                Muted
-                              </span>
-                            ) : null}
-                            {row.isGroup ? (
-                              <span className="shrink-0 text-[10px] font-medium uppercase tracking-[0.12em] text-accent/80">
-                                Group
-                              </span>
-                            ) : row.person ? (
-                              <NameMarks
-                                black={!!row.person.black}
-                                trusted={(row.person.blackConnections ?? 0) > 0}
-                                trustedCount={row.person.blackConnections}
-                                size="xs"
-                              />
-                            ) : null}
+                            {row.preview}
                           </p>
-                          {row.lastAt && (
-                            <span className="shrink-0 text-[11px] text-muted">
-                              {relativeTime(row.lastAt)}
-                            </span>
-                          )}
                         </div>
-                        <p
-                          className={`mt-0.5 truncate text-[12px] ${
-                            unread > 0 ? "font-medium text-ivory/85" : "text-muted"
-                          }`}
-                        >
-                          {row.preview}
-                        </p>
-                      </div>
-                      {unread > 0 ? (
-                        <span className="grid h-5 min-w-5 shrink-0 place-items-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold text-white">
-                          {unread > 99 ? "99+" : unread}
-                        </span>
-                      ) : null}
-                    </button>
+                        {unread > 0 ? (
+                          <span className="grid h-5 min-w-5 shrink-0 place-items-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold text-white">
+                            {unread > 99 ? "99+" : unread}
+                          </span>
+                        ) : null}
+                      </button>
+                      <ChatOverflowMenu
+                        chat={row.chat}
+                        compact
+                        menuUp={index > filteredRows.length - 3}
+                        isGroup={row.isGroup}
+                        peerId={!row.isGroup ? row.chat.memberIds[0] : undefined}
+                        peerName={!row.isGroup ? row.person?.name || row.title : undefined}
+                        onLeft={() => {
+                          if (selectedId === row.chat.id) clearSelection();
+                        }}
+                      />
+                    </div>
                   );
                 })}
               </div>
