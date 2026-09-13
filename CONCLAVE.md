@@ -153,7 +153,7 @@ NEXT_PUBLIC_ENABLE_DEMO_PROFILES=1
 
 - **Frontend:** Next.js App Router, TypeScript, Tailwind  
 - **DB:** Postgres via Prisma (`Member`, connections, chats, BLACK tables, `EventInterest`, `Report`)
-- **Vercel build:** `prisma generate && next build` only. Do **not** run `prisma db push` on deploy — it tried to DROP live `Report` columns (`alsoBlocked`, `category`, `notes`, `status`). Details: [prisma/README.md](./prisma/README.md).
+- **Vercel build:** `prisma generate && node scripts/prisma-migrate-deploy.mjs && next build` (`migrate deploy` only). Never `prisma db push` on Production (that tried to DROP live `Report` columns). Never `--accept-data-loss`. Details: [prisma/README.md](./prisma/README.md).
 - **Auth:** email/password + Google / LinkedIn / Apple (when keyed)  
 - **Payments:** Stripe Checkout (`premier`, `black_month`, `black_year`)  
 - **Email:** Resend welcome on sign-up  
@@ -205,4 +205,4 @@ See [MISSING.md](./MISSING.md). Big ones: email verify + password reset links, c
 | Premier access | `lib/plans.ts` |
 | Walkthrough owner (env-gated) | `lib/walkthroughOwner.ts`, `lib/ensureDemoOwner.ts` |
 | Waitlist → Notion | `lib/waitlist.ts`, `app/api/waitlist/route.ts`, `components/WaitlistForm.tsx` |
-| Reports / deploy vs db push | `app/api/report/route.ts`, [prisma/README.md](./prisma/README.md) |
+| Reports / migrate deploy | `app/api/report/route.ts`, [prisma/README.md](./prisma/README.md) |

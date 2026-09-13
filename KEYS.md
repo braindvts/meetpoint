@@ -36,7 +36,7 @@ SQLite is local-only; the live site needs hosted Postgres.
 1. Create a free database at [Neon](https://neon.tech) or [Supabase](https://supabase.com).
 2. Copy the connection string (it looks like `postgresql://user:password@host/dbname?sslmode=require`).
 3. Set `DATABASE_URL` in `.env.local` **and** in `.env` (Prisma CLI reads `.env`), plus your host.
-4. Create the tables on an **empty** database: `npx prisma db push` (never `--accept-data-loss`). Vercel builds run `prisma generate && next build` only — see [prisma/README.md](./prisma/README.md).
+4. Apply tables with `npm run db:deploy` (`prisma migrate deploy` only — never `db push` on Production, never `--accept-data-loss`). Vercel: `prisma generate && node scripts/prisma-migrate-deploy.mjs && next build` — see [prisma/README.md](./prisma/README.md).
 
 Verify: `/api/health` shows `"database": true`, and `/api/members` returns `{"ok":true,"members":[]}`.
 

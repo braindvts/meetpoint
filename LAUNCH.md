@@ -42,7 +42,7 @@ Cheapest at cost is Cloudflare Registrar. Buy the `.com` if you can; the domain 
 2. Import it at [vercel.com](https://vercel.com) → Add New → Project.
 3. Add your domain under Project → Settings → Domains and follow the DNS instructions.
 
-The Vercel build command is `prisma generate && next build` (`vercel.json`). That compiles the app only — it does **not** change Postgres. First-time tables: `npx prisma db push` against an empty database (never `--accept-data-loss`). Report columns and deploy notes: [prisma/README.md](./prisma/README.md).
+The Vercel build command is `prisma generate && node scripts/prisma-migrate-deploy.mjs && next build` (`vercel.json`). That is **`prisma migrate deploy` only** — never `db push`, never `--accept-data-loss`. A first deploy on the existing Production DB baselines init (P3005) then applies additive SQL. Report columns and deploy notes: [prisma/README.md](./prisma/README.md).
 
 Note on Vercel's free plan: Hobby is for personal, non-commercial projects. Since Interlink charges for Premier, budget for Pro at $20/month.
 
