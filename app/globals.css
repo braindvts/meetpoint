@@ -717,6 +717,50 @@ svg {
   transition-duration: 0.08s;
 }
 
+/* BijuuFlow sponsor — compact lockup, dark-field invert */
+.mp-sponsor-lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--color-ivory);
+}
+.mp-sponsor-lockup-kicker {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  transition: color 0.18s ease;
+}
+.mp-sponsor-lockup-name {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--color-ivory);
+  transition: color 0.18s ease;
+}
+.mp-sponsor-lockup-mark {
+  width: 1.75rem;
+  height: 1.7rem;
+  object-fit: contain;
+  /* Official mark is black on white — invert to ivory, then warm toward champagne */
+  filter: invert(1) sepia(0.18) saturate(0.45) hue-rotate(6deg) brightness(1.02);
+  opacity: 0.92;
+  transition:
+    filter 0.22s var(--ease-out),
+    opacity 0.18s ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .mp-sponsor-lockup:hover .mp-sponsor-lockup-kicker,
+  .mp-sponsor-lockup:hover .mp-sponsor-lockup-name {
+    color: var(--color-accent);
+  }
+  .mp-sponsor-lockup:hover .mp-sponsor-lockup-mark {
+    filter: invert(1) sepia(0.32) saturate(0.7) hue-rotate(4deg) brightness(1.08);
+    opacity: 1;
+  }
+}
+
 /* Cards — hover lift on desktop, press on touch */
 .mp-card-motion {
   transition:
@@ -1277,6 +1321,9 @@ html.mp-boot-splash body::before {
   .mp-row,
   .mp-press,
   .mp-btn-lux,
+  .mp-sponsor-lockup-mark,
+  .mp-sponsor-lockup-kicker,
+  .mp-sponsor-lockup-name,
   .mp-site-nav-link,
   .mp-seg button {
     animation: none !important;

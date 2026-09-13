@@ -1,6 +1,7 @@
 import Link from "next/link";
 import BlackBadge from "@/components/BlackBadge";
 import DemoEnterButton from "@/components/DemoEnterButton";
+import SponsorLockup from "@/components/SponsorLockup";
 import TierBadge from "@/components/TierBadge";
 import { demoEntryEnabled } from "@/lib/demoFlag";
 
@@ -103,6 +104,7 @@ export default function Landing() {
             <p className="mp-reveal mp-reveal-delay-4 mt-8 text-[11px] tracking-wide text-muted">
               Website first · Native app when you’re ready
             </p>
+            <SponsorLockup className="mp-reveal mp-reveal-delay-4 mt-8" />
           </div>
 
           <aside className="mp-reveal mp-reveal-delay-2 mp-landing-frame hidden px-8 py-9 lg:block">
@@ -239,8 +241,13 @@ export default function Landing() {
         </div>
       </section>
 
-      <footer className="border-t border-line/50 px-6 py-8 text-center text-[11px] text-muted">
-        Interlink · Private introductions for ambitious people
+      <footer className="border-t border-line/50 px-6 py-10">
+        <div className="mx-auto flex max-w-6xl flex-col items-center gap-5 text-center">
+          <SponsorLockup />
+          <p className="text-[11px] text-muted">
+            Interlink · Private introductions for ambitious people
+          </p>
+        </div>
       </footer>
     </main>
   );
