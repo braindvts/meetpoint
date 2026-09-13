@@ -36,7 +36,7 @@ export default function MembershipTiers({ input, missing, missingHint }: Props) 
           return (
             <div
               key={t.tier}
-              className={`border px-2.5 py-2 sm:px-3.5 sm:py-3 ${TIER_CARD[t.tier].row} ${
+              className={`mp-row border px-2.5 py-2 sm:px-3.5 sm:py-3 ${TIER_CARD[t.tier].row} ${
                 active ? (black ? "border-accent/50" : "border-white/20") : ""
               } ${black ? "py-3 sm:py-3.5" : ""}`}
             >

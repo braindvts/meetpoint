@@ -154,8 +154,8 @@ export default function NewChatSheet({ open, onClose, people, onCreated }: Props
                     <button
                       type="button"
                       onClick={() => toggle(p.id)}
-                      className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition ${
-                        on ? "bg-accent/15 ring-1 ring-accent/35" : "hover:bg-white/[0.04]"
+                      className={`mp-row flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left ${
+                        on ? "bg-accent/15 ring-1 ring-accent/35" : ""
                       }`}
                     >
                       <Avatar

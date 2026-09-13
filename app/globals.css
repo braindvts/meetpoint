@@ -49,6 +49,66 @@ a {
   touch-action: manipulation;
 }
 
+/* —— One motion language ——
+   Hover: 1px lift + hairline brighten (fine pointers)
+   Press: 0.97 scale, 140ms
+   Cards: 3px lift
+   Rows: wash only (lists stay geometrically stable)
+   Ease: 0.22 / 1 / 0.36 / 1 across the product
+*/
+:root {
+  --mp-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --mp-press-ms: 140ms;
+  --mp-hover-ms: 280ms;
+}
+
+.mp-press {
+  transition:
+    transform var(--mp-press-ms) var(--mp-ease),
+    background-color var(--mp-hover-ms) var(--mp-ease),
+    border-color var(--mp-hover-ms) var(--mp-ease),
+    color var(--mp-hover-ms) var(--mp-ease),
+    box-shadow var(--mp-hover-ms) var(--mp-ease),
+    opacity var(--mp-hover-ms) var(--mp-ease);
+  will-change: transform;
+}
+.mp-press:active {
+  transform: scale(0.97);
+}
+.mp-press:disabled,
+.mp-press[aria-disabled="true"],
+.mp-press:disabled:hover,
+.mp-press[aria-disabled="true"]:hover {
+  transform: none;
+}
+
+.mp-btn-ghost {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: transparent;
+  color: var(--color-ivory);
+  transition:
+    transform var(--mp-press-ms) var(--mp-ease),
+    background-color var(--mp-hover-ms) var(--mp-ease),
+    border-color var(--mp-hover-ms) var(--mp-ease),
+    color var(--mp-hover-ms) var(--mp-ease);
+}
+.mp-btn-ghost:hover {
+  border-color: rgba(196, 180, 150, 0.45);
+  color: var(--color-accent);
+}
+.mp-btn-ghost:active {
+  transform: scale(0.97);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .mp-press:hover {
+    transform: translateY(-1px);
+  }
+  .mp-press:active {
+    transform: scale(0.97);
+  }
+}
+
 /* Quiet black field — near-black only, accent reserved for rare highlights */
 body {
   background: var(--color-ink);
@@ -200,6 +260,13 @@ body:has([data-shot]) nextjs-portal {
   letter-spacing: 0.28em;
   text-transform: uppercase;
   color: var(--color-ivory);
+  transition:
+    transform var(--mp-press-ms) var(--mp-ease),
+    color var(--mp-hover-ms) var(--mp-ease),
+    opacity var(--mp-hover-ms) var(--mp-ease);
+}
+.mp-site-nav-brand:active {
+  transform: scale(0.97);
 }
 .mp-site-nav-links {
   display: flex;
@@ -216,22 +283,47 @@ body:has([data-shot]) nextjs-portal {
 }
 .mp-site-nav-link {
   flex-shrink: 0;
+  position: relative;
   border-radius: 4px;
   padding: 0.5rem 0.75rem;
   font-size: 13px;
   font-weight: 500;
   color: var(--color-muted);
-  transition: color 0.15s ease, background 0.15s ease;
+  transition:
+    transform var(--mp-press-ms) var(--mp-ease),
+    color var(--mp-hover-ms) var(--mp-ease),
+    background-color var(--mp-hover-ms) var(--mp-ease);
+}
+.mp-site-nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0.75rem;
+  right: 0.75rem;
+  bottom: 0.28rem;
+  height: 1px;
+  background: var(--color-accent);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.32s var(--mp-ease);
+  pointer-events: none;
 }
 .mp-site-nav-link:hover {
   color: var(--color-ivory);
   background: rgba(255, 255, 255, 0.04);
 }
+.mp-site-nav-link:hover::after {
+  transform: scaleX(0.55);
+}
+.mp-site-nav-link:active {
+  transform: scale(0.97);
+}
 .mp-site-nav-link.is-active {
   color: var(--color-ivory);
   background: rgba(255, 255, 255, 0.06);
   font-weight: 600;
-  box-shadow: inset 0 -1px 0 0 color-mix(in srgb, var(--color-accent) 55%, transparent);
+}
+.mp-site-nav-link.is-active::after {
+  transform: scaleX(1);
 }
 
 /* Leave room under the fixed top bar */
@@ -268,8 +360,12 @@ html.mp-has-site-nav body {
   color: var(--color-muted);
   border-radius: 4px;
   transition:
-    color 0.2s ease,
-    background 0.2s ease;
+    transform var(--mp-press-ms) var(--mp-ease),
+    color var(--mp-hover-ms) var(--mp-ease),
+    background-color var(--mp-hover-ms) var(--mp-ease);
+}
+.mp-seg button:active {
+  transform: scale(0.97);
 }
 .mp-seg button[aria-pressed="true"] {
   background: rgba(255, 255, 255, 0.1);
@@ -634,7 +730,7 @@ svg {
   animation: tabUnderline 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-/* Primary CTA — soft rectangle, not a pill */
+/* Primary CTA — ivory field, shared press language */
 .mp-btn-lux {
   position: relative;
   overflow: hidden;
@@ -643,34 +739,47 @@ svg {
   color: var(--color-ink) !important;
   background-image: none !important;
   transition:
-    transform 0.15s ease,
-    opacity 0.15s ease,
-    background 0.15s ease;
+    transform var(--mp-press-ms) var(--mp-ease),
+    opacity var(--mp-hover-ms) var(--mp-ease),
+    background-color var(--mp-hover-ms) var(--mp-ease),
+    box-shadow var(--mp-hover-ms) var(--mp-ease);
 }
 .mp-btn-lux::after {
   content: none;
 }
 .mp-btn-lux:hover {
   background: #f5f2ea !important;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
 }
 .mp-btn-lux:active {
-  transform: scale(0.99);
+  transform: scale(0.97);
+  box-shadow: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .mp-btn-lux:hover {
+    transform: translateY(-1px);
+  }
+  .mp-btn-lux:active {
+    transform: scale(0.97);
+  }
 }
 
 /* Cards — hover lift on desktop, press on touch */
 .mp-card-motion {
   transition:
-    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
-    border-color 0.35s ease,
-    box-shadow 0.45s ease;
+    transform 0.4s var(--mp-ease),
+    border-color var(--mp-hover-ms) var(--mp-ease),
+    box-shadow 0.4s var(--mp-ease);
   will-change: transform;
 }
 @media (hover: hover) and (pointer: fine) {
   .mp-card-motion:hover {
-    transform: translateY(-4px);
+    transform: translateY(-3px);
+    border-color: rgba(196, 180, 150, 0.28);
+    box-shadow: 0 14px 32px rgba(0, 0, 0, 0.35);
   }
   .mp-card-motion:hover .mp-card-photo {
-    transform: scale(1.04);
+    transform: scale(1.035);
   }
 }
 .mp-card-motion:active {
@@ -984,21 +1093,20 @@ html.mp-boot-splash body::before {
   animation: pageEnter 0.35s ease-out both;
 }
 
-/* List row press */
+/* List row — wash only; no scale (keeps overflow menus / rails stable) */
 .mp-row {
   transition:
-    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
-    border-color 0.28s ease,
-    background-color 0.28s ease;
+    border-color var(--mp-hover-ms) var(--mp-ease),
+    background-color var(--mp-hover-ms) var(--mp-ease);
 }
 @media (hover: hover) and (pointer: fine) {
   .mp-row:hover {
-    border-color: rgba(255, 255, 255, 0.22);
-    background-color: rgba(255, 255, 255, 0.02);
+    border-color: rgba(255, 255, 255, 0.18);
+    background-color: rgba(255, 255, 255, 0.035);
   }
 }
 .mp-row:active {
-  transform: scale(0.99);
+  background-color: rgba(255, 255, 255, 0.055);
 }
 
 /* Skeleton shimmer */
@@ -1211,13 +1319,37 @@ html.mp-boot-splash body::before {
   .mp-card-pass,
   .mp-card-connect,
   .mp-card-connect-burst,
-  .mp-row {
+  .mp-row,
+  .mp-press,
+  .mp-btn-lux,
+  .mp-btn-ghost,
+  .mp-site-nav-brand,
+  .mp-site-nav-link,
+  .mp-site-nav-link::after,
+  .mp-seg button {
     animation: none !important;
     transition: none !important;
   }
   .mp-card-motion:hover,
   .mp-card-motion:active,
+  .mp-press:hover,
+  .mp-press:active,
+  .mp-btn-lux:hover,
+  .mp-btn-lux:active,
+  .mp-btn-ghost:active,
+  .mp-site-nav-brand:active,
+  .mp-site-nav-link:active,
+  .mp-seg button:active,
   .mp-row:active {
+    transform: none !important;
+    box-shadow: none !important;
+  }
+  .mp-site-nav-link.is-active::after {
+    transform: scaleX(1) !important;
+    opacity: 1;
+  }
+  .mp-card-motion img {
+    transition: none !important;
     transform: none !important;
   }
 }
@@ -1232,59 +1364,92 @@ html.mp-boot-splash body::before {
   }
 }
 
-/* Shared metal mark family — Member / Verified / BLACK */
+/* Signal lockups — node + word. Not metal chips. */
+.level-lockup,
 .level-mark {
   position: relative;
-  overflow: hidden;
-  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  overflow: visible;
   isolation: isolate;
+  background: none;
+  box-shadow: none;
+  border-radius: 0;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  line-height: 1;
 }
-.level-mark-sheen {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  background: linear-gradient(
-    125deg,
-    rgba(255, 255, 255, 0.14) 0%,
-    transparent 42%,
-    transparent 62%,
-    rgba(255, 255, 255, 0.05) 100%
-  );
+.level-lockup-node {
+  display: block;
+  width: 0.42em;
+  height: 0.42em;
+  min-width: 6px;
+  min-height: 6px;
+  border-radius: 999px;
+  flex-shrink: 0;
 }
+.level-lockup-word {
+  position: relative;
+}
+.level-mark-sheen,
 .level-mark-sheen--live::after {
-  content: none;
+  display: none;
 }
 
-/* Member — cool steel */
+/* Member — steel */
+.level-lockup--member,
 .level-mark--member {
-  color: #e8eef6;
-  background: linear-gradient(145deg, #8a9bb0 0%, #5c6d82 42%, #3a4656 100%);
-  box-shadow:
-    0 0 0 1px #2a3440,
-    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  color: #c5d0dc;
+}
+.level-lockup--member .level-lockup-node,
+.level-mark--member::before {
+  background: #8a9bb0;
+  box-shadow: 0 0 0 1px rgba(138, 155, 176, 0.45);
 }
 
-/* Verified — champagne gold */
+/* Verified — champagne */
+.level-lockup--verified,
 .level-mark--verified {
-  color: #1a1610;
-  background: linear-gradient(145deg, #e8dcc8 0%, #c4b08e 45%, #9a8664 100%);
-  box-shadow:
-    0 0 0 1px #5a4c36,
-    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  color: #d4c4a8;
+}
+.level-lockup--verified .level-lockup-node,
+.level-mark--verified::before {
+  background: #c4b496;
+  box-shadow: 0 0 0 1px rgba(196, 180, 150, 0.5);
 }
 
-/* BLACK — solid black + thin bronze edge */
+/* BLACK — void node, ivory word */
+.level-lockup--black,
 .level-mark--black,
 .black-mark {
   color: #f2f2f2;
-  background: #000;
-  box-shadow:
-    0 0 0 1px rgba(196, 180, 150, 0.45),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  background: none;
+  box-shadow: none;
+}
+.level-lockup--black .level-lockup-node,
+.level-mark--black::before,
+.black-mark::before {
+  background: #050505;
+  box-shadow: 0 0 0 1px rgba(196, 180, 150, 0.7);
 }
 .black-mark-sheen {
   display: none;
+}
+
+/* Legacy word-only marks still get a node */
+.level-mark--member::before,
+.level-mark--verified::before,
+.level-mark--black::before,
+.black-mark::before {
+  content: "";
+  width: 0.42em;
+  height: 0.42em;
+  min-width: 6px;
+  min-height: 6px;
+  border-radius: 999px;
+  flex-shrink: 0;
 }
 
 /* BLACK panels — pure black, thin bronze hairline (no silver aura) */

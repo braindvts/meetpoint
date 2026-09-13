@@ -546,7 +546,7 @@ export default function ChatThreadPanel({ chatId, embedded = false, onBack }: Pr
                 type="button"
                 onClick={() => fileRef.current?.click()}
                 aria-label="Attach photo or file"
-                className="mb-0.5 flex h-10 w-10 shrink-0 items-center justify-center border border-line/70 text-muted transition hover:border-accent/50 hover:text-accent-2"
+                className="mp-press mb-0.5 flex h-10 w-10 shrink-0 items-center justify-center border border-line/70 text-muted hover:border-accent/50 hover:text-accent-2"
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
                   <path
@@ -575,7 +575,7 @@ export default function ChatThreadPanel({ chatId, embedded = false, onBack }: Pr
               <button
                 type="submit"
                 disabled={!text.trim()}
-                className="rounded-lg bg-ivory px-5 py-2.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink transition enabled:hover:brightness-110 disabled:opacity-40 sm:px-6"
+                className="mp-btn-lux rounded-lg px-5 py-2.5 text-[11px] font-semibold uppercase tracking-[0.18em] disabled:opacity-40 sm:px-6"
               >
                 Send
               </button>

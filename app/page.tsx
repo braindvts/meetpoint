@@ -1,162 +1,184 @@
 import Link from "next/link";
 import DemoEnterButton from "@/components/DemoEnterButton";
+import TierBadge from "@/components/TierBadge";
 import { demoEntryEnabled } from "@/lib/demoFlag";
+
+const STEPS = [
+  {
+    name: "Identity",
+    copy: "Photo, name, role, ambitions, and what you’re looking for. That’s enough to enter as a Member.",
+  },
+  {
+    name: "The room",
+    copy: "Discover people who fit — nearby or worldwide. Verification is optional until you want Verified reach.",
+  },
+  {
+    name: "The table",
+    copy: "When it clicks, you sit down. Introductions here are meant to end at dinner, not another chat thread.",
+  },
+] as const;
+
+const STANDING = [
+  {
+    tier: 3 as const,
+    copy: "Paid or earned. The top level — never granted by a friend’s invite.",
+  },
+  {
+    tier: 2 as const,
+    copy: "Identity plus business email, LinkedIn, and resume — when you’re ready.",
+  },
+  {
+    tier: 1 as const,
+    copy: "You’re in with Identity alone. Skip verification and you stay Member.",
+  },
+];
 
 /**
  * Browser marketing site — website first.
- * Native app can wrap this same site later; do not shrink it back into a phone frame.
+ * Cool and professional: editorial club, not a SaaS feature grid.
  */
 export default function Landing() {
   return (
     <main className="mp-site">
       <header className="relative z-10 mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-accent">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-ivory">
           Interlink
         </p>
-        <div className="flex items-center gap-5">
-          <Link href="/login" className="text-[13px] text-muted transition hover:text-ivory">
+        <div className="flex items-center gap-4">
+          <Link href="/login" className="mp-press text-[13px] text-muted hover:text-ivory">
             Sign in
           </Link>
           <Link
             href="/login"
-            className="rounded-lg bg-ivory px-4 py-2 text-[12px] font-semibold tracking-wide text-ink"
+            className="mp-btn-lux inline-flex px-4 py-2 text-[12px] font-semibold tracking-wide"
           >
             Get started
           </Link>
         </div>
       </header>
 
-      {/* Hero — one composition: brand, line, CTAs */}
-      <section className="relative flex min-h-[calc(100dvh-4.5rem)] flex-col justify-center px-6 pb-20 pt-8">
-        <div
-          className="pointer-events-none absolute inset-0 overflow-hidden"
-          aria-hidden
-        >
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_40%,rgba(196,180,150,0.06),transparent_55%)]" />
-          <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black to-transparent" />
+      <section className="relative px-6 pb-20 pt-10 sm:pt-16">
+        <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/12 to-transparent" />
+          <div className="absolute left-[12%] top-24 hidden h-[28rem] w-px bg-white/[0.06] lg:block" />
         </div>
 
-        <div className="relative mx-auto w-full max-w-3xl text-center">
-          <h1 className="mp-reveal text-[clamp(2.75rem,8vw,5.5rem)] font-semibold leading-[0.95] tracking-[0.08em] text-accent">
-            INTERLINK
-          </h1>
-          <p className="mp-reveal mp-reveal-delay-2 mx-auto mt-6 max-w-md text-[1.05rem] leading-relaxed text-ivory/70 sm:text-lg">
-            The private network for ambitious people — introductions that end at a table.
-          </p>
-          <div className="mp-reveal mp-reveal-delay-3 mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
-            <Link
-              href="/login"
-              className="inline-flex min-w-[12rem] items-center justify-center rounded-lg bg-ivory px-8 py-3.5 text-[12px] font-semibold tracking-wide text-ink"
-            >
-              Join on the web
-            </Link>
-            <Link
-              href="/login"
-              className="inline-flex min-w-[12rem] items-center justify-center rounded-lg border border-white/20 px-8 py-3.5 text-[12px] font-medium tracking-wide text-ivory/80 transition hover:border-accent/40 hover:text-accent"
-            >
-              Sign in
-            </Link>
-          </div>
-          {demoEntryEnabled() && (
-            <div className="mp-reveal mp-reveal-delay-3 mt-5">
-              <DemoEnterButton label="Enter demo" className="text-[13px] text-accent" />
+        <div className="relative mx-auto grid w-full max-w-6xl items-end gap-14 lg:grid-cols-[minmax(0,1.15fr)_minmax(17rem,0.85fr)] lg:gap-20">
+          <div>
+            <p className="mp-reveal mp-kicker text-accent">Private introductions</p>
+            <h1 className="mp-reveal mp-reveal-delay-1 mt-5 max-w-[14ch] text-[clamp(2.4rem,6.4vw,4.35rem)] font-semibold leading-[0.96] tracking-tight text-ivory">
+              Meet in the room.
+              <span className="block text-accent">Settle it at dinner.</span>
+            </h1>
+            <p className="mp-reveal mp-reveal-delay-2 mt-6 max-w-md text-[1.05rem] leading-relaxed text-ivory/68">
+              Interlink introduces ambitious people, then the conversation leaves
+              the screen. Website first — use it in the browser today.
+            </p>
+            <div className="mp-reveal mp-reveal-delay-3 mt-10 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
+              <Link
+                href="/login"
+                className="mp-btn-lux inline-flex min-w-[11.5rem] items-center justify-center px-8 py-3.5 text-[12px] font-semibold tracking-wide"
+              >
+                Join on the web
+              </Link>
+              <Link
+                href="/login"
+                className="mp-btn-ghost mp-press inline-flex min-w-[11.5rem] items-center justify-center rounded-lg px-8 py-3.5 text-[12px] font-medium tracking-wide"
+              >
+                Sign in
+              </Link>
             </div>
-          )}
-          <p className="mp-reveal mp-reveal-delay-3 mt-8 text-[11px] tracking-wide text-muted">
-            Website first · Native app when you’re ready
-          </p>
+            {demoEntryEnabled() && (
+              <div className="mp-reveal mp-reveal-delay-3 mt-5">
+                <DemoEnterButton label="Enter demo" className="mp-press text-[13px] text-accent" />
+              </div>
+            )}
+          </div>
+
+          <aside className="mp-reveal mp-reveal-delay-2 mp-frame border border-white/[0.08] bg-[#0a0a0a] px-6 py-7 sm:px-8 sm:py-8">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-muted">
+              Standing
+            </p>
+            <ul className="mt-6 space-y-0">
+              {STANDING.map((row, i) => (
+                <li
+                  key={row.tier}
+                  className={i === 0 ? "" : "border-t border-white/[0.07] pt-5 mt-5"}
+                >
+                  <TierBadge tier={row.tier} size="md" />
+                  <p className="mt-3 text-[13px] leading-relaxed text-muted">{row.copy}</p>
+                </li>
+              ))}
+            </ul>
+          </aside>
         </div>
       </section>
 
-      <section className="border-t border-line/60 px-6 py-20">
-        <div className="mx-auto max-w-3xl text-center">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-accent">
-            How it works
-          </p>
-          <h2 className="mt-4 text-2xl font-semibold tracking-tight text-ivory sm:text-3xl">
-            Match in the browser. Meet at dinner.
+      <section className="border-t border-white/[0.07] px-6 py-20">
+        <div className="mx-auto max-w-6xl">
+          <p className="mp-kicker text-accent">How it works</p>
+          <h2 className="mt-4 max-w-xl text-2xl font-semibold tracking-tight text-ivory sm:text-3xl">
+            Identity. The room. The table.
           </h2>
-          <p className="mx-auto mt-4 max-w-xl text-[15px] leading-relaxed text-muted">
-            Build your Identity profile, join as a Member, optionally get Verified with
-            business email and LinkedIn, then discover people who fit — and settle
-            it over a real table.
-          </p>
+          <ol className="mt-12 grid gap-0 sm:grid-cols-3">
+            {STEPS.map((step, i) => (
+              <li
+                key={step.name}
+                className={`py-2 sm:px-8 sm:py-0 ${
+                  i === 0 ? "sm:pl-0" : "sm:border-l sm:border-white/[0.08]"
+                } ${i === 2 ? "sm:pr-0" : ""}`}
+              >
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-ivory/80">
+                  {step.name}
+                </p>
+                <p className="mt-3 text-[14px] leading-relaxed text-muted">{step.copy}</p>
+              </li>
+            ))}
+          </ol>
         </div>
       </section>
 
-      <section className="border-t border-line/60 px-6 py-20">
-        <div className="mx-auto max-w-3xl text-center">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-accent">
-            Events &amp; conventions
-          </p>
-          <h2 className="mt-4 text-2xl font-semibold tracking-tight text-ivory sm:text-3xl">
-            Nearby rooms. Global stages.
-          </h2>
-          <p className="mx-auto mt-4 max-w-xl text-[15px] leading-relaxed text-muted">
-            See professional dinners, conferences, and conventions coming up in your
-            city — or across the world — then meet the people who will be there.
-          </p>
+      <section className="border-t border-white/[0.07] px-6 py-20">
+        <div className="mx-auto flex max-w-6xl flex-col justify-between gap-8 lg:flex-row lg:items-end">
+          <div className="max-w-xl">
+            <p className="mp-kicker text-accent">Events &amp; conventions</p>
+            <h2 className="mt-4 text-2xl font-semibold tracking-tight text-ivory sm:text-3xl">
+              Nearby rooms. Global stages.
+            </h2>
+            <p className="mt-4 text-[15px] leading-relaxed text-muted">
+              Professional dinners, conferences, and conventions in your city —
+              or across the world. See who will be there, then sit with them.
+            </p>
+          </div>
           <Link
             href="/login"
-            className="mt-8 inline-flex rounded-lg border border-accent/30 px-6 py-3 text-[12px] font-medium tracking-wide text-accent transition hover:bg-accent/5"
+            className="mp-btn-ghost mp-press inline-flex shrink-0 items-center justify-center rounded-lg px-6 py-3 text-[12px] font-medium tracking-wide"
           >
             Sign in to browse Events
           </Link>
         </div>
       </section>
 
-      <section className="border-t border-line/60 px-6 py-20">
-        <div className="mx-auto max-w-4xl">
-          <p className="text-center text-[10px] font-semibold uppercase tracking-[0.28em] text-accent">
-            Levels
-          </p>
-          <div className="mt-10 grid gap-8 sm:grid-cols-3">
-            {[
-              {
-                name: "BLACK",
-                mark: "level-mark level-mark--black",
-                copy: "Premium standing. Pay or earn it through dinners and reputation.",
-              },
-              {
-                name: "Verified",
-                mark: "level-mark level-mark--verified",
-                copy: "Add business email and LinkedIn when you’re ready.",
-              },
-              {
-                name: "Member",
-                mark: "level-mark level-mark--member",
-                copy: "Sign up with Identity — photo, name, role. Verification is optional.",
-              },
-            ].map((level) => (
-              <div key={level.name} className="text-center sm:text-left">
-                <span
-                  className={`inline-flex items-center px-2.5 py-1 text-[9.5px] font-semibold uppercase tracking-[0.22em] text-ivory ${level.mark}`}
-                >
-                  <span className="level-mark-sheen" aria-hidden />
-                  <span className="relative">{level.name}</span>
-                </span>
-                <p className="mt-4 text-[14px] leading-relaxed text-muted">{level.copy}</p>
-              </div>
-            ))}
+      <section className="border-t border-white/[0.07] px-6 py-16">
+        <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
+          <div>
+            <h2 className="text-xl font-semibold tracking-tight text-ivory sm:text-2xl">
+              Start on the website today
+            </h2>
+            <p className="mt-2 text-[14px] text-muted">
+              Native app later — after the room is already meeting.
+            </p>
           </div>
-        </div>
-      </section>
-
-      <section className="border-t border-line/60 px-6 py-16">
-        <div className="mx-auto flex max-w-3xl flex-col items-center gap-5 text-center">
-          <h2 className="text-xl font-semibold text-ivory sm:text-2xl">
-            Start on the website today
-          </h2>
           <Link
             href="/login"
-            className="inline-flex items-center justify-center rounded-lg bg-ivory px-8 py-3.5 text-[12px] font-semibold tracking-wide text-ink"
+            className="mp-btn-lux inline-flex items-center justify-center px-8 py-3.5 text-[12px] font-semibold tracking-wide"
           >
             Get started
           </Link>
         </div>
       </section>
 
-      <footer className="border-t border-line/50 px-6 py-8 text-center text-[11px] text-muted">
+      <footer className="border-t border-white/[0.06] px-6 py-8 text-center text-[11px] text-muted">
         Interlink · Private introductions for ambitious people
       </footer>
     </main>

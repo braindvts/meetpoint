@@ -167,9 +167,11 @@ Details: [WEBSITE.md](./WEBSITE.md) · [KEYS.md](./KEYS.md) · [LAUNCH.md](./LAU
 
 - Brand first: Interlink / champagne on dark ink  
 - One typeface family (Outfit)  
-- Level marks: steel Member · champagne Verified · **black check** for BLACK · **blue check** for trusted (BLACK CONNECTION)  
+- Level badges: signal lockups (node + word) — steel Member · champagne Verified · void BLACK. Not metal chips, not 01/02.  
+- Name checks stay checks: **black check** for BLACK standing · **blue check** for trusted (BLACK CONNECTION)  
+- One motion language (hover lift / press scale / row wash); honor `prefers-reduced-motion`  
 - Signup must show **what** is missing and **where** (Needed sections + sticky chips)  
-- No purple AI-default theme, no cream+terracotta cliché  
+- No purple AI-default theme, no cream+terracotta cliché, no vibe-coded SaaS landing  
 
 ---
 

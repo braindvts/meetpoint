@@ -81,7 +81,7 @@ function GroupChatIconButton({
       onClick={onClick}
       aria-label="New group chat"
       title="New group chat"
-      className={`grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-white/15 text-ivory/80 transition hover:border-accent/50 hover:text-accent active:scale-[0.98] ${className}`}
+      className={`mp-press grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-white/15 text-ivory/80 hover:border-accent/50 hover:text-accent ${className}`}
     >
       <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none" aria-hidden>
         <circle cx="9" cy="9" r="2.6" stroke="currentColor" strokeWidth="1.7" />
@@ -250,7 +250,7 @@ function ChatsInner() {
                   onClick={() => setInterlinksOpen(true)}
                   aria-label={`Interlinks, ${connectedPeople.length} connections`}
                   title="Interlinks"
-                  className="inline-flex h-10 items-center gap-1.5 rounded-lg border border-white/15 px-2.5 text-ivory/80 transition hover:border-accent/45 hover:text-accent"
+                  className="mp-press inline-flex h-10 items-center gap-1.5 rounded-lg border border-white/15 px-2.5 text-ivory/80 hover:border-accent/45 hover:text-accent"
                 >
                   <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" aria-hidden>
                     <circle cx="8.5" cy="9" r="2.4" stroke="currentColor" strokeWidth="1.7" />
@@ -333,10 +333,10 @@ function ChatsInner() {
                   return (
                     <div
                       key={row.key}
-                      className={`flex w-full items-center gap-2 rounded-xl px-2 py-2.5 transition ${
+                      className={`mp-row flex w-full items-center gap-2 rounded-xl px-2 py-2.5 ${
                         active
                           ? "bg-accent/15 ring-1 ring-accent/35"
-                          : "hover:bg-white/[0.04]"
+                          : ""
                       }`}
                     >
                       <button
@@ -449,7 +449,7 @@ function ChatsInner() {
                 <button
                   type="button"
                   onClick={() => setInterlinksOpen(true)}
-                  className="inline-flex h-11 items-center gap-2 rounded-lg border border-white/15 px-4 text-[12px] font-medium text-ivory/85 hover:border-accent/40 hover:text-accent"
+                  className="mp-press inline-flex h-11 items-center gap-2 rounded-lg border border-white/15 px-4 text-[12px] font-medium text-ivory/85 hover:border-accent/40 hover:text-accent"
                 >
                   Interlinks · {connectedPeople.length}
                 </button>

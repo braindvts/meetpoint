@@ -32,7 +32,7 @@ export default function EventCard({
 
   return (
     <article
-      className={`group relative overflow-hidden rounded-2xl border border-white/10 bg-[#0a0a0a] transition duration-300 hover:border-accent/35 ${
+      className={`mp-card-motion group relative overflow-hidden rounded-2xl border border-white/10 bg-[#0a0a0a] ${
         compact ? "" : "mp-reveal"
       }`}
     >
@@ -114,7 +114,7 @@ export default function EventCard({
               onToggleInterested();
             }}
             aria-pressed={!!interested}
-            className={`rounded-xl border px-3 py-2.5 text-[11px] font-medium transition ${
+            className={`mp-press rounded-xl border px-3 py-2.5 text-[11px] font-medium ${
               interested
                 ? "border-accent/50 bg-accent/10 text-accent"
                 : "border-accent/20 text-muted hover:border-accent/40 hover:text-ivory"

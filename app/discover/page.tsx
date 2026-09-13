@@ -219,7 +219,7 @@ export default function DiscoverPage() {
                 key={key}
                 type="button"
                 onClick={() => setFilter(key)}
-                className={`flex-1 py-2 text-[12px] font-medium transition ${
+                className={`mp-press flex-1 py-2 text-[12px] font-medium ${
                   filter === key
                     ? "bg-ivory text-ink"
                     : "text-ivory/65 hover:text-ivory"
@@ -257,7 +257,7 @@ export default function DiscoverPage() {
                         saveProfile(updated);
                         setProfile(updated);
                       }}
-                      className={`border px-2.5 py-1 text-[12px] transition ${
+                      className={`mp-press border px-2.5 py-1 text-[12px] ${
                         on
                           ? "border-accent/50 bg-accent/15 text-accent-2"
                           : "border-line/80 text-muted hover:border-accent/35 hover:text-ivory"
@@ -286,7 +286,7 @@ export default function DiscoverPage() {
                       key={tier}
                       type="button"
                       onClick={() => toggleRank(tier)}
-                      className={`inline-flex items-center gap-1.5 border px-2.5 py-1 text-[12px] transition ${
+                      className={`mp-press inline-flex items-center gap-1.5 border px-2.5 py-1 text-[12px] ${
                         on
                           ? "border-accent/50 bg-accent/15 text-accent-2"
                           : "border-line/80 text-muted hover:border-accent/35 hover:text-ivory"

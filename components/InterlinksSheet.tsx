@@ -48,7 +48,7 @@ export default function InterlinksSheet({ open, onClose, people, onMessage }: Pr
             <button
               type="button"
               onClick={onClose}
-              className="text-[12px] font-medium text-muted hover:text-ivory"
+              className="mp-press text-[12px] font-medium text-muted hover:text-ivory"
             >
               Close
             </button>
@@ -65,7 +65,7 @@ export default function InterlinksSheet({ open, onClose, people, onMessage }: Pr
               {people.map((p) => (
                 <li
                   key={p.id}
-                  className="flex items-center gap-3 rounded-xl px-2 py-2.5 hover:bg-white/[0.03]"
+                  className="mp-row flex items-center gap-3 rounded-xl px-2 py-2.5"
                 >
                   <button
                     type="button"
@@ -90,7 +90,7 @@ export default function InterlinksSheet({ open, onClose, people, onMessage }: Pr
                   <button
                     type="button"
                     onClick={() => onMessage(p)}
-                    className="shrink-0 rounded-lg border border-accent/35 px-3 py-2 text-[11px] font-semibold text-accent transition hover:border-accent/60 hover:bg-accent/10"
+                    className="mp-press shrink-0 rounded-lg border border-accent/35 px-3 py-2 text-[11px] font-semibold text-accent hover:border-accent/60 hover:bg-accent/10"
                   >
                     Message
                   </button>

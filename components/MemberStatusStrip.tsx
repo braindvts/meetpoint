@@ -14,7 +14,7 @@ interface Props {
 }
 
 /**
- * Standing row: Free / Verified / BLACK check + trusted blue check.
+ * Standing row: Free chip + signal lockup + BLACK / trusted checks.
  */
 export default function MemberStatusStrip({ profile, tier }: Props) {
   const [connections, setConnections] = useState(0);

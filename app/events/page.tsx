@@ -217,7 +217,7 @@ export default function EventsPage() {
           action={
             <Link
               href="#conventions"
-              className="text-[11px] font-medium uppercase tracking-[0.14em] text-accent/90 hover:text-accent"
+              className="mp-press text-[11px] font-medium uppercase tracking-[0.14em] text-accent/90 hover:text-accent"
             >
               Conventions
             </Link>
@@ -247,7 +247,7 @@ export default function EventsPage() {
                 }));
                 document.getElementById("near-you")?.scrollIntoView({ behavior: "smooth" });
               }}
-              className="rounded-lg border border-accent/30 px-3.5 py-1.5 text-[11px] font-medium text-accent transition hover:border-accent/55 hover:bg-accent/10"
+              className="mp-press rounded-lg border border-accent/30 px-3.5 py-1.5 text-[11px] font-medium text-accent hover:border-accent/55 hover:bg-accent/10"
             >
               Near you{cityHint ? ` · ${cityHint}` : ""}
             </button>
@@ -265,7 +265,7 @@ export default function EventsPage() {
                 });
                 document.getElementById("worldwide")?.scrollIntoView({ behavior: "smooth" });
               }}
-              className="rounded-lg border border-line px-3.5 py-1.5 text-[11px] font-medium text-muted transition hover:border-accent/40 hover:text-ivory"
+              className="mp-press rounded-lg border border-line px-3.5 py-1.5 text-[11px] font-medium text-muted hover:border-accent/40 hover:text-ivory"
             >
               Around the world
             </button>
@@ -274,7 +274,7 @@ export default function EventsPage() {
               onClick={() =>
                 document.getElementById("conventions")?.scrollIntoView({ behavior: "smooth" })
               }
-              className="rounded-lg border border-line px-3.5 py-1.5 text-[11px] font-medium text-muted transition hover:border-accent/40 hover:text-ivory"
+              className="mp-press rounded-lg border border-line px-3.5 py-1.5 text-[11px] font-medium text-muted hover:border-accent/40 hover:text-ivory"
             >
               Conventions
             </button>
