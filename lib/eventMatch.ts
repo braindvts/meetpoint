@@ -57,6 +57,8 @@ const STRONG_THRESHOLD = 38;
 const SPARSE_THRESHOLD = 26;
 
 const GENERIC_INTENTS = new Set<LookingFor>(["Networking", "Partnership"]);
+/** Roles that piggy-back on common titles ("Product Designer", "Restaurant Owner"). */
+const GENERIC_ROLES = new Set(["product", "founder"]);
 
 const INTENT_PHRASE =
   /(?:looking for|seeking|want(?:s)?(?: to (?:meet|find|raise|hire|join))?|need(?:s)?|hiring|into|building|raising|open to|trying to|here for)\s+(.{3,48}?)(?:[.!?;,]|$)/gi;
@@ -288,16 +290,28 @@ function intentScore(
   return { score: Math.min(1, score), overlap };
 }
 
+function roleOverlapFor(member: MemberSignals, fields: EventMatchFields): string[] {
+  const overlap = fields.roles.filter((r) => member.roles.includes(r));
+  if (!member.sparse) return overlap;
+  const specific = overlap.filter((r) => !GENERIC_ROLES.has(r));
+  if (specific.length) return specific;
+  const memberOnlyGeneric = member.roles.every((r) => GENERIC_ROLES.has(r));
+  return memberOnlyGeneric ? overlap : [];
+}
+
 function roleScore(
   member: MemberSignals,
   fields: EventMatchFields
 ): { score: number; overlap: string[] } {
-  const overlap = fields.roles.filter((r) => member.roles.includes(r));
+  const overlap = roleOverlapFor(member, fields);
   if (overlap.length) {
     return { score: Math.min(1, 0.55 + overlap.length * 0.22), overlap };
   }
   const job = (member.blob || "").toLowerCase();
-  const soft = fields.roles.filter((r) => job.includes(r));
+  const soft = roleOverlapFor(member, {
+    ...fields,
+    roles: fields.roles.filter((r) => job.includes(r)),
+  });
   if (soft.length) return { score: 0.36, overlap: soft };
   return { score: 0, overlap: [] };
 }

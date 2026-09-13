@@ -151,6 +151,8 @@ describe("sparse / cold-start profiles", () => {
     assert.ok(brand!.roleOverlap.includes("designer"));
     assert.equal(byId(ranked, "evt-re-miami"), undefined);
     assert.equal(byId(ranked, "evt-lux-paris"), undefined);
+    assert.equal(byId(ranked, "evt-ai-summit-sf"), undefined);
+    assert.equal(byId(ranked, "evt-black-tie-ny"), undefined);
   });
 
   it("uses looking-for Investor when the rest of the card is empty", () => {
