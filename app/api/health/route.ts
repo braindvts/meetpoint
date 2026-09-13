@@ -30,7 +30,7 @@ export async function GET(req: Request) {
         has("TWILIO_AUTH_TOKEN") &&
         has("TWILIO_FROM_NUMBER"),
       adminSecret: has("ADMIN_SECRET"),
-      demoOwner: has("ENABLE_DEMO_OWNER") || has("NEXT_PUBLIC_ENABLE_DEMO"),
+      walkthroughOwner: has("ENABLE_WALKTHROUGH_OWNER"),
     };
 
     return NextResponse.json({

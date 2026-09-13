@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { clearDemoOwnerSession, markDemoOwnerSession } from "@/lib/demoFlag";
-import { DEMO_OWNER_EMAIL, isDemoOwnerEmail } from "@/lib/demoOwner";
 import { saveProfile } from "@/lib/store";
 import type { MyProfile } from "@/lib/types";
 
@@ -28,7 +27,7 @@ export default function EmailAuthForm() {
     if (data.profile?.name) {
       saveProfile(data.profile);
     }
-    if (data.demoOwner || isDemoOwnerEmail(email)) {
+    if (data.demoOwner) {
       markDemoOwnerSession();
     } else {
       clearDemoOwnerSession();
@@ -62,38 +61,8 @@ export default function EmailAuthForm() {
     }
   }
 
-  /** Password never leaves the server — demo-owner mode only. */
-  async function signInAsBrian() {
-    setError("");
-    setBusy(true);
-    setMode("signin");
-    setEmail(DEMO_OWNER_EMAIL);
-    try {
-      const res = await fetch("/api/auth/email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ mode: "demo-owner" }),
-      });
-      const data = (await res.json()) as {
-        ok?: boolean;
-        error?: string;
-        next?: string;
-        demoOwner?: boolean;
-        profile?: MyProfile | null;
-      };
-      await finishAuth({ ...data, demoOwner: true });
-    } catch {
-      setError("Network error. Try again.");
-    } finally {
-      setBusy(false);
-    }
-  }
-
   const field =
     "w-full rounded-lg border border-line/80 bg-ink/60 px-3 py-2 text-[14px] text-ivory outline-none placeholder:text-muted/55 focus:border-accent";
-
-  const showDemoOwner = process.env.NEXT_PUBLIC_ENABLE_DEMO === "1";
 
   return (
     <form onSubmit={submit} className="space-y-2.5">
@@ -113,22 +82,6 @@ export default function EmailAuthForm() {
           Create account
         </button>
       </div>
-
-      {showDemoOwner ? (
-        <button
-          type="button"
-          disabled={busy}
-          onClick={() => void signInAsBrian()}
-          className="w-full rounded-lg border border-accent/35 bg-accent/[0.07] px-3 py-2 text-left disabled:opacity-40"
-        >
-          <span className="block text-[10px] font-semibold uppercase tracking-[0.16em] text-accent">
-            Owner
-          </span>
-          <span className="mt-0.5 block text-[13px] font-medium text-ivory">
-            Continue as Brian
-          </span>
-        </button>
-      ) : null}
 
       {mode === "signup" && (
         <input

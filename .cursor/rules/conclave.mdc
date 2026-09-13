@@ -41,7 +41,7 @@ Peer invites award BLACK CONNECTION only. They never promote someone to BLACK.
 
 ## Demo
 
-`brianasome@gmail.com` / `Brian812` is the fixed demo owner login. Demo env flags stay off in production unless intentionally enabled.
+Walkthrough owner login is server-only (`ENABLE_WALKTHROUGH_OWNER` plus mailbox/password env vars). Those stay unset in production. Never commit an owner password or mailbox. `NEXT_PUBLIC_ENABLE_DEMO*` flags stay off in production unless intentionally enabled.
 
 ## Delivery
 

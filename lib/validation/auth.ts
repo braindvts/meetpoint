@@ -10,13 +10,6 @@ export const emailAuthSchema = z
   })
   .strict();
 
-/** One-tap Brian — no password in the browser bundle. */
-export const demoOwnerAuthSchema = z
-  .object({
-    mode: z.literal("demo-owner"),
-  })
-  .strict();
-
 export const reauthSchema = z
   .object({
     password: zPassword,

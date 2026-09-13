@@ -18,6 +18,7 @@ const ERRORS: Record<string, string> = {
   missing_code: "Sign-in didn’t return a code. Please try again.",
   invalid_state: "This entry link expired. Please try again.",
   token_failed: "Couldn’t finish sign-in. Check your credentials and try again.",
+  token_invalid: "Sign-in token was rejected. Please try again.",
   profile_failed: "Signed in, but we couldn’t load your profile. Try again.",
   oauth_failed: "Something went wrong. Please try again.",
   access_denied: "Sign-in was cancelled.",

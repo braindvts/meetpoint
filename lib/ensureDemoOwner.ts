@@ -1,53 +1,49 @@
 import { prisma } from "@/lib/db";
-import { DEMO_OWNER_EMAIL, DEMO_OWNER_PROFILE } from "@/lib/demoOwner";
-import { demoOwnerPassword, matchesDemoOwner } from "@/lib/demoOwnerServer";
+import { WALKTHROUGH_OWNER_PROFILE } from "@/lib/demoOwner";
 import { profileToMemberData } from "@/lib/memberMap";
 import { hashPassword } from "@/lib/password";
+import { walkthroughOwnerCredentials } from "@/lib/walkthroughOwner";
 
-export { matchesDemoOwner };
+export {
+  matchesWalkthroughOwner as matchesDemoOwner,
+  walkthroughOwnerEnabled,
+  walkthroughOwnerCredentials,
+} from "@/lib/walkthroughOwner";
 
 /**
- * Creates or refreshes the fixed Brian demo account so email sign-in always
- * works with the published credentials, even on a fresh database.
+ * Create the walkthrough member if that mailbox is unused.
+ * Never overwrites an existing row — including OAuth members.
  */
-export async function ensureDemoOwner() {
-  const email = DEMO_OWNER_EMAIL;
-  const password = demoOwnerPassword();
-  if (!password) {
-    throw new Error("DEMO_OWNER_PASSWORD is required for demo owner login");
-  }
-  const existing = await prisma.member.findFirst({ where: { email } });
+export async function provisionWalkthroughOwnerIfAbsent() {
+  const creds = walkthroughOwnerCredentials();
+  if (!creds) return null;
 
-  if (existing) {
-    return prisma.member.update({
-      where: { id: existing.id },
-      data: {
-        email,
-        passwordHash: hashPassword(password),
-        name: existing.name?.trim() ? existing.name : DEMO_OWNER_PROFILE.name,
-        photo: existing.photo?.trim() ? existing.photo : DEMO_OWNER_PROFILE.photo,
-        jobTitle: existing.jobTitle?.trim()
-          ? existing.jobTitle
-          : DEMO_OWNER_PROFILE.jobTitle,
-      },
-    });
-  }
+  const existing = await prisma.member.findFirst({ where: { email: creds.email } });
+  if (existing) return existing;
 
+  const now = new Date().toISOString();
   const profile = {
-    ...DEMO_OWNER_PROFILE,
-    verifications: DEMO_OWNER_PROFILE.verifications.map((v) => ({
-      ...v,
-      verifiedAt: new Date().toISOString(),
-    })),
+    ...WALKTHROUGH_OWNER_PROFILE,
+    verifications: WALKTHROUGH_OWNER_PROFILE.verifications.map((v) =>
+      v.method === "company-email"
+        ? { ...v, value: creds.email, verifiedAt: now }
+        : { ...v, verifiedAt: now }
+    ),
   };
 
-  return prisma.member.create({
-    data: {
-      ...profileToMemberData(profile),
-      verificationsJson: JSON.stringify(profile.verifications),
-      meetingsAttended: profile.meetingsAttended || 0,
-      email,
-      passwordHash: hashPassword(password),
-    },
-  });
+  try {
+    return await prisma.member.create({
+      data: {
+        ...profileToMemberData(profile),
+        verificationsJson: JSON.stringify(profile.verifications),
+        meetingsAttended: profile.meetingsAttended || 0,
+        email: creds.email,
+        passwordHash: hashPassword(creds.password),
+      },
+    });
+  } catch {
+    return prisma.member.findFirst({ where: { email: creds.email } });
+  }
 }
+
+export const ensureDemoOwner = provisionWalkthroughOwnerIfAbsent;
