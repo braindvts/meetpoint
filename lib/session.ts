@@ -87,9 +87,12 @@ export async function clearSession(): Promise<void> {
   jar.delete(COOKIE);
 }
 
-export async function createOAuthState(): Promise<{ state: string; cookieValue: string }> {
+export type OAuthChallenge = { state: string; nonce: string };
+
+export async function createOAuthState(): Promise<OAuthChallenge & { cookieValue: string }> {
   const state = randomBytes(16).toString("hex");
-  return { state, cookieValue: signValue(state) };
+  const nonce = randomBytes(16).toString("hex");
+  return { state, nonce, cookieValue: signValue(JSON.stringify({ state, nonce })) };
 }
 
 export function applyOAuthStateCookie(res: NextResponse, cookieValue: string): NextResponse {
@@ -97,12 +100,32 @@ export function applyOAuthStateCookie(res: NextResponse, cookieValue: string): N
   return res;
 }
 
-export async function consumeOAuthState(state: string): Promise<boolean> {
+function parseOAuthChallenge(payload: string): OAuthChallenge | null {
+  try {
+    const parsed = JSON.parse(payload) as Partial<OAuthChallenge>;
+    if (typeof parsed.state === "string" && parsed.state && typeof parsed.nonce === "string") {
+      return { state: parsed.state, nonce: parsed.nonce };
+    }
+  } catch {
+    /* ignore */
+  }
+  return null;
+}
+
+/** Read and drop the one-time OAuth state cookie. */
+export async function consumeOAuthChallenge(): Promise<OAuthChallenge | null> {
   const jar = await cookies();
   const raw = jar.get(STATE_COOKIE)?.value;
-  if (!raw) return false;
-  const expected = verifyValue(raw);
-  return !!expected && expected === state;
+  if (!raw) return null;
+  jar.delete(STATE_COOKIE);
+  const payload = verifyValue(raw);
+  if (!payload) return null;
+  return parseOAuthChallenge(payload);
+}
+
+export async function consumeOAuthState(state: string): Promise<boolean> {
+  const challenge = await consumeOAuthChallenge();
+  return !!challenge && challenge.state === state;
 }
 
 export function clearOAuthStateCookie(res: NextResponse): NextResponse {
