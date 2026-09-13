@@ -259,6 +259,8 @@ export interface ChatMessage {
 
 export interface GroupChat {
   id: string;
+  /** Browser-generated id kept so a thread opened before the server id arrives still resolves. */
+  localId?: string;
   name: string;
   /** Connected peer IDs in this private chat (current user is always included). */
   memberIds: string[];

@@ -55,9 +55,17 @@ export async function POST(req: Request) {
     if (!me) return NextResponse.json({ ok: false, error: "Not signed in" }, { status: 401 });
 
     const body = (await req.json()) as { name?: string; memberIds?: string[] };
-    const peerIds = (body.memberIds || []).filter((id) => id && id !== me.id);
+    const peerIds = [...new Set((body.memberIds || []).filter((id) => id && id !== me.id))];
     if (!peerIds.length) {
       return NextResponse.json({ ok: false, error: "Need members" }, { status: 400 });
+    }
+
+    const peers = await prisma.member.findMany({
+      where: { id: { in: peerIds } },
+      select: { id: true },
+    });
+    if (peers.length !== peerIds.length) {
+      return NextResponse.json({ ok: false, error: "Unknown member" }, { status: 404 });
     }
 
     const chat = await prisma.chat.create({

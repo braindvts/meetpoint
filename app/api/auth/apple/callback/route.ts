@@ -24,7 +24,6 @@ export async function POST(req: NextRequest) {
   const form = await req.formData();
   const code = String(form.get("code") || "");
   const state = String(form.get("state") || "");
-  const idToken = String(form.get("id_token") || "");
   const userRaw = String(form.get("user") || "");
 
   if (!code || !state) {
@@ -35,7 +34,30 @@ export async function POST(req: NextRequest) {
 
   try {
     await purgeDemoResidue();
-    const claims = decodeJwtPayload(idToken);
+
+    // Exchange the authorization code with Apple. Never trust the form-posted
+    // id_token — it is not a signature we verify, and the code is single-use.
+    const tokenRes = await fetch("https://appleid.apple.com/auth/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        client_id: process.env.APPLE_CLIENT_ID!.trim(),
+        client_secret: process.env.APPLE_CLIENT_SECRET!.trim(),
+        code,
+        grant_type: "authorization_code",
+        redirect_uri: appUrl("/api/auth/apple/callback"),
+      }),
+    });
+    if (!tokenRes.ok) {
+      console.error("Apple token error", await tokenRes.text());
+      return NextResponse.redirect(appUrl("/login?error=token_failed"));
+    }
+    const token = (await tokenRes.json()) as { id_token?: string };
+    if (!token.id_token) {
+      return NextResponse.redirect(appUrl("/login?error=profile_failed"));
+    }
+
+    const claims = decodeJwtPayload(token.id_token);
     const sub = claims.sub;
     if (!sub) return NextResponse.redirect(appUrl("/login?error=profile_failed"));
 

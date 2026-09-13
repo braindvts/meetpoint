@@ -14,6 +14,7 @@ import {
   loadChats,
   loadConnections,
   loadProfile,
+  hydrateNetworkFromServer,
 } from "@/lib/store";
 import { findPerson, loadDirectory, refreshDirectory } from "@/lib/directory";
 import { readClientProfile } from "@/lib/clientProfile";
@@ -61,6 +62,7 @@ export default function ChatsPage() {
     }
     setProfile(p);
     setChats(loadChats());
+    void hydrateNetworkFromServer().then(() => setChats(loadChats()));
     void refreshDirectory().then(setDirectory);
 
     const refresh = () => setChats(loadChats());

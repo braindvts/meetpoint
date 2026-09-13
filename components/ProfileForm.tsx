@@ -310,7 +310,7 @@ export default function ProfileForm({ initial }: { initial?: MyProfile | null })
       }))
       .filter((w) => w.title);
 
-    saveProfile({
+    const nextProfile: MyProfile = {
       name: name.trim(),
       jobTitle: jobTitle.trim(),
       bio: bio.trim(),
@@ -329,7 +329,9 @@ export default function ProfileForm({ initial }: { initial?: MyProfile | null })
       blackSince: initial?.blackSince,
       blackSource: initial?.blackSource,
       premierPlan: initial?.premierPlan,
-    });
+    };
+    // Wait for the member cookie before posting credentials — otherwise /api/verify 401s.
+    await saveProfile(nextProfile);
 
     for (const v of verifications) {
       try {

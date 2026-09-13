@@ -52,33 +52,28 @@ export async function POST(req: Request) {
     const existing = await prisma.member.findFirst({ where: { email } });
 
     if (mode === "signup") {
-      if (existing?.passwordHash) {
+      // Never attach a password to an existing row. An OAuth account with this
+      // email would otherwise be taken over by anyone who can guess the address.
+      if (existing) {
         return NextResponse.json(
           { ok: false, error: "An account with that email already exists. Sign in instead." },
           { status: 409 }
         );
       }
       const name = String(body.name || "").trim() || email.split("@")[0];
-      const member = existing
-        ? await prisma.member.update({
-            where: { id: existing.id },
-            data: { passwordHash: hashPassword(password), name: existing.name || name },
-          })
-        : await prisma.member.create({
-            data: {
-              email,
-              name,
-              passwordHash: hashPassword(password),
-            },
-          });
+      const member = await prisma.member.create({
+        data: {
+          email,
+          name,
+          passwordHash: hashPassword(password),
+        },
+      });
 
-      if (!existing) {
-        void sendWelcomeEmail(email, member.name);
-      }
+      void sendWelcomeEmail(email, member.name);
 
       const res = NextResponse.json({
         ok: true,
-        next: existing?.jobTitle ? "/discover" : "/onboarding",
+        next: "/onboarding",
         memberId: member.id,
       });
       withSession(res, {

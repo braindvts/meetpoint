@@ -30,7 +30,7 @@ export async function fetchServerConnections(): Promise<Connection[] | null> {
   try {
     const res = await fetch("/api/connections");
     const data = (await res.json()) as { ok?: boolean; connections?: Connection[] };
-    return data.ok && data.connections ? data.connections : null;
+    return data.ok && Array.isArray(data.connections) ? data.connections : null;
   } catch {
     return null;
   }
@@ -71,7 +71,7 @@ export async function fetchServerChats(): Promise<GroupChat[] | null> {
   try {
     const res = await fetch("/api/chats");
     const data = (await res.json()) as { ok?: boolean; chats?: GroupChat[] };
-    return data.ok && data.chats ? data.chats : null;
+    return data.ok && Array.isArray(data.chats) ? data.chats : null;
   } catch {
     return null;
   }

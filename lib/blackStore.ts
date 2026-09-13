@@ -17,6 +17,7 @@ import {
 import { DEMO_PEOPLE } from "./demoPeople";
 import { findPerson } from "./directory";
 import { isDemoProfile, loadProfile, saveProfile } from "./store";
+import { hasRequiredVerifications } from "./tiers";
 
 /**
  * Client mirror of the BLACK network.
@@ -329,11 +330,11 @@ export async function claimBlack(source: "paid" | "earned", sessionId?: string):
   if (!profile) return { ok: false, error: "Create your profile first." };
 
   // Paying never skips verification, in demo or otherwise.
-  if (!profile.verifications?.length) {
+  if (!hasRequiredVerifications(profile.verifications)) {
     return {
       ok: false,
       needsVerification: true,
-      error: "Verify your profile before BLACK can be activated.",
+      error: "Add business email, LinkedIn, and resume before BLACK can be activated.",
     };
   }
 

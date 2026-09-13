@@ -76,43 +76,19 @@ export function loadProfile(): MyProfile | null {
       localStorage.setItem(PROFILE_KEY, JSON.stringify(p));
     }
 
-    // Auto-verify existing members so they aren't locked out of the room.
-    if (p.verifications.length === 0) {
-      if (p.linkedInId) {
-        p.verifications = [
-          {
-            method: "linkedin",
-            value: `linkedin:${p.linkedInId}`,
-            verifiedAt: new Date().toISOString(),
-          },
-        ];
-      } else if (p.name && p.photo) {
-        p.verifications = [
-          {
-            method: "portfolio",
-            value: "verified:member",
-            verifiedAt: new Date().toISOString(),
-          },
-        ];
-      }
-      if (p.verifications.length) {
-        localStorage.setItem(PROFILE_KEY, JSON.stringify(p));
-      }
-    }
-
     return p;
   } catch {
     return null;
   }
 }
 
-export function saveProfile(profile: MyProfile): void {
+export function saveProfile(profile: MyProfile): Promise<string | null> {
   localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
   window.dispatchEvent(new CustomEvent("meetpoint:profile-changed"));
   // Persist so other devices / members can see you — except the demo member,
   // who would otherwise show up in the real room as a stranger.
-  if (isDemoProfile(profile)) return;
-  void import("./apiClient").then(({ syncProfileToServer }) => syncProfileToServer(profile));
+  if (isDemoProfile(profile)) return Promise.resolve(null);
+  return import("./apiClient").then(({ syncProfileToServer }) => syncProfileToServer(profile));
 }
 
 /** Install the sample member and skip onboarding — demo mode only. */
@@ -439,8 +415,12 @@ function saveChats(chats: GroupChat[]): void {
   window.dispatchEvent(new CustomEvent("meetpoint:chats-changed"));
 }
 
+function chatMatches(chat: GroupChat, id: string): boolean {
+  return chat.id === id || chat.localId === id;
+}
+
 export function getChat(id: string): GroupChat | undefined {
-  return loadChats().find((c) => c.id === id);
+  return loadChats().find((c) => chatMatches(c, id));
 }
 
 /** Create a private chat with one or more connected peers. */
@@ -477,15 +457,28 @@ export function createChat(name: string, memberIds: string[]): GroupChat {
     .then((data: { ok?: boolean; chat?: GroupChat }) => {
       if (!data.ok || !data.chat?.id) return;
       const latest = loadChats();
-      const idx = latest.findIndex((c) => c.id === chat.id);
+      const idx = latest.findIndex((c) => chatMatches(c, chat.id));
       if (idx < 0) return;
+      const prev = latest[idx];
+      const serverId = data.chat.id;
       latest[idx] = {
-        ...latest[idx],
-        id: data.chat.id,
-        createdAt: data.chat.createdAt || latest[idx].createdAt,
-        updatedAt: data.chat.updatedAt || latest[idx].updatedAt,
+        ...prev,
+        localId: prev.localId || prev.id,
+        id: serverId,
+        createdAt: data.chat.createdAt || prev.createdAt,
+        updatedAt: data.chat.updatedAt || prev.updatedAt,
       };
       saveChats(latest);
+
+      // Messages sent against the local id 404'd — replay them onto the server thread.
+      for (const msg of prev.messages) {
+        if (msg.senderId !== "me" || !msg.text) continue;
+        void fetch(`/api/chats/${serverId}/messages`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: msg.text }),
+        }).catch(() => undefined);
+      }
     })
     .catch(() => undefined);
 
@@ -501,7 +494,7 @@ export function sendChatMessage(
   if (!trimmed && !attachment) return getChat(chatId);
 
   const chats = loadChats();
-  const chat = chats.find((c) => c.id === chatId);
+  const chat = chats.find((c) => chatMatches(c, chatId));
   if (!chat) return undefined;
 
   const msg: ChatMessage = {
@@ -517,7 +510,7 @@ export function sendChatMessage(
 
   // Best-effort server sync (real multi-device); ignore failures for local-only chats
   if (trimmed && !chat.memberIds.some(isDemoPeer)) {
-    void fetch(`/api/chats/${chatId}/messages`, {
+    void fetch(`/api/chats/${chat.id}/messages`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text: trimmed }),
@@ -537,7 +530,7 @@ export function sendChatMessage(
       ];
       setTimeout(() => {
         const latest = loadChats();
-        const c = latest.find((x) => x.id === chatId);
+        const c = latest.find((x) => chatMatches(x, chatId));
         if (!c) return;
         c.messages.push({
           id: uid(),
@@ -555,9 +548,50 @@ export function sendChatMessage(
 }
 
 export function deleteChat(chatId: string): GroupChat[] {
-  const chats = loadChats().filter((c) => c.id !== chatId);
+  const chats = loadChats().filter((c) => !chatMatches(c, chatId));
   saveChats(chats);
   return chats;
+}
+
+function mergeMessages(local: ChatMessage[], remote: ChatMessage[]): ChatMessage[] {
+  const byId = new Map<string, ChatMessage>();
+  for (const msg of [...local, ...remote]) byId.set(msg.id, msg);
+  return [...byId.values()].sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+}
+
+/** Pull Circle + chats from the server so the other device actually sees them. */
+export async function hydrateNetworkFromServer(): Promise<void> {
+  const { fetchServerConnections, fetchServerChats } = await import("./apiClient");
+
+  const remoteConnections = await fetchServerConnections();
+  if (remoteConnections) {
+    const local = loadConnections();
+    const demo = local.filter((c) => isDemoPeer(c.peerId));
+    saveConnections([...demo, ...remoteConnections]);
+    window.dispatchEvent(new CustomEvent("meetpoint:connections-changed"));
+  }
+
+  const remoteChats = await fetchServerChats();
+  if (remoteChats) {
+    const local = loadChats();
+    const demo = local.filter((c) => c.memberIds.some(isDemoPeer));
+    const pending = local.filter(
+      (c) =>
+        !c.memberIds.some(isDemoPeer) &&
+        !remoteChats.some((r) => r.id === c.id || r.id === c.localId)
+    );
+    const merged = remoteChats.map((r) => {
+      const existing = local.find((l) => l.id === r.id || l.localId === r.id);
+      if (!existing) return r;
+      return {
+        ...r,
+        localId: existing.localId || (existing.id !== r.id ? existing.id : existing.localId),
+        tableProposal: existing.tableProposal,
+        messages: mergeMessages(existing.messages, r.messages || []),
+      };
+    });
+    saveChats([...demo, ...pending, ...merged]);
+  }
 }
 
 function requiredVoters(chat: GroupChat): string[] {
@@ -574,7 +608,7 @@ export function allAgreed(chat: GroupChat): boolean {
 /** Propose a table from the AI popup — starts the agree → book flow. */
 export function proposeTable(chatId: string, suggestion: FoodSuggestion): GroupChat | undefined {
   const chats = loadChats();
-  const chat = chats.find((c) => c.id === chatId);
+  const chat = chats.find((c) => chatMatches(c, chatId));
   if (!chat) return undefined;
 
   const now = new Date().toISOString();
@@ -604,7 +638,7 @@ export function proposeTable(chatId: string, suggestion: FoodSuggestion): GroupC
 /** Current member agrees to the proposed table. */
 export function agreeToTable(chatId: string, voterId = "me"): GroupChat | undefined {
   const chats = loadChats();
-  const chat = chats.find((c) => c.id === chatId);
+  const chat = chats.find((c) => chatMatches(c, chatId));
   if (!chat?.tableProposal || chat.tableProposal.booked) return chat;
 
   if (!chat.tableProposal.agreedBy.includes(voterId)) {
@@ -620,7 +654,7 @@ export function agreeToTable(chatId: string, voterId = "me"): GroupChat | undefi
       .forEach((peerId, i) => {
         setTimeout(() => {
           const latest = loadChats();
-          const c = latest.find((x) => x.id === chatId);
+          const c = latest.find((x) => chatMatches(x, chatId));
           if (!c?.tableProposal || c.tableProposal.booked) return;
           if (c.tableProposal.agreedBy.includes(peerId)) return;
           c.tableProposal.agreedBy = [...c.tableProposal.agreedBy, peerId];
@@ -641,7 +675,7 @@ export function bookTable(
   paymentMethod: "apple-pay" | "card" = "card"
 ): GroupChat | undefined {
   const chats = loadChats();
-  const chat = chats.find((c) => c.id === chatId);
+  const chat = chats.find((c) => chatMatches(c, chatId));
   if (!chat?.tableProposal || chat.tableProposal.booked) return chat;
   if (!allAgreed(chat)) return chat;
   if (!isValidPhone(contactPhone)) return chat;
@@ -673,6 +707,11 @@ export function bookTable(
       meetingsAttended: (profile.meetingsAttended ?? 0) + 1,
     };
     saveProfile(next);
+    void fetch("/api/members/me", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "attended" }),
+    }).catch(() => undefined);
   }
 
   chat.tableProposal.booked = true;
@@ -720,7 +759,7 @@ export function bookTable(
 
 export function clearTableProposal(chatId: string): GroupChat | undefined {
   const chats = loadChats();
-  const chat = chats.find((c) => c.id === chatId);
+  const chat = chats.find((c) => chatMatches(c, chatId));
   if (!chat) return undefined;
   delete chat.tableProposal;
   chat.updatedAt = new Date().toISOString();

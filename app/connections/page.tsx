@@ -22,6 +22,7 @@ import {
   loadConnections,
   loadProfile,
   removeConnection,
+  hydrateNetworkFromServer,
 } from "@/lib/store";
 import { findPerson, refreshDirectory } from "@/lib/directory";
 import { readClientConnections, readClientProfile } from "@/lib/clientProfile";
@@ -44,6 +45,7 @@ export default function ConnectionsPage() {
     }
     setProfile(p);
     refresh();
+    void hydrateNetworkFromServer().then(refresh);
     void refreshDirectory().then(() => setDirectoryTick((n) => n + 1));
     const onDir = () => setDirectoryTick((n) => n + 1);
     window.addEventListener("meetpoint:connections-changed", refresh);

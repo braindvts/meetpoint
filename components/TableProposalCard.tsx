@@ -35,12 +35,13 @@ export function savePendingBooking(data: PendingBooking): void {
   }
 }
 
-export function takePendingBooking(chatId: string): PendingBooking | null {
+export function takePendingBooking(...chatIds: string[]): PendingBooking | null {
   try {
     const raw = sessionStorage.getItem(PENDING_BOOKING_KEY);
     if (!raw) return null;
     const data = JSON.parse(raw) as PendingBooking;
-    if (data.chatId !== chatId) return null;
+    const aliases = chatIds.filter(Boolean);
+    if (!aliases.includes(data.chatId)) return null;
     sessionStorage.removeItem(PENDING_BOOKING_KEY);
     return data;
   } catch {
