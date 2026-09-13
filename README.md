@@ -76,6 +76,8 @@ Copy from `.env.example`. Important ones:
 | `GOOGLE_PLACES_API_KEY` | Live restaurant search |
 | `TWILIO_*` | Optional booking SMS |
 | `NOTIFY_SECRET` | Optional SMS API lock |
+| `ENABLE_WALKTHROUGH_OWNER` | Server-only walkthrough login gate — leave unset in production |
+| `WALKTHROUGH_OWNER_EMAIL` / `WALKTHROUGH_OWNER_PASSWORD` | Walkthrough credentials — never commit values |
 
 Step-by-step for each one: **[KEYS.md](./KEYS.md)**.
 

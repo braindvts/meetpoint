@@ -20,8 +20,8 @@ Interlink hardens the API so secrets stay on the server and user input is strict
 | Control | Detail |
 |---------|--------|
 | **No production source maps** | Browser maps disabled; `.map` requests 404 |
-| **Demo owner gated** | “Continue as Brian” / `demo-owner` only when `NEXT_PUBLIC_ENABLE_DEMO=1` (or `ENABLE_DEMO_OWNER=1`). Off on the live site by default |
-| **No default prod demo password** | Production requires `DEMO_OWNER_PASSWORD` if demo login is enabled |
+| **Walkthrough owner gated** | Provision only when `ENABLE_WALKTHROUGH_OWNER=1` plus server-only mailbox/password env. Unset in production. Never overwrites an existing member |
+| **No committed owner credentials** | Mailbox and password are not in the repo; no one-tap owner login |
 | **Health endpoint** | Public `/api/health` only says up/misconfigured — full checklist needs admin Bearer |
 | **Schema validation** | Zod `.strict()` schemas under `lib/validation/` |
 | **Rate limits** | Per-IP limits on auth, billing, Places, SMS, reports, analytics, connections, chats, invites |
@@ -29,7 +29,7 @@ Interlink hardens the API so secrets stay on the server and user input is strict
 | **Sessions** | Signed cookies `iat`/`exp`; **7-day**; `HttpOnly` + `SameSite=Lax` (+ `Secure` in prod) |
 | **CSRF** | Mutating `/api/*` needs matching Origin/Referer in production |
 | **Security headers** | CSP, HSTS (prod), frame deny, nosniff, COOP/CORP, Permissions-Policy |
-| **OAuth** | Apple + Google ID tokens verified via JWKS |
+| **OAuth** | Apple exchanges `code` at Apple’s token endpoint, then verifies the returned id_token via JWKs (iss, aud, exp, nonce). Client-posted tokens are ignored. Google ID tokens verified via JWKS |
 | **Secrets** | Never `NEXT_PUBLIC_` for passwords/API keys |
 | **Members / chats** | Auth required; chats only with connected peers; text sanitized |
 | **Error leakage** | Production hides internal exception messages |
@@ -48,10 +48,11 @@ APPLE_CLIENT_ID=
 TWILIO_* /
 NOTIFY_SECRET=
 ADMIN_SECRET=
-# Demo owner (keep OFF on the public site)
-# NEXT_PUBLIC_ENABLE_DEMO=1
-# ENABLE_DEMO_OWNER=1
-# DEMO_OWNER_PASSWORD=   # required in production if demo is on; never NEXT_PUBLIC_
+# Walkthrough owner (keep OFF on the public site)
+# ENABLE_WALKTHROUGH_OWNER=1
+# WALKTHROUGH_OWNER_EMAIL=
+# WALKTHROUGH_OWNER_PASSWORD=
+# NEXT_PUBLIC_ENABLE_DEMO=1   # UI demo only — not a login
 ```
 
 Never prefix secrets with `NEXT_PUBLIC_`.
@@ -59,7 +60,7 @@ Never prefix secrets with `NEXT_PUBLIC_`.
 ## Client rules
 
 - Sync profile with only writable fields (`lib/apiClient.syncProfileToServer`)
-- Demo owner button only renders when demo env is on
+- Walkthrough login is never published to the client; the server confirms `demoOwner` only after env-gated credentials match
 - Sensitive purchases may prompt `ReauthDialog` when the API returns `needsReauth`
 
 ## Optional next steps

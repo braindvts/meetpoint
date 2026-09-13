@@ -44,8 +44,6 @@ export function purgeDemoResidue(): Promise<void> {
       const demoAccounts = await prisma.member.findMany({
         where: {
           verificationsJson: { contains: DEMO_PROFILE_MARKER },
-          // Keep the fixed Brian walkthrough account.
-          NOT: { email: "brianasome@gmail.com" },
         },
         select: { id: true },
       });

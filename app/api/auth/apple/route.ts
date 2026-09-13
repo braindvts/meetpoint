@@ -11,7 +11,7 @@ export async function GET() {
     return NextResponse.redirect(appUrl("/login?error=apple_not_configured"));
   }
 
-  const { state, cookieValue } = await createOAuthState();
+  const { state, nonce, cookieValue } = await createOAuthState();
   const params = new URLSearchParams({
     client_id: process.env.APPLE_CLIENT_ID!.trim(),
     redirect_uri: appUrl("/api/auth/apple/callback"),
@@ -19,6 +19,7 @@ export async function GET() {
     response_mode: "form_post",
     scope: "name email",
     state,
+    nonce,
   });
 
   const res = NextResponse.redirect(`https://appleid.apple.com/auth/authorize?${params.toString()}`);

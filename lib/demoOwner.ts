@@ -1,13 +1,11 @@
 import type { MyProfile } from "./types";
 
-/** Public demo identity — safe to import from client components. */
-export const DEMO_OWNER_EMAIL = "brianasome@gmail.com";
-
-export const DEMO_OWNER_FLAG_KEY = "conclave.demoOwner";
-
-/** Ready-made Brian profile — skips onboarding on first sign-in. */
-export const DEMO_OWNER_PROFILE: MyProfile = {
-  name: "Brian",
+/**
+ * Local walkthrough profile template. Mailbox and password come from
+ * server-only env (see lib/walkthroughOwner.ts) — never from this file.
+ */
+export const WALKTHROUGH_OWNER_PROFILE: MyProfile = {
+  name: "Walkthrough",
   jobTitle: "Founder",
   bio: "Building Interlink — private introductions that end at a table.",
   photo:
@@ -26,23 +24,22 @@ export const DEMO_OWNER_PROFILE: MyProfile = {
   verifications: [
     {
       method: "company-email",
-      value: "brianasome@gmail.com",
+      value: "",
       verifiedAt: new Date().toISOString(),
     },
     {
       method: "linkedin",
-      value: "https://linkedin.com/in/conclave-owner-brian",
+      value: "https://linkedin.com/in/interlink-walkthrough",
       verifiedAt: new Date().toISOString(),
     },
     {
       method: "resume",
-      value: "https://conclave.app/brian-resume.pdf",
+      value: "https://interlink.app/walkthrough-resume.pdf",
       verifiedAt: new Date().toISOString(),
     },
   ],
   meetingsAttended: 2,
 };
 
-export function isDemoOwnerEmail(email: string): boolean {
-  return email.trim().toLowerCase() === DEMO_OWNER_EMAIL;
-}
+/** @deprecated Use WALKTHROUGH_OWNER_PROFILE — kept for existing imports. */
+export const DEMO_OWNER_PROFILE = WALKTHROUGH_OWNER_PROFILE;
