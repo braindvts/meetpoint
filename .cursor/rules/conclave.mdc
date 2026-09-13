@@ -7,6 +7,8 @@ alwaysApply: true
 
 Read **CONCLAVE.md** at the repo root for the full handbook. Keep it accurate when product rules change.
 
+**Public brand:** Interlink. Use Interlink in user-facing UI. Conclave is the internal handbook name. Do not rename the GitHub repo.
+
 ## Levels (only three)
 
 - **Member** — Identity only (photo, name, role, ambitions, looking for). Verification fields are optional.
@@ -38,7 +40,7 @@ Premier ($20/mo) is a plan that expands who Members can meet. Standing levels ar
 
 ## Demo
 
-`brianasome@gmail.com` / `Brian812` is the fixed demo owner login. Demo env flags stay off in production unless intentionally enabled.
+A fixed demo owner login exists for walkthroughs — see local env / ask the operator. Do not publish credentials. Demo env flags stay off in production unless intentionally enabled.
 
 ## Delivery
 

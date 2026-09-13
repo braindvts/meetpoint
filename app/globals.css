@@ -298,7 +298,7 @@ html.mp-has-site-nav body {
 /* Freeze page chrome under open sheets (phones) */
 @media (max-width: 639px) {
   html.mp-sheet-open header,
-  html.mp-sheet-open nav[aria-label="Conclave"],
+  html.mp-sheet-open nav[aria-label="Interlink"],
   html.mp-sheet-open nav[aria-label="App"] {
     visibility: hidden;
   }
@@ -949,7 +949,7 @@ svg {
     0 4px 12px rgba(0, 0, 0, 0.35);
 }
 
-/* Verified — champagne gold (Conclave accent family) */
+/* Verified — champagne gold (Interlink accent family) */
 .level-mark--verified {
   color: #1a1610;
   background: linear-gradient(145deg, #f0e6d4 0%, #d4c4a8 40%, #a8926e 100%);
@@ -1072,5 +1072,233 @@ svg {
   .black-centurion .black-sheen::after,
   .level-mark-sheen--live::after {
     animation: none !important;
+  }
+}
+
+/* —— Interlink marketing landing —— */
+.mp-landing {
+  padding-top: 4.25rem;
+}
+
+.mp-landing-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  border-bottom: 1px solid rgba(212, 196, 168, 0.18);
+  background: rgba(5, 5, 5, 0.88);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.mp-landing-nav-inner {
+  margin: 0 auto;
+  display: flex;
+  max-width: 72rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 4.25rem;
+  padding: 0.7rem 1.25rem;
+}
+
+.mp-landing-brand {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.mp-landing-anchors {
+  display: none;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.mp-landing-anchors a {
+  border-radius: 999px;
+  padding: 0.5rem 0.85rem;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-muted);
+  transition:
+    color 0.2s ease,
+    background 0.2s ease;
+}
+
+.mp-landing-anchors a:hover {
+  color: var(--color-ivory);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.mp-landing-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.mp-landing-ghost {
+  font-size: 13px;
+  color: var(--color-muted);
+  transition: color 0.2s ease;
+}
+
+.mp-landing-ghost:hover {
+  color: var(--color-ivory);
+}
+
+.mp-landing-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.75rem;
+  background: linear-gradient(180deg, #efe6d6, #d4c4a8);
+  padding: 0.55rem 1.05rem;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--color-ink);
+}
+
+.mp-landing-cta--wide {
+  min-width: 12.5rem;
+  padding: 0.9rem 2rem;
+}
+
+.mp-landing-secondary {
+  display: inline-flex;
+  min-width: 12.5rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(212, 196, 168, 0.32);
+  padding: 0.9rem 2rem;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--color-accent);
+  transition: background 0.2s ease;
+}
+
+.mp-landing-secondary:hover {
+  background: rgba(212, 196, 168, 0.06);
+}
+
+.mp-landing-hero-mark {
+  margin-top: 1.1rem;
+  font-size: clamp(2.85rem, 9vw, 5.65rem);
+  font-weight: 600;
+  line-height: 0.92;
+  letter-spacing: 0.1em;
+  color: var(--color-accent);
+}
+
+.mp-gold-rule {
+  display: block;
+  width: 3.25rem;
+  height: 1px;
+  margin: 1.65rem auto 0;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(212, 196, 168, 0.85),
+    transparent
+  );
+}
+
+.mp-landing-section {
+  scroll-margin-top: 5rem;
+  border-top: 1px solid rgba(46, 42, 36, 0.7);
+  padding: 5.5rem 1.5rem;
+}
+
+.mp-landing-section--close {
+  padding-top: 5rem;
+  padding-bottom: 5.5rem;
+}
+
+.mp-landing-h2 {
+  margin-top: 1rem;
+  font-size: 1.65rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--color-ivory);
+}
+
+.mp-landing-card {
+  border: 1px solid rgba(212, 196, 168, 0.16);
+  background: color-mix(in srgb, var(--color-panel) 82%, transparent);
+  border-radius: 1rem;
+  padding: 1.5rem 1.35rem 1.6rem;
+}
+
+.mp-landing-num {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  color: var(--color-accent);
+}
+
+.mp-landing-plan-frame {
+  overflow: hidden;
+  border: 1px solid rgba(212, 196, 168, 0.2);
+  border-radius: 1.15rem;
+  background: rgba(212, 196, 168, 0.12);
+}
+
+.mp-landing-plan {
+  background: #0c0b0a;
+  padding: 1.65rem 1.5rem 1.75rem;
+}
+
+@media (min-width: 640px) {
+  .mp-landing-h2 {
+    font-size: 1.95rem;
+  }
+
+  .mp-landing-section {
+    padding: 6.5rem 1.5rem;
+  }
+
+  .mp-landing-card {
+    padding: 1.75rem 1.5rem 1.85rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .mp-landing-nav-inner {
+    padding: 0.75rem 1.75rem;
+  }
+
+  .mp-landing-anchors {
+    display: flex;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .mp-landing-card {
+    transition:
+      transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 0.3s ease,
+      box-shadow 0.4s ease;
+  }
+
+  .mp-landing-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(212, 196, 168, 0.32);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mp-landing-card {
+    transition: none;
+  }
+
+  .mp-landing-card:hover {
+    transform: none;
   }
 }

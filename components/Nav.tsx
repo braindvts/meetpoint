@@ -37,10 +37,10 @@ export default function Nav() {
   if (!mounted || inChatThread) return null;
 
   return createPortal(
-    <nav className="mp-site-nav" aria-label="Conclave">
+    <nav className="mp-site-nav" aria-label="Interlink">
       <div className="mp-site-nav-inner">
         <Link href="/discover" className="mp-site-nav-brand">
-          Conclave
+          Interlink
         </Link>
         <div className="mp-site-nav-links" role="list">
           {LINKS.map((l) => {

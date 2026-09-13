@@ -83,7 +83,7 @@ export async function notifyTableBooked(opts: {
   phone: string;
   memberNames: string[];
 }) {
-  const smsBody = `Conclave: Your table at ${opts.restaurant} is set for ${opts.whenLabel}. Coming soon — see you there.`;
+  const smsBody = `Interlink: Your table at ${opts.restaurant} is set for ${opts.whenLabel}. Coming soon — see you there.`;
   await sendBookingSms(opts.phone, smsBody);
 
   const everyone = opts.memberNames.join(", ");

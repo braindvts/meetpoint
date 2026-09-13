@@ -241,7 +241,7 @@ function ChatThreadInner() {
 
   function senderName(senderId: string) {
     if (senderId === "me") return profile!.name.split(" ")[0];
-    if (senderId === "system") return "Conclave";
+    if (senderId === "system") return "Interlink";
     return findPerson(senderId)?.name.split(" ")[0] || "Member";
   }
 

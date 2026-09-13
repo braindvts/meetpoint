@@ -92,7 +92,7 @@ export default function SplashScreen() {
       />
       <div className="mp-splash-seal relative flex flex-col items-center px-8 text-center">
         <p className="mp-splash-word text-4xl font-semibold tracking-[0.06em] text-accent sm:text-5xl">
-          CONCLAVE
+          INTERLINK
         </p>
         <p className="mt-5 max-w-xs text-[15px] font-normal leading-snug text-ivory/70">
           The private network for ambitious people.

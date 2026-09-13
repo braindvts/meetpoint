@@ -9,7 +9,7 @@ export const PREMIER_TRIAL_DAYS = 3;
 /** Premier unlocks Member → Verified & BLACK introductions. */
 export const PREMIER_PLAN = {
   id: "conclave-premier",
-  name: "Conclave Premier",
+  name: "Premier",
   tagline: "Meet every level in the room.",
   features: [
     "Introduce yourself to Verified & BLACK",

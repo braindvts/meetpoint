@@ -4,9 +4,9 @@ interface Props {
 }
 
 const SRC = {
-  story: { src: "/social/conclave-ad-story.png", alt: "Conclave story ad" },
-  feed: { src: "/social/conclave-ad-feed.png", alt: "Conclave feed ad" },
-  portrait: { src: "/social/conclave-ad-portrait.png", alt: "Conclave portrait ad" },
+  story: { src: "/social/conclave-ad-story.png", alt: "Interlink story ad" },
+  feed: { src: "/social/conclave-ad-feed.png", alt: "Interlink feed ad" },
+  portrait: { src: "/social/conclave-ad-portrait.png", alt: "Interlink portrait ad" },
 } as const;
 
 /** Finished studio ads — phone + brand, matching the campaign layout. */

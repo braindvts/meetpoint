@@ -1,8 +1,8 @@
-# Conclave
+# Interlink
 
-**Networking that ends at a real dinner table.**
+**Private introductions for ambitious people. They end at a dinner table.**
 
-Conclave introduces people matched by ambition or profession, then settles it over dinner.
+Interlink introduces people matched by ambition or profession, then settles it over dinner. The GitHub repo is still `meetpoint`; the public brand is Interlink.
 
 **Product handbook (keep this open):** **[CONCLAVE.md](./CONCLAVE.md)** — levels, verification, BLACK, screens, deploy, and where things live in code.
 
@@ -89,7 +89,7 @@ Without LinkedIn keys you can still sign up with email, Google, or Apple, or fil
 
 ## Open in Xcode (iPhone)
 
-The website stays in Cursor. An iOS wrapper lives in `ios/` so you can run Conclave in the iPhone Simulator.
+The website stays in Cursor. An iOS wrapper lives in `ios/` so you can run Interlink in the iPhone Simulator.
 
 1. Start the site: `npm run dev`
 2. Open `ios/Conclave.xcodeproj` in Xcode
