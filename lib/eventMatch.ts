@@ -334,11 +334,19 @@ function reasonsFor(opts: {
       weight: 3,
     });
   }
-  if (opts.intentOverlap[0]) {
+  const intent =
+    opts.intentOverlap.find((item) => !GENERIC_INTENTS.has(item)) || opts.intentOverlap[0];
+  if (intent && !GENERIC_INTENTS.has(intent)) {
     reasons.push({
       kind: "intent",
-      label: `Looking for ${opts.intentOverlap[0]}`,
+      label: `Looking for ${intent}`,
       weight: 3,
+    });
+  } else if (intent && !opts.topicOverlap[0]) {
+    reasons.push({
+      kind: "intent",
+      label: `Looking for ${intent}`,
+      weight: 2,
     });
   }
   if (opts.roleOverlap[0] && opts.jobTitle) {
@@ -496,12 +504,14 @@ export function rankEvents(
 export function formatEventWhen(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "";
-  return d.toLocaleString(undefined, {
+  return d.toLocaleString("en-US", {
+    timeZone: "UTC",
     weekday: "short",
     month: "short",
     day: "numeric",
     hour: "numeric",
     minute: "2-digit",
+    timeZoneName: "short",
   });
 }
 

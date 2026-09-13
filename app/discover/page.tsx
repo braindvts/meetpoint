@@ -64,10 +64,12 @@ export default function DiscoverPage() {
   const [eventInterests, setEventInterests] = useState<EventInterest[]>(() =>
     loadEventInterests()
   );
+  const [hydrated, setHydrated] = useState(false);
 
   const refreshConnections = useCallback(() => setConnections(loadConnections()), []);
 
   useEffect(() => {
+    setHydrated(true);
     const p = loadProfile();
     if (!p) {
       router.replace("/onboarding");
@@ -184,7 +186,7 @@ export default function DiscoverPage() {
     }, 220);
   }
 
-  if (!profile) return null;
+  if (!hydrated || !profile) return null;
 
   const showSkeletons = !directoryReady && visiblePeople.length === 0;
 
