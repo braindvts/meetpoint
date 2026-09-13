@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
+import { prisma } from "@/lib/db";
 import { getCurrentMember } from "@/lib/memberAuth";
 import { appUrl } from "@/lib/session";
 import { BLACK_MONTHLY_USD, BLACK_YEARLY_USD } from "@/lib/black";
+import { BOOKING_FEE_PER_PERSON_USD } from "@/lib/pricing";
 
 function stripeClient() {
   const key = process.env.STRIPE_SECRET_KEY?.trim();
@@ -49,7 +51,13 @@ export async function POST(req: Request) {
     amount = BLACK_YEARLY_USD * 100;
     name = "Interlink BLACK · Yearly";
   } else if (kind === "booking") {
-    amount = Math.round((body.amountUsd || 5) * 100);
+    const chatId = body.chatId?.trim();
+    let headcount = 2;
+    if (chatId) {
+      const n = await prisma.chatMember.count({ where: { chatId } });
+      if (n > 0) headcount = n;
+    }
+    amount = headcount * BOOKING_FEE_PER_PERSON_USD * 100;
     name = body.label || "Interlink table booking";
   }
 

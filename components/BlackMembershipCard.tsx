@@ -11,6 +11,7 @@ import {
 import { claimBlack, myBlackConnectionCount } from "@/lib/blackStore";
 import { startBlackCheckout } from "@/lib/apiClient";
 import { track } from "@/lib/analytics";
+import { hasRequiredVerifications } from "@/lib/tiers";
 import type { MyProfile } from "@/lib/types";
 
 interface Props {
@@ -41,7 +42,7 @@ export default function BlackMembershipCard({
     return () => window.removeEventListener("meetpoint:black-changed", sync);
   }, []);
 
-  const verified = (profile.verifications?.length ?? 0) > 0;
+  const verified = hasRequiredVerifications(profile.verifications);
   const isBlack = profile.black === true;
   const req = BLACK_EARNED_REQUIREMENTS;
   const earnedReady =

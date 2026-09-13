@@ -1,15 +1,16 @@
-import { DEMO_OWNER_FLAG_KEY } from "./demoOwner";
+const WALKTHROUGH_SESSION_FLAG = "conclave.demoOwner";
 
 /**
- * Demo mode is for looking at the app locally. Env flags default to off, so a
- * deployed Interlink only ever shows real members — unless someone signs in with
- * the fixed Brian demo account, which turns sample people on for that browser.
+ * Demo mode is for looking at the app locally. Public env flags default to
+ * off, so a deployed Interlink only ever shows real members. A walkthrough
+ * owner session is marked only after the server says so (`demoOwner: true`),
+ * which requires ENABLE_WALKTHROUGH_OWNER on the server.
  */
 
-function demoOwnerSessionActive(): boolean {
+function walkthroughSessionActive(): boolean {
   if (typeof window === "undefined") return false;
   try {
-    return localStorage.getItem(DEMO_OWNER_FLAG_KEY) === "1";
+    return localStorage.getItem(WALKTHROUGH_SESSION_FLAG) === "1";
   } catch {
     return false;
   }
@@ -17,19 +18,19 @@ function demoOwnerSessionActive(): boolean {
 
 /** Shows "Enter demo" and enables the /demo bypass. */
 export function demoEntryEnabled(): boolean {
-  return process.env.NEXT_PUBLIC_ENABLE_DEMO === "1" || demoOwnerSessionActive();
+  return process.env.NEXT_PUBLIC_ENABLE_DEMO === "1" || walkthroughSessionActive();
 }
 
 /** Puts the sample members in Discover, and lets them accept and reply. */
 export function demoProfilesEnabled(): boolean {
-  return process.env.NEXT_PUBLIC_ENABLE_DEMO_PROFILES === "1" || demoOwnerSessionActive();
+  return process.env.NEXT_PUBLIC_ENABLE_DEMO_PROFILES === "1" || walkthroughSessionActive();
 }
 
-/** Mark this browser as the Brian demo walkthrough after a successful login. */
+/** Mark this browser as a local walkthrough after the server confirms it. */
 export function markDemoOwnerSession(): void {
   if (typeof window === "undefined") return;
   try {
-    localStorage.setItem(DEMO_OWNER_FLAG_KEY, "1");
+    localStorage.setItem(WALKTHROUGH_SESSION_FLAG, "1");
   } catch {
     /* ignore */
   }
@@ -38,7 +39,7 @@ export function markDemoOwnerSession(): void {
 export function clearDemoOwnerSession(): void {
   if (typeof window === "undefined") return;
   try {
-    localStorage.removeItem(DEMO_OWNER_FLAG_KEY);
+    localStorage.removeItem(WALKTHROUGH_SESSION_FLAG);
   } catch {
     /* ignore */
   }

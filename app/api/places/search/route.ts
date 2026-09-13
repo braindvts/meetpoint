@@ -50,7 +50,7 @@ export async function GET(req: Request) {
           rating: r.rating,
           vibe: r.rating ? `Rated ${r.rating}` : "Recommended nearby",
           photoUrl: r.photos?.[0]
-            ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photo_reference=${r.photos[0].photo_reference}&key=${key}`
+            ? `/api/places/photo?ref=${encodeURIComponent(r.photos[0].photo_reference)}`
             : undefined,
           live: true,
         }));

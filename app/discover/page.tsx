@@ -32,6 +32,7 @@ import {
   loadRatings,
   requestConnection,
   saveProfile,
+  hydrateNetworkFromServer,
 } from "@/lib/store";
 import { refreshDirectory, loadDirectory } from "@/lib/directory";
 import { readClientConnections, readClientProfile } from "@/lib/clientProfile";
@@ -79,7 +80,10 @@ export default function DiscoverPage() {
     setFilter("open");
     refreshConnections();
     ensureSampleInboundRequest();
-    if (!isDemoProfile(p)) void syncProfileToServer(p);
+    if (!isDemoProfile(p)) {
+      void syncProfileToServer(p);
+      void hydrateNetworkFromServer();
+    }
     track("discover_open");
     void refreshDirectory().then((list) => {
       setPeople(list);

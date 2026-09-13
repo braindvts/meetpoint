@@ -4,6 +4,15 @@ import { getCurrentMember } from "@/lib/memberAuth";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
 import type { Connection as ClientConnection } from "@/lib/types";
 
+function parseMeetup(raw: string | null): ClientConnection["meetup"] {
+  if (!raw) return undefined;
+  try {
+    return JSON.parse(raw) as ClientConnection["meetup"];
+  } catch {
+    return undefined;
+  }
+}
+
 function toClient(
   row: { id: string; fromId: string; toId: string; status: string; meetupJson: string | null },
   meId: string
@@ -13,8 +22,19 @@ function toClient(
     peerId: inbound ? row.fromId : row.toId,
     status: row.status as "requested" | "connected",
     direction: inbound ? "in" : "out",
-    meetup: row.meetupJson ? (JSON.parse(row.meetupJson) as ClientConnection["meetup"]) : undefined,
+    meetup: parseMeetup(row.meetupJson),
   };
+}
+
+function dedupeConnections(rows: ClientConnection[]): ClientConnection[] {
+  const byPeer = new Map<string, ClientConnection>();
+  for (const row of rows) {
+    const prev = byPeer.get(row.peerId);
+    if (!prev || (row.status === "connected" && prev.status !== "connected")) {
+      byPeer.set(row.peerId, row);
+    }
+  }
+  return [...byPeer.values()];
 }
 
 export async function GET() {
@@ -30,7 +50,7 @@ export async function GET() {
 
     return NextResponse.json({
       ok: true,
-      connections: rows.map((r) => toClient(r, me.id)),
+      connections: dedupeConnections(rows.map((r) => toClient(r, me.id))),
     });
   } catch (e) {
     return NextResponse.json(
@@ -56,11 +76,25 @@ export async function POST(req: Request) {
     const peer = await prisma.member.findUnique({ where: { id: peerId } });
     if (!peer) return NextResponse.json({ ok: false, error: "Peer not found" }, { status: 404 });
 
-    await prisma.connection.upsert({
-      where: { fromId_toId: { fromId: me.id, toId: peerId } },
-      create: { fromId: me.id, toId: peerId, status: "requested" },
-      update: {},
+    // If they already introduced themselves, connecting back accepts — don't
+    // create a second pending row that never resolves.
+    const inbound = await prisma.connection.findUnique({
+      where: { fromId_toId: { fromId: peerId, toId: me.id } },
     });
+    if (inbound) {
+      if (inbound.status === "requested") {
+        await prisma.connection.update({
+          where: { id: inbound.id },
+          data: { status: "connected" },
+        });
+      }
+    } else {
+      await prisma.connection.upsert({
+        where: { fromId_toId: { fromId: me.id, toId: peerId } },
+        create: { fromId: me.id, toId: peerId, status: "requested" },
+        update: {},
+      });
+    }
 
     const rows = await prisma.connection.findMany({
       where: { OR: [{ fromId: me.id }, { toId: me.id }] },
@@ -68,7 +102,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       ok: true,
-      connections: rows.map((r) => toClient(r, me.id)),
+      connections: dedupeConnections(rows.map((r) => toClient(r, me.id))),
     });
   } catch (e) {
     return NextResponse.json(
@@ -115,7 +149,7 @@ export async function PATCH(req: Request) {
 
     return NextResponse.json({
       ok: true,
-      connections: rows.map((r) => toClient(r, me.id)),
+      connections: dedupeConnections(rows.map((r) => toClient(r, me.id))),
     });
   } catch (e) {
     return NextResponse.json(

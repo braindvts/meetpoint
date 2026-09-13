@@ -10,6 +10,8 @@ const LEGACY_SEED_IDS = Array.from({ length: 18 }, (_, i) => `p${i + 1}`);
 const DEMO_PROFILE_MARKERS = [
   "linkedin.com/in/interlink-demo",
   "linkedin.com/in/conclave-demo",
+  "linkedin.com/in/interlink-walkthrough",
+  "linkedin.com/in/interlink-brian-demo",
 ];
 
 async function removeMembers(ids: string[]): Promise<void> {
@@ -49,8 +51,6 @@ export function purgeDemoResidue(): Promise<void> {
           OR: DEMO_PROFILE_MARKERS.map((marker) => ({
             verificationsJson: { contains: marker },
           })),
-          // Keep the fixed Brian walkthrough account.
-          NOT: { email: "brianasome@gmail.com" },
         },
         select: { id: true },
       });

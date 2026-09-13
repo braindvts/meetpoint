@@ -125,13 +125,21 @@ Discover ranks people by shared ambitions, complementary “looking for,” same
 
 ---
 
-## Demo / owner login
+## Demo / walkthrough login
 
-| Email | Password | Notes |
-|-------|----------|-------|
-| `brianasome@gmail.com` | `Brian812` | Always works; recreates on fresh DB; turns on sample people in that browser |
+There is **no committed owner mailbox or password**. Sign-in never recreates a privileged owner on an arbitrary database.
 
-Local-only env flags (do **not** set on production unless you want demo entry):
+A walkthrough owner can be provisioned only when **all** of these **server-only** env vars are set. Leave them unset in production. Do not commit values.
+
+```
+ENABLE_WALKTHROUGH_OWNER=1
+WALKTHROUGH_OWNER_EMAIL=
+WALKTHROUGH_OWNER_PASSWORD=
+```
+
+If the gate is off (the production default), email sign-in uses the stored password hash only.
+
+Local UI demo flags (do **not** set on production unless you want demo entry). These are not a login and do not create an account:
 
 ```
 NEXT_PUBLIC_ENABLE_DEMO=1
@@ -191,4 +199,4 @@ See [MISSING.md](./MISSING.md). Big ones: email verify + password reset links, c
 | Signup missing fields | `components/ProfileForm.tsx` |
 | BLACK rules | `lib/black.ts` |
 | Premier access | `lib/plans.ts` |
-| Demo owner login | `lib/demoOwner.ts`, `lib/ensureDemoOwner.ts` |
+| Walkthrough owner (env-gated) | `lib/walkthroughOwner.ts`, `lib/ensureDemoOwner.ts` |

@@ -50,7 +50,16 @@ export async function sendEmail({ to, subject, html, text }: Mail): Promise<bool
   }
 }
 
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 function welcomeHtml(firstName: string, link: string): string {
+  const safeName = escapeHtml(firstName);
   return `<!doctype html>
 <html>
   <body style="margin:0;padding:32px 16px;background:#050505;font-family:'Helvetica Neue',Arial,sans-serif;">
@@ -62,7 +71,7 @@ function welcomeHtml(firstName: string, link: string): string {
       </tr>
       <tr>
         <td style="padding:16px 28px 0;">
-          <h1 style="margin:0;color:#f3efe6;font-size:24px;font-weight:600;">Welcome, ${firstName}.</h1>
+          <h1 style="margin:0;color:#f3efe6;font-size:24px;font-weight:600;">Welcome, ${safeName}.</h1>
           <p style="margin:14px 0 0;color:#8f877a;font-size:15px;line-height:1.6;">
             You're in. Interlink introduces you to people matched by ambition and profession — and it ends at a real table.
           </p>

@@ -81,6 +81,11 @@ function ChatThreadInner() {
       router.replace("/chats");
       return;
     }
+    if (c.id !== id) {
+      const paid = searchParams.get("paid");
+      router.replace(`/chats/${c.id}${paid ? `?paid=${encodeURIComponent(paid)}` : ""}`);
+      return;
+    }
     setChat(c);
     lastScannedRef.current = c.messages[c.messages.length - 1]?.id || "";
     lastUpdatedRef.current = c.updatedAt;
@@ -88,7 +93,7 @@ function ChatThreadInner() {
 
     // Return from Stripe Checkout → finish booking
     if (searchParams.get("paid") === "1") {
-      const pending = takePendingBooking(id);
+      const pending = takePendingBooking(id, c.localId || "");
       if (pending && !c.tableProposal?.booked) {
         ignoreChatsEventRef.current = true;
         const updated = bookTable(id, pending.meetupAt, pending.phone, "card");
@@ -137,7 +142,9 @@ function ChatThreadInner() {
     // Cross-device chat sync (poll) when server chats exist
     const poll = window.setInterval(async () => {
       try {
-        const res = await fetch(`/api/chats/${id}/messages`);
+        const thread = getChat(id);
+        if (!thread) return;
+        const res = await fetch(`/api/chats/${thread.id}/messages`);
         const data = (await res.json()) as {
           ok?: boolean;
           messages?: { id: string; senderId: string; text: string; createdAt: string }[];

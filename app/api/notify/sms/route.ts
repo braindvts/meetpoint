@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getCurrentMember } from "@/lib/memberAuth";
 
 /**
  * Booking confirmation SMS.
@@ -20,6 +21,11 @@ function rateLimited(ip: string): boolean {
 }
 
 export async function POST(req: Request) {
+  const me = await getCurrentMember();
+  if (!me) {
+    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+  }
+
   const secret = process.env.NOTIFY_SECRET;
   if (secret) {
     const got = req.headers.get("x-conclave-notify") || "";

@@ -101,6 +101,9 @@ export async function consumeOAuthState(state: string): Promise<boolean> {
   const jar = await cookies();
   const raw = jar.get(STATE_COOKIE)?.value;
   if (!raw) return false;
+  // One-time use — drop the cookie even when the value is wrong so a stolen
+  // authorization code cannot be retried with the same browser state.
+  jar.delete(STATE_COOKIE);
   const expected = verifyValue(raw);
   return !!expected && expected === state;
 }

@@ -1,7 +1,11 @@
 import type { Member } from "@prisma/client";
 import { prisma } from "./db";
 import { qualifiesForEarnedBlack, type BlackSource } from "./black";
-import { scoreProfileStrength, reputationScoreForMeetings } from "./tiers";
+import {
+  hasRequiredVerifications,
+  scoreProfileStrength,
+  reputationScoreForMeetings,
+} from "./tiers";
 import type { PersonWork, Verification } from "./types";
 
 /**
@@ -22,7 +26,7 @@ export function memberVerifications(m: Member): Verification[] {
 }
 
 export function isVerified(m: Member): boolean {
-  return memberVerifications(m).length > 0;
+  return hasRequiredVerifications(memberVerifications(m));
 }
 
 /** Profile strength from stored fields — never from anything the client asserts. */
@@ -118,8 +122,13 @@ export async function awardBlackConnection(
   });
   if (existing) return { created: false };
 
-  await prisma.blackConnection.create({
-    data: { ...pairing, source },
-  });
-  return { created: true };
+  try {
+    await prisma.blackConnection.create({
+      data: { ...pairing, source },
+    });
+    return { created: true };
+  } catch {
+    // Unique pair — a concurrent accept already wrote the row.
+    return { created: false };
+  }
 }
