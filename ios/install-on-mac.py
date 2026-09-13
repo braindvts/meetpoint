@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Creates ~/Desktop/Conclave and opens it in Xcode. Run on your Mac."""
+"""Copies the Interlink iOS wrapper to ~/Desktop/Conclave and opens it in Xcode. Run on your Mac."""
 from pathlib import Path
 import subprocess
 

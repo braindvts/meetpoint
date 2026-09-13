@@ -9,7 +9,7 @@ function city(name: string): City {
 }
 
 /**
- * Curated Conclave tables. These are product-owned dinners/salons —
+ * Curated Interlink tables. These are product-owned dinners/salons —
  * the same “settled over dinner” surface as private bookings, opened to the room.
  * Dates sit in late 2026 so the catalog stays upcoming for this build.
  */

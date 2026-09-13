@@ -1,4 +1,4 @@
-# Conclave launch checklist
+# Interlink launch checklist
 
 Tick these off as you go. Boxes already ticked are done in the code — you don't need to touch them.
 
@@ -72,7 +72,7 @@ That last row is the one to watch — on a $5 charge Stripe's cut is 9%, because
 - [ ] Import the GitHub repo on Vercel — free on Hobby, $20/month on Pro
 - [ ] Point your domain at Vercel (Project → Settings → Domains)
 - [ ] Copy the Postgres connection string into `DATABASE_URL` on Vercel
-- [ ] Set `NEXT_PUBLIC_APP_URL` to your real domain, e.g. `https://conclave.app`
+- [ ] Set `NEXT_PUBLIC_APP_URL` to your real domain, e.g. `https://interlink.app`
 - [ ] Generate and set `AUTH_SECRET` (`openssl rand -base64 48`)
 - [ ] Redeploy
 - [ ] Open `https://yourdomain.com` — the landing page loads
@@ -157,7 +157,7 @@ That last row is the one to watch — on a $5 charge Stripe's cut is 9%, because
 
 - [ ] Confirm you have a Mac with Xcode installed (Xcode itself is free)
 - [ ] Run `python3 ios/install-on-mac.py` and open the project
-- [ ] Pick a bundle identifier, e.g. `com.yourdomain.conclave`
+- [ ] Pick a bundle identifier, e.g. `com.yourdomain.interlink`
 - [ ] Make a 1024×1024 app icon
 - [ ] Take App Store screenshots at the required device sizes
 - [ ] Answer Apple's App Privacy questionnaire

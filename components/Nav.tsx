@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
+import InterlinkMark from "@/components/InterlinkMark";
+import { BRAND } from "@/lib/brand";
 
 const LINKS = [
   { href: "/discover", label: "Discover" },
@@ -13,7 +15,7 @@ const LINKS = [
 ];
 
 /**
- * Fixed top navigation for the website — always at the top of the viewport,
+ * Fixed top navigation — always at the top of the viewport,
  * every screen size. (The old bottom dock was easy to miss.)
  */
 export default function Nav() {
@@ -37,10 +39,11 @@ export default function Nav() {
   if (!mounted || inChatThread) return null;
 
   return createPortal(
-    <nav className="mp-site-nav" aria-label="Interlink">
+    <nav className="mp-site-nav" aria-label={BRAND}>
       <div className="mp-site-nav-inner">
-        <Link href="/discover" className="mp-site-nav-brand">
-          Interlink
+        <Link href="/discover" className="mp-site-nav-brand il-press">
+          <InterlinkMark size={22} />
+          {BRAND}
         </Link>
         <div className="mp-site-nav-links" role="list">
           {LINKS.map((l) => {

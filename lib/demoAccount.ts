@@ -21,17 +21,17 @@ export const DEMO_PROFILE: MyProfile = {
   verifications: [
     {
       method: "company-email",
-      value: "demo@conclave.app",
+      value: "demo@interlink.app",
       verifiedAt: new Date().toISOString(),
     },
     {
       method: "linkedin",
-      value: "https://linkedin.com/in/conclave-demo",
+      value: "https://linkedin.com/in/interlink-demo",
       verifiedAt: new Date().toISOString(),
     },
     {
       method: "resume",
-      value: "https://conclave.app/demo-resume.pdf",
+      value: "https://interlink.app/demo-resume.pdf",
       verifiedAt: new Date().toISOString(),
     },
   ],

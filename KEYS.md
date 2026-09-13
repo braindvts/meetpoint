@@ -51,7 +51,7 @@ AUTH_SECRET=<long random string>
 
 ## 3. Welcome email — Resend
 
-The app sends one welcome email the moment an account is created (email, Google, or Apple sign-up). Until a key exists it logs `[conclave email skipped]` to the server console and sign-up continues normally.
+The app sends one welcome email the moment an account is created (email, Google, or Apple sign-up). Until a key exists it logs `[interlink email skipped]` to the server console and sign-up continues normally.
 
 1. Sign up at [resend.com](https://resend.com) and create an API key.
 2. Add and verify your sending domain under Domains (add the DNS records they show).
@@ -96,7 +96,7 @@ A LinkedIn sign-in also counts as a professional verification on the member's pr
 The fiddliest of the three — skip it until the others work.
 
 1. [Apple Developer → Identifiers](https://developer.apple.com/account/resources/identifiers) (needs the $99/year program).
-2. Create a **Services ID**; its identifier (e.g. `com.yourdomain.conclave.web`) becomes `APPLE_CLIENT_ID`.
+2. Create a **Services ID**; its identifier (e.g. `com.yourdomain.interlink.web`) becomes `APPLE_CLIENT_ID`.
 3. Configure it for Sign In with Apple: domain `yourdomain.com`, return URL `https://yourdomain.com/api/auth/apple/callback`.
 4. Keys → create a key with **Sign In with Apple** enabled, download the `AuthKey_XXXXXXXXXX.p8` (one download only), and note the key id and your team id.
 5. Apple wants a signed JWT rather than a plain secret. Generate one:
@@ -105,7 +105,7 @@ The fiddliest of the three — skip it until the others work.
 npm run apple:secret -- \
   --team-id ABCDE12345 \
   --key-id XYZ9876543 \
-  --client-id com.yourdomain.conclave.web \
+  --client-id com.yourdomain.interlink.web \
   --key ~/Downloads/AuthKey_XYZ9876543.p8
 ```
 

@@ -6,7 +6,7 @@ Keep this open as your product handbook. Update it when rules change.
 
 **Delivery plan:** **Website first** (browser on laptop/phone). Turn it into a native app later once the website is making money. Do not rebuild the UI as a phone-frame “app shell” for web.
 
-**Live code:** GitHub `braindvts/meetpoint` · stack Next.js + Postgres + Prisma · brand dark `#050505` + champagne gold `#d4c4a8`
+**Live code:** GitHub `braindvts/meetpoint` · stack Next.js + Postgres + Prisma · user-facing brand **Interlink** · night ink `#07080c` + champagne gold `#d4c4a8`
 
 ---
 
@@ -126,13 +126,21 @@ Discover ranks people by shared ambitions, complementary “looking for,” same
 
 ---
 
-## Demo / owner login
+## Demo / walkthrough login
 
-| Email | Password | Notes |
-|-------|----------|-------|
-| `brianasome@gmail.com` | `Brian812` | Always works; recreates on fresh DB; turns on sample people in that browser |
+There is **no committed owner mailbox or password**. Sign-in never recreates a privileged owner on an arbitrary database.
 
-Local-only env flags (do **not** set on production unless you want demo entry):
+A walkthrough owner can be provisioned only when **all** of these **server-only** env vars are set. Leave them unset in production. Do not commit values.
+
+```
+ENABLE_WALKTHROUGH_OWNER=1
+WALKTHROUGH_OWNER_EMAIL=
+WALKTHROUGH_OWNER_PASSWORD=
+```
+
+If the gate is off (the production default), email sign-in uses the stored password hash only.
+
+Local UI demo flags (do **not** set on production unless you want demo entry). These are not a login and do not create an account:
 
 ```
 NEXT_PUBLIC_ENABLE_DEMO=1
@@ -164,12 +172,13 @@ Details: [WEBSITE.md](./WEBSITE.md) · [KEYS.md](./KEYS.md) · [LAUNCH.md](./LAU
 
 ## Design rules (don’t break these)
 
-- Brand first: Interlink / champagne on dark ink  
+- User-facing brand is **Interlink** (handbook filename may still be CONCLAVE.md)
 - Never show Conclave or Meetpoint in user-facing copy (repo name can stay meetpoint)
-- One typeface family (Outfit)  
-- Level marks are the same metal shape: steel Member · champagne Verified · black sheen BLACK  
-- Signup must show **what** is missing and **where** (Needed sections + sticky chips)  
-- No purple AI-default theme, no cream+terracotta cliché  
+- Night ink `#07080c` + champagne as a precision accent; Syne for display, Outfit for UI
+- Standing is a **signal lockup** (node + word) — not metal chips, not numbered 01/02, not a membership board
+- Verified / BLACK CONNECTION **check SVGs stay unchanged**
+- Signup must show **what** is missing and **where** (Needed sections + sticky chips)
+- No purple AI-default theme, no cream+terracotta cliché, no editorial ladder / tariff board
 
 ---
 
@@ -193,5 +202,5 @@ See [MISSING.md](./MISSING.md). Big ones: email verify + password reset links, c
 | Signup missing fields | `components/ProfileForm.tsx` |
 | BLACK rules | `lib/black.ts` |
 | Premier access | `lib/plans.ts` |
-| Demo owner login | `lib/demoOwner.ts`, `lib/ensureDemoOwner.ts` |
+| Walkthrough owner (env-gated) | `lib/walkthroughOwner.ts`, `lib/ensureDemoOwner.ts` |
 | Waitlist → Notion | `lib/waitlist.ts`, `app/api/waitlist/route.ts`, `components/WaitlistForm.tsx` |

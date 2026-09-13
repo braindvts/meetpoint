@@ -1,5 +1,5 @@
 ---
-description: Conclave product handbook — levels, verification, BLACK, deploy
+description: Interlink product handbook — levels, verification, BLACK, deploy
 alwaysApply: true
 ---
 
@@ -28,7 +28,7 @@ Premier ($20/mo) is a plan that expands who Members can meet. Standing levels ar
 ## UX
 
 - User-facing product name is **Interlink**. Never show Conclave or Meetpoint in UI, titles, meta, emails, SMS, or checkout. Repo can stay `meetpoint`.
-- Level badges: matching metal marks — steel / champagne / black (BLACK is the coolest)
+- Level badges: signal lockups (node + word) — steel Member · champagne Verified · void BLACK. Not metal chips, not 01/02. Verified / BLACK CONNECTION check SVGs stay unchanged.
 - BLACK CONNECTION: black checkmark badge (not a chain icon)
 - Never show “Tier N · Name”
 - Signup: Identity required; verification optional (skip = stay Member)
@@ -39,7 +39,7 @@ Premier ($20/mo) is a plan that expands who Members can meet. Standing levels ar
 
 ## Demo
 
-`brianasome@gmail.com` / `Brian812` is the fixed demo owner login. Demo env flags stay off in production unless intentionally enabled.
+Walkthrough owner login is server-only (`ENABLE_WALKTHROUGH_OWNER` plus mailbox/password env vars). Those stay unset in production. Never commit an owner password or mailbox. `NEXT_PUBLIC_ENABLE_DEMO*` flags stay off in production unless intentionally enabled.
 
 ## Delivery
 

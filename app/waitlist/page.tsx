@@ -1,28 +1,27 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import WaitlistForm from "@/components/WaitlistForm";
+import Wordmark from "@/components/Wordmark";
+import { BRAND, BRAND_LINE } from "@/lib/brand";
 
 export const metadata: Metadata = {
-  title: "Waitlist · Interlink",
-  description: "Request access to Interlink — the private network for ambitious people.",
+  title: `Waitlist · ${BRAND}`,
+  description: `Request access to ${BRAND} — ${BRAND_LINE}`,
 };
 
 export default function WaitlistPage() {
   return (
-    <main className="mp-site">
-      <header className="relative z-10 mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
-        <Link
-          href="/"
-          className="text-[11px] font-semibold uppercase tracking-[0.28em] text-accent"
-        >
-          Interlink
-        </Link>
-        <Link href="/login" className="text-[13px] text-muted transition hover:text-ivory">
-          Sign in
-        </Link>
+    <main className="mp-site overflow-x-hidden">
+      <header className="fixed inset-x-0 top-0 z-30 border-b border-white/[0.06] bg-ink/70 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+          <Wordmark href="/" size="sm" />
+          <Link href="/login" className="il-press text-[13px] text-muted transition hover:text-ivory">
+            Sign in
+          </Link>
+        </div>
       </header>
 
-      <section className="relative flex min-h-[calc(100dvh-8rem)] flex-col justify-center px-6 pb-20 pt-8">
+      <section className="relative flex min-h-[calc(100dvh-8rem)] flex-col justify-center px-6 pb-20 pt-28">
         <div
           className="pointer-events-none absolute inset-0 overflow-hidden"
           aria-hidden
@@ -31,10 +30,8 @@ export default function WaitlistPage() {
         </div>
 
         <div className="relative mx-auto w-full max-w-md text-center">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-accent">
-            Private access
-          </p>
-          <h1 className="mt-5 text-[clamp(2rem,6vw,3.25rem)] font-semibold leading-[1.05] tracking-tight text-ivory">
+          <p className="il-kicker">{BRAND}</p>
+          <h1 className="mt-5 font-display text-[clamp(2rem,6vw,3.25rem)] font-semibold leading-[1.05] tracking-[-0.03em] text-ivory">
             Join the waitlist
           </h1>
           <p className="mx-auto mt-4 max-w-sm text-[15px] leading-relaxed text-ivory/70">
@@ -46,8 +43,8 @@ export default function WaitlistPage() {
         </div>
       </section>
 
-      <footer className="border-t border-line/50 px-6 py-8 text-center text-[11px] text-muted">
-        Interlink · Private introductions for ambitious people
+      <footer className="border-t border-white/[0.06] px-6 py-10 text-center text-[12px] text-muted">
+        {BRAND} · Private introductions for ambitious people
       </footer>
     </main>
   );

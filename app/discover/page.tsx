@@ -198,12 +198,12 @@ export default function DiscoverPage() {
     <>
       <Nav />
       <main className="mp-app px-0 pb-10 md:px-6">
-        <header className="sticky top-0 z-40 bg-ink/95 px-5 pb-3 pt-4 backdrop-blur-xl md:px-0 md:pt-6">
+        <header className="sticky top-0 z-40 bg-ink/80 px-5 pb-3 pt-4 backdrop-blur-xl md:px-0 md:pt-6">
           <div className="relative flex h-7 items-center justify-center md:justify-between">
-            <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-accent md:hidden">
+            <p className="font-display text-[1.05rem] font-semibold tracking-[-0.03em] text-ivory md:hidden">
               Interlink
             </p>
-            <h1 className="hidden text-[1.85rem] font-semibold tracking-tight text-ivory md:block">
+            <h1 className="hidden font-display text-[1.85rem] font-semibold tracking-[-0.03em] text-ivory md:block">
               Discover
             </h1>
             <button
@@ -218,11 +218,11 @@ export default function DiscoverPage() {
               </svg>
             </button>
           </div>
-          <h1 className="mt-2 text-[1.85rem] font-semibold tracking-tight text-ivory md:hidden">
+          <h1 className="mt-2 font-display text-[1.85rem] font-semibold tracking-[-0.03em] text-ivory md:hidden">
             Discover
           </h1>
           <p className="mt-1 text-[13px] leading-snug text-ivory/60 md:mt-2">
-            Curated professionals. Meaningful connections.
+            People first. Tables when a dinner is the better match.
           </p>
           {myTier === 1 && !premier && (
             <button
@@ -239,15 +239,13 @@ export default function DiscoverPage() {
         </header>
 
         <div className="px-4 pt-3 md:px-0 md:pt-4">
-          <div className="flex max-w-xl rounded-full border border-white/12 bg-[#12110f] p-1 md:max-w-2xl">
+          <div className="il-seg max-w-xl md:max-w-2xl">
             {(["open", "local", "tables"] as Filter[]).map((key) => (
               <button
                 key={key}
                 type="button"
                 onClick={() => setFilter(key)}
-                className={`flex-1 rounded-full py-2 text-[12px] font-medium transition ${
-                  filter === key ? "bg-accent text-ink" : "text-ivory/70"
-                }`}
+                className={filter === key ? "is-on" : ""}
               >
                 {key === "open"
                   ? `For you · ${remainingForYou}`
@@ -305,7 +303,7 @@ export default function DiscoverPage() {
             <button
               type="button"
               onClick={() => setFilter("tables")}
-              className="mb-4 w-full border border-accent/25 bg-accent/[0.06] px-4 py-3 text-left transition hover:border-accent/40"
+              className="il-panel mb-4 w-full px-4 py-3 text-left transition hover:border-accent/30"
             >
               <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent">
                 Tables for you

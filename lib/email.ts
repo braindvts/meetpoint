@@ -26,7 +26,7 @@ interface Mail {
 export async function sendEmail({ to, subject, html, text }: Mail): Promise<boolean> {
   const key = process.env.RESEND_API_KEY?.trim();
   if (!key) {
-    console.info("[conclave email skipped]", { to, subject });
+    console.info("[interlink email skipped]", { to, subject });
     return false;
   }
 
@@ -40,12 +40,12 @@ export async function sendEmail({ to, subject, html, text }: Mail): Promise<bool
       body: JSON.stringify({ from: fromAddress(), to: [to], subject, html, text }),
     });
     if (!res.ok) {
-      console.error("[conclave email failed]", res.status, await res.text());
+      console.error("[interlink email failed]", res.status, await res.text());
       return false;
     }
     return true;
   } catch (err) {
-    console.error("[conclave email error]", err);
+    console.error("[interlink email error]", err);
     return false;
   }
 }
@@ -66,7 +66,7 @@ function welcomeHtml(firstName: string, link: string): string {
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;margin:0 auto;background:#0c0b0a;border:1px solid rgba(212,196,168,0.22);">
       <tr>
         <td style="padding:32px 28px 8px;text-align:center;">
-          <p style="margin:0;color:#d4c4a8;font-size:13px;letter-spacing:0.28em;">INTERLINK</p>
+          <p style="margin:0;color:#d4c4a8;font-size:18px;font-weight:600;letter-spacing:-0.03em;">Interlink</p>
         </td>
       </tr>
       <tr>

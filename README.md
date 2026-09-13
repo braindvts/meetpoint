@@ -76,6 +76,8 @@ Copy from `.env.example`. Important ones:
 | `GOOGLE_PLACES_API_KEY` | Live restaurant search |
 | `TWILIO_*` | Optional booking SMS |
 | `NOTIFY_SECRET` | Optional SMS API lock |
+| `ENABLE_WALKTHROUGH_OWNER` | Server-only walkthrough login gate — leave unset in production |
+| `WALKTHROUGH_OWNER_EMAIL` / `WALKTHROUGH_OWNER_PASSWORD` | Walkthrough credentials — never commit values |
 | `NOTION_API_KEY` (or `NOTION_TOKEN`) | Writes waitlist signups to Notion |
 | `NOTION_WAITLIST_DATABASE_ID` | Interlink Waitlist DB (`a6ffe8d865f94b25a851e2331a31c65b`) |
 
@@ -110,7 +112,7 @@ If the API key is missing, `/waitlist` still opens the [public Notion form](http
 The website stays in Cursor. An iOS wrapper lives in `ios/` so you can run Interlink in the iPhone Simulator.
 
 1. Start the site: `npm run dev`
-2. Open `ios/Conclave.xcodeproj` in Xcode
+2. Open `ios/Conclave.xcodeproj` in Xcode (internal project name; the app displays as **Interlink**)
 3. Signing & Capabilities → your Apple ID (Personal Team)
 4. Pick an iPhone simulator → press **▶**
 5. **Product → Test** (⌘U) runs the unit tests in `ios/ConclaveTests`

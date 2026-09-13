@@ -51,7 +51,7 @@ function attachLinkedInVerification(
   return JSON.stringify(verifications);
 }
 
-/** Upsert the signed-in / cookie member from a Conclave profile. */
+/** Upsert the signed-in / cookie member from an Interlink profile. */
 export async function PUT(req: Request) {
   try {
     await purgeDemoResidue();

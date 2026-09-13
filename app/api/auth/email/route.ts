@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { sendWelcomeEmail } from "@/lib/email";
-import { ensureDemoOwner, matchesDemoOwner } from "@/lib/ensureDemoOwner";
+import { provisionWalkthroughOwnerIfAbsent } from "@/lib/ensureDemoOwner";
 import { withMemberCookie } from "@/lib/memberAuth";
 import { hashPassword, isValidEmail, verifyPassword } from "@/lib/password";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
 import { appUrl, withSession } from "@/lib/session";
+import { matchesWalkthroughOwner } from "@/lib/walkthroughOwner";
 
 export async function POST(req: Request) {
   try {
@@ -28,25 +29,6 @@ export async function POST(req: Request) {
         { ok: false, error: "Password must be at least 8 characters." },
         { status: 400 }
       );
-    }
-
-    // Fixed Brian demo login — recreate the account on any fresh database.
-    if (matchesDemoOwner(email, password)) {
-      const member = await ensureDemoOwner();
-      const res = NextResponse.json({
-        ok: true,
-        next: "/discover",
-        memberId: member.id,
-        demoOwner: true,
-      });
-      withSession(res, {
-        id: member.id,
-        name: member.name,
-        email,
-        picture: member.photo || undefined,
-        provider: "email",
-      });
-      return withMemberCookie(res, member.id);
     }
 
     const existing = await prisma.member.findFirst({ where: { email } });
@@ -85,20 +67,30 @@ export async function POST(req: Request) {
       return withMemberCookie(res, member.id);
     }
 
-    if (!existing?.passwordHash || !verifyPassword(password, existing.passwordHash)) {
+    let member = existing;
+    if (!member && matchesWalkthroughOwner(email, password)) {
+      member = await provisionWalkthroughOwnerIfAbsent();
+    }
+
+    if (!member?.passwordHash || !verifyPassword(password, member.passwordHash)) {
       return NextResponse.json({ ok: false, error: "Email or password is incorrect." }, { status: 401 });
     }
 
-    const next = existing.jobTitle && existing.photo ? "/discover" : "/onboarding";
-    const res = NextResponse.json({ ok: true, next, memberId: existing.id });
+    const next = member.jobTitle && member.photo ? "/discover" : "/onboarding";
+    const res = NextResponse.json({
+      ok: true,
+      next,
+      memberId: member.id,
+      demoOwner: matchesWalkthroughOwner(email, password),
+    });
     withSession(res, {
-      id: existing.id,
-      name: existing.name,
+      id: member.id,
+      name: member.name,
       email,
-      picture: existing.photo || undefined,
+      picture: member.photo || undefined,
       provider: "email",
     });
-    return withMemberCookie(res, existing.id);
+    return withMemberCookie(res, member.id);
   } catch (e) {
     return NextResponse.json(
       { ok: false, error: e instanceof Error ? e.message : "Sign-in failed" },

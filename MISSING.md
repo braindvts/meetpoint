@@ -1,4 +1,4 @@
-# What’s missing from Conclave
+# What’s missing from Interlink
 
 Updated after the backend pass (Prisma SQLite, APIs, Stripe/Places hooks).
 

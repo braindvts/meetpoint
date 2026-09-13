@@ -42,7 +42,7 @@ export default function MemberStatusStrip({ profile, tier }: Props) {
         }`}
         title={premier ? "Interlink Premier" : "Free member"}
       >
-        {premier ? (onTrial ? "Premier · Trial" : "Interlink Premier") : "Free member"}
+        {premier ? (onTrial ? "Premier · Trial" : "Premier") : "Free"}
       </span>
 
       <TierBadge tier={tier} size="sm" />

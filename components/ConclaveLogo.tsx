@@ -13,8 +13,8 @@ interface Props {
 }
 
 /**
- * Crisp vector seal — never rasterized, sharp on retina.
- * Double ring + tick marks + monogram C.
+ * Legacy seal mark — unused on current screens (InterlinkMark is the brand).
+ * Wordmark reads Interlink if this component is ever shown.
  */
 export default function ConclaveLogo({
   size = 36,
