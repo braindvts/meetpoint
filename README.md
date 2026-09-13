@@ -8,6 +8,7 @@ Conclave introduces people matched by ambition or profession, then settles it ov
 
 ## What’s working now
 
+- Landing waitlist (`/` + `/waitlist`) writes to the Interlink Waitlist Notion database
 - Landing, splash (first open only), mobile bottom dock
 - Email + password sign-up, and Google / LinkedIn / Apple OAuth once keyed
 - Welcome email on sign-up (Resend) — logs and skips until keyed
@@ -75,6 +76,8 @@ Copy from `.env.example`. Important ones:
 | `GOOGLE_PLACES_API_KEY` | Live restaurant search |
 | `TWILIO_*` | Optional booking SMS |
 | `NOTIFY_SECRET` | Optional SMS API lock |
+| `NOTION_API_KEY` (or `NOTION_TOKEN`) | Writes waitlist signups to Notion |
+| `NOTION_WAITLIST_DATABASE_ID` | Interlink Waitlist DB (`a6ffe8d865f94b25a851e2331a31c65b`) |
 
 Step-by-step for each one: **[KEYS.md](./KEYS.md)**.
 
@@ -86,6 +89,21 @@ Step-by-step for each one: **[KEYS.md](./KEYS.md)**.
 4. Paste Client ID / Secret into `.env.local` and restart
 
 Without LinkedIn keys you can still sign up with email, Google, or Apple, or fill in a profile manually.
+
+### Waitlist (Notion) — set this on Vercel
+
+Site signups go to the existing **Interlink Waitlist** database: [open it](https://app.notion.com/p/a6ffe8d865f94b25a851e2331a31c65b). Source is set to `Waitlist`.
+
+On **Vercel → Project → Settings → Environment Variables** (Production):
+
+| Variable | Value |
+|----------|--------|
+| `NOTION_API_KEY` | Internal integration secret from [notion.so/my-integrations](https://www.notion.so/my-integrations) |
+| `NOTION_WAITLIST_DATABASE_ID` | `a6ffe8d865f94b25a851e2331a31c65b` |
+
+Then open the database → **••• → Connections** → connect that integration. Redeploy after saving.
+
+If the API key is missing, `/waitlist` still opens the [public Notion form](https://tiny-palladium-a02.notion.site/cc1d0f6fc49348239d2e24fdfa7a41c1?pvs=105) so names still land in the same database. `/api/health` reports `canWriteWaitlist` when the key is present.
 
 ## Open in Xcode (iPhone)
 

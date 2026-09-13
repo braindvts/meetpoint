@@ -10,7 +10,7 @@
     "postinstall": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:push": "prisma db push",
-    "test": "tsx --test lib/eventMatch.test.ts",
+    "test": "tsx --test lib/eventMatch.test.ts lib/waitlist.test.ts",
     "apple:secret": "node scripts/apple-client-secret.mjs"
   },
   "dependencies": {

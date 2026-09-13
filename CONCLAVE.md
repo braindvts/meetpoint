@@ -106,7 +106,8 @@ Separate from BLACK. Shown as a **black checkmark** badge. Earned when a BLACK m
 
 | Route | Purpose |
 |-------|---------|
-| `/` | Landing |
+| `/` | Landing + waitlist email |
+| `/waitlist` | Full waitlist (email + optional name) → Interlink Notion DB |
 | `/login` | Email + OAuth sign-in |
 | `/onboarding` | Profile setup (highlights missing fields) |
 | `/discover` | The Room — For you / Nearby people, plus Tables matched to you |
@@ -154,6 +155,7 @@ NEXT_PUBLIC_ENABLE_DEMO_PROFILES=1
 1. Neon Postgres → copy `DATABASE_URL`  
 2. Vercel project linked to `braindvts/meetpoint`  
 3. Env: `DATABASE_URL`, `AUTH_SECRET`, `NEXT_PUBLIC_APP_URL`  
+   For the live waitlist: `NOTION_API_KEY` + `NOTION_WAITLIST_DATABASE_ID=a6ffe8d865f94b25a851e2331a31c65b`  
 4. Redeploy  
 
 Details: [WEBSITE.md](./WEBSITE.md) · [KEYS.md](./KEYS.md) · [LAUNCH.md](./LAUNCH.md)
@@ -191,3 +193,4 @@ See [MISSING.md](./MISSING.md). Big ones: email verify + password reset links, c
 | BLACK rules | `lib/black.ts` |
 | Premier access | `lib/plans.ts` |
 | Demo owner login | `lib/demoOwner.ts`, `lib/ensureDemoOwner.ts` |
+| Waitlist → Notion | `lib/waitlist.ts`, `app/api/waitlist/route.ts`, `components/WaitlistForm.tsx` |

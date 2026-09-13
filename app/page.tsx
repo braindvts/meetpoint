@@ -1,5 +1,6 @@
 import Link from "next/link";
 import DemoEnterButton from "@/components/DemoEnterButton";
+import WaitlistForm from "@/components/WaitlistForm";
 import { demoEntryEnabled } from "@/lib/demoFlag";
 
 /**
@@ -14,14 +15,17 @@ export default function Landing() {
           Conclave
         </p>
         <div className="flex items-center gap-5">
+          <Link href="/waitlist" className="text-[13px] text-muted transition hover:text-ivory">
+            Waitlist
+          </Link>
           <Link href="/login" className="text-[13px] text-muted transition hover:text-ivory">
             Sign in
           </Link>
           <Link
-            href="/login"
+            href="/waitlist"
             className="rounded-xl bg-gradient-to-b from-accent-2 to-accent px-4 py-2 text-[12px] font-semibold tracking-wide text-ink"
           >
-            Get started
+            Request access
           </Link>
         </div>
       </header>
@@ -43,18 +47,15 @@ export default function Landing() {
           <p className="mp-reveal mp-reveal-delay-2 mx-auto mt-6 max-w-md text-[1.05rem] leading-relaxed text-ivory/70 sm:text-lg">
             The private network for ambitious people — introductions that end at a table.
           </p>
-          <div className="mp-reveal mp-reveal-delay-3 mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
+          <div className="mp-reveal mp-reveal-delay-3 mx-auto mt-10 w-full max-w-md">
+            <WaitlistForm compact id="hero-waitlist" />
+          </div>
+          <div className="mp-reveal mp-reveal-delay-3 mt-4">
             <Link
               href="/login"
-              className="inline-flex min-w-[12rem] items-center justify-center rounded-xl bg-gradient-to-b from-accent-2 to-accent px-8 py-3.5 text-[12px] font-semibold tracking-wide text-ink"
+              className="text-[13px] text-muted transition hover:text-ivory"
             >
-              Join on the web
-            </Link>
-            <Link
-              href="/login"
-              className="inline-flex min-w-[12rem] items-center justify-center rounded-xl border border-accent/30 px-8 py-3.5 text-[12px] font-medium tracking-wide text-accent transition hover:bg-accent/5"
-            >
-              Sign in
+              Already a member? Sign in
             </Link>
           </div>
           {demoEntryEnabled() && (
@@ -122,15 +123,16 @@ export default function Landing() {
       </section>
 
       <section className="border-t border-line/60 px-6 py-16">
-        <div className="mx-auto flex max-w-3xl flex-col items-center gap-5 text-center">
+        <div className="mx-auto flex max-w-md flex-col items-center gap-5 text-center">
           <h2 className="text-xl font-semibold text-ivory sm:text-2xl">
-            Start on the website today
+            Request a seat
           </h2>
-          <Link
-            href="/login"
-            className="inline-flex items-center justify-center rounded-xl bg-gradient-to-b from-accent-2 to-accent px-8 py-3.5 text-[12px] font-semibold tracking-wide text-ink"
-          >
-            Get started
+          <p className="text-[14px] leading-relaxed text-muted">
+            We’ll write when a seat opens.
+          </p>
+          <WaitlistForm compact id="footer-waitlist" />
+          <Link href="/waitlist" className="text-[13px] text-accent hover:text-ivory">
+            Add your name
           </Link>
         </div>
       </section>
