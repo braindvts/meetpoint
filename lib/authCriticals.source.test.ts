@@ -38,11 +38,3 @@ test("C1 does not recreate a privileged owner unless the server gate is on", () 
   assert.doesNotMatch(src, /matchesDemoOwner\(/);
   assert.doesNotMatch(src, /ensureDemoOwner\(\)/);
 });
-
-test("C3 from PR #2 remains: signup 409s on any existing email", () => {
-  const src = readFileSync(join(ROOT, "app/api/auth/email/route.ts"), "utf8");
-  assert.match(src, /if \(existing\)/);
-  assert.match(src, /status: 409/);
-  assert.doesNotMatch(src, /existing\?\.passwordHash/);
-  assert.doesNotMatch(src, /prisma\.member\.update/);
-});

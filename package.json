@@ -7,11 +7,10 @@
     "build": "prisma generate && prisma db push && next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "node --experimental-strip-types --test lib/*.test.ts",
     "postinstall": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:push": "prisma db push",
-    "test": "tsx --test lib/eventMatch.test.ts",
+    "test": "tsx --test lib/*.test.ts",
     "apple:secret": "node scripts/apple-client-secret.mjs"
   },
   "dependencies": {
