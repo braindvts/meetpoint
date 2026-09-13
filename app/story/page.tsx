@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Conclave — Instagram post",
+  title: "Interlink — Instagram post",
   robots: { index: false, follow: false },
 };
 
@@ -18,7 +18,7 @@ export default function StoryPage() {
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/conclave-instagram.png"
-        alt="Conclave Instagram post"
+        alt="Interlink Instagram post"
         className="mx-auto mt-8 w-full max-w-[360px] rounded-lg border border-accent/25"
       />
 

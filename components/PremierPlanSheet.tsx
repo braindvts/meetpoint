@@ -55,7 +55,7 @@ export default function PremierPlanSheet({
       className="fixed inset-0 z-[80] flex items-end justify-center sm:items-center"
       role="dialog"
       aria-modal="true"
-      aria-label="Conclave Premier"
+      aria-label="Interlink Premier"
     >
       <button
         type="button"
@@ -74,8 +74,8 @@ export default function PremierPlanSheet({
           </div>
 
           <div className="px-6 pb-2 pt-4 text-center sm:pt-6">
-            <p className="font-display text-2xl font-semibold text-white">
-              Con<span className="text-accent">clave</span>
+            <p className="font-display text-2xl font-semibold tracking-[-0.03em] text-white">
+              Interlink
             </p>
             <p className="mt-2 text-[13px] font-semibold tracking-tight text-white/55">
               Membership

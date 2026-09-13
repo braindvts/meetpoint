@@ -1,142 +1,214 @@
 import Link from "next/link";
 import DemoEnterButton from "@/components/DemoEnterButton";
+import InterlinkMark from "@/components/InterlinkMark";
+import Magnetic from "@/components/motion/Magnetic";
+import Reveal from "@/components/motion/Reveal";
+import SignalMesh from "@/components/SignalMesh";
+import TierBadge from "@/components/TierBadge";
+import Wordmark from "@/components/Wordmark";
+import { BRAND, BRAND_LINE, BRAND_TAGLINE } from "@/lib/brand";
 import { demoEntryEnabled } from "@/lib/demoFlag";
 
-/**
- * Browser marketing site — website first.
- * Native app can wrap this same site later; do not shrink it back into a phone frame.
- */
+const STEPS = [
+  {
+    title: "Show up as yourself",
+    copy: "Identity is enough to enter — photo, name, role, ambitions. Verification waits until you want it.",
+  },
+  {
+    title: "Get introduced with intent",
+    copy: "Discover ranks people by overlap, not a feed. Nearby when you want it. Tables when a dinner is the better match.",
+  },
+  {
+    title: "Settle it over dinner",
+    copy: "Private chat, a proposed table, a real seat. The network is the introduction. The product is the meal.",
+  },
+];
+
+const STANDING = [
+  {
+    tier: 1 as const,
+    name: "Member",
+    copy: "Identity on file. Meet other Members. Skip credentials and stay here — that’s correct.",
+  },
+  {
+    tier: 2 as const,
+    name: "Verified",
+    copy: "Business email, LinkedIn, and resume. The checkmarks stay checks. Standing is the signal next to them.",
+  },
+  {
+    tier: 3 as const,
+    name: "BLACK",
+    copy: "Paid or earned. Meet anyone. Peer invites never grant this — only BLACK CONNECTION.",
+  },
+];
+
 export default function Landing() {
   return (
-    <main className="mp-site">
-      <header className="relative z-10 mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-accent">
-          Conclave
-        </p>
-        <div className="flex items-center gap-5">
-          <Link href="/login" className="text-[13px] text-muted transition hover:text-ivory">
+    <main className="mp-site overflow-x-hidden">
+      <header className="fixed inset-x-0 top-0 z-30 border-b border-white/[0.06] bg-ink/70 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+        <Wordmark href="/" size="sm" />
+        <div className="flex items-center gap-3">
+          <Link href="/login" className="il-press text-[13px] text-muted transition hover:text-ivory">
             Sign in
           </Link>
-          <Link
-            href="/login"
-            className="rounded-xl bg-gradient-to-b from-accent-2 to-accent px-4 py-2 text-[12px] font-semibold tracking-wide text-ink"
-          >
-            Get started
-          </Link>
+          <Magnetic>
+            <Link href="/login" className="il-btn il-landing-cta il-landing-cta--fill !min-w-0 px-4 py-2 text-[12px]">
+              Join
+            </Link>
+          </Magnetic>
+        </div>
         </div>
       </header>
 
-      {/* Hero — one composition: brand, line, CTAs */}
-      <section className="relative flex min-h-[calc(100dvh-4.5rem)] flex-col justify-center px-6 pb-20 pt-8">
-        <div
-          className="pointer-events-none absolute inset-0 overflow-hidden"
-          aria-hidden
-        >
-          <div className="absolute left-1/2 top-[42%] h-[28rem] w-[28rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/12 blur-3xl motion-safe:animate-pulse" />
-          <div className="absolute -right-20 top-10 h-72 w-72 rounded-full bg-accent/5 blur-3xl" />
+      <section className="relative isolate min-h-[calc(100dvh-4.5rem)] px-6 pb-16 pt-24 md:pt-28">
+        <div className="pointer-events-none absolute inset-0" aria-hidden>
+          <SignalMesh />
         </div>
-
-        <div className="relative mx-auto w-full max-w-3xl text-center">
-          <h1 className="mp-reveal text-[clamp(2.75rem,8vw,5.5rem)] font-semibold leading-[0.95] tracking-[0.08em] text-accent">
-            CONCLAVE
-          </h1>
-          <p className="mp-reveal mp-reveal-delay-2 mx-auto mt-6 max-w-md text-[1.05rem] leading-relaxed text-ivory/70 sm:text-lg">
-            The private network for ambitious people — introductions that end at a table.
-          </p>
-          <div className="mp-reveal mp-reveal-delay-3 mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
-            <Link
-              href="/login"
-              className="inline-flex min-w-[12rem] items-center justify-center rounded-xl bg-gradient-to-b from-accent-2 to-accent px-8 py-3.5 text-[12px] font-semibold tracking-wide text-ink"
-            >
-              Join on the web
-            </Link>
-            <Link
-              href="/login"
-              className="inline-flex min-w-[12rem] items-center justify-center rounded-xl border border-accent/30 px-8 py-3.5 text-[12px] font-medium tracking-wide text-accent transition hover:bg-accent/5"
-            >
-              Sign in
-            </Link>
-          </div>
-          {demoEntryEnabled() && (
-            <div className="mp-reveal mp-reveal-delay-3 mt-5">
-              <DemoEnterButton label="Enter demo" className="text-[13px] text-accent" />
-            </div>
-          )}
-          <p className="mp-reveal mp-reveal-delay-3 mt-8 text-[11px] tracking-wide text-muted">
-            Website first · Native app when you’re ready
-          </p>
-        </div>
-      </section>
-
-      <section className="border-t border-line/60 px-6 py-20">
-        <div className="mx-auto max-w-3xl text-center">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-accent">
-            How it works
-          </p>
-          <h2 className="mt-4 text-2xl font-semibold tracking-tight text-ivory sm:text-3xl">
-            Match in the browser. Meet at dinner.
-          </h2>
-          <p className="mx-auto mt-4 max-w-xl text-[15px] leading-relaxed text-muted">
-            Build your Identity profile, join as a Member, optionally get Verified with
-            business email, LinkedIn, and resume, then discover people who fit — and settle
-            it over a real table.
-          </p>
-        </div>
-      </section>
-
-      <section className="border-t border-line/60 px-6 py-20">
-        <div className="mx-auto max-w-4xl">
-          <p className="text-center text-[10px] font-semibold uppercase tracking-[0.28em] text-accent">
-            Levels
-          </p>
-          <div className="mt-10 grid gap-8 sm:grid-cols-3">
-            {[
-              {
-                name: "Member",
-                mark: "level-mark level-mark--member",
-                copy: "Sign up with Identity — photo, name, role. Verification is optional.",
-              },
-              {
-                name: "Verified",
-                mark: "level-mark level-mark--verified",
-                copy: "Add business email, LinkedIn, and resume when you’re ready.",
-              },
-              {
-                name: "BLACK",
-                mark: "level-mark level-mark--black",
-                copy: "Premium standing. Pay or earn it through dinners and reputation.",
-              },
-            ].map((level) => (
-              <div key={level.name} className="text-center sm:text-left">
-                <span
-                  className={`inline-flex items-center px-2.5 py-1 text-[9.5px] font-semibold uppercase tracking-[0.22em] text-ivory ${level.mark}`}
-                >
-                  <span className="level-mark-sheen" aria-hidden />
-                  <span className="relative">{level.name}</span>
+        <div className="relative mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16">
+          <div>
+            <p className="il-kicker mp-reveal">{BRAND}</p>
+            <h1 className="mp-reveal mp-reveal-delay-1 mt-5 font-display text-[clamp(3.1rem,8vw,6.4rem)] font-semibold leading-[0.9] tracking-[-0.045em] text-ivory">
+              {BRAND_TAGLINE.split(". ").map((line, i) => (
+                <span key={line} className="block">
+                  {line}
+                  {i === 0 ? "." : ""}
                 </span>
-                <p className="mt-4 text-[14px] leading-relaxed text-muted">{level.copy}</p>
+              ))}
+            </h1>
+            <p className="mp-reveal mp-reveal-delay-2 mt-6 max-w-md text-[1.05rem] leading-relaxed text-ivory/68">
+              {BRAND_LINE} Introductions ranked by ambition — then a table.
+            </p>
+            <div className="mp-reveal mp-reveal-delay-3 mt-10 flex flex-col items-start gap-3 sm:flex-row sm:items-center">
+              <Magnetic>
+                <Link href="/login" className="il-btn il-landing-cta il-landing-cta--fill">
+                  Enter the room
+                </Link>
+              </Magnetic>
+              <Magnetic>
+                <Link href="/login" className="il-btn il-landing-cta il-landing-cta--ghost">
+                  Sign in
+                </Link>
+              </Magnetic>
+            </div>
+            {demoEntryEnabled() && (
+              <div className="mp-reveal mp-reveal-delay-3 mt-5">
+                <DemoEnterButton label="Enter demo" className="text-[13px] text-accent" />
               </div>
+            )}
+            <p className="mp-reveal mp-reveal-delay-4 mt-8 text-[12px] text-muted">
+              Website first · Native app when the room is paying for itself
+            </p>
+          </div>
+
+          <div className="mp-reveal mp-reveal-delay-2 relative hidden min-h-[22rem] lg:block">
+            <div className="il-node-card absolute left-6 top-4 w-[78%] p-5">
+              <p className="il-kicker">Tonight</p>
+              <p className="mt-3 font-display text-2xl font-semibold tracking-tight text-ivory">
+                Founders after the raise
+              </p>
+              <p className="mt-2 text-[13px] text-muted">Eight seats · Dumbo · Thursday</p>
+              <div className="mt-5 flex items-center gap-2">
+                <span className="stand stand--verified">
+                  <span className="stand-node" aria-hidden />
+                  <span>Host</span>
+                </span>
+                <span className="text-[12px] text-ivory/55">Matched to your ambitions</span>
+              </div>
+            </div>
+            <div className="il-node-card absolute bottom-2 right-0 w-[70%] p-4">
+              <div className="flex items-center gap-3">
+                <span className="grid h-11 w-11 place-items-center rounded-full border border-white/12 bg-black">
+                  <InterlinkMark size={22} />
+                </span>
+                <div>
+                  <p className="font-display text-lg font-semibold text-ivory">A private thread</p>
+                  <p className="text-[12px] text-muted">Then a table. Not a feed.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="relative border-t border-white/[0.06] px-6 py-24">
+        <div className="mx-auto max-w-6xl">
+          <Reveal>
+            <p className="il-kicker">How the room works</p>
+            <h2 className="mt-3 max-w-xl font-display text-3xl font-semibold tracking-[-0.03em] text-ivory sm:text-4xl">
+              Three moves. No numbered ladder.
+            </h2>
+          </Reveal>
+          <div className="mt-12 grid gap-8 md:grid-cols-3 md:gap-10">
+            {STEPS.map((step, i) => (
+              <Reveal key={step.title} delay={i * 90}>
+                <div className="relative">
+                  {i < STEPS.length - 1 ? (
+                    <span
+                      className="pointer-events-none absolute left-[calc(100%+0.4rem)] top-3 hidden h-px w-[calc(100%-0.8rem)] bg-gradient-to-r from-accent/40 to-transparent md:block"
+                      aria-hidden
+                    />
+                  ) : null}
+                  <span className="stand-node !h-2.5 !w-2.5 bg-accent" aria-hidden />
+                  <h3 className="mt-4 font-display text-xl font-semibold tracking-tight text-ivory">
+                    {step.title}
+                  </h3>
+                  <p className="mt-2 text-[14px] leading-relaxed text-muted">{step.copy}</p>
+                </div>
+              </Reveal>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="border-t border-line/60 px-6 py-16">
-        <div className="mx-auto flex max-w-3xl flex-col items-center gap-5 text-center">
-          <h2 className="text-xl font-semibold text-ivory sm:text-2xl">
-            Start on the website today
-          </h2>
-          <Link
-            href="/login"
-            className="inline-flex items-center justify-center rounded-xl bg-gradient-to-b from-accent-2 to-accent px-8 py-3.5 text-[12px] font-semibold tracking-wide text-ink"
-          >
-            Get started
-          </Link>
+      <section className="relative border-t border-white/[0.06] px-6 py-24">
+        <div className="mx-auto max-w-6xl">
+          <Reveal>
+            <p className="il-kicker">Standing</p>
+            <h2 className="mt-3 max-w-xl font-display text-3xl font-semibold tracking-[-0.03em] text-ivory sm:text-4xl">
+              Three signals. None of them a metal chip.
+            </h2>
+          </Reveal>
+          <div className="stand-path mt-12">
+            {STANDING.map((level, i) => (
+              <Reveal key={level.name} delay={i * 80} className="stand-path-item">
+                {i > 0 ? <span className="stand-path-link" aria-hidden /> : null}
+                <div className={`stand-path-card ${level.tier === 3 ? "bg-black" : ""}`}>
+                  <TierBadge tier={level.tier} size="md" />
+                  <p className="mt-4 font-display text-lg font-semibold text-ivory">{level.name}</p>
+                  <p className="mt-2 text-[13px] leading-relaxed text-muted">{level.copy}</p>
+                </div>
+              </Reveal>
+            ))}
+          </div>
         </div>
       </section>
 
-      <footer className="border-t border-line/50 px-6 py-8 text-center text-[11px] text-muted">
-        Conclave · Private introductions for ambitious people
+      <section className="relative border-t border-white/[0.06] px-6 py-24">
+        <Reveal className="mx-auto max-w-3xl text-center">
+          <p className="il-kicker">Tables</p>
+          <h2 className="mt-3 font-display text-3xl font-semibold tracking-[-0.03em] text-ivory sm:text-4xl">
+            Hosted dinners already live in Discover
+          </h2>
+          <p className="mx-auto mt-4 max-w-xl text-[15px] leading-relaxed text-muted">
+            For you, Nearby, and Tables — ranked against your interests, role, and what you said
+            you want. The product is not a brochure. The tables are in the room.
+          </p>
+          <Magnetic className="mt-8">
+            <Link href="/login" className="il-btn il-landing-cta il-landing-cta--fill">
+              Open Discover
+            </Link>
+          </Magnetic>
+        </Reveal>
+      </section>
+
+      <footer className="border-t border-white/[0.06] px-6 py-10">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 sm:flex-row">
+          <Wordmark href="/" size="sm" />
+          <p className="text-[12px] text-muted">
+            {BRAND} · Private introductions for ambitious people
+          </p>
+        </div>
       </footer>
     </main>
   );

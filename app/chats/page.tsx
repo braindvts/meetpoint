@@ -134,7 +134,7 @@ export default function ChatsPage() {
 
         <div className="px-4 pb-6 pt-4">
         {creating && (
-          <div className="mp-modal-in mp-person-card mb-6 p-4">
+          <div className="il-node-card mp-modal-in mb-6 p-4">
             <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-accent">
               Start a private chat
             </p>
@@ -207,7 +207,7 @@ export default function ChatsPage() {
               const when = relativeTime(last?.createdAt || chat.messages.at(-1)?.createdAt);
               const lead = members[0];
               return (
-                <div key={chat.id} className="mp-person-card group flex items-stretch">
+                <div key={chat.id} className="mp-person-card mp-row group flex items-stretch">
                   <Link
                     href={`/chats/${chat.id}`}
                     className="flex min-w-0 flex-1 items-center gap-3 px-3 py-3"

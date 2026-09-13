@@ -6,24 +6,20 @@ interface Props {
 }
 
 /**
- * The BLACK mark — same metal-card family as Member / Verified, fully blacked
- * out with a living sheen. Deliberately the loudest badge in the app.
+ * BLACK — the loudest standing. A void lockup with a filled node.
+ * Not a metal chip, not a numbered plaque, not Amex chrome.
  */
 export default function BlackBadge({ size = "sm", className = "" }: Props) {
-  const pad =
-    size === "md"
-      ? "px-3.5 py-1.5 text-[11px] tracking-[0.3em]"
-      : size === "xs"
-        ? "px-2 py-[3px] text-[8.5px] tracking-[0.24em]"
-        : "px-2.5 py-1 text-[9.5px] tracking-[0.26em]";
+  const scale =
+    size === "md" ? "stand--md" : size === "xs" ? "stand--xs" : "";
 
   return (
     <span
-      className={`level-mark level-mark--black relative inline-flex shrink-0 items-center font-semibold uppercase text-[#f5f5f5] ${pad} ${className}`}
+      className={`stand stand--black ${scale} ${className}`}
       title="BLACK — premium verified member"
     >
-      <span className="level-mark-sheen level-mark-sheen--live" aria-hidden />
-      <span className="relative z-[1]">{BLACK_LABEL}</span>
+      <span className="stand-node" aria-hidden />
+      <span className="stand-word">{BLACK_LABEL}</span>
     </span>
   );
 }

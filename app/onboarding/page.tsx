@@ -65,11 +65,11 @@ function OnboardingContent() {
   return (
     <main className="mp-app relative min-h-dvh px-4 pb-10 md:px-6">
       <div className="px-6 pt-14">
-        <p className="text-center text-[0.75rem] font-medium tracking-[0.14em] text-accent">
-          CONCLAVE
+        <p className="text-center font-display text-[1.05rem] font-semibold tracking-[-0.03em] text-ivory">
+          Interlink
         </p>
         <header className="mt-10 mb-8">
-          <h1 className="text-3xl font-semibold tracking-tight text-ivory">
+          <h1 className="font-display text-3xl font-semibold tracking-[-0.03em] text-ivory">
             Your profile
           </h1>
           <p className="mt-2 text-sm leading-relaxed text-muted">

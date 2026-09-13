@@ -84,7 +84,7 @@ function ProfileContent() {
   function cancel() {
     if (
       !confirm(
-        "Cancel Conclave Premier? Members can only introduce to other Members."
+        "Cancel Interlink Premier? Members can only introduce to other Members."
       )
     ) {
       return;
@@ -118,7 +118,7 @@ function ProfileContent() {
           </div>
         )}
 
-        <section className="mp-person-card mb-5 flex items-center justify-between gap-3 p-3">
+        <section className="il-node-card mb-5 flex items-center justify-between gap-3 p-4">
           <div className="flex items-center gap-3">
             <button
               type="button"
@@ -158,7 +158,7 @@ function ProfileContent() {
           onSwitchPremier={switchInterval}
         />
 
-        <section className="mp-person-card mb-5 p-4">
+        <section className="il-panel mb-5 p-4">
           <p className="text-[12px] font-medium text-accent">Alerts</p>
           <p className="mt-1 text-sm text-muted">
             Browser notifications for intros and table confirmations.

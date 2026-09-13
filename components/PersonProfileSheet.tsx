@@ -181,8 +181,8 @@ export default function PersonProfileSheet({
         <div
           className={`relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-t-[20px] border border-b-0 sm:rounded-[24px] sm:border-b ${
             black
-              ? "black-profile-shell black-centurion border-white/20"
-              : "border-accent/20 bg-[#12110f]"
+              ? "black-profile-shell border-white/15 bg-black"
+              : "border-white/10 bg-panel"
           }`}
         >
           {black && <span className="black-sheen" aria-hidden />}

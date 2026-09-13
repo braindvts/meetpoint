@@ -1,9 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { Outfit } from "next/font/google";
+import { Outfit, Syne } from "next/font/google";
 import AnalyticsBeacon from "@/components/AnalyticsBeacon";
 import AppChrome from "@/components/AppChrome";
 import PlausibleScript from "@/components/PlausibleScript";
 import ToastHost from "@/components/ToastHost";
+import { BRAND, BRAND_LINE } from "@/lib/brand";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -12,17 +13,22 @@ const outfit = Outfit({
   variable: "--font-outfit",
 });
 
+const syne = Syne({
+  subsets: ["latin"],
+  weight: ["500", "600", "700", "800"],
+  variable: "--font-syne",
+});
+
 export const metadata: Metadata = {
-  title: "Conclave",
-  description:
-    "Conclave — the private network for ambitious people. Use it in the browser now; native app later.",
+  title: BRAND,
+  description: `${BRAND} — ${BRAND_LINE} Use it in the browser now; native app later.`,
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#050505",
+  themeColor: "#07080c",
   interactiveWidget: "resizes-content",
 };
 
@@ -30,7 +36,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={outfit.variable}>
+    <html lang="en" className={`${outfit.variable} ${syne.variable}`}>
       <head>
         <script
           dangerouslySetInnerHTML={{

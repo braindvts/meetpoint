@@ -6,7 +6,7 @@ Keep this open as your product handbook. Update it when rules change.
 
 **Delivery plan:** **Website first** (browser on laptop/phone). Turn it into a native app later once the website is making money. Do not rebuild the UI as a phone-frame “app shell” for web.
 
-**Live code:** GitHub `braindvts/meetpoint` · stack Next.js + Postgres + Prisma · brand dark `#050505` + champagne gold `#d4c4a8`
+**Live code:** GitHub `braindvts/meetpoint` · stack Next.js + Postgres + Prisma · user-facing brand **Interlink** · night ink `#07080c` + champagne gold `#d4c4a8`
 
 ---
 
@@ -162,11 +162,12 @@ Details: [WEBSITE.md](./WEBSITE.md) · [KEYS.md](./KEYS.md) · [LAUNCH.md](./LAU
 
 ## Design rules (don’t break these)
 
-- Brand first: Conclave / champagne on dark ink  
-- One typeface family (Outfit)  
-- Level marks are the same metal shape: steel Member · champagne Verified · black sheen BLACK  
-- Signup must show **what** is missing and **where** (Needed sections + sticky chips)  
-- No purple AI-default theme, no cream+terracotta cliché  
+- User-facing brand is **Interlink** (repo / handbook may still say Conclave)
+- Night ink `#07080c` + champagne as a precision accent; Syne for display, Outfit for UI
+- Standing is a **signal lockup** (node + word) — not metal chips, not numbered 01/02, not a membership board
+- Verified / BLACK CONNECTION **check SVGs stay unchanged**
+- Signup must show **what** is missing and **where** (Needed sections + sticky chips)
+- No purple AI-default theme, no cream+terracotta cliché, no editorial ladder / tariff board  
 
 ---
 
