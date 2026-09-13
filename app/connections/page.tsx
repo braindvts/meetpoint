@@ -283,7 +283,7 @@ export default function ConnectionsPage() {
                               </button>
                               <button
                                 type="button"
-                                onClick={() => decline(person.id)}
+                                onClick={() => decline(conn.peerId)}
                                 className="mp-press border border-line px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted"
                               >
                                 Decline
