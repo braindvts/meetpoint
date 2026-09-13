@@ -11,8 +11,11 @@
   --color-muted: #7a746a;
   --color-mint: #b8b0a4;
   --color-sky: #9c9488;
+  --color-steel: #b8c2d0;
   --font-sans: var(--font-outfit), "Segoe UI", system-ui, -apple-system, sans-serif;
   --font-display: var(--font-outfit), "Segoe UI", system-ui, -apple-system, sans-serif;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-press: cubic-bezier(0.2, 0, 0, 1);
 }
 
 html {
@@ -221,11 +224,18 @@ body:has([data-shot]) nextjs-portal {
   font-size: 13px;
   font-weight: 500;
   color: var(--color-muted);
-  transition: color 0.15s ease, background 0.15s ease;
+  transition:
+    color 0.2s ease,
+    background 0.22s var(--ease-out),
+    transform 0.2s var(--ease-out);
 }
 .mp-site-nav-link:hover {
   color: var(--color-ivory);
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.05);
+}
+.mp-site-nav-link:active {
+  transform: scale(0.96);
+  transition-duration: 0.08s;
 }
 .mp-site-nav-link.is-active {
   color: var(--color-ivory);
@@ -269,7 +279,12 @@ html.mp-has-site-nav body {
   border-radius: 4px;
   transition:
     color 0.2s ease,
-    background 0.2s ease;
+    background 0.22s var(--ease-out),
+    transform 0.2s var(--ease-out);
+}
+.mp-seg button:active {
+  transform: scale(0.97);
+  transition-duration: 0.08s;
 }
 .mp-seg button[aria-pressed="true"] {
   background: rgba(255, 255, 255, 0.1);
@@ -634,51 +649,97 @@ svg {
   animation: tabUnderline 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-/* Primary CTA — soft rectangle, not a pill */
+/* Shared press / hover — buttons, chips, ghost links */
+.mp-press {
+  transition:
+    transform 0.22s var(--ease-out),
+    box-shadow 0.22s var(--ease-out),
+    background-color 0.22s var(--ease-out),
+    border-color 0.22s var(--ease-out),
+    color 0.18s ease,
+    opacity 0.18s ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .mp-press:hover {
+    transform: translateY(-2px);
+  }
+}
+.mp-press:active {
+  transform: scale(0.965);
+  transition-duration: 0.08s;
+}
+
+/* Primary CTA — ivory field, quiet sheen, firm press */
 .mp-btn-lux {
   position: relative;
   overflow: hidden;
+  isolation: isolate;
   border-radius: 8px;
   background: var(--color-ivory) !important;
   color: var(--color-ink) !important;
   background-image: none !important;
   transition:
-    transform 0.15s ease,
-    opacity 0.15s ease,
-    background 0.15s ease;
+    transform 0.22s var(--ease-out),
+    opacity 0.18s ease,
+    background 0.22s var(--ease-out),
+    box-shadow 0.22s var(--ease-out);
 }
 .mp-btn-lux::after {
-  content: none;
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    112deg,
+    transparent 36%,
+    rgba(255, 255, 255, 0.38) 50%,
+    transparent 64%
+  );
+  transform: translateX(-120%);
+  transition: transform 0.55s var(--ease-out);
 }
 .mp-btn-lux:hover {
   background: #f5f2ea !important;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+}
+@media (hover: hover) and (pointer: fine) {
+  .mp-btn-lux:hover {
+    transform: translateY(-2px);
+  }
+  .mp-btn-lux:hover::after {
+    transform: translateX(120%);
+  }
 }
 .mp-btn-lux:active {
-  transform: scale(0.99);
+  transform: scale(0.965);
+  box-shadow: none;
+  transition-duration: 0.08s;
 }
 
 /* Cards — hover lift on desktop, press on touch */
 .mp-card-motion {
   transition:
-    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
-    border-color 0.35s ease,
-    box-shadow 0.45s ease;
-  will-change: transform;
+    transform 0.4s var(--ease-out),
+    border-color 0.3s ease,
+    box-shadow 0.4s var(--ease-out);
 }
 @media (hover: hover) and (pointer: fine) {
   .mp-card-motion:hover {
-    transform: translateY(-4px);
+    transform: translateY(-3px);
+    border-color: rgba(196, 180, 150, 0.3);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.38);
   }
   .mp-card-motion:hover .mp-card-photo {
-    transform: scale(1.04);
+    transform: scale(1.045);
   }
 }
 .mp-card-motion:active {
-  transform: scale(0.985);
+  transform: scale(0.985) translateY(0);
+  transition-duration: 0.1s;
 }
 .mp-card-photo {
-  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
-  will-change: transform;
+  transition: transform 0.7s var(--ease-out);
 }
 
 /* —— Splash / loading seal —— */
@@ -987,18 +1048,20 @@ html.mp-boot-splash body::before {
 /* List row press */
 .mp-row {
   transition:
-    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
-    border-color 0.28s ease,
-    background-color 0.28s ease;
+    transform 0.2s var(--ease-out),
+    border-color 0.22s ease,
+    background-color 0.22s ease,
+    box-shadow 0.22s var(--ease-out);
 }
 @media (hover: hover) and (pointer: fine) {
   .mp-row:hover {
-    border-color: rgba(255, 255, 255, 0.22);
-    background-color: rgba(255, 255, 255, 0.02);
+    border-color: rgba(255, 255, 255, 0.18);
+    background-color: rgba(255, 255, 255, 0.035);
   }
 }
 .mp-row:active {
-  transform: scale(0.99);
+  transform: scale(0.988);
+  transition-duration: 0.08s;
 }
 
 /* Skeleton shimmer */
@@ -1211,14 +1274,25 @@ html.mp-boot-splash body::before {
   .mp-card-pass,
   .mp-card-connect,
   .mp-card-connect-burst,
-  .mp-row {
+  .mp-row,
+  .mp-press,
+  .mp-btn-lux,
+  .mp-site-nav-link,
+  .mp-seg button {
     animation: none !important;
     transition: none !important;
   }
   .mp-card-motion:hover,
   .mp-card-motion:active,
-  .mp-row:active {
+  .mp-row:active,
+  .mp-press:hover,
+  .mp-press:active,
+  .mp-btn-lux:hover,
+  .mp-btn-lux:active,
+  .mp-site-nav-link:active,
+  .mp-seg button:active {
     transform: none !important;
+    box-shadow: none !important;
   }
 }
 
@@ -1232,59 +1306,97 @@ html.mp-boot-splash body::before {
   }
 }
 
-/* Shared metal mark family — Member / Verified / BLACK */
-.level-mark {
-  position: relative;
-  overflow: hidden;
-  border-radius: 4px;
-  isolation: isolate;
+/*
+ * Standing — typeset lockups, not metal chips and not signal nodes.
+ * Member = steel word. Verified = champagne word. BLACK = existing check SVG.
+ */
+.mp-level {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  line-height: 1.1;
+  font-size: 9.5px;
 }
-.level-mark-sheen {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  background: linear-gradient(
-    125deg,
-    rgba(255, 255, 255, 0.14) 0%,
-    transparent 42%,
-    transparent 62%,
-    rgba(255, 255, 255, 0.05) 100%
-  );
+.mp-level--md {
+  font-size: 11px;
+  letter-spacing: 0.22em;
 }
-.level-mark-sheen--live::after {
-  content: none;
+.mp-level--member {
+  color: var(--color-steel);
 }
-
-/* Member — cool steel */
-.level-mark--member {
-  color: #e8eef6;
-  background: linear-gradient(145deg, #8a9bb0 0%, #5c6d82 42%, #3a4656 100%);
-  box-shadow:
-    0 0 0 1px #2a3440,
-    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+.mp-level--member::before {
+  content: "";
+  width: 1px;
+  height: 0.85em;
+  background: #8a96a8;
 }
-
-/* Verified — champagne gold */
-.level-mark--verified {
-  color: #1a1610;
-  background: linear-gradient(145deg, #e8dcc8 0%, #c4b08e 45%, #9a8664 100%);
-  box-shadow:
-    0 0 0 1px #5a4c36,
-    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+.mp-level--verified {
+  color: var(--color-accent);
+  padding-bottom: 0.12em;
+  box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--color-accent) 70%, transparent);
+}
+.mp-level--black {
+  color: var(--color-ivory);
+  letter-spacing: 0.28em;
 }
 
-/* BLACK — solid black + thin bronze edge */
+/* Legacy aliases — keep older class names from painting metal chips */
+.level-mark,
+.level-mark--member,
+.level-mark--verified,
 .level-mark--black,
 .black-mark {
-  color: #f2f2f2;
-  background: #000;
-  box-shadow:
-    0 0 0 1px rgba(196, 180, 150, 0.45),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  background: none;
+  box-shadow: none;
+  border-radius: 0;
 }
+.level-mark-sheen,
 .black-mark-sheen {
   display: none;
+}
+
+/* Landing — quiet architectural field, not a SaaS mesh */
+.mp-site-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 80px 80px;
+  mask-image: radial-gradient(ellipse at 42% 38%, black 12%, transparent 68%);
+  pointer-events: none;
+}
+.mp-landing-frame {
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(180deg, rgba(18, 18, 18, 0.55), rgba(5, 5, 5, 0.88));
+}
+.mp-landing-frame::before,
+.mp-landing-frame::after {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-color: rgba(196, 180, 150, 0.45);
+  pointer-events: none;
+}
+.mp-landing-frame::before {
+  top: 10px;
+  left: 10px;
+  border-top: 1px solid;
+  border-left: 1px solid;
+}
+.mp-landing-frame::after {
+  bottom: 10px;
+  right: 10px;
+  border-bottom: 1px solid;
+  border-right: 1px solid;
 }
 
 /* BLACK panels — pure black, thin bronze hairline (no silver aura) */

@@ -37,7 +37,7 @@ import { track } from "@/lib/analytics";
 
 type Filter = "open" | "local";
 
-const RANK_OPTIONS: MemberTier[] = [3, 2, 1];
+const STANDING_OPTIONS: MemberTier[] = [1, 2, 3];
 
 export default function DiscoverPage() {
   const router = useRouter();
@@ -205,7 +205,7 @@ export default function DiscoverPage() {
             <button
               type="button"
               onClick={() => needVerified()}
-              className="mt-2 text-[12px] font-medium text-accent"
+              className="mp-press mt-2 text-[12px] font-medium text-accent"
             >
               Get Verified to meet anyone
             </button>
@@ -219,7 +219,7 @@ export default function DiscoverPage() {
                 key={key}
                 type="button"
                 onClick={() => setFilter(key)}
-                className={`flex-1 py-2 text-[12px] font-medium transition ${
+                className={`mp-press flex-1 py-2 text-[12px] font-medium ${
                   filter === key
                     ? "bg-ivory text-ink"
                     : "text-ivory/65 hover:text-ivory"
@@ -257,7 +257,7 @@ export default function DiscoverPage() {
                         saveProfile(updated);
                         setProfile(updated);
                       }}
-                      className={`border px-2.5 py-1 text-[12px] transition ${
+                      className={`mp-press border px-2.5 py-1 text-[12px] ${
                         on
                           ? "border-accent/50 bg-accent/15 text-accent-2"
                           : "border-line/80 text-muted hover:border-accent/35 hover:text-ivory"
@@ -272,13 +272,13 @@ export default function DiscoverPage() {
 
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-accent">
-                Rank
+                Standing
               </p>
               <p className="mt-1 text-[12px] text-muted">
-                Show only selected ranks. Leave empty to see everyone.
+                Show only selected standing. Leave empty to see everyone.
               </p>
               <div className="mt-2.5 flex flex-wrap gap-1.5">
-                {RANK_OPTIONS.map((tier) => {
+                {STANDING_OPTIONS.map((tier) => {
                   const on = rankFilter.includes(tier);
                   const def = TIER_DEFINITIONS.find((t) => t.tier === tier);
                   return (
@@ -286,7 +286,7 @@ export default function DiscoverPage() {
                       key={tier}
                       type="button"
                       onClick={() => toggleRank(tier)}
-                      className={`inline-flex items-center gap-1.5 border px-2.5 py-1 text-[12px] transition ${
+                      className={`mp-press inline-flex items-center gap-1.5 border px-2.5 py-1 text-[12px] ${
                         on
                           ? "border-accent/50 bg-accent/15 text-accent-2"
                           : "border-line/80 text-muted hover:border-accent/35 hover:text-ivory"
@@ -302,9 +302,9 @@ export default function DiscoverPage() {
                 <button
                   type="button"
                   onClick={() => setRankFilter([])}
-                  className="mt-2 text-[11px] font-medium text-accent"
+                  className="mp-press mt-2 text-[11px] font-medium text-accent"
                 >
-                  Clear ranks
+                  Clear standing
                 </button>
               ) : null}
             </div>
@@ -351,16 +351,16 @@ export default function DiscoverPage() {
             <EmptyState
               title={
                 rankFilter.length > 0 && byRank.length === 0
-                  ? "No one at these ranks"
+                  ? "No one at this standing"
                   : "You've seen everyone"
               }
               body={
                 rankFilter.length > 0 && byRank.length === 0
-                  ? "Clear the rank filter or pick different ranks to see more people."
+                  ? "Clear the standing filter or pick a different standing to see more people."
                   : "Skip is just for this session. Restore the list and keep going, or come back later."
               }
               actionLabel={
-                rankFilter.length > 0 && byRank.length === 0 ? "Clear ranks" : "Restore list"
+                rankFilter.length > 0 && byRank.length === 0 ? "Clear standing" : "Restore list"
               }
               onAction={() => {
                 if (rankFilter.length > 0 && byRank.length === 0) setRankFilter([]);

@@ -154,20 +154,6 @@ function ProfileContent() {
           profileStrength={strength.score}
         />
 
-        <section className="mp-person-card mb-5 p-4">
-          <p className="text-[12px] font-medium text-accent">Alerts</p>
-          <p className="mt-1 text-sm text-muted">
-            Browser notifications for chat messages, intros, and table confirmations.
-          </p>
-          <button
-            type="button"
-            onClick={() => void ensureNotifyPermission()}
-            className="mt-3 rounded-md border border-accent/40 px-4 py-2 text-[12px] text-accent"
-          >
-            Enable alerts
-          </button>
-        </section>
-
         <MembershipTiers
           input={tierInput}
           missing={
@@ -183,6 +169,20 @@ function ProfileContent() {
               : "Only these two for Verified"
           }
         />
+
+        <section className="mp-person-card mb-5 p-4">
+          <p className="text-[12px] font-medium text-accent">Alerts</p>
+          <p className="mt-1 text-sm text-muted">
+            Browser notifications for chat messages, intros, and table confirmations.
+          </p>
+          <button
+            type="button"
+            onClick={() => void ensureNotifyPermission()}
+            className="mp-press mt-3 rounded-md border border-accent/40 px-4 py-2 text-[12px] text-accent"
+          >
+            Enable alerts
+          </button>
+        </section>
 
         <p className="mb-2.5 mt-6 scroll-mt-20 text-[12px] font-medium text-accent" id="edit-details">
           Edit details

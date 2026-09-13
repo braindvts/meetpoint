@@ -124,7 +124,7 @@ Separate from BLACK. Shown as a **blue checkmark** next to the name (trusted). E
 
 ## How matching works (short)
 
-Discover ranks people by shared ambitions, complementary “looking for,” same profession, and distance. Nearby narrows by city/geo. The filter also lets you narrow by **rank** (Member / Verified / BLACK). **Members** only introduce to other Members. **Verified** and **BLACK** can meet anyone. Looking-for preferences can be edited from Discover’s filter anytime.
+Discover ranks people by shared ambitions, complementary “looking for,” same profession, and distance. Nearby narrows by city/geo. The filter also lets you narrow by **standing** (Member / Verified / BLACK). **Members** only introduce to other Members. **Verified** and **BLACK** can meet anyone. Looking-for preferences can be edited from Discover’s filter anytime.
 
 ---
 
@@ -175,7 +175,7 @@ Details: [WEBSITE.md](./WEBSITE.md) · [KEYS.md](./KEYS.md) · [LAUNCH.md](./LAU
 
 - Brand first: Interlink / champagne on dark ink  
 - One typeface family (Outfit)  
-- Level marks: steel Member · champagne Verified · **black check** for BLACK · **blue check** for trusted (BLACK CONNECTION)  
+- Standing: typeset steel **Member** · champagne **Verified** · **black check** for BLACK · **blue check** for trusted (BLACK CONNECTION). Not metal chips, not numbered ranks. Check SVGs stay checks.  
 - Signup must show **what** is missing and **where** (Needed sections + sticky chips)  
 - No purple AI-default theme, no cream+terracotta cliché  
 
@@ -192,7 +192,7 @@ See [MISSING.md](./MISSING.md). Big ones: email verify + password reset links, c
 | Topic | File |
 |-------|------|
 | Levels logic | `lib/tiers.ts` |
-| Required 3 credentials | `lib/types.ts` → `REQUIRED_VERIFICATIONS` |
+| Required credentials (email + LinkedIn) | `lib/types.ts` → `REQUIRED_VERIFICATIONS` |
 | Plans (BLACK · Free) | `components/PlansSection.tsx` |
 | BLACK CONNECTION checkmark | `components/BlackConnectionBadge.tsx` |
 | Discover cards | `components/MatchCard.tsx` |

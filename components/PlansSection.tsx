@@ -156,7 +156,7 @@ export default function PlansSection({
                     type="button"
                     disabled={!verified || busy !== null}
                     onClick={() => void buyBlack("month")}
-                    className="rounded-lg border border-white/20 py-2.5 text-[12px] font-semibold text-ivory disabled:opacity-40"
+                    className="mp-press rounded-lg border border-white/20 py-2.5 text-[12px] font-semibold text-ivory disabled:opacity-40"
                   >
                     {busy === "month" ? "…" : formatBlackPrice("month")}
                   </button>
@@ -164,7 +164,7 @@ export default function PlansSection({
                     type="button"
                     disabled={!verified || busy !== null}
                     onClick={() => void buyBlack("year")}
-                    className="rounded-lg border border-accent/50 bg-accent/15 py-2.5 text-[12px] font-semibold text-accent disabled:opacity-40"
+                    className="mp-press rounded-lg border border-accent/50 bg-accent/15 py-2.5 text-[12px] font-semibold text-accent disabled:opacity-40"
                   >
                     {busy === "year" ? "…" : formatBlackPrice("year")}
                   </button>

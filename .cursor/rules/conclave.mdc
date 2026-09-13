@@ -29,7 +29,7 @@ Peer invites award BLACK CONNECTION only. They never promote someone to BLACK.
 
 ## UX
 
-- Level badges: steel Member · champagne Verified · **black check** for BLACK · **blue check** for trusted (BLACK CONNECTION)
+- Standing: typeset steel Member · champagne Verified · **black check** for BLACK · **blue check** for trusted (BLACK CONNECTION). Not metal chips. Check SVGs stay checks.
 - Checks appear by the name in chat and on profiles
 - Never show “Tier N · Name”
 - Signup: Identity required; verification optional (skip = stay Member)

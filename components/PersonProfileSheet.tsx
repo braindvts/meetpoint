@@ -468,7 +468,7 @@ export default function PersonProfileSheet({
                   className={`w-full rounded-lg py-3 text-[13px] font-semibold ${
                     canConnect
                       ? "mp-btn-lux text-ink"
-                      : "border border-accent/40 text-accent"
+                      : "mp-press border border-accent/40 text-accent"
                   }`}
                 >
                   {canConnect ? "Connect" : "Get Verified to connect"}

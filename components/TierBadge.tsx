@@ -7,27 +7,27 @@ interface Props {
 }
 
 /**
- * Shared metal-mark styling for Member / Verified.
- * BLACK uses BlackBadge — same family, blacked-out and louder.
+ * Standing lockups — typeset, not metal chips and not signal nodes.
+ * BLACK stays the existing black check SVG (do not restyle it).
  */
 export const TIER_CARD: Record<
   MemberTier,
   { mark: string; label: string; row: string }
 > = {
   1: {
-    mark: "level-mark level-mark--member",
-    label: "text-[#b8c4d4]",
-    row: "border-[#6d7f96]/25 bg-[#7a8ba3]/[0.08]",
+    mark: "mp-level mp-level--member",
+    label: "text-steel",
+    row: "border-white/10 bg-transparent",
   },
   2: {
-    mark: "level-mark level-mark--verified",
-    label: "text-[#d4c4a8]",
-    row: "border-[#d4c4a8]/25 bg-[#d4c4a8]/[0.07]",
+    mark: "mp-level mp-level--verified",
+    label: "text-accent",
+    row: "border-accent/20 bg-transparent",
   },
   3: {
-    mark: "level-mark level-mark--black",
-    label: "text-[#f5f5f5]",
-    row: "border-accent/30 bg-black relative",
+    mark: "mp-level mp-level--black",
+    label: "text-ivory",
+    row: "border-white/12 bg-black",
   },
 };
 
@@ -39,18 +39,14 @@ export default function TierBadge({ tier, size = "sm" }: Props) {
   }
 
   const style = TIER_CARD[resolved];
-  const pad =
-    size === "md"
-      ? "px-3.5 py-1.5 text-[11px] tracking-[0.22em]"
-      : "px-2.5 py-1 text-[9.5px] tracking-[0.2em]";
+  const scale = size === "md" ? "mp-level--md" : "";
 
   return (
     <span
-      className={`relative inline-flex shrink-0 items-center font-semibold uppercase ${style.mark} ${pad}`}
+      className={`${style.mark} ${scale}`}
       title={formatTierLabel(resolved)}
     >
-      <span className="level-mark-sheen" aria-hidden />
-      <span className="relative">{formatTierLabel(resolved)}</span>
+      {formatTierLabel(resolved)}
     </span>
   );
 }
