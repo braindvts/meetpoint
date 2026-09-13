@@ -40,16 +40,16 @@ export async function POST(req: Request) {
 
   const kind = body.kind || "premier_month";
   let amount = 2000;
-  let name = "Conclave Premier · Monthly";
+  let name = "Interlink Premier · Monthly";
   if (kind === "premier_year") {
     amount = 10000;
-    name = "Conclave Premier · Yearly";
+    name = "Interlink Premier · Yearly";
   } else if (kind === "black_month") {
     amount = BLACK_MONTHLY_USD * 100;
-    name = "Conclave BLACK · Monthly";
+    name = "Interlink BLACK · Monthly";
   } else if (kind === "black_year") {
     amount = BLACK_YEARLY_USD * 100;
-    name = "Conclave BLACK · Yearly";
+    name = "Interlink BLACK · Yearly";
   } else if (kind === "booking") {
     const chatId = body.chatId?.trim();
     let headcount = 2;
@@ -58,7 +58,7 @@ export async function POST(req: Request) {
       if (n > 0) headcount = n;
     }
     amount = headcount * BOOKING_FEE_PER_PERSON_USD * 100;
-    name = body.label || "Conclave table booking";
+    name = body.label || "Interlink table booking";
   }
 
   const chatId = body.chatId?.trim();

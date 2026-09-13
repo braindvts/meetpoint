@@ -298,7 +298,7 @@ html.mp-has-site-nav body {
 /* Freeze page chrome under open sheets (phones) */
 @media (max-width: 639px) {
   html.mp-sheet-open header,
-  html.mp-sheet-open nav[aria-label="Conclave"],
+  html.mp-sheet-open nav[aria-label="Interlink"],
   html.mp-sheet-open nav[aria-label="App"] {
     visibility: hidden;
   }
@@ -949,7 +949,7 @@ svg {
     0 4px 12px rgba(0, 0, 0, 0.35);
 }
 
-/* Verified — champagne gold (Conclave accent family) */
+/* Verified — champagne gold (Interlink accent family) */
 .level-mark--verified {
   color: #1a1610;
   background: linear-gradient(145deg, #f0e6d4 0%, #d4c4a8 40%, #a8926e 100%);

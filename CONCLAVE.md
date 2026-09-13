@@ -1,8 +1,8 @@
-# Conclave — how the product works
+# Interlink — how the product works
 
 Keep this open as your product handbook. Update it when rules change.
 
-**One-liner:** Conclave introduces ambitious people, then settles it over dinner.
+**One-liner:** Interlink introduces ambitious people, then settles it over dinner.
 
 **Delivery plan:** **Website first** (browser on laptop/phone). Turn it into a native app later once the website is making money. Do not rebuild the UI as a phone-frame “app shell” for web.
 
@@ -164,7 +164,8 @@ Details: [WEBSITE.md](./WEBSITE.md) · [KEYS.md](./KEYS.md) · [LAUNCH.md](./LAU
 
 ## Design rules (don’t break these)
 
-- Brand first: Conclave / champagne on dark ink  
+- Brand first: Interlink / champagne on dark ink  
+- Never show Conclave or Meetpoint in user-facing copy (repo name can stay meetpoint)
 - One typeface family (Outfit)  
 - Level marks are the same metal shape: steel Member · champagne Verified · black sheen BLACK  
 - Signup must show **what** is missing and **where** (Needed sections + sticky chips)  

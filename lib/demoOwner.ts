@@ -10,7 +10,7 @@ export const DEMO_OWNER_FLAG_KEY = "conclave.demoOwner";
 export const DEMO_OWNER_PROFILE: MyProfile = {
   name: "Brian",
   jobTitle: "Founder",
-  bio: "Building Conclave — private introductions that end at a table.",
+  bio: "Building Interlink — private introductions that end at a table.",
   photo:
     "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&h=400&q=90",
   city: {

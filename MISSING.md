@@ -179,7 +179,7 @@ Code for magic-link email is **not in the app yet**. To prepare:
 3. Save for later:
    ```env
    RESEND_API_KEY=re_xxxxxxxx
-   EMAIL_FROM=Conclave <onboarding@yourdomain.com>
+   EMAIL_FROM=Interlink <onboarding@yourdomain.com>
    ```
 4. Tell me you have the key → I’ll add `/api/auth/email` + verify link + profile flag
 

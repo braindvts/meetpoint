@@ -13,9 +13,9 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "Conclave",
+  title: "Interlink",
   description:
-    "Conclave — the private network for ambitious people. Use it in the browser now; native app later.",
+    "Interlink — the private network for ambitious people. Use it in the browser now; native app later.",
 };
 
 export const viewport: Viewport = {

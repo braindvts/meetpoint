@@ -40,9 +40,9 @@ export default function MemberStatusStrip({ profile, tier }: Props) {
             ? "border-accent/45 bg-accent/[0.08] text-accent"
             : "border-white/12 bg-white/[0.03] text-muted"
         }`}
-        title={premier ? "Conclave Premier" : "Free member"}
+        title={premier ? "Interlink Premier" : "Free member"}
       >
-        {premier ? (onTrial ? "Premier · Trial" : "Conclave Premier") : "Free member"}
+        {premier ? (onTrial ? "Premier · Trial" : "Interlink Premier") : "Free member"}
       </span>
 
       <TierBadge tier={tier} size="sm" />

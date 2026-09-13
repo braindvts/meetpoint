@@ -84,7 +84,7 @@ function ProfileContent() {
   function cancel() {
     if (
       !confirm(
-        "Cancel Conclave Premier? Members can only introduce to other Members."
+        "Cancel Interlink Premier? Members can only introduce to other Members."
       )
     ) {
       return;

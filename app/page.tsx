@@ -12,7 +12,7 @@ export default function Landing() {
     <main className="mp-site">
       <header className="relative z-10 mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
         <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-accent">
-          Conclave
+          Interlink
         </p>
         <div className="flex items-center gap-5">
           <Link href="/waitlist" className="text-[13px] text-muted transition hover:text-ivory">
@@ -42,7 +42,7 @@ export default function Landing() {
 
         <div className="relative mx-auto w-full max-w-3xl text-center">
           <h1 className="mp-reveal text-[clamp(2.75rem,8vw,5.5rem)] font-semibold leading-[0.95] tracking-[0.08em] text-accent">
-            CONCLAVE
+            INTERLINK
           </h1>
           <p className="mp-reveal mp-reveal-delay-2 mx-auto mt-6 max-w-md text-[1.05rem] leading-relaxed text-ivory/70 sm:text-lg">
             The private network for ambitious people — introductions that end at a table.
@@ -138,7 +138,7 @@ export default function Landing() {
       </section>
 
       <footer className="border-t border-line/50 px-6 py-8 text-center text-[11px] text-muted">
-        Conclave · Private introductions for ambitious people
+        Interlink · Private introductions for ambitious people
       </footer>
     </main>
   );

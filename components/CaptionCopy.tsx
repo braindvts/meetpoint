@@ -6,7 +6,7 @@ const POSTS = [
   {
     id: "ig",
     label: "Instagram / TikTok",
-    body: `Conclave is live — in your browser.
+    body: `Interlink is live — in your browser.
 
 A private network for ambitious people.
 Matched by ambition. Then you take it to dinner.
@@ -19,7 +19,7 @@ Beta is open. Link in bio.`,
     label: "Story (short)",
     body: `The website is live.
 
-CONCLAVE — networking that ends at a dinner table.
+INTERLINK — networking that ends at a dinner table.
 Open it in your browser. The app is next.
 
 Tap the link.`,
@@ -27,7 +27,7 @@ Tap the link.`,
   {
     id: "x",
     label: "X / LinkedIn",
-    body: `I shipped Conclave.
+    body: `I shipped Interlink.
 
 It’s a private network you open in the browser — introductions matched by ambition, settled over dinner. Native app is next.
 

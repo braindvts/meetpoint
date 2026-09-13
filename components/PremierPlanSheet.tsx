@@ -55,7 +55,7 @@ export default function PremierPlanSheet({
       className="fixed inset-0 z-[80] flex items-end justify-center sm:items-center"
       role="dialog"
       aria-modal="true"
-      aria-label="Conclave Premier"
+      aria-label="Interlink Premier"
     >
       <button
         type="button"

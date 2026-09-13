@@ -3,8 +3,8 @@ import Link from "next/link";
 import WaitlistForm from "@/components/WaitlistForm";
 
 export const metadata: Metadata = {
-  title: "Waitlist · Conclave",
-  description: "Request access to Conclave — the private network for ambitious people.",
+  title: "Waitlist · Interlink",
+  description: "Request access to Interlink — the private network for ambitious people.",
 };
 
 export default function WaitlistPage() {
@@ -15,7 +15,7 @@ export default function WaitlistPage() {
           href="/"
           className="text-[11px] font-semibold uppercase tracking-[0.28em] text-accent"
         >
-          Conclave
+          Interlink
         </Link>
         <Link href="/login" className="text-[13px] text-muted transition hover:text-ivory">
           Sign in
@@ -47,7 +47,7 @@ export default function WaitlistPage() {
       </section>
 
       <footer className="border-t border-line/50 px-6 py-8 text-center text-[11px] text-muted">
-        Conclave · Private introductions for ambitious people
+        Interlink · Private introductions for ambitious people
       </footer>
     </main>
   );

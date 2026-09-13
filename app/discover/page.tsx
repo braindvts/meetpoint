@@ -201,7 +201,7 @@ export default function DiscoverPage() {
         <header className="sticky top-0 z-40 bg-ink/95 px-5 pb-3 pt-4 backdrop-blur-xl md:px-0 md:pt-6">
           <div className="relative flex h-7 items-center justify-center md:justify-between">
             <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-accent md:hidden">
-              Conclave
+              Interlink
             </p>
             <h1 className="hidden text-[1.85rem] font-semibold tracking-tight text-ivory md:block">
               Discover
@@ -362,7 +362,7 @@ export default function DiscoverPage() {
               body={
                 visiblePeople.length === 0 ? (
                   <>
-                    No other members yet. Share Conclave — profiles appear here when they join this
+                    No other members yet. Share Interlink — profiles appear here when they join this
                     same app.
                   </>
                 ) : profile.lookingFor?.length === 0 ? (

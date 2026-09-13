@@ -37,7 +37,7 @@ export default function ConclaveLogo({
       className="shrink-0"
       aria-hidden={withWordmark ? true : undefined}
       role={withWordmark ? undefined : "img"}
-      aria-label={withWordmark ? undefined : "Conclave"}
+      aria-label={withWordmark ? undefined : "Interlink"}
     >
       <defs>
         <linearGradient id={rim} x1="8" y1="4" x2="56" y2="60" gradientUnits="userSpaceOnUse">
@@ -140,7 +140,7 @@ export default function ConclaveLogo({
         className={`font-semibold tracking-tight text-ivory ${wordSize}`}
         style={{ textRendering: "geometricPrecision" }}
       >
-        Con<span className="text-accent">clave</span>
+        Inter<span className="text-accent">link</span>
       </span>
     </span>
   );

@@ -3,7 +3,7 @@ description: Conclave product handbook — levels, verification, BLACK, deploy
 alwaysApply: true
 ---
 
-# Conclave product rules
+# Interlink product rules
 
 Read **CONCLAVE.md** at the repo root for the full handbook. Keep it accurate when product rules change.
 
@@ -27,6 +27,7 @@ Premier ($20/mo) is a plan that expands who Members can meet. Standing levels ar
 
 ## UX
 
+- User-facing product name is **Interlink**. Never show Conclave or Meetpoint in UI, titles, meta, emails, SMS, or checkout. Repo can stay `meetpoint`.
 - Level badges: matching metal marks — steel / champagne / black (BLACK is the coolest)
 - BLACK CONNECTION: black checkmark badge (not a chain icon)
 - Never show “Tier N · Name”
