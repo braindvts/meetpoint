@@ -66,7 +66,7 @@ export async function resolveSessionGate(): Promise<SessionGate> {
     /* offline */
   }
 
-  if (local?.name) return { status: "needs-onboarding" };
+  if (local) return { status: "needs-onboarding" };
   return { status: "guest" };
 }
 

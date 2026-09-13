@@ -4,12 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev --hostname ::",
-    "build": "prisma generate && prisma db push && next build",
+    "build": "prisma generate && node scripts/prisma-migrate-deploy.mjs && next build",
     "start": "next start",
     "lint": "next lint",
     "test": "tsx --test lib/*.test.ts",
     "postinstall": "prisma generate",
     "db:migrate": "prisma migrate dev",
+    "db:deploy": "node scripts/prisma-migrate-deploy.mjs",
     "db:push": "prisma db push",
     "apple:secret": "node scripts/apple-client-secret.mjs"
   },

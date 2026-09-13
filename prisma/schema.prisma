@@ -162,6 +162,8 @@ model Message {
   @@index([chatId, createdAt])
 }
 
+/// Safety report. Production already stores alsoBlocked, category, notes,
+/// and status — keep them on the model so schema sync never DROP them.
 model Report {
   id          String   @id @default(cuid())
   reporterId  String
