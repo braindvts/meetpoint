@@ -90,7 +90,7 @@ export default function Landing() {
               </Link>
               <Link
                 href="/login"
-                className="mp-press inline-flex min-w-[11.5rem] items-center justify-center border border-white/18 px-8 py-3.5 text-[12px] font-medium tracking-wide text-ivory/80 hover:border-accent/40 hover:text-accent"
+                className="mp-press inline-flex min-w-[11.5rem] items-center justify-center border border-ivory/35 px-8 py-3.5 text-[12px] font-medium tracking-wide text-ivory hover:border-accent/55 hover:text-accent"
               >
                 Sign in
               </Link>

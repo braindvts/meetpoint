@@ -661,11 +661,11 @@ svg {
 }
 @media (hover: hover) and (pointer: fine) {
   .mp-press:hover {
-    transform: translateY(-1px);
+    transform: translateY(-2px);
   }
 }
 .mp-press:active {
-  transform: scale(0.97);
+  transform: scale(0.965);
   transition-duration: 0.08s;
 }
 
@@ -705,14 +705,14 @@ svg {
 }
 @media (hover: hover) and (pointer: fine) {
   .mp-btn-lux:hover {
-    transform: translateY(-1px);
+    transform: translateY(-2px);
   }
   .mp-btn-lux:hover::after {
     transform: translateX(120%);
   }
 }
 .mp-btn-lux:active {
-  transform: scale(0.975);
+  transform: scale(0.965);
   box-shadow: none;
   transition-duration: 0.08s;
 }
