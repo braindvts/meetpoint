@@ -23,6 +23,7 @@ Check progress any time at **`/api/health`** (for example `http://127.0.0.1:4312
 | 9 | Booking SMS | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER` | Table confirmations show in-app only, no text |
 | 10 | Operator BLACK grant | `ADMIN_SECRET` | `/admin/black` stays closed |
 | 11 | Analytics (optional) | `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` | First-party pageviews only |
+| 12 | Waitlist → Notion | `NOTION_API_KEY` (or `NOTION_TOKEN`), `NOTION_WAITLIST_DATABASE_ID` | Site form falls back to the public Notion form |
 
 Email sign-up with a password works today with no keys at all, as long as the database is set (#1).
 
@@ -150,6 +151,32 @@ BLACK is bought or earned by the member. This secret only lets you grant it manu
 ## 11. Analytics (optional)
 
 Pageviews already post to the app's own `/api/analytics`. To add Plausible, set `NEXT_PUBLIC_PLAUSIBLE_DOMAIN=yourdomain.com`.
+
+## 12. Waitlist → Interlink Notion database
+
+The site waitlist (`/` and `/waitlist`) writes to the existing **Interlink Waitlist** database — the same list the public Notion form already uses.
+
+Database: https://app.notion.com/p/a6ffe8d865f94b25a851e2331a31c65b
+
+On Vercel (Production + Preview):
+
+```
+NOTION_API_KEY=secret_...
+NOTION_WAITLIST_DATABASE_ID=a6ffe8d865f94b25a851e2331a31c65b
+```
+
+`NOTION_TOKEN` is accepted as an alias for `NOTION_API_KEY`.
+
+1. Create an **Internal** integration at [notion.so/my-integrations](https://www.notion.so/my-integrations).
+2. Copy the secret into `NOTION_API_KEY`.
+3. Open the Interlink Waitlist database → **••• → Connections** → add that integration.
+4. Redeploy.
+
+Properties written: **Name** (title), **Email**, **Source** = `Waitlist`.
+
+Until the key is set, the page opens the public form so signups still land in that database: https://tiny-palladium-a02.notion.site/cc1d0f6fc49348239d2e24fdfa7a41c1?pvs=105
+
+Verify: `/api/health` shows `"waitlist": true`, then submit an email on `/waitlist` and confirm the row in Notion.
 
 ---
 

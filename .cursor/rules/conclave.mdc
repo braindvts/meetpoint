@@ -27,6 +27,7 @@ Premier ($20/mo) is a plan that expands who Members can meet. Standing levels ar
 
 ## UX
 
+- User-facing product name is **Interlink**. Never show Conclave or Meetpoint in UI, titles, meta, emails, SMS, or checkout. Repo can stay `meetpoint`.
 - Level badges: signal lockups (node + word) — steel Member · champagne Verified · void BLACK. Not metal chips, not 01/02. Verified / BLACK CONNECTION check SVGs stay unchanged.
 - BLACK CONNECTION: black checkmark badge (not a chain icon)
 - Never show “Tier N · Name”

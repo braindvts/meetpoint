@@ -106,7 +106,8 @@ Separate from BLACK. Shown as a **black checkmark** badge. Earned when a BLACK m
 
 | Route | Purpose |
 |-------|---------|
-| `/` | Landing |
+| `/` | Landing + waitlist email |
+| `/waitlist` | Full waitlist (email + optional name) → Interlink Notion DB |
 | `/login` | Email + OAuth sign-in |
 | `/onboarding` | Profile setup (highlights missing fields) |
 | `/discover` | The Room — For you / Nearby people, plus Tables matched to you |
@@ -162,6 +163,7 @@ NEXT_PUBLIC_ENABLE_DEMO_PROFILES=1
 1. Neon Postgres → copy `DATABASE_URL`  
 2. Vercel project linked to `braindvts/meetpoint`  
 3. Env: `DATABASE_URL`, `AUTH_SECRET`, `NEXT_PUBLIC_APP_URL`  
+   For the live waitlist: `NOTION_API_KEY` + `NOTION_WAITLIST_DATABASE_ID=a6ffe8d865f94b25a851e2331a31c65b`  
 4. Redeploy  
 
 Details: [WEBSITE.md](./WEBSITE.md) · [KEYS.md](./KEYS.md) · [LAUNCH.md](./LAUNCH.md)
@@ -171,11 +173,12 @@ Details: [WEBSITE.md](./WEBSITE.md) · [KEYS.md](./KEYS.md) · [LAUNCH.md](./LAU
 ## Design rules (don’t break these)
 
 - User-facing brand is **Interlink** (handbook filename may still be CONCLAVE.md)
+- Never show Conclave or Meetpoint in user-facing copy (repo name can stay meetpoint)
 - Night ink `#07080c` + champagne as a precision accent; Syne for display, Outfit for UI
 - Standing is a **signal lockup** (node + word) — not metal chips, not numbered 01/02, not a membership board
 - Verified / BLACK CONNECTION **check SVGs stay unchanged**
 - Signup must show **what** is missing and **where** (Needed sections + sticky chips)
-- No purple AI-default theme, no cream+terracotta cliché, no editorial ladder / tariff board  
+- No purple AI-default theme, no cream+terracotta cliché, no editorial ladder / tariff board
 
 ---
 
@@ -200,3 +203,4 @@ See [MISSING.md](./MISSING.md). Big ones: email verify + password reset links, c
 | BLACK rules | `lib/black.ts` |
 | Premier access | `lib/plans.ts` |
 | Walkthrough owner (env-gated) | `lib/walkthroughOwner.ts`, `lib/ensureDemoOwner.ts` |
+| Waitlist → Notion | `lib/waitlist.ts`, `app/api/waitlist/route.ts`, `components/WaitlistForm.tsx` |

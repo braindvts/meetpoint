@@ -5,6 +5,7 @@ import Magnetic from "@/components/motion/Magnetic";
 import Reveal from "@/components/motion/Reveal";
 import SignalMesh from "@/components/SignalMesh";
 import TierBadge from "@/components/TierBadge";
+import WaitlistForm from "@/components/WaitlistForm";
 import Wordmark from "@/components/Wordmark";
 import { BRAND, BRAND_LINE, BRAND_TAGLINE } from "@/lib/brand";
 import { demoEntryEnabled } from "@/lib/demoFlag";
@@ -47,17 +48,23 @@ export default function Landing() {
     <main className="mp-site overflow-x-hidden">
       <header className="fixed inset-x-0 top-0 z-30 border-b border-white/[0.06] bg-ink/70 backdrop-blur-xl">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-        <Wordmark href="/" size="sm" />
-        <div className="flex items-center gap-3">
-          <Link href="/login" className="il-press text-[13px] text-muted transition hover:text-ivory">
-            Sign in
-          </Link>
-          <Magnetic>
-            <Link href="/login" className="il-btn il-landing-cta il-landing-cta--fill !min-w-0 px-4 py-2 text-[12px]">
-              Join
+          <Wordmark href="/" size="sm" />
+          <div className="flex items-center gap-3">
+            <Link href="/waitlist" className="il-press text-[13px] text-muted transition hover:text-ivory">
+              Waitlist
             </Link>
-          </Magnetic>
-        </div>
+            <Link href="/login" className="il-press text-[13px] text-muted transition hover:text-ivory">
+              Sign in
+            </Link>
+            <Magnetic>
+              <Link
+                href="/waitlist"
+                className="il-btn il-landing-cta il-landing-cta--fill !min-w-0 px-4 py-2 text-[12px]"
+              >
+                Request access
+              </Link>
+            </Magnetic>
+          </div>
         </div>
       </header>
 
@@ -79,17 +86,13 @@ export default function Landing() {
             <p className="mp-reveal mp-reveal-delay-2 mt-6 max-w-md text-[1.05rem] leading-relaxed text-ivory/68">
               {BRAND_LINE} Introductions ranked by ambition — then a table.
             </p>
-            <div className="mp-reveal mp-reveal-delay-3 mt-10 flex flex-col items-start gap-3 sm:flex-row sm:items-center">
-              <Magnetic>
-                <Link href="/login" className="il-btn il-landing-cta il-landing-cta--fill">
-                  Enter the room
-                </Link>
-              </Magnetic>
-              <Magnetic>
-                <Link href="/login" className="il-btn il-landing-cta il-landing-cta--ghost">
-                  Sign in
-                </Link>
-              </Magnetic>
+            <div className="mp-reveal mp-reveal-delay-3 mx-auto mt-10 w-full max-w-md lg:mx-0">
+              <WaitlistForm compact id="hero-waitlist" />
+            </div>
+            <div className="mp-reveal mp-reveal-delay-3 mt-4">
+              <Link href="/login" className="text-[13px] text-muted transition hover:text-ivory">
+                Already a member? Sign in
+              </Link>
             </div>
             {demoEntryEnabled() && (
               <div className="mp-reveal mp-reveal-delay-3 mt-5">
@@ -202,12 +205,24 @@ export default function Landing() {
         </Reveal>
       </section>
 
+      <section className="relative border-t border-white/[0.06] px-6 py-16">
+        <div className="mx-auto flex max-w-md flex-col items-center gap-5 text-center">
+          <p className="il-kicker">Waitlist</p>
+          <h2 className="font-display text-xl font-semibold tracking-[-0.03em] text-ivory sm:text-2xl">
+            Request a seat
+          </h2>
+          <p className="text-[14px] leading-relaxed text-muted">We’ll write when a seat opens.</p>
+          <WaitlistForm compact id="footer-waitlist" />
+          <Link href="/waitlist" className="text-[13px] text-accent hover:text-ivory">
+            Add your name
+          </Link>
+        </div>
+      </section>
+
       <footer className="border-t border-white/[0.06] px-6 py-10">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 sm:flex-row">
           <Wordmark href="/" size="sm" />
-          <p className="text-[12px] text-muted">
-            {BRAND} · Private introductions for ambitious people
-          </p>
+          <p className="text-[12px] text-muted">{BRAND} · Private introductions for ambitious people</p>
         </div>
       </footer>
     </main>

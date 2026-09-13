@@ -22,6 +22,7 @@ export async function GET() {
       has("TWILIO_ACCOUNT_SID") &&
       has("TWILIO_AUTH_TOKEN") &&
       has("TWILIO_FROM_NUMBER"),
+    waitlist: has("NOTION_API_KEY") || has("NOTION_TOKEN"),
   };
 
   const canRun = checks.appUrl && checks.database && checks.authSecret;
@@ -36,6 +37,7 @@ export async function GET() {
     canTakePayments: canRun && checks.stripe,
     canSearchRestaurants: checks.googlePlaces,
     canTextBookings: checks.twilio,
+    canWriteWaitlist: checks.waitlist,
     launchReady: canRun && canSignInWithSocial && checks.email && checks.stripe,
     tip: "See KEYS.md for where to get each key. Add missing ones in your host's environment variables, then redeploy.",
   });
