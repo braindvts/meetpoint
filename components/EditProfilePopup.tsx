@@ -78,7 +78,7 @@ export default function EditProfilePopup({
           <Link
             href={editHref}
             onClick={onClose}
-            className="mp-btn-lux block w-full rounded-full bg-gradient-to-b from-accent-2 to-accent py-2.5 text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-ink"
+            className="mp-btn-lux mp-spot block w-full rounded-[2px] bg-gradient-to-b from-accent-2 to-accent py-2.5 text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-ink"
           >
             Edit profile
           </Link>

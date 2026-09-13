@@ -77,11 +77,10 @@ export default function BlackMembershipCard({
 
   return (
     <section
-      className={`mb-5 rounded-2xl p-4 sm:p-5 ${
-        isBlack ? "black-centurion border border-white/20" : "border border-line/70 bg-panel/60"
+      className={`mb-5 rounded-[4px] p-4 sm:p-5 ${
+        isBlack ? "border border-white/20 bg-black" : "border border-line/70 bg-panel/60"
       }`}
     >
-      {isBlack && <span className="black-sheen" aria-hidden />}
 
       <div className="relative flex items-start justify-between gap-3">
         <div className="min-w-0">

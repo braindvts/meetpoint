@@ -1,16 +1,22 @@
 export default function PageHeader({
   title,
   action,
+  kicker = "Interlink",
+  lede,
 }: {
   title: string;
   action?: React.ReactNode;
+  kicker?: string;
+  lede?: string;
 }) {
   return (
-    <header className="sticky top-0 z-40 flex h-14 items-center justify-center bg-ink/95 px-4 backdrop-blur-xl md:justify-start md:px-0">
-      <h1 className="text-[1.15rem] font-medium tracking-tight text-ivory">{title}</h1>
-      {action ? (
-        <div className="absolute right-4 top-1/2 -translate-y-1/2 md:right-0">{action}</div>
-      ) : null}
+    <header className="mp-page-head">
+      <div>
+        <p className="mp-kicker hidden md:block">{kicker}</p>
+        <h1>{title}</h1>
+        {lede ? <p className="mt-1.5 max-w-md text-[13px] leading-snug text-muted">{lede}</p> : null}
+      </div>
+      {action ? <div className="mp-page-head-action">{action}</div> : null}
     </header>
   );
 }

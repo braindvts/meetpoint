@@ -13,7 +13,6 @@ interface Props {
   initialInterval?: PremierInterval;
 }
 
-/** Apple-style subscription sheet — monthly or yearly (3-day trial). */
 export default function PremierPlanSheet({
   open,
   onClose,
@@ -55,93 +54,88 @@ export default function PremierPlanSheet({
       className="fixed inset-0 z-[80] flex items-end justify-center sm:items-center"
       role="dialog"
       aria-modal="true"
-      aria-label="Conclave Premier"
+      aria-label="Premier"
     >
       <button
         type="button"
-        className="absolute inset-0 bg-black/55 backdrop-blur-md [-webkit-tap-highlight-color:transparent]"
+        className="mp-backdrop-in absolute inset-0 bg-black/70 [-webkit-tap-highlight-color:transparent]"
         aria-label="Dismiss"
         onClick={onClose}
       />
 
       <div
-        className="relative z-10 w-full max-w-none animate-[fadeUp_0.35s_ease-out_both] sm:max-w-[400px] sm:px-4 sm:pb-4"
+        className="mp-modal-in relative z-10 w-full max-w-none sm:max-w-[400px] sm:px-4 sm:pb-4"
         style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
       >
-        <div className="overflow-hidden rounded-t-[22px] border border-white/12 border-b-0 bg-[#1c1c1e] shadow-[0_-8px_40px_rgba(0,0,0,0.45)] sm:rounded-[28px] sm:border-b sm:shadow-[0_24px_80px_rgba(0,0,0,0.65)]">
+        <div className="mp-sheet">
           <div className="flex justify-center pt-2.5 sm:hidden" aria-hidden>
-            <span className="h-[5px] w-9 rounded-full bg-white/25" />
+            <span className="h-px w-10 bg-white/35" />
           </div>
 
-          <div className="px-6 pb-2 pt-4 text-center sm:pt-6">
-            <p className="font-display text-2xl font-semibold text-white">
-              Con<span className="text-accent">clave</span>
-            </p>
-            <p className="mt-2 text-[13px] font-semibold tracking-tight text-white/55">
-              Membership
-            </p>
-            <h2 className="mt-1 font-display text-[28px] font-semibold leading-tight tracking-tight text-white">
+          <div className="px-6 pb-1 pt-5 text-left sm:pt-6">
+            <p className="mp-kicker">Interlink</p>
+            <h2 className="mt-2 font-display text-[1.65rem] font-semibold leading-tight tracking-tight text-ivory">
               {PREMIER_PLAN.name}
             </h2>
-            <p className="mt-2 text-[15px] leading-snug text-white/60">
+            <p className="mt-2 text-[14px] leading-relaxed text-muted">
               {peerName
-                ? `Unlock introductions to ${peerName.split(" ")[0]} and every higher tier.`
+                ? `Unlock introductions to ${peerName.split(" ")[0]} and every higher standing.`
                 : PREMIER_PLAN.tagline}
             </p>
           </div>
 
-          <div className="mx-5 mt-4 flex rounded-xl bg-white/[0.06] p-1">
+          <div className="mx-6 mt-4 flex border border-white/10 p-0.5">
             <button
               type="button"
               onClick={() => setInterval("month")}
-              className={`flex-1 rounded-[10px] py-2.5 text-[13px] font-semibold transition ${
-                interval === "month" ? "bg-white text-black" : "text-white/55"
+              className={`flex-1 py-2.5 text-[12px] font-semibold uppercase tracking-[0.12em] transition duration-300 ${
+                interval === "month" ? "bg-accent text-ink" : "text-muted hover:text-ivory"
               }`}
             >
-              Monthly · $20
+              Monthly
             </button>
             <button
               type="button"
               onClick={() => setInterval("year")}
-              className={`flex-1 rounded-[10px] py-2.5 text-[13px] font-semibold transition ${
-                yearly ? "bg-white text-black" : "text-white/55"
+              className={`flex-1 py-2.5 text-[12px] font-semibold uppercase tracking-[0.12em] transition duration-300 ${
+                yearly ? "bg-accent text-ink" : "text-muted hover:text-ivory"
               }`}
             >
-              Yearly · $100
+              Yearly
             </button>
           </div>
 
-          <div className="mx-5 mt-3 rounded-2xl bg-white/[0.06] px-4 py-4">
+          <div className="mx-6 mt-4 border-t border-white/10 pt-4">
             <div className="flex items-baseline justify-between gap-3">
-              <span className="text-[15px] font-medium text-white">
+              <span className="text-[12px] font-semibold uppercase tracking-[0.16em] text-accent">
                 {yearly ? "Yearly" : "Monthly"}
               </span>
-              <span className="text-[15px] font-semibold text-white">
+              <span className="text-[1.35rem] font-semibold tracking-tight text-ivory">
                 {formatPremierPrice(interval)}
               </span>
             </div>
             {yearly && (
-              <p className="mt-2 rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-[13px] leading-snug text-ivory/80">
+              <p className="mt-2 text-[13px] leading-snug text-ivory/75">
                 3-day free trial — then $100/year. Cancel before day 3 and you won’t be charged.
               </p>
             )}
             <ul className="mt-3 space-y-2 border-t border-white/10 pt-3">
               {PREMIER_PLAN.features.map((f) => (
-                <li key={f} className="flex gap-2 text-[13px] leading-snug text-white/70">
-                  <span className="mt-0.5 text-white/40">✓</span>
+                <li key={f} className="flex gap-3 text-[13px] leading-snug text-muted">
+                  <span className="mt-2 h-px w-3 shrink-0 bg-accent/70" aria-hidden />
                   <span>{f}</span>
                 </li>
               ))}
               {yearly && (
-                <li className="flex gap-2 text-[13px] leading-snug text-white/70">
-                  <span className="mt-0.5 text-white/40">✓</span>
+                <li className="flex gap-3 text-[13px] leading-snug text-muted">
+                  <span className="mt-2 h-px w-3 shrink-0 bg-accent/70" aria-hidden />
                   <span>Save vs paying monthly ($240/yr)</span>
                 </li>
               )}
             </ul>
           </div>
 
-          <div className="flex flex-col gap-2 px-5 pb-6 pt-5 sm:pb-5">
+          <div className="flex flex-col gap-2 px-6 pb-6 pt-5">
             <button
               type="button"
               onClick={async () => {
@@ -153,18 +147,18 @@ export default function PremierPlanSheet({
                 }
                 onSubscribe(interval);
               }}
-              className="mp-btn-lux min-h-[48px] w-full rounded-full bg-gradient-to-b from-accent-2 to-accent py-3.5 text-[17px] font-semibold text-ink [-webkit-tap-highlight-color:transparent]"
+              className="mp-btn-lux mp-spot min-h-[48px] w-full rounded-[2px] bg-gradient-to-b from-accent-2 to-accent py-3.5 text-[13px] font-semibold uppercase tracking-[0.16em] text-ink [-webkit-tap-highlight-color:transparent]"
             >
               {yearly ? "Start 3-day free trial" : "Subscribe · $20/mo"}
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="min-h-[48px] w-full rounded-full py-3 text-[17px] font-medium text-ivory/70 transition [-webkit-tap-highlight-color:transparent] active:bg-white/[0.06] hover:bg-white/[0.04] hover:text-ivory"
+              className="min-h-[44px] w-full py-3 text-[13px] font-medium text-muted transition duration-300 hover:text-ivory active:scale-[0.99] [-webkit-tap-highlight-color:transparent]"
             >
-              Not Now
+              Not now
             </button>
-            <p className="px-2 pb-1 text-center text-[11px] leading-relaxed text-white/35">
+            <p className="text-center text-[11px] leading-relaxed text-white/35">
               {yearly
                 ? "Trial is free for 3 days. After that, $100 yearly until you cancel in Membership."
                 : "No card is charged until Stripe is connected. Cancel anytime in Membership."}

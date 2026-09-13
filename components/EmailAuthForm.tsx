@@ -46,7 +46,7 @@ export default function EmailAuthForm() {
   }
 
   const field =
-    "w-full rounded-xl border border-accent/25 bg-[#12110f] px-3 py-3 text-sm text-ivory outline-none placeholder:text-muted/70 focus:border-accent";
+    "w-full rounded-[4px] border border-accent/25 bg-[#12110f] px-3 py-3 text-sm text-ivory outline-none placeholder:text-muted/70 transition-[border-color] duration-300 focus:border-accent";
 
   return (
     <form onSubmit={submit} className="space-y-3">

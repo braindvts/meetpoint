@@ -5,7 +5,7 @@ interface Props {
 }
 
 const btn =
-  "inline-flex w-full items-center justify-center gap-2.5 rounded-xl border border-accent/25 bg-[#12110f] px-5 py-3.5 text-[13px] font-medium text-ivory transition hover:border-accent/50";
+  "mp-row inline-flex w-full items-center justify-center gap-2.5 rounded-[4px] border border-accent/25 bg-[#12110f] px-5 py-3.5 text-[13px] font-medium text-ivory";
 
 export default function AuthButtons({ className = "" }: Props) {
   return (

@@ -33,16 +33,12 @@ export default function MemberStatusStrip({ profile, tier }: Props) {
   const black = profile.black === true;
 
   return (
-    <div className="mb-5 flex flex-wrap items-center gap-2">
+    <div className="mb-6 flex flex-wrap items-center gap-x-4 gap-y-2">
       <span
-        className={`inline-flex shrink-0 items-center rounded-full border px-2.5 py-1 text-[9.5px] font-semibold uppercase tracking-[0.18em] ${
-          premier
-            ? "border-accent/45 bg-accent/[0.08] text-accent"
-            : "border-white/12 bg-white/[0.03] text-muted"
-        }`}
-        title={premier ? "Conclave Premier" : "Free member"}
+        className={`mp-plan-mark ${premier ? "is-on" : ""}`}
+        title={premier ? "Premier" : "Free member"}
       >
-        {premier ? (onTrial ? "Premier · Trial" : "Conclave Premier") : "Free member"}
+        {premier ? (onTrial ? "Premier · Trial" : "Premier") : "Free"}
       </span>
 
       <TierBadge tier={tier} size="sm" />

@@ -109,10 +109,12 @@ export default function ChatsPage() {
       <main className="mp-app px-0 pb-10 md:px-6">
         <PageHeader
           title="Chats"
+          kicker="Private"
+          lede="Private messages. The table is proposed here."
           action={
             <button
               onClick={() => setCreating((c) => !c)}
-              className="inline-flex items-center gap-1.5 text-[13px] font-medium text-accent"
+              className="inline-flex items-center gap-1.5 text-[13px] font-medium text-accent transition hover:text-accent-2 active:scale-95"
               aria-label={creating ? "Cancel new chat" : "New chat"}
             >
               {creating ? (
@@ -128,10 +130,6 @@ export default function ChatsPage() {
             </button>
           }
         />
-        <div className="px-4 pt-2">
-          <p className="text-[14px] text-ivory/70">Private messages</p>
-        </div>
-
         <div className="px-4 pb-6 pt-4">
         {creating && (
           <div className="mp-modal-in mp-person-card mb-6 p-4">
@@ -166,7 +164,7 @@ export default function ChatsPage() {
                           on ? "border-accent/50 bg-accent/10" : "border-line/60 bg-ink/40"
                         }`}
                       >
-                        <Avatar src={p.photoUrl} name={p.name} sizeCls="h-10 w-10" rounded="rounded-[12px]" />
+                        <Avatar src={p.photoUrl} name={p.name} sizeCls="h-10 w-10" rounded="rounded-[3px]" />
                         <div className="min-w-0 flex-1">
                           <p className="font-display text-lg font-semibold text-ivory">{p.name}</p>
                           <p className="truncate text-[10px] uppercase tracking-[0.16em] text-muted">
@@ -207,16 +205,16 @@ export default function ChatsPage() {
               const when = relativeTime(last?.createdAt || chat.messages.at(-1)?.createdAt);
               const lead = members[0];
               return (
-                <div key={chat.id} className="mp-person-card group flex items-stretch">
+                <div key={chat.id} className="mp-person-card mp-spot mp-row group flex items-stretch">
                   <Link
                     href={`/chats/${chat.id}`}
-                    className="flex min-w-0 flex-1 items-center gap-3 px-3 py-3"
+                    className="flex min-w-0 flex-1 items-center gap-3.5 px-3.5 py-3.5"
                   >
                     <Avatar
                       src={lead?.photoUrl}
                       name={lead?.name || chat.name}
                       sizeCls="h-12 w-12"
-                      rounded="rounded-[12px]"
+                      rounded="rounded-[3px]"
                     />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-baseline justify-between gap-2">
@@ -246,7 +244,7 @@ export default function ChatsPage() {
                   <button
                     title="Close"
                     onClick={() => setChats(deleteChat(chat.id))}
-                    className="px-3 text-muted"
+                    className="px-3 text-muted transition hover:text-ivory active:scale-95"
                   >
                     ✕
                   </button>

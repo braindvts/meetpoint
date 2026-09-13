@@ -58,8 +58,8 @@ function WorkBlock({ work, owner = false }: { work: PersonWork; owner?: boolean 
     </>
   );
   const cls = owner
-    ? "block rounded-xl border border-accent/35 bg-accent/[0.08] px-3 py-3"
-    : "block rounded-xl border border-accent/15 bg-ink/40 px-3 py-2.5";
+    ? "mp-row block rounded-[2px] border border-accent/35 bg-accent/[0.08] px-3 py-3"
+    : "mp-row block rounded-[2px] border border-accent/15 bg-ink/40 px-3 py-2.5";
   return work.url ? (
     <a href={work.url} target="_blank" rel="noopener noreferrer" className={cls}>
       {inner}
@@ -179,13 +179,10 @@ export default function PersonProfileSheet({
         style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
       >
         <div
-          className={`relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-t-[20px] border border-b-0 sm:rounded-[24px] sm:border-b ${
-            black
-              ? "black-profile-shell black-centurion border-white/20"
-              : "border-accent/20 bg-[#12110f]"
+          className={`mp-sheet relative flex min-h-0 flex-1 flex-col overflow-hidden ${
+            black ? "black-profile-shell" : ""
           }`}
         >
-          {black && <span className="black-sheen" aria-hidden />}
 
           {/* Drag handle only — does not cover the photo / block scroll */}
           <div
@@ -196,13 +193,13 @@ export default function PersonProfileSheet({
             onPointerCancel={onHandlePointerUp}
             aria-label="Swipe down to close"
           >
-            <span className="h-1 w-10 rounded-full bg-white/70 shadow-sm" />
+            <span className="h-px w-10 bg-white/55" />
           </div>
 
           <button
             type="button"
             onClick={onClose}
-            className="absolute right-3 top-3 z-20 rounded-full bg-black/55 px-3 py-1 text-[12px] text-white/90 sm:right-4 sm:top-4"
+            className="absolute right-3 top-3 z-20 border border-white/20 bg-black/55 px-3 py-1 text-[12px] text-white/90 transition hover:border-white/40 hover:text-white sm:right-4 sm:top-4"
           >
             Close
           </button>
@@ -284,7 +281,7 @@ export default function PersonProfileSheet({
                     {person.ideaTags.map((t) => (
                       <span
                         key={t}
-                        className="rounded-md border border-accent/25 bg-accent/[0.06] px-2 py-1 text-[11px] text-accent-2"
+                        className="mp-chip border-accent/25 bg-accent/[0.06] text-accent-2"
                       >
                         {t}
                       </span>
@@ -302,7 +299,7 @@ export default function PersonProfileSheet({
                     {person.lookingFor.map((t) => (
                       <span
                         key={t}
-                        className="rounded-md border border-ivory/15 px-2 py-1 text-[11px] text-ivory/80"
+                        className="mp-chip"
                       >
                         {t}
                       </span>
@@ -350,7 +347,7 @@ export default function PersonProfileSheet({
                     {person.verifications.map((method) => (
                       <span
                         key={method}
-                        className="rounded-md border border-accent/20 px-2 py-1 text-[11px] text-ivory/80"
+                        className="mp-chip border-accent/20"
                       >
                         {VERIFY_LABEL[method]}
                       </span>
@@ -368,7 +365,7 @@ export default function PersonProfileSheet({
                     href={person.linkedInUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-between gap-3 rounded-xl border border-accent/20 bg-ink/40 px-3 py-2.5 text-[13px] text-ivory"
+                    className="mp-row flex items-center justify-between gap-3 rounded-[2px] border border-accent/20 bg-ink/40 px-3 py-2.5 text-[13px] text-ivory"
                   >
                     <span className="font-medium">LinkedIn</span>
                     <span className="truncate text-[11px] text-muted">
@@ -381,7 +378,7 @@ export default function PersonProfileSheet({
                     href={person.websiteUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-between gap-3 rounded-xl border border-accent/20 bg-ink/40 px-3 py-2.5 text-[13px] text-ivory"
+                    className="mp-row flex items-center justify-between gap-3 rounded-[2px] border border-accent/20 bg-ink/40 px-3 py-2.5 text-[13px] text-ivory"
                   >
                     <span className="font-medium">Website</span>
                     <span className="truncate text-[11px] text-muted">
@@ -394,7 +391,7 @@ export default function PersonProfileSheet({
                     href={person.portfolioUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-between gap-3 rounded-xl border border-accent/20 bg-ink/40 px-3 py-2.5 text-[13px] text-ivory"
+                    className="mp-row flex items-center justify-between gap-3 rounded-[2px] border border-accent/20 bg-ink/40 px-3 py-2.5 text-[13px] text-ivory"
                   >
                     <span className="font-medium">Portfolio</span>
                     <span className="truncate text-[11px] text-muted">
@@ -419,7 +416,7 @@ export default function PersonProfileSheet({
               <Link
                 href={editHref}
                 onClick={onClose}
-                className="block w-full rounded-xl bg-gradient-to-b from-accent-2 to-accent py-3 text-center text-[13px] font-semibold text-ink"
+                className="mp-btn-lux mp-spot block w-full rounded-[2px] bg-gradient-to-b from-accent-2 to-accent py-3 text-center text-[13px] font-semibold uppercase tracking-[0.14em] text-ink"
               >
                 Edit profile
               </Link>
@@ -446,10 +443,10 @@ export default function PersonProfileSheet({
                     onConnect(person.id);
                     onClose();
                   }}
-                  className={`w-full rounded-xl py-3 text-[13px] font-semibold ${
+                  className={`w-full rounded-[2px] py-3 text-[13px] font-semibold uppercase tracking-[0.14em] transition duration-300 active:scale-[0.99] ${
                     canConnect
-                      ? "bg-gradient-to-b from-accent-2 to-accent text-ink"
-                      : "border border-accent/40 text-accent-2"
+                      ? "mp-btn-lux mp-spot bg-gradient-to-b from-accent-2 to-accent text-ink"
+                      : "border border-accent/40 text-accent-2 hover:border-accent/70"
                   }`}
                 >
                   {canConnect ? "Connect" : "Premier · Connect"}

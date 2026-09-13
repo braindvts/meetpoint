@@ -2,7 +2,9 @@
 
 Keep this open as your product handbook. Update it when rules change.
 
-**One-liner:** Conclave introduces ambitious people, then settles it over dinner.
+**Public brand:** **Interlink**. This file is the internal handbook (still named Conclave). Use Interlink in all user-facing UI and marketing copy. Do not rename the GitHub repo (`braindvts/meetpoint`).
+
+**One-liner:** Interlink introduces ambitious people, then settles it over dinner.
 
 **Delivery plan:** **Website first** (browser on laptop/phone). Turn it into a native app later once the website is making money. Do not rebuild the UI as a phone-frame “app shell” for web.
 
@@ -124,9 +126,7 @@ Discover ranks people by shared ambitions, complementary “looking for,” same
 
 ## Demo / owner login
 
-| Email | Password | Notes |
-|-------|----------|-------|
-| `brianasome@gmail.com` | `Brian812` | Always works; recreates on fresh DB; turns on sample people in that browser |
+A fixed demo owner account exists for walkthroughs. Credentials live in local env / operator notes — do **not** publish them here.
 
 Local-only env flags (do **not** set on production unless you want demo entry):
 
@@ -159,9 +159,9 @@ Details: [WEBSITE.md](./WEBSITE.md) · [KEYS.md](./KEYS.md) · [LAUNCH.md](./LAU
 
 ## Design rules (don’t break these)
 
-- Brand first: Conclave / champagne on dark ink  
+- Brand first: Interlink / champagne on dark ink  
 - One typeface family (Outfit)  
-- Level marks are the same metal shape: steel Member · champagne Verified · black sheen BLACK  
+- Standing marks are editorial, not metal chips: index + name for Member / Verified; BLACK is a black plaque. Do not restyle Verified checkmarks or the BLACK CONNECTION check.
 - Signup must show **what** is missing and **where** (Needed sections + sticky chips)  
 - No purple AI-default theme, no cream+terracotta cliché  
 

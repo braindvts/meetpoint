@@ -241,7 +241,7 @@ function ChatThreadInner() {
 
   function senderName(senderId: string) {
     if (senderId === "me") return profile!.name.split(" ")[0];
-    if (senderId === "system") return "Conclave";
+    if (senderId === "system") return "Interlink";
     return findPerson(senderId)?.name.split(" ")[0] || "Member";
   }
 
@@ -255,26 +255,27 @@ function ChatThreadInner() {
       <Nav />
       <div className="mp-chat-shell">
         <div className="mx-auto flex h-full min-h-0 w-full max-w-3xl flex-col px-3 sm:px-6">
-          <header className="shrink-0 border-b border-line/60 pb-2.5 pt-[max(0.5rem,env(safe-area-inset-top))] sm:py-4 sm:pt-4">
+          <header className="shrink-0 border-b border-accent/15 pb-3 pt-[max(0.5rem,env(safe-area-inset-top))] sm:py-4 sm:pt-4">
             <div className="flex items-center gap-3">
               <Link
                 href="/chats"
-                className="shrink-0 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted transition hover:text-accent-2"
+                className="shrink-0 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted transition duration-300 hover:text-ivory active:scale-95"
               >
                 ← Back
               </Link>
               <div className="min-w-0 flex-1">
-                <h1 className="truncate font-display text-xl font-semibold tracking-tight sm:text-3xl">
+                <p className="mp-kicker">Thread</p>
+                <h1 className="mt-1 truncate font-display text-xl font-semibold tracking-tight sm:text-2xl">
                   {chat.name}
                 </h1>
-                <p className="truncate text-[9px] font-semibold uppercase tracking-[0.16em] text-muted sm:text-[10px] sm:tracking-[0.2em]">
+                <p className="mt-0.5 truncate text-[11px] text-muted">
                   You · {members.map((m) => m.name.split(" ")[0]).join(" · ")}
                 </p>
               </div>
               <div className="flex shrink-0 -space-x-2">
-                <Avatar src={profile.photo} name={profile.name} sizeCls="h-8 w-8" />
+                <Avatar src={profile.photo} name={profile.name} sizeCls="h-8 w-8" rounded="rounded-[3px]" />
                 {members.slice(0, 3).map((m) => (
-                  <Avatar key={m.id} src={m.photoUrl} name={m.name} sizeCls="h-8 w-8" />
+                  <Avatar key={m.id} src={m.photoUrl} name={m.name} sizeCls="h-8 w-8" rounded="rounded-[3px]" />
                 ))}
               </div>
             </div>
@@ -307,18 +308,13 @@ function ChatThreadInner() {
                       src={senderPhoto(m.senderId)}
                       name={senderName(m.senderId)}
                       sizeCls="h-8 w-8 sm:h-9 sm:w-9"
+                      rounded="rounded-[3px]"
                     />
                     <div className={`max-w-[78%] ${mine ? "text-right" : ""}`}>
                       <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-muted">
                         {senderName(m.senderId)}
                       </p>
-                      <div
-                        className={`inline-block max-w-full border px-3.5 py-2.5 text-left text-sm leading-relaxed sm:px-4 sm:py-3 ${
-                          mine
-                            ? "border-accent/40 bg-accent/10 text-ivory"
-                            : "border-line/70 bg-panel text-ivory/90"
-                        }`}
-                      >
+                      <div className={`mp-bubble ${mine ? "mp-bubble--me" : ""}`}>
                         {m.attachment?.kind === "image" && (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
@@ -400,7 +396,7 @@ function ChatThreadInner() {
                 type="button"
                 onClick={() => fileRef.current?.click()}
                 aria-label="Attach photo or file"
-                className="mb-0.5 flex h-10 w-10 shrink-0 items-center justify-center border border-line/70 text-muted transition hover:border-accent/50 hover:text-accent-2"
+                className="mb-0.5 flex h-10 w-10 shrink-0 items-center justify-center border border-line/70 text-muted transition duration-300 hover:border-accent/50 hover:text-accent-2 active:scale-95"
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
                   <path
@@ -429,7 +425,7 @@ function ChatThreadInner() {
               <button
                 type="submit"
                 disabled={!text.trim()}
-                className="rounded-full bg-gradient-to-b from-accent-2 to-accent px-5 py-2.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink transition enabled:hover:brightness-110 disabled:opacity-40 sm:px-6"
+                className="mp-btn-lux mp-spot rounded-[2px] bg-gradient-to-b from-accent-2 to-accent px-5 py-2.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink disabled:opacity-40 sm:px-6"
               >
                 Send
               </button>

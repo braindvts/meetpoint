@@ -24,7 +24,7 @@ export default function BlackConnectionBadge({
 
   return (
     <span
-      className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/25 bg-black px-2.5 py-1 text-[9.5px] font-semibold uppercase tracking-[0.16em] text-[#f5f5f5] shadow-[0_0_0_1px_#000] ${className}`}
+      className={`inline-flex shrink-0 items-center gap-1.5 rounded-[2px] border border-white/25 bg-black px-2 py-1 text-[9.5px] font-semibold uppercase tracking-[0.16em] text-[#f5f5f5] ${className}`}
       title={`BLACK CONNECTION — ${level.name || "connected"} (${count})`}
     >
       <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 shrink-0" fill="none" aria-hidden>

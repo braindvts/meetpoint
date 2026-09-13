@@ -58,7 +58,7 @@ The app sends one welcome email the moment an account is created (email, Google,
 
 ```
 RESEND_API_KEY=re_...
-EMAIL_FROM=Conclave <hello@yourdomain.com>
+EMAIL_FROM=Interlink <hello@yourdomain.com>
 ```
 
 Without a verified domain you can test with Resend's sandbox sender (`onboarding@resend.dev`), which only delivers to your own address.

@@ -16,7 +16,7 @@ export default function Wordmark({ href = "/", size = "md", className = "" }: Pr
         : "text-[1.35rem] tracking-tight";
   const inner = (
     <span className={`font-semibold tracking-tight text-ivory ${scale} ${className}`}>
-      Con<span className="text-accent">clave</span>
+      Inter<span className="text-accent">link</span>
     </span>
   );
   if (!href) return inner;

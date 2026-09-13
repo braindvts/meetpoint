@@ -7,6 +7,8 @@ alwaysApply: true
 
 Read **CONCLAVE.md** at the repo root for the full handbook. Keep it accurate when product rules change.
 
+**Public brand:** Interlink. Use Interlink in user-facing UI. Conclave is the internal handbook name. Do not rename the GitHub repo.
+
 ## Levels (only three)
 
 - **Member** — Identity only (photo, name, role, ambitions, looking for). Verification fields are optional.
@@ -27,7 +29,8 @@ Premier ($20/mo) is a plan that expands who Members can meet. Standing levels ar
 
 ## UX
 
-- Level badges: matching metal marks — steel / champagne / black (BLACK is the coolest)
+- Standing marks: editorial index + name (Member / Verified); BLACK is a black plaque — not matching metal chips
+- Do not restyle Verified checkmarks; BLACK CONNECTION stays a black checkmark
 - BLACK CONNECTION: black checkmark badge (not a chain icon)
 - Never show “Tier N · Name”
 - Signup: Identity required; verification optional (skip = stay Member)
@@ -38,7 +41,7 @@ Premier ($20/mo) is a plan that expands who Members can meet. Standing levels ar
 
 ## Demo
 
-`brianasome@gmail.com` / `Brian812` is the fixed demo owner login. Demo env flags stay off in production unless intentionally enabled.
+A fixed demo owner login exists for walkthroughs — see local env / ask the operator. Do not publish credentials. Demo env flags stay off in production unless intentionally enabled.
 
 ## Delivery
 

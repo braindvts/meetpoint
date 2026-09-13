@@ -13,9 +13,15 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "Conclave",
+  title: "Interlink",
   description:
-    "Conclave — the private network for ambitious people. Use it in the browser now; native app later.",
+    "Interlink — private introductions for ambitious people. They end at a dinner table.",
+  openGraph: {
+    title: "Interlink",
+    description:
+      "A private network for ambitious people. Identity makes you a Member. Introductions end at a real table.",
+    type: "website",
+  },
 };
 
 export const viewport: Viewport = {

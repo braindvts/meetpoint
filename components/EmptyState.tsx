@@ -18,7 +18,7 @@ export default function EmptyState({
   onAction,
 }: Props) {
   return (
-    <div className="mp-reveal relative overflow-hidden rounded-2xl border border-accent/15 bg-[#12110f] px-6 py-16 text-center">
+    <div className="mp-reveal relative overflow-hidden rounded-[4px] border border-accent/15 bg-[#12110f] px-6 py-16 text-center">
       <span
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(212,196,168,0.08),transparent_55%)]"
         aria-hidden
@@ -34,7 +34,7 @@ export default function EmptyState({
             {actionHref ? (
               <Link
                 href={actionHref}
-                className="mp-btn-lux inline-flex rounded-xl bg-gradient-to-b from-accent-2 to-accent px-9 py-3.5 text-[12px] font-semibold text-ink"
+                className="mp-btn-lux mp-spot inline-flex rounded-[2px] bg-gradient-to-b from-accent-2 to-accent px-9 py-3.5 text-[12px] font-semibold uppercase tracking-[0.16em] text-ink"
               >
                 {actionLabel}
               </Link>
@@ -42,7 +42,7 @@ export default function EmptyState({
               <button
                 type="button"
                 onClick={onAction}
-                className="mp-btn-lux inline-flex rounded-xl bg-gradient-to-b from-accent-2 to-accent px-9 py-3.5 text-[12px] font-semibold text-ink"
+                className="mp-btn-lux mp-spot inline-flex rounded-[2px] bg-gradient-to-b from-accent-2 to-accent px-9 py-3.5 text-[12px] font-semibold uppercase tracking-[0.16em] text-ink"
               >
                 {actionLabel}
               </button>

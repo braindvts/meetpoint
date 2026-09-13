@@ -17,7 +17,7 @@ export default function LoadingRoom({
     <div className="mx-auto max-w-5xl px-3 py-16 sm:px-6 sm:py-24">
       <div className="flex flex-col items-center text-center">
         <p className="font-display text-4xl font-semibold text-ivory">
-          Con<span className="text-accent">clave</span>
+          Inter<span className="text-accent">link</span>
         </p>
         <p className="mt-5 max-w-xs font-display text-lg italic text-ivory/75">
           {label}
