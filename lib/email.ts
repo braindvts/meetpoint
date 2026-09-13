@@ -6,9 +6,9 @@ export function emailConfigured(): boolean {
   return !!process.env.RESEND_API_KEY?.trim();
 }
 
-/** Verified sender in Resend, e.g. "Conclave <hello@yourdomain.com>". */
+/** Verified sender in Resend, e.g. "Interlink <hello@yourdomain.com>". */
 function fromAddress(): string {
-  return process.env.EMAIL_FROM?.trim() || "Conclave <onboarding@resend.dev>";
+  return process.env.EMAIL_FROM?.trim() || "Interlink <onboarding@resend.dev>";
 }
 
 interface Mail {
@@ -26,7 +26,7 @@ interface Mail {
 export async function sendEmail({ to, subject, html, text }: Mail): Promise<boolean> {
   const key = process.env.RESEND_API_KEY?.trim();
   if (!key) {
-    console.info("[conclave email skipped]", { to, subject });
+    console.info("[interlink email skipped]", { to, subject });
     return false;
   }
 
@@ -40,12 +40,12 @@ export async function sendEmail({ to, subject, html, text }: Mail): Promise<bool
       body: JSON.stringify({ from: fromAddress(), to: [to], subject, html, text }),
     });
     if (!res.ok) {
-      console.error("[conclave email failed]", res.status, await res.text());
+      console.error("[interlink email failed]", res.status, await res.text());
       return false;
     }
     return true;
   } catch (err) {
-    console.error("[conclave email error]", err);
+    console.error("[interlink email error]", err);
     return false;
   }
 }
@@ -66,14 +66,14 @@ function welcomeHtml(firstName: string, link: string): string {
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;margin:0 auto;background:#0c0b0a;border:1px solid rgba(212,196,168,0.22);">
       <tr>
         <td style="padding:32px 28px 8px;text-align:center;">
-          <p style="margin:0;color:#d4c4a8;font-size:13px;letter-spacing:0.28em;">CONCLAVE</p>
+          <p style="margin:0;color:#d4c4a8;font-size:18px;font-weight:600;letter-spacing:-0.03em;">Interlink</p>
         </td>
       </tr>
       <tr>
         <td style="padding:16px 28px 0;">
           <h1 style="margin:0;color:#f3efe6;font-size:24px;font-weight:600;">Welcome, ${safeName}.</h1>
           <p style="margin:14px 0 0;color:#8f877a;font-size:15px;line-height:1.6;">
-            You're in. Conclave introduces you to people matched by ambition and profession — and it ends at a real table.
+            You're in. Interlink introduces you to people matched by ambition and profession — and it ends at a real table.
           </p>
           <p style="margin:14px 0 0;color:#8f877a;font-size:15px;line-height:1.6;">
             Finish your profile so introductions stay intentional: your role, what you're building, and what you're looking for.
@@ -105,12 +105,12 @@ export async function sendWelcomeEmail(to: string, name?: string): Promise<boole
   const link = appUrl("/onboarding");
   return sendEmail({
     to,
-    subject: "Welcome to Conclave",
+    subject: "Welcome to Interlink",
     html: welcomeHtml(firstName, link),
     text: [
       `Welcome, ${firstName}.`,
       "",
-      "You're in. Conclave introduces you to people matched by ambition and profession — and it ends at a real table.",
+      "You're in. Interlink introduces you to people matched by ambition and profession — and it ends at a real table.",
       "",
       `Finish your profile so introductions stay intentional: ${link}`,
     ].join("\n"),

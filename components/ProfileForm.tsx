@@ -76,12 +76,12 @@ function Section({
     >
       <div className="mb-2.5 flex items-baseline gap-2 sm:mb-6 sm:gap-4">
         <span
-          className={`text-[10px] font-medium tabular-nums sm:text-sm ${
-            missing ? "text-accent-2" : "text-accent"
+          className={`stand-node mt-1.5 !h-2 !w-2 ${
+            missing ? "bg-accent" : "bg-accent/55"
           }`}
-        >
-          {num}
-        </span>
+          aria-hidden
+        />
+        <span className="sr-only">{num}</span>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <h2 className="text-base font-semibold tracking-tight text-ivory sm:text-xl">
@@ -733,7 +733,7 @@ export default function ProfileForm({ initial }: { initial?: MyProfile | null })
       >
         <div className="border border-line/70 bg-panel/40 px-3 py-3 sm:px-5 sm:py-4">
           <p className="text-[12px] leading-relaxed text-muted sm:text-sm">
-            Pick your business ideas and what you&apos;re looking for above. Conclave ranks
+            Pick your business ideas and what you&apos;re looking for above. Interlink ranks
             people who share your model, can help you build it, or work in your profession —
             then Nearby narrows that to people close to you.
           </p>

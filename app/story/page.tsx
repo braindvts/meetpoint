@@ -1,12 +1,27 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import StoryAd from "@/components/StoryAd";
+import { BRAND } from "@/lib/brand";
 
 export const metadata: Metadata = {
-  title: "Conclave — Instagram post",
+  title: `${BRAND} — Instagram post`,
   robots: { index: false, follow: false },
 };
 
-export default function StoryPage() {
+export default async function StoryPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ export?: string }>;
+}) {
+  const { export: exp } = await searchParams;
+  if (exp === "story" || exp === "feed" || exp === "portrait") {
+    return (
+      <main className="h-dvh w-dvw bg-ink">
+        <StoryAd variant={exp} className="h-full w-full !aspect-auto" />
+      </main>
+    );
+  }
+
   return (
     <main className="mx-auto min-h-dvh max-w-md bg-ink px-5 pb-16 pt-10 text-center">
       <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-accent">Instagram</p>
@@ -15,31 +30,28 @@ export default function StoryPage() {
         Save the picture. Upload it to Instagram. That&apos;s it.
       </p>
 
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src="/conclave-instagram.png"
-        alt="Conclave Instagram post"
-        className="mx-auto mt-8 w-full max-w-[360px] rounded-lg border border-accent/25"
-      />
+      <div className="mx-auto mt-8 w-full max-w-[360px] overflow-hidden rounded-lg border border-accent/25">
+        <StoryAd variant="feed" />
+      </div>
 
       <div className="mt-6 flex flex-col gap-2">
         <a
-          href="/conclave-instagram.png"
-          download="conclave-instagram.png"
+          href="/interlink-instagram.png"
+          download="interlink-instagram.png"
           className="rounded-xl bg-gradient-to-b from-accent-2 to-accent py-3.5 text-[12px] font-semibold text-ink"
         >
           Save picture (PNG)
         </a>
         <a
-          href="/conclave-instagram.pdf"
-          download="conclave-instagram.pdf"
+          href="/interlink-instagram.pdf"
+          download="interlink-instagram.pdf"
           className="rounded-xl border border-accent/30 py-3.5 text-[12px] font-semibold text-ivory"
         >
           Save PDF
         </a>
         <a
-          href="/conclave-instagram-story.png"
-          download="conclave-instagram-story.png"
+          href="/interlink-instagram-story.png"
+          download="interlink-instagram-story.png"
           className="text-[13px] text-accent"
         >
           Story version (vertical)

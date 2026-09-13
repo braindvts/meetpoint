@@ -4,7 +4,7 @@ import type { MyProfile } from "./types";
 export const DEMO_PROFILE: MyProfile = {
   name: "Mohammed",
   jobTitle: "Founder",
-  bio: "Building Conclave — private introductions that end at a table.",
+  bio: "Building Interlink — private introductions that end at a table.",
   photo:
     "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&h=400&q=90",
   city: {
@@ -21,17 +21,17 @@ export const DEMO_PROFILE: MyProfile = {
   verifications: [
     {
       method: "company-email",
-      value: "demo@conclave.app",
+      value: "demo@interlink.app",
       verifiedAt: new Date().toISOString(),
     },
     {
       method: "linkedin",
-      value: "https://linkedin.com/in/conclave-demo",
+      value: "https://linkedin.com/in/interlink-demo",
       verifiedAt: new Date().toISOString(),
     },
     {
       method: "resume",
-      value: "https://conclave.app/demo-resume.pdf",
+      value: "https://interlink.app/demo-resume.pdf",
       verifiedAt: new Date().toISOString(),
     },
   ],

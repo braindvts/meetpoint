@@ -31,13 +31,17 @@ const RATINGS_KEY = "meetpoint.ratings";
 const BLOCKS_KEY = "meetpoint.blocked";
 
 /** The "Enter demo" account signs itself with this LinkedIn value. */
-const DEMO_PROFILE_MARKER = "linkedin.com/in/conclave-demo";
+const DEMO_PROFILE_MARKERS = [
+  "linkedin.com/in/interlink-demo",
+  "linkedin.com/in/conclave-demo",
+];
 
 /** Demo runs entirely in this browser — it never reaches the shared database. */
 export function isDemoProfile(p: MyProfile | null | undefined): boolean {
-  return (p?.verifications || []).some((v) =>
-    String(v.value || "").includes(DEMO_PROFILE_MARKER)
-  );
+  return (p?.verifications || []).some((v) => {
+    const value = String(v.value || "");
+    return DEMO_PROFILE_MARKERS.some((marker) => value.includes(marker));
+  });
 }
 
 function isDemoPeer(peerId: string): boolean {

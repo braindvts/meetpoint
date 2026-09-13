@@ -248,7 +248,7 @@ function ChatThreadInner() {
 
   function senderName(senderId: string) {
     if (senderId === "me") return profile!.name.split(" ")[0];
-    if (senderId === "system") return "Conclave";
+    if (senderId === "system") return "Interlink";
     return findPerson(senderId)?.name.split(" ")[0] || "Member";
   }
 
@@ -320,10 +320,8 @@ function ChatThreadInner() {
                         {senderName(m.senderId)}
                       </p>
                       <div
-                        className={`inline-block max-w-full border px-3.5 py-2.5 text-left text-sm leading-relaxed sm:px-4 sm:py-3 ${
-                          mine
-                            ? "border-accent/40 bg-accent/10 text-ivory"
-                            : "border-line/70 bg-panel text-ivory/90"
+                        className={`inline-block max-w-full px-3.5 py-2.5 text-left text-sm leading-relaxed sm:px-4 sm:py-3 ${
+                          mine ? "il-bubble-me text-ivory" : "il-bubble-them text-ivory/90"
                         }`}
                       >
                         {m.attachment?.kind === "image" && (
@@ -436,7 +434,7 @@ function ChatThreadInner() {
               <button
                 type="submit"
                 disabled={!text.trim()}
-                className="rounded-full bg-gradient-to-b from-accent-2 to-accent px-5 py-2.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink transition enabled:hover:brightness-110 disabled:opacity-40 sm:px-6"
+                className="il-btn rounded-full bg-gradient-to-b from-accent-2 to-accent px-5 py-2.5 text-[12px] font-semibold text-ink transition enabled:hover:brightness-110 disabled:opacity-40 sm:px-6"
               >
                 Send
               </button>

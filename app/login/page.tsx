@@ -49,10 +49,10 @@ function LoginContent() {
 
   return (
     <main className="mp-app flex min-h-dvh flex-col px-6 pb-10 pt-16 md:max-w-lg md:pt-20">
-      <p className="text-center text-[0.75rem] font-medium tracking-[0.14em] text-accent">
-        CONCLAVE
+      <p className="text-center font-display text-[1.05rem] font-semibold tracking-[-0.03em] text-ivory">
+        Interlink
       </p>
-      <h1 className="mt-10 text-3xl font-semibold tracking-tight text-ivory">
+      <h1 className="mt-10 font-display text-3xl font-semibold tracking-[-0.03em] text-ivory">
         Sign in
       </h1>
       <p className="mt-2 text-sm leading-relaxed text-muted">

@@ -1,7 +1,7 @@
 /** Soft shimmer placeholder while Discover settles. */
 export default function SkeletonCard() {
   return (
-    <div className="mp-skeleton overflow-hidden rounded-[18px] border border-accent/15 bg-[#12110f]">
+    <div className="il-node-card mp-skeleton overflow-hidden">
       <div className="flex gap-3.5 px-4 pb-3 pt-4">
         <div className="h-[86px] w-[86px] shrink-0 rounded-[14px] bg-panel-2" />
         <div className="flex-1 space-y-2 pt-1">

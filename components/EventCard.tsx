@@ -1,6 +1,7 @@
 "use client";
 
 import type { MouseEvent } from "react";
+import TiltCard from "@/components/motion/TiltCard";
 import { formatEventWhen, tableKindLabel, type EventMatchResult } from "@/lib/eventMatch";
 import type { EventInterestStatus } from "@/lib/eventTypes";
 
@@ -24,7 +25,8 @@ export default function EventCard({ match, status, onInterest, onClear }: Props)
   }
 
   return (
-    <article className="flex h-full min-h-[320px] flex-col overflow-hidden rounded-[18px] border border-accent/20 bg-[#12110f]">
+    <TiltCard className="h-full">
+    <article className="il-node-card flex h-full min-h-[320px] flex-col">
       <div className="flex gap-3.5 px-4 pb-3 pt-4">
         <div className="grid h-16 w-16 shrink-0 place-items-center rounded-[12px] border border-accent/20 bg-black text-accent sm:h-[72px] sm:w-[72px]">
           <span className="text-[10px] font-semibold uppercase tracking-[0.16em]">
@@ -108,7 +110,7 @@ export default function EventCard({ match, status, onInterest, onClear }: Props)
           type="button"
           aria-label="Pass"
           onClick={(e) => setStatus(e, "passed")}
-          className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-white/18 text-ivory/80 transition active:scale-95"
+          className="il-action"
         >
           <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth="1.8">
             <path d="M7 7l10 10M17 7 7 17" strokeLinecap="round" />
@@ -118,8 +120,8 @@ export default function EventCard({ match, status, onInterest, onClear }: Props)
           type="button"
           aria-label={status === "saved" ? "Unsave" : "Save"}
           onClick={(e) => setStatus(e, "saved")}
-          className={`grid h-11 w-11 shrink-0 place-items-center rounded-full border transition active:scale-95 ${
-            status === "saved" ? "border-accent/45 text-accent" : "border-white/18 text-ivory/80"
+          className={`il-action ${
+            status === "saved" ? "border-accent/45 text-accent" : ""
           }`}
         >
           <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth="1.8">
@@ -130,10 +132,8 @@ export default function EventCard({ match, status, onInterest, onClear }: Props)
           type="button"
           aria-label={status === "going" ? "Undo going" : "I'm going"}
           onClick={(e) => setStatus(e, "going")}
-          className={`grid h-11 w-11 shrink-0 place-items-center rounded-full transition active:scale-95 ${
-            status === "going"
-              ? "border border-accent/45 text-accent"
-              : "bg-gradient-to-b from-accent-2 to-accent text-ink shadow-[0_8px_20px_rgba(212,196,168,0.22)]"
+          className={`il-action ${
+            status === "going" ? "border-accent/45 text-accent" : "il-action--fill"
           }`}
         >
           <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth="2.2">
@@ -145,5 +145,6 @@ export default function EventCard({ match, status, onInterest, onClear }: Props)
         </p>
       </div>
     </article>
+    </TiltCard>
   );
 }

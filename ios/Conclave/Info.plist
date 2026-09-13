@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleDisplayName</key>
-	<string>Conclave</string>
+	<string>Interlink</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsLocalNetworking</key>
@@ -25,11 +25,11 @@
 		</dict>
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Conclave uses your location to suggest nearby cities and dinner tables.</string>
+	<string>Interlink uses your location to suggest nearby cities and dinner tables.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>Conclave can use the camera when you add a profile photo.</string>
+	<string>Interlink can use the camera when you add a profile photo.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Conclave can use your library when you add a profile photo.</string>
+	<string>Interlink can use your library when you add a profile photo.</string>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
 	<key>UIStatusBarStyle</key>

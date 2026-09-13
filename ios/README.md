@@ -1,4 +1,4 @@
-# Open Conclave in Xcode
+# Open Interlink in Xcode
 
 Do **not** open the `AI App 1` website folder in Xcode. That only lists files. It does not make an iPhone app.
 
@@ -13,7 +13,7 @@ python3 ~/Documents/"AI App 1"/ios/install-on-mac.py
 
 If that says *No such file*, copy the `ios` folder from this project onto your Mac first, then run the command again.
 
-That creates **Desktop/Conclave** and opens `Conclave.xcodeproj`.
+That copies the iOS wrapper to your Desktop and opens the Xcode project (folder still named `Conclave` internally). The home-screen name is **Interlink**.
 
 3. In another Terminal window:
 

@@ -2,6 +2,7 @@
 
 import type { KeyboardEvent, MouseEvent } from "react";
 import BlackConnectionBadge from "@/components/BlackConnectionBadge";
+import TiltCard from "@/components/motion/TiltCard";
 import TierBadge from "@/components/TierBadge";
 import { blackConnectionWith } from "@/lib/blackStore";
 import type { MatchResult } from "@/lib/match";
@@ -95,12 +96,13 @@ export default function MatchCard({
   }
 
   return (
+    <TiltCard className="h-full">
     <article
       role={onOpenProfile ? "button" : undefined}
       tabIndex={onOpenProfile ? 0 : undefined}
       onClick={() => onOpenProfile?.(person.id)}
       onKeyDown={handleKey}
-      className={`flex h-full min-h-[320px] flex-col overflow-hidden rounded-[18px] border border-accent/20 bg-[#12110f] ${
+      className={`il-node-card flex h-full min-h-[320px] flex-col ${
         onOpenProfile || preview ? "cursor-pointer [-webkit-tap-highlight-color:transparent]" : ""
       }`}
     >
@@ -207,7 +209,7 @@ export default function MatchCard({
               e.stopPropagation();
               onSkip(person.id);
             }}
-            className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-white/18 text-ivory/80 transition active:scale-95"
+            className="il-action"
           >
             <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth="1.8">
               <path d="M7 7l10 10M17 7 7 17" strokeLinecap="round" />
@@ -220,14 +222,14 @@ export default function MatchCard({
           aria-label={connectAria()}
           disabled={connectLocked && status !== "connected"}
           onClick={handleConnect}
-          className={`grid h-11 w-11 shrink-0 place-items-center rounded-full transition active:scale-95 ${
+          className={`il-action ${
             status === "connected"
-              ? "border border-accent/25 text-muted"
+              ? "text-muted"
               : status === "requested"
-                ? "border border-accent/45 text-accent"
+                ? "border-accent/45 text-accent"
                 : !canConnect && !preview
-                  ? "border border-accent/40 text-accent"
-                  : "bg-gradient-to-b from-accent-2 to-accent text-ink shadow-[0_8px_20px_rgba(212,196,168,0.22)]"
+                  ? "border-accent/40 text-accent"
+                  : "il-action--fill"
           }`}
         >
           {status === "requested" ? (
@@ -260,5 +262,6 @@ export default function MatchCard({
         ) : null}
       </div>
     </article>
+    </TiltCard>
   );
 }

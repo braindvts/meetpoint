@@ -91,7 +91,7 @@ export default function PlansSection({
   }
 
   return (
-    <section className="mb-6 border border-line/50 bg-panel/40 p-3 sm:mb-10 sm:p-5">
+    <section className="il-panel mb-6 p-4 sm:mb-10 sm:p-6">
       <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
         <p className="text-[9px] font-semibold uppercase tracking-[0.22em] text-accent sm:text-[11px]">
           Plans
@@ -107,7 +107,7 @@ export default function PlansSection({
 
       <div className="space-y-2.5">
         {/* Free */}
-        <div className="border border-line/60 bg-ink/40 px-3.5 py-3 sm:px-4 sm:py-3.5">
+        <div className="rounded-2xl border border-white/[0.07] bg-ink/30 px-3.5 py-3 sm:px-4 sm:py-3.5">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-[15px] font-semibold text-ivory">Free</p>
@@ -126,7 +126,7 @@ export default function PlansSection({
         </div>
 
         {/* Premier */}
-        <div className="border border-accent/30 bg-ink/50 px-3.5 py-3 sm:px-4 sm:py-3.5">
+        <div className="rounded-2xl border border-accent/25 bg-accent/[0.04] px-3.5 py-3 sm:px-4 sm:py-3.5">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-[15px] font-semibold text-ivory">Premier</p>
@@ -198,7 +198,7 @@ export default function PlansSection({
         </div>
 
         {/* BLACK */}
-        <div className="border border-white/15 bg-black px-3.5 py-3 black-centurion sm:px-4 sm:py-3.5">
+        <div className="rounded-2xl border border-white/12 bg-black px-3.5 py-3 sm:px-4 sm:py-3.5">
           <div className="relative z-[1]">
             <div className="flex items-start justify-between gap-3">
               <div>

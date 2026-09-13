@@ -1,6 +1,6 @@
 import type { City, LookingFor } from "./types";
 
-/** Hosted Conclave table — a dinner, salon, or night with a topic and audience. */
+/** Hosted Interlink table — a dinner, salon, or night with a topic and audience. */
 export type TableKind = "dinner" | "salon" | "night";
 
 export type EventInterestStatus = "going" | "saved" | "passed";

@@ -2,8 +2,9 @@ const WALKTHROUGH_SESSION_FLAG = "conclave.demoOwner";
 
 /**
  * Demo mode is for looking at the app locally. Public env flags default to
- * off. A walkthrough owner session is marked only after the server says so
- * (`demoOwner: true`), which requires ENABLE_WALKTHROUGH_OWNER on the server.
+ * off, so a deployed Interlink only ever shows real members. A walkthrough
+ * owner session is marked only after the server says so (`demoOwner: true`),
+ * which requires ENABLE_WALKTHROUGH_OWNER on the server.
  */
 
 function walkthroughSessionActive(): boolean {

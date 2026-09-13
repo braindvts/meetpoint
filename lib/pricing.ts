@@ -1,4 +1,4 @@
-/** Conclave table booking fee — charged to every member when someone books. */
+/** Interlink table booking fee — charged to every member when someone books. */
 export const BOOKING_FEE_PER_PERSON_USD = 5;
 
 export function bookingHeadcount(memberIds: string[]): number {

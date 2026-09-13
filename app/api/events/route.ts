@@ -11,7 +11,7 @@ function asInterest(status: string): EventInterestStatus | null {
   return null;
 }
 
-/** Ranked Conclave tables for the signed-in member, plus the catalog. */
+/** Ranked Interlink tables for the signed-in member, plus the catalog. */
 export async function GET() {
   try {
     const me = await getCurrentMember();
