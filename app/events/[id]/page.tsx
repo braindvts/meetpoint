@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import Nav from "@/components/Nav";
 import PageHeader from "@/components/PageHeader";
 import EmptyState from "@/components/EmptyState";
@@ -23,16 +23,14 @@ import {
   setRsvp,
 } from "@/lib/eventStore";
 import { findPerson } from "@/lib/directory";
-import { hydrateLocalProfile } from "@/lib/hydrateSession";
+import { hydrateSocialCaches } from "@/lib/hydrateSocial";
 import { loadConnections } from "@/lib/store";
 import { showToast } from "@/lib/notify";
-import type { MyProfile, Person } from "@/lib/types";
+import type { Person } from "@/lib/types";
 
 export default function EventDetailPage() {
   const params = useParams();
   const id = String(params?.id || "");
-  const router = useRouter();
-  const [profile, setProfile] = useState<MyProfile | null>(null);
   const [event, setEvent] = useState<InterlinkEvent | null | undefined>(undefined);
   const [connectedIds, setConnectedIds] = useState<string[]>([]);
   const [, setTick] = useState(0);
@@ -49,23 +47,17 @@ export default function EventDetailPage() {
 
   useEffect(() => {
     let cancelled = false;
-    void (async () => {
-      const p = await hydrateLocalProfile();
-      if (cancelled) return;
-      if (!p) {
-        router.replace("/onboarding");
-        return;
-      }
-      setProfile(p);
-      refresh();
-    })();
+    refresh();
+    void hydrateSocialCaches().then(() => {
+      if (!cancelled) refresh();
+    });
     const onEvt = () => refresh();
     window.addEventListener("meetpoint:events", onEvt);
     return () => {
       cancelled = true;
       window.removeEventListener("meetpoint:events", onEvt);
     };
-  }, [router, refresh]);
+  }, [refresh]);
 
   const related = useMemo(() => {
     if (!event) return [];
@@ -87,7 +79,7 @@ export default function EventDetailPage() {
       .filter((p): p is Person => !!p);
   }, [event]);
 
-  if (event === undefined || !profile) {
+  if (event === undefined) {
     return (
       <div className="mp-app">
         <Nav />

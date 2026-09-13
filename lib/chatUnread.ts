@@ -83,6 +83,17 @@ export function totalUnread(chats: GroupChat[]): number {
  * First visit: treat existing messages as already seen so badges only
  * show for new incoming texts going forward.
  */
+/** Keep unread cursor when a local chat id is replaced by the server id. */
+export function remapChatReadCursor(from: string, to: string): void {
+  if (!from || !to || from === to) return;
+  const map = readMap();
+  if (map[from] && !map[to]) {
+    map[to] = map[from];
+    delete map[from];
+    writeMap(map);
+  }
+}
+
 export function ensureReadBaseline(chats: GroupChat[]): void {
   const map = readMap();
   let changed = false;

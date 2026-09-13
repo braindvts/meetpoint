@@ -421,8 +421,113 @@ function saveChats(chats: GroupChat[]): void {
   window.dispatchEvent(new CustomEvent("meetpoint:chats-changed"));
 }
 
+/** Client → server chat ids after POST /api/chats remaps a local placeholder. */
+const chatIdRemap: Record<string, string> = {};
+
+function memberKey(ids: string[]): string {
+  return [...ids].sort().join(",");
+}
+
+function rememberChatIdRemap(from: string, to: string): void {
+  if (!from || !to || from === to) return;
+  chatIdRemap[from] = to;
+  void import("./chatUnread").then(({ remapChatReadCursor }) => remapChatReadCursor(from, to));
+  void import("./chatMute").then(({ remapChatMute }) => remapChatMute(from, to));
+  window.dispatchEvent(
+    new CustomEvent("meetpoint:chat-id-remapped", { detail: { from, to } })
+  );
+}
+
+/** Follow local→server id remaps so an open thread survives createChat sync. */
+export function resolveChatId(id: string): string {
+  let cur = id;
+  const seen = new Set<string>();
+  while (chatIdRemap[cur] && !seen.has(cur)) {
+    seen.add(cur);
+    cur = chatIdRemap[cur];
+  }
+  return cur;
+}
+
+function findChatIn(chats: GroupChat[], id: string): GroupChat | undefined {
+  const resolved = resolveChatId(id);
+  return chats.find((c) => c.id === id || c.id === resolved);
+}
+
 export function getChat(id: string): GroupChat | undefined {
-  return loadChats().find((c) => c.id === id);
+  return findChatIn(loadChats(), id);
+}
+
+/** Merge GET /api/connections into local storage (keeps local-only meetups / demo rows). */
+export function applyServerConnections(remote: Connection[]): Connection[] {
+  const local = loadConnections();
+  const localByPeer = new Map(local.map((c) => [c.peerId, c]));
+  const merged = remote.map((s) => {
+    const loc = localByPeer.get(s.peerId);
+    if (loc?.meetup && !s.meetup) return { ...s, meetup: loc.meetup };
+    return s;
+  });
+  for (const loc of local) {
+    if (!remote.some((s) => s.peerId === loc.peerId)) merged.push(loc);
+  }
+  saveConnections(merged);
+  window.dispatchEvent(new CustomEvent("meetpoint:connections-changed"));
+  return merged;
+}
+
+/** Merge GET /api/chats into local storage; remaps placeholder ids to server ids. */
+export function applyServerChats(remote: GroupChat[]): GroupChat[] {
+  const local = loadChats();
+  const usedLocal = new Set<string>();
+  const next: GroupChat[] = [];
+
+  for (const r of remote) {
+    const rKey = memberKey(r.memberIds || []);
+    const match =
+      local.find((c) => c.id === r.id) ||
+      local.find(
+        (c) => memberKey(c.memberIds) === rKey && rKey && !usedLocal.has(c.id)
+      );
+    if (match) {
+      usedLocal.add(match.id);
+      if (match.id !== r.id) rememberChatIdRemap(match.id, r.id);
+      const known = new Set(match.messages.map((m) => m.id));
+      const extras = (r.messages || []).filter((m) => !known.has(m.id));
+      const messages = [...match.messages, ...extras].sort((a, b) =>
+        a.createdAt.localeCompare(b.createdAt)
+      );
+      next.push({
+        ...match,
+        id: r.id,
+        name: match.name || r.name,
+        photo: match.photo || r.photo,
+        memberIds: r.memberIds?.length ? r.memberIds : match.memberIds,
+        messages,
+        updatedAt:
+          r.updatedAt && r.updatedAt > match.updatedAt ? r.updatedAt : match.updatedAt,
+        createdAt: match.createdAt || r.createdAt,
+      });
+    } else {
+      next.push({
+        ...r,
+        messages: r.messages || [],
+      });
+    }
+  }
+
+  for (const c of local) {
+    if (!usedLocal.has(c.id) && !next.some((n) => n.id === c.id)) {
+      next.push(c);
+    }
+  }
+
+  saveChats(next);
+  return next;
+}
+
+export function applyServerBlockedIds(ids: string[]): string[] {
+  saveBlockedIds(ids);
+  return ids;
 }
 
 /** Rename a chat and/or set a group photo. Stored with local chats (API-ready later). */
@@ -431,7 +536,7 @@ export function updateChatMeta(
   patch: { name?: string; photo?: string | null }
 ): GroupChat | undefined {
   const chats = loadChats();
-  const chat = chats.find((c) => c.id === chatId);
+  const chat = findChatIn(chats, chatId);
   if (!chat) return undefined;
 
   if (typeof patch.name === "string") {
@@ -505,6 +610,7 @@ export function createChat(name: string, memberIds: string[]): GroupChat {
   void fetch("/api/chats", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    credentials: "include",
     body: JSON.stringify({ name: chat.name, memberIds: chat.memberIds }),
   })
     .then((r) => r.json())
@@ -513,12 +619,14 @@ export function createChat(name: string, memberIds: string[]): GroupChat {
       const latest = loadChats();
       const idx = latest.findIndex((c) => c.id === chat.id);
       if (idx < 0) return;
+      const fromId = latest[idx].id;
       latest[idx] = {
         ...latest[idx],
         id: data.chat.id,
         createdAt: data.chat.createdAt || latest[idx].createdAt,
         updatedAt: data.chat.updatedAt || latest[idx].updatedAt,
       };
+      rememberChatIdRemap(fromId, data.chat.id);
       saveChats(latest);
     })
     .catch(() => undefined);
@@ -535,7 +643,7 @@ export function sendChatMessage(
   if (!trimmed && !attachment) return getChat(chatId);
 
   const chats = loadChats();
-  const chat = chats.find((c) => c.id === chatId);
+  const chat = findChatIn(chats, chatId);
   if (!chat) return undefined;
 
   const msg: ChatMessage = {
@@ -551,9 +659,10 @@ export function sendChatMessage(
 
   // Best-effort server sync (real multi-device); ignore failures for local-only chats
   if (trimmed && !chat.memberIds.some(isDemoPeer)) {
-    void fetch(`/api/chats/${chatId}/messages`, {
+    void fetch(`/api/chats/${chat.id}/messages`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ text: trimmed }),
     }).catch(() => undefined);
   }
@@ -571,7 +680,7 @@ export function sendChatMessage(
       ];
       setTimeout(() => {
         const latest = loadChats();
-        const c = latest.find((x) => x.id === chatId);
+        const c = findChatIn(latest, chatId);
         if (!c) return;
         const reply = {
           id: uid(),
@@ -599,9 +708,13 @@ export function sendChatMessage(
 }
 
 export function deleteChat(chatId: string): GroupChat[] {
-  const chats = loadChats().filter((c) => c.id !== chatId);
+  const resolved = resolveChatId(chatId);
+  const chats = loadChats().filter((c) => c.id !== chatId && c.id !== resolved);
   saveChats(chats);
-  void import("./chatMute").then(({ clearChatMute }) => clearChatMute(chatId));
+  void import("./chatMute").then(({ clearChatMute }) => {
+    clearChatMute(chatId);
+    if (resolved !== chatId) clearChatMute(resolved);
+  });
   return chats;
 }
 
@@ -619,7 +732,7 @@ export function allAgreed(chat: GroupChat): boolean {
 /** Propose a table from the AI popup — starts the agree → book flow. */
 export function proposeTable(chatId: string, suggestion: FoodSuggestion): GroupChat | undefined {
   const chats = loadChats();
-  const chat = chats.find((c) => c.id === chatId);
+  const chat = findChatIn(chats, chatId);
   if (!chat) return undefined;
 
   const now = new Date().toISOString();
@@ -649,7 +762,7 @@ export function proposeTable(chatId: string, suggestion: FoodSuggestion): GroupC
 /** Current member agrees to the proposed table. */
 export function agreeToTable(chatId: string, voterId = "me"): GroupChat | undefined {
   const chats = loadChats();
-  const chat = chats.find((c) => c.id === chatId);
+  const chat = findChatIn(chats, chatId);
   if (!chat?.tableProposal || chat.tableProposal.booked) return chat;
 
   if (!chat.tableProposal.agreedBy.includes(voterId)) {
@@ -665,7 +778,7 @@ export function agreeToTable(chatId: string, voterId = "me"): GroupChat | undefi
       .forEach((peerId, i) => {
         setTimeout(() => {
           const latest = loadChats();
-          const c = latest.find((x) => x.id === chatId);
+          const c = findChatIn(latest, chatId);
           if (!c?.tableProposal || c.tableProposal.booked) return;
           if (c.tableProposal.agreedBy.includes(peerId)) return;
           c.tableProposal.agreedBy = [...c.tableProposal.agreedBy, peerId];
@@ -686,7 +799,7 @@ export function bookTable(
   paymentMethod: "apple-pay" | "card" = "card"
 ): GroupChat | undefined {
   const chats = loadChats();
-  const chat = chats.find((c) => c.id === chatId);
+  const chat = findChatIn(chats, chatId);
   if (!chat?.tableProposal || chat.tableProposal.booked) return chat;
   if (!allAgreed(chat)) return chat;
   if (!isValidPhone(contactPhone)) return chat;
@@ -765,7 +878,7 @@ export function bookTable(
 
 export function clearTableProposal(chatId: string): GroupChat | undefined {
   const chats = loadChats();
-  const chat = chats.find((c) => c.id === chatId);
+  const chat = findChatIn(chats, chatId);
   if (!chat) return undefined;
   delete chat.tableProposal;
   chat.updatedAt = new Date().toISOString();

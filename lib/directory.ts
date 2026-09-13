@@ -39,7 +39,7 @@ export function findPerson(id: string): Person | undefined {
 
 export async function refreshDirectory(): Promise<Person[]> {
   try {
-    const res = await fetch("/api/members");
+    const res = await fetch("/api/members", { credentials: "include" });
     const data = (await res.json()) as { ok?: boolean; members?: Person[] };
     if (data.ok && data.members) {
       saveDirectory(data.members);

@@ -39,7 +39,7 @@ export async function syncProfileToServer(
 
 export async function fetchServerMembers(): Promise<Person[] | null> {
   try {
-    const res = await fetch("/api/members");
+    const res = await fetch("/api/members", { credentials: "include" });
     const data = (await res.json()) as { ok?: boolean; members?: Person[] };
     return data.ok && data.members ? data.members : null;
   } catch {
@@ -49,7 +49,7 @@ export async function fetchServerMembers(): Promise<Person[] | null> {
 
 export async function fetchServerConnections(): Promise<Connection[] | null> {
   try {
-    const res = await fetch("/api/connections");
+    const res = await fetch("/api/connections", { credentials: "include" });
     const data = (await res.json()) as { ok?: boolean; connections?: Connection[] };
     return data.ok && data.connections ? data.connections : null;
   } catch {
@@ -62,6 +62,7 @@ export async function requestServerConnection(peerId: string): Promise<Connectio
     const res = await fetch("/api/connections", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ peerId }),
     });
     const data = (await res.json()) as { ok?: boolean; connections?: Connection[] };
@@ -79,6 +80,7 @@ export async function patchServerConnection(
     const res = await fetch("/api/connections", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ peerId, action }),
     });
     const data = (await res.json()) as { ok?: boolean; connections?: Connection[] };
@@ -90,7 +92,7 @@ export async function patchServerConnection(
 
 export async function fetchServerChats(): Promise<GroupChat[] | null> {
   try {
-    const res = await fetch("/api/chats");
+    const res = await fetch("/api/chats", { credentials: "include" });
     const data = (await res.json()) as { ok?: boolean; chats?: GroupChat[] };
     return data.ok && data.chats ? data.chats : null;
   } catch {
@@ -184,7 +186,7 @@ export async function searchPlaces(opts: {
 
 export async function fetchBlockedIds(): Promise<string[] | null> {
   try {
-    const res = await fetch("/api/blocks");
+    const res = await fetch("/api/blocks", { credentials: "include" });
     const data = (await res.json()) as { ok?: boolean; blockedIds?: string[] };
     return data.ok && data.blockedIds ? data.blockedIds : null;
   } catch {
@@ -200,6 +202,7 @@ export async function setBlocked(
     const res = await fetch("/api/blocks", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ peerId, action }),
     });
     const data = (await res.json()) as { ok?: boolean; blockedIds?: string[] };

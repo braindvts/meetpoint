@@ -19,11 +19,12 @@ import {
   declineConnection,
   loadChats,
   loadConnections,
-  loadProfile,
   openOrCreateDirectChat,
 } from "@/lib/store";
 import { findPerson, refreshDirectory } from "@/lib/directory";
 import { readClientConnections, readClientProfile } from "@/lib/clientProfile";
+import { hydrateLocalProfile } from "@/lib/hydrateSession";
+import { hydrateSocialCaches } from "@/lib/hydrateSocial";
 import type { Connection, GroupChat, Meetup, MyProfile, Person } from "@/lib/types";
 
 type Reservation =
@@ -86,18 +87,27 @@ export default function ConnectionsPage() {
   }, []);
 
   useEffect(() => {
-    const p = loadProfile();
-    if (!p) {
-      router.replace("/onboarding");
-      return;
-    }
-    setProfile(p);
-    refresh();
-    void refreshDirectory().then(() => setTick((n) => n + 1));
+    let cancelled = false;
+    void (async () => {
+      const p = await hydrateLocalProfile();
+      if (cancelled) return;
+      if (!p) {
+        router.replace("/onboarding");
+        return;
+      }
+      setProfile(p);
+      await hydrateSocialCaches();
+      if (cancelled) return;
+      refresh();
+      void refreshDirectory().then(() => {
+        if (!cancelled) setTick((n) => n + 1);
+      });
+    })();
     window.addEventListener("meetpoint:connections-changed", refresh);
     window.addEventListener("meetpoint:chats-changed", refresh);
     window.addEventListener("meetpoint:directory-changed", refresh);
     return () => {
+      cancelled = true;
       window.removeEventListener("meetpoint:connections-changed", refresh);
       window.removeEventListener("meetpoint:chats-changed", refresh);
       window.removeEventListener("meetpoint:directory-changed", refresh);
@@ -167,7 +177,17 @@ export default function ConnectionsPage() {
     setConnections(declineConnection(peerId));
   }
 
-  if (!profile) return null;
+  if (!profile) {
+    return (
+      <>
+        <Nav />
+        <main className="mp-app px-4 pb-10 md:px-6">
+          <PageHeader title="Circle" />
+          <p className="mt-8 text-sm text-muted">Loading your circle…</p>
+        </main>
+      </>
+    );
+  }
 
   const empty = inbound.length === 0 && reservations.length === 0;
 

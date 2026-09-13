@@ -14,9 +14,10 @@ import ChatOverflowMenu from "@/components/ChatOverflowMenu";
 import {
   loadChats,
   loadConnections,
-  loadProfile,
   openOrCreateDirectChat,
 } from "@/lib/store";
+import { hydrateLocalProfile } from "@/lib/hydrateSession";
+import { hydrateSocialCaches } from "@/lib/hydrateSocial";
 import {
   ensureReadBaseline,
   markChatRead,
@@ -127,37 +128,58 @@ function ChatsInner() {
   const [interlinksOpen, setInterlinksOpen] = useState(false);
   const [unreadTick, setUnreadTick] = useState(0);
   const [muteTick, setMuteTick] = useState(0);
+  const [inboxReady, setInboxReady] = useState(false);
 
   const refreshConnections = useCallback(() => setConnections(loadConnections()), []);
 
   useEffect(() => {
-    const p = loadProfile();
-    if (!p) {
-      router.replace("/onboarding");
-      return;
-    }
-    setProfile(p);
-    const loaded = loadChats();
-    ensureReadBaseline(loaded);
-    setChats(loaded);
-    refreshConnections();
-    void refreshDirectory().then(setDirectory);
+    let cancelled = false;
+    void (async () => {
+      const p = await hydrateLocalProfile();
+      if (cancelled) return;
+      if (!p) {
+        router.replace("/onboarding");
+        return;
+      }
+      await hydrateSocialCaches();
+      if (cancelled) return;
+      setProfile(p);
+      const loaded = loadChats();
+      ensureReadBaseline(loaded);
+      setChats(loaded);
+      refreshConnections();
+      setInboxReady(true);
+      void refreshDirectory().then((list) => {
+        if (!cancelled) setDirectory(list);
+      });
+    })();
 
     const refreshChats = () => setChats(loadChats());
     const onUnread = () => setUnreadTick((n) => n + 1);
     const onMute = () => setMuteTick((n) => n + 1);
     const onDir = () => setDirectory(loadDirectory());
+    const onRemap = (event: Event) => {
+      const detail = (event as CustomEvent<{ from?: string; to?: string }>).detail;
+      if (!detail?.from || !detail.to) return;
+      const current = new URLSearchParams(window.location.search).get("c");
+      if (current === detail.from) {
+        router.replace(`/chats?c=${encodeURIComponent(detail.to)}`, { scroll: false });
+      }
+    };
     window.addEventListener("meetpoint:chats-changed", refreshChats);
     window.addEventListener("meetpoint:unread-changed", onUnread);
     window.addEventListener("meetpoint:mute-changed", onMute);
     window.addEventListener("meetpoint:connections-changed", refreshConnections);
     window.addEventListener("meetpoint:directory-changed", onDir);
+    window.addEventListener("meetpoint:chat-id-remapped", onRemap);
     return () => {
+      cancelled = true;
       window.removeEventListener("meetpoint:chats-changed", refreshChats);
       window.removeEventListener("meetpoint:unread-changed", onUnread);
       window.removeEventListener("meetpoint:mute-changed", onMute);
       window.removeEventListener("meetpoint:connections-changed", refreshConnections);
       window.removeEventListener("meetpoint:directory-changed", onDir);
+      window.removeEventListener("meetpoint:chat-id-remapped", onRemap);
     };
   }, [router, refreshConnections]);
 
@@ -223,7 +245,26 @@ function ChatsInner() {
     router.replace("/chats", { scroll: false });
   }, [router]);
 
-  if (!profile) return null;
+  if (!profile) {
+    return (
+      <>
+        <Nav />
+        <main className="mp-chats-layout">
+          <aside className="mp-chats-rail border-r border-line/50">
+            <div className="shrink-0 border-b border-line/50 px-4 py-4">
+              <h1 className="font-display text-2xl font-semibold text-ivory">Chats</h1>
+              <p className="mt-3 text-sm text-muted">Loading threads…</p>
+            </div>
+          </aside>
+          <section className="mp-chats-thread hidden min-w-0 lg:flex">
+            <div className="flex h-full w-full items-center justify-center px-8 text-center">
+              <p className="text-sm text-muted">Opening your inbox…</p>
+            </div>
+          </section>
+        </main>
+      </>
+    );
+  }
 
   const threadOpen = !!selectedId;
 
@@ -431,13 +472,17 @@ function ChatsInner() {
             threadOpen ? "flex" : "hidden lg:flex"
           }`}
         >
-          {selectedId ? (
+          {selectedId && inboxReady ? (
             <ChatThreadPanel
               key={selectedId}
               chatId={selectedId}
               embedded
               onBack={clearSelection}
             />
+          ) : selectedId ? (
+            <div className="flex h-full w-full items-center justify-center px-8 text-center">
+              <p className="text-sm text-muted">Opening chat…</p>
+            </div>
           ) : (
             <div className="flex h-full w-full flex-col items-center justify-center px-8 text-center">
               <p className="font-display text-2xl font-semibold text-ivory">Select a chat</p>
@@ -490,7 +535,21 @@ function ChatsInner() {
 
 export default function ChatsPage() {
   return (
-    <Suspense fallback={<main className="min-h-dvh" />}>
+    <Suspense
+      fallback={
+        <>
+          <Nav />
+          <main className="mp-chats-layout">
+            <aside className="mp-chats-rail border-r border-line/50">
+              <div className="px-4 py-4">
+                <h1 className="font-display text-2xl font-semibold text-ivory">Chats</h1>
+                <p className="mt-3 text-sm text-muted">Loading threads…</p>
+              </div>
+            </aside>
+          </main>
+        </>
+      }
+    >
       <ChatsInner />
     </Suspense>
   );

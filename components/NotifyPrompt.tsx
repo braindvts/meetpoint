@@ -44,7 +44,7 @@ export default function NotifyPrompt() {
   }
 
   return (
-    <div className="fixed inset-x-0 bottom-[5.5rem] z-[90] px-3 sm:bottom-6 sm:left-auto sm:right-6 sm:max-w-sm sm:px-0">
+    <div className="fixed inset-x-0 bottom-6 z-[90] px-3 sm:left-auto sm:right-6 sm:max-w-sm sm:px-0">
       <div className="border border-accent/25 bg-panel/95 p-4 shadow-[0_16px_48px_rgba(0,0,0,0.55)] backdrop-blur-md">
         <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-accent">
           Alerts

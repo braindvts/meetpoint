@@ -31,16 +31,17 @@ function LoginContent() {
 
   useEffect(() => {
     const p = loadProfile();
-    if (p?.verifications?.length && p.name) {
+    // Identity (name) is enough to enter — verification is optional for Members.
+    if (p?.name) {
       router.replace("/discover");
       return;
     }
-    void fetch("/api/members/me")
+    void fetch("/api/members/me", { credentials: "include" })
       .then((r) => r.json())
       .then((data: { ok?: boolean; profile?: MyProfile | null }) => {
         if (data.ok && data.profile?.name) {
           saveProfile(data.profile);
-          if (data.profile.verifications?.length) router.replace("/discover");
+          router.replace("/discover");
         }
       })
       .catch(() => undefined);
