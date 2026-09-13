@@ -9,7 +9,8 @@ import BlackBadge from "@/components/BlackBadge";
 import StarRating, { cuisineLine } from "@/components/StarRating";
 import { findPerson, refreshDirectory } from "@/lib/directory";
 import { distanceKm, formatDistance, midpointRestaurants, restaurantsInCity } from "@/lib/match";
-import { getConnection, loadProfile, setMeetup } from "@/lib/store";
+import { getConnection, setMeetup } from "@/lib/store";
+import { hydrateLocalProfile } from "@/lib/hydrateSession";
 import type { MeetMode, MyProfile, Person, Restaurant } from "@/lib/types";
 
 export default function Planner({ peerId }: { peerId: string }) {
@@ -25,22 +26,31 @@ export default function Planner({ peerId }: { peerId: string }) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const p = loadProfile();
-    if (!p) {
-      router.replace("/onboarding");
-      return;
-    }
-    setProfile(p);
-    setPerson(findPerson(peerId) || null);
-    void refreshDirectory().then(() => setPerson(findPerson(peerId) || null));
-    const existing = getConnection(peerId)?.meetup;
-    if (existing) {
-      setMode(existing.mode);
-      setRestaurantId(existing.restaurantId);
-      setDate(existing.date);
-      setNote(existing.note ?? "");
-    }
-    setReady(true);
+    let cancelled = false;
+    void (async () => {
+      const p = await hydrateLocalProfile();
+      if (cancelled) return;
+      if (!p) {
+        router.replace("/onboarding");
+        return;
+      }
+      setProfile(p);
+      setPerson(findPerson(peerId) || null);
+      void refreshDirectory().then(() => {
+        if (!cancelled) setPerson(findPerson(peerId) || null);
+      });
+      const existing = getConnection(peerId)?.meetup;
+      if (existing) {
+        setMode(existing.mode);
+        setRestaurantId(existing.restaurantId);
+        setDate(existing.date);
+        setNote(existing.note ?? "");
+      }
+      setReady(true);
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [peerId, router]);
 
   const options: Restaurant[] = useMemo(() => {

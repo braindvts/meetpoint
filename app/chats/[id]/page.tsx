@@ -14,7 +14,11 @@ function RedirectInner() {
     router.replace(`/chats?c=${encodeURIComponent(id)}${paid}`);
   }, [id, router, searchParams]);
 
-  return <main className="min-h-dvh" />;
+  return (
+    <main className="min-h-dvh px-5 py-10">
+      <p className="text-sm text-muted">Opening chat…</p>
+    </main>
+  );
 }
 
 /** Deep links `/chats/[id]` open the split inbox with that thread selected. */

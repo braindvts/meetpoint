@@ -434,10 +434,18 @@ export function getFeaturedEvents(): InterlinkEvent[] {
   return getPublishedEvents().filter((e) => e.featured);
 }
 
+/** True while the gathering is still on the calendar (uses endsAt, then startsAt). */
+export function isEventUpcoming(event: InterlinkEvent, now = Date.now()): boolean {
+  const raw = event.endsAt || event.startsAt;
+  const t = new Date(raw).getTime();
+  if (Number.isNaN(t)) return true;
+  return t >= now;
+}
+
 export function getUpcomingSorted(list: InterlinkEvent[] = getPublishedEvents()): InterlinkEvent[] {
-  return [...list].sort(
-    (a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime()
-  );
+  return list
+    .filter((e) => isEventUpcoming(e))
+    .sort((a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime());
 }
 
 export function getPopularEvents(): InterlinkEvent[] {

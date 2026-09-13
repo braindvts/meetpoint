@@ -25,6 +25,7 @@ import { findPerson, refreshDirectory, loadDirectory } from "@/lib/directory";
 import { syncProfileToServer } from "@/lib/apiClient";
 import { readClientConnections, readClientProfile } from "@/lib/clientProfile";
 import { hydrateLocalProfile } from "@/lib/hydrateSession";
+import { hydrateSocialCaches } from "@/lib/hydrateSocial";
 import { TIER_DEFINITIONS, tierForPerson, tierForProfile, type MemberTier } from "@/lib/tiers";
 import type { Connection, LookingFor, MyProfile, Person } from "@/lib/types";
 import { LOOKING_FOR_OPTIONS } from "@/lib/types";
@@ -66,6 +67,8 @@ export default function DiscoverPage() {
       }
       setProfile(p);
       setFilter("open");
+      await hydrateSocialCaches();
+      if (cancelled) return;
       refreshConnections();
       ensureSampleInboundRequest();
       if (!isDemoProfile(p)) void syncProfileToServer(p);
@@ -163,7 +166,19 @@ export default function DiscoverPage() {
     }, 520);
   }
 
-  if (!profile) return null;
+  if (!profile) {
+    return (
+      <>
+        <Nav />
+        <main className="mp-app px-5 pb-10 md:px-6">
+          <h1 className="pt-4 text-[1.85rem] font-semibold tracking-tight text-ivory">
+            Discover
+          </h1>
+          <p className="mt-6 text-sm text-muted">Loading the room…</p>
+        </main>
+      </>
+    );
+  }
 
   const showSkeletons = !directoryReady && visiblePeople.length === 0;
 

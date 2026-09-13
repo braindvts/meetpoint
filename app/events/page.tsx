@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import Nav from "@/components/Nav";
 import PageHeader from "@/components/PageHeader";
 import EmptyState from "@/components/EmptyState";
@@ -23,6 +22,7 @@ import {
   setRsvp,
 } from "@/lib/eventStore";
 import { hydrateLocalProfile } from "@/lib/hydrateSession";
+import { hydrateSocialCaches } from "@/lib/hydrateSocial";
 import { loadConnections } from "@/lib/store";
 import { showToast } from "@/lib/notify";
 import type { MyProfile } from "@/lib/types";
@@ -60,9 +60,8 @@ function Grid({ children }: { children: React.ReactNode }) {
 }
 
 export default function EventsPage() {
-  const router = useRouter();
   const [profile, setProfile] = useState<MyProfile | null>(null);
-  const [events, setEvents] = useState<InterlinkEvent[]>([]);
+  const [events, setEvents] = useState<InterlinkEvent[]>(() => listPublishedEvents());
   const [filters, setFilters] = useState<EventFilters>({
     query: "",
     category: "all",
@@ -87,15 +86,13 @@ export default function EventsPage() {
 
   useEffect(() => {
     let cancelled = false;
+    refresh();
     void (async () => {
       const p = await hydrateLocalProfile();
       if (cancelled) return;
-      if (!p) {
-        router.replace("/onboarding");
-        return;
-      }
-      setProfile(p);
-      refresh();
+      if (p) setProfile(p);
+      await hydrateSocialCaches();
+      if (!cancelled) refresh();
     })();
     const onEvt = () => refresh();
     window.addEventListener("meetpoint:events", onEvt);
@@ -105,7 +102,7 @@ export default function EventsPage() {
       window.removeEventListener("meetpoint:events", onEvt);
       window.removeEventListener("meetpoint:connections-changed", onEvt);
     };
-  }, [router, refresh]);
+  }, [refresh]);
 
   const cityHint = profile?.city?.name || "";
 
@@ -130,7 +127,7 @@ export default function EventsPage() {
   const upcoming = useMemo(() => getUpcomingSorted(events).slice(0, 6), [events]);
   const popular = useMemo(
     () =>
-      [...events]
+      [...getUpcomingSorted(events)]
         .sort(
           (a, b) =>
             b.interestedCount + b.attendeeCount - (a.interestedCount + a.attendeeCount)
@@ -196,17 +193,7 @@ export default function EventsPage() {
     };
   };
 
-  if (!profile) {
-    return (
-      <div className="mp-app">
-        <Nav />
-        <main className="mx-auto max-w-5xl px-4 pb-24 pt-4 md:px-6">
-          <PageHeader title="Events" />
-          <p className="mt-8 text-sm text-muted">Loading the room…</p>
-        </main>
-      </div>
-    );
-  }
+  const liveCount = upcoming.length;
 
   return (
     <div className="mp-app">
@@ -327,95 +314,117 @@ export default function EventsPage() {
               </Section>
             ) : null}
 
-            <Section title="Upcoming" id="worldwide" subtitle="Soonest on the calendar — cities worldwide.">
-              <Grid>
-                {upcoming.map((e) => (
-                  <EventCard key={e.id} {...cardProps(e)} />
-                ))}
-              </Grid>
-            </Section>
+            {liveCount === 0 ? (
+              <EmptyState
+                title="No upcoming events"
+                body="The calendar is between gatherings. Check back soon, or clear filters if you applied any."
+              />
+            ) : null}
 
-            <Section title="Popular" subtitle="Where professionals are already gathering.">
-              <Grid>
-                {popular.map((e) => (
-                  <EventCard key={e.id} {...cardProps(e)} />
-                ))}
-              </Grid>
-            </Section>
+            {upcoming.length > 0 ? (
+              <Section title="Upcoming" id="worldwide" subtitle="Soonest on the calendar — cities worldwide.">
+                <Grid>
+                  {upcoming.map((e) => (
+                    <EventCard key={e.id} {...cardProps(e)} />
+                  ))}
+                </Grid>
+              </Section>
+            ) : null}
 
-            <Section
-              id="near-you"
-              title="Near you"
-              subtitle={
-                cityHint
-                  ? `Based on ${cityHint} — plus online rooms you can join from anywhere.`
-                  : "Online and in-person gatherings across the network. Set your city on Profile to prioritize nearby rooms."
-              }
-            >
-              <Grid>
-                {nearYou.map((e) => (
-                  <EventCard key={e.id} {...cardProps(e)} />
-                ))}
-              </Grid>
-            </Section>
+            {popular.length > 0 ? (
+              <Section title="Popular" subtitle="Where professionals are already gathering.">
+                <Grid>
+                  {popular.map((e) => (
+                    <EventCard key={e.id} {...cardProps(e)} />
+                  ))}
+                </Grid>
+              </Section>
+            ) : null}
 
-            <Section
-              title="Business & networking"
-              subtitle="Tables, mixers, and meetups built for introductions."
-            >
-              <Grid>
-                {networking.map((e) => (
-                  <EventCard key={e.id} {...cardProps(e)} />
-                ))}
-              </Grid>
-            </Section>
+            {nearYou.length > 0 ? (
+              <Section
+                id="near-you"
+                title="Near you"
+                subtitle={
+                  cityHint
+                    ? `Based on ${cityHint} — plus online rooms you can join from anywhere.`
+                    : "Online and in-person gatherings across the network. Set your city on Profile to prioritize nearby rooms."
+                }
+              >
+                <Grid>
+                  {nearYou.map((e) => (
+                    <EventCard key={e.id} {...cardProps(e)} />
+                  ))}
+                </Grid>
+              </Section>
+            ) : null}
 
-            <Section title="Conferences" subtitle="Focused days with decision-makers in the room.">
-              <Grid>
-                {conferences.map((e) => (
-                  <EventCard key={e.id} {...cardProps(e)} />
-                ))}
-              </Grid>
-            </Section>
+            {networking.length > 0 ? (
+              <Section
+                title="Business & networking"
+                subtitle="Tables, mixers, and meetups built for introductions."
+              >
+                <Grid>
+                  {networking.map((e) => (
+                    <EventCard key={e.id} {...cardProps(e)} />
+                  ))}
+                </Grid>
+              </Section>
+            ) : null}
 
-            <Section
-              title="Industry events"
-              subtitle="From AI and finance to real estate and luxury."
-            >
-              <Grid>
-                {industryEvents.slice(0, 6).map((e) => (
-                  <EventCard key={e.id} {...cardProps(e)} />
-                ))}
-              </Grid>
-            </Section>
+            {conferences.length > 0 ? (
+              <Section title="Conferences" subtitle="Focused days with decision-makers in the room.">
+                <Grid>
+                  {conferences.map((e) => (
+                    <EventCard key={e.id} {...cardProps(e)} />
+                  ))}
+                </Grid>
+              </Section>
+            ) : null}
 
-            <Section
-              title="Exclusive"
-              subtitle="Invitation-leaning rooms for Verified and BLACK members."
-            >
-              <Grid>
-                {exclusive.map((e) => (
-                  <EventCard key={e.id} {...cardProps(e)} />
-                ))}
-              </Grid>
-            </Section>
+            {industryEvents.length > 0 ? (
+              <Section
+                title="Industry events"
+                subtitle="From AI and finance to real estate and luxury."
+              >
+                <Grid>
+                  {industryEvents.slice(0, 6).map((e) => (
+                    <EventCard key={e.id} {...cardProps(e)} />
+                  ))}
+                </Grid>
+              </Section>
+            ) : null}
+
+            {exclusive.length > 0 ? (
+              <Section
+                title="Exclusive"
+                subtitle="Invitation-leaning rooms for Verified and BLACK members."
+              >
+                <Grid>
+                  {exclusive.map((e) => (
+                    <EventCard key={e.id} {...cardProps(e)} />
+                  ))}
+                </Grid>
+              </Section>
+            ) : null}
 
             <Section
               id="conventions"
               title="Conventions"
               subtitle="Multi-day floors — see who from your network will be on site."
             >
-              <div className="grid gap-5 lg:grid-cols-2">
-                {conventions.map((e) => (
-                  <ConventionCard key={e.id} event={e} />
-                ))}
-              </div>
-              {conventions.length === 0 ? (
+              {conventions.length > 0 ? (
+                <div className="grid gap-5 lg:grid-cols-2">
+                  {conventions.map((e) => (
+                    <ConventionCard key={e.id} event={e} />
+                  ))}
+                </div>
+              ) : (
                 <EmptyState
                   title="No conventions yet"
                   body="Check back as the calendar fills — or browse smaller events above."
                 />
-              ) : null}
+              )}
             </Section>
           </>
         )}

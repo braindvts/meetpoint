@@ -44,6 +44,17 @@ export function toggleChatMuted(chatId: string): boolean {
   return next;
 }
 
+/** Keep mute when a local chat id is replaced by the server id. */
+export function remapChatMute(from: string, to: string): void {
+  if (!from || !to || from === to) return;
+  const map = readMuted();
+  if (map[from] && !map[to]) {
+    map[to] = true;
+    delete map[from];
+    writeMuted(map);
+  }
+}
+
 /** Drop mute when a chat is deleted / left. */
 export function clearChatMute(chatId: string): void {
   if (!isChatMuted(chatId)) return;

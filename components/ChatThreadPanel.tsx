@@ -22,10 +22,11 @@ import {
   bookTable,
   clearTableProposal,
   getChat,
-  loadProfile,
   proposeTable,
+  resolveChatId,
   sendChatMessage,
 } from "@/lib/store";
+import { hydrateLocalProfile } from "@/lib/hydrateSession";
 import { findPerson, loadDirectory, refreshDirectory } from "@/lib/directory";
 import type { ChatAttachment, GroupChat, MyProfile } from "@/lib/types";
 
@@ -82,35 +83,14 @@ export default function ChatThreadPanel({ chatId, embedded = false, onBack }: Pr
 
   // Load / switch thread — only when chatId changes (do NOT clear composer on parent re-renders).
   useEffect(() => {
-    const p = loadProfile();
-    if (!p) {
-      router.replace("/onboarding");
-      return;
-    }
-    setProfile(p);
-    const c = getChat(chatId);
-    if (!c) {
-      if (onBackRef.current) onBackRef.current();
-      else router.replace("/chats");
-      return;
-    }
-    setChat(c);
-    setText("");
-    setFoodHint(false);
-    setFoodExpanded(false);
-    setMuted(isChatMuted(chatId));
-    lastScannedRef.current = c.messages[c.messages.length - 1]?.id || "";
-    lastUpdatedRef.current = c.updatedAt;
-    void refreshDirectory();
-    void import("@/lib/chatUnread").then(({ setActiveChatId, markChatRead }) => {
-      setActiveChatId(chatId);
-      markChatRead(c);
-    });
+    let cancelled = false;
+    let poll: number | undefined;
+    const profileRef: { current: MyProfile | null } = { current: null };
 
-    const onMute = () => setMuted(isChatMuted(chatId));
-    window.addEventListener("meetpoint:mute-changed", onMute);
-
+    const onMute = () => setMuted(isChatMuted(resolveChatId(chatId)));
     const refresh = () => {
+      const p = profileRef.current;
+      if (!p) return;
       const next = getChat(chatId);
       if (!next) return;
       if (ignoreChatsEventRef.current) {
@@ -140,51 +120,87 @@ export default function ChatThreadPanel({ chatId, embedded = false, onBack }: Pr
         });
       }
     };
+
+    window.addEventListener("meetpoint:mute-changed", onMute);
     window.addEventListener("meetpoint:chats-changed", refresh);
 
-    const poll = window.setInterval(async () => {
-      try {
-        const res = await fetch(`/api/chats/${chatId}/messages`);
-        const data = (await res.json()) as {
-          ok?: boolean;
-          messages?: { id: string; senderId: string; text: string; createdAt: string }[];
-        };
-        if (!data.ok || !data.messages?.length) return;
-        setChat((prev) => {
-          if (!prev) return prev;
-          const known = new Set(prev.messages.map((m) => m.id));
-          const incoming = data.messages!.filter((m) => !known.has(m.id));
-          if (!incoming.length) return prev;
-          const next = {
-            ...prev,
-            messages: [...prev.messages, ...incoming],
-            updatedAt: new Date().toISOString(),
-          };
-          void import("@/lib/chatUnread").then(({ markChatRead, getActiveChatId, noteIncomingMessage }) => {
-            if (getActiveChatId() === chatId) markChatRead(next);
-            else {
-              for (const m of incoming) {
-                if (m.senderId === "me" || m.senderId === "system") continue;
-                noteIncomingMessage({
-                  chatId,
-                  messageId: m.id,
-                  title: "New message",
-                  preview: m.text,
-                });
-              }
-            }
-          });
-          return next;
-        });
-      } catch {
-        /* local-only chat still works */
+    void (async () => {
+      const p = await hydrateLocalProfile();
+      if (cancelled) return;
+      if (!p) {
+        router.replace("/onboarding");
+        return;
       }
-    }, 4000);
+      profileRef.current = p;
+      setProfile(p);
+      const c = getChat(chatId);
+      if (!c) {
+        if (onBackRef.current) onBackRef.current();
+        else router.replace("/chats");
+        return;
+      }
+      setChat(c);
+      setText("");
+      setFoodHint(false);
+      setFoodExpanded(false);
+      setMuted(isChatMuted(c.id));
+      lastScannedRef.current = c.messages[c.messages.length - 1]?.id || "";
+      lastUpdatedRef.current = c.updatedAt;
+      void refreshDirectory();
+      void import("@/lib/chatUnread").then(({ setActiveChatId, markChatRead }) => {
+        setActiveChatId(c.id);
+        markChatRead(c);
+      });
+
+      poll = window.setInterval(async () => {
+        try {
+          const liveId = resolveChatId(chatId);
+          const res = await fetch(`/api/chats/${liveId}/messages`, {
+            credentials: "include",
+          });
+          const data = (await res.json()) as {
+            ok?: boolean;
+            messages?: { id: string; senderId: string; text: string; createdAt: string }[];
+          };
+          if (!data.ok || !data.messages?.length) return;
+          setChat((prev) => {
+            if (!prev) return prev;
+            const known = new Set(prev.messages.map((m) => m.id));
+            const incoming = data.messages!.filter((m) => !known.has(m.id));
+            if (!incoming.length) return prev;
+            const next = {
+              ...prev,
+              id: liveId,
+              messages: [...prev.messages, ...incoming],
+              updatedAt: new Date().toISOString(),
+            };
+            void import("@/lib/chatUnread").then(({ markChatRead, getActiveChatId, noteIncomingMessage }) => {
+              if (getActiveChatId() === liveId || getActiveChatId() === chatId) markChatRead(next);
+              else {
+                for (const m of incoming) {
+                  if (m.senderId === "me" || m.senderId === "system") continue;
+                  noteIncomingMessage({
+                    chatId: liveId,
+                    messageId: m.id,
+                    title: "New message",
+                    preview: m.text,
+                  });
+                }
+              }
+            });
+            return next;
+          });
+        } catch {
+          /* local-only chat still works */
+        }
+      }, 4000);
+    })();
 
     return () => {
+      cancelled = true;
       window.removeEventListener("meetpoint:chats-changed", refresh);
       window.removeEventListener("meetpoint:mute-changed", onMute);
-      window.clearInterval(poll);
+      if (poll) window.clearInterval(poll);
       void import("@/lib/chatUnread").then(({ setActiveChatId }) => setActiveChatId(null));
     };
   }, [chatId, router]);
