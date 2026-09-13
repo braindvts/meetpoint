@@ -68,7 +68,7 @@ export default function Landing() {
         <div className="relative mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16">
           <div>
             <p className="il-kicker mp-reveal">{BRAND}</p>
-            <h1 className="mp-reveal mp-reveal-delay-1 mt-5 font-display text-[clamp(3.1rem,8vw,6.4rem)] font-semibold leading-[0.9] tracking-[-0.045em] text-ivory">
+            <h1 className="mp-reveal mp-reveal-delay-1 mt-5 font-display text-[clamp(3.1rem,8vw,6.4rem)] font-semibold leading-[0.92] tracking-[-0.028em] text-ivory">
               {BRAND_TAGLINE.split(". ").map((line, i) => (
                 <span key={line} className="block">
                   {line}

@@ -1,4 +1,4 @@
-# Launch Conclave — everything to buy and do
+# Launch Interlink — everything to buy and do
 
 Two lists: what costs money, and the order to do it in. Prices were checked on 2 September 2026 and do change — treat them as estimates, not quotes.
 
@@ -44,7 +44,7 @@ Cheapest at cost is Cloudflare Registrar. Buy the `.com` if you can; the domain 
 
 The build command is already set in `vercel.json` (`prisma generate && prisma db push && next build`), so deploys create the database tables for you.
 
-Note on Vercel's free plan: Hobby is for personal, non-commercial projects. Since Conclave charges for Premier, budget for Pro at $20/month.
+Note on Vercel's free plan: Hobby is for personal, non-commercial projects. Since Interlink charges for Premier, budget for Pro at $20/month.
 
 ### Step 3 — Create the database
 
@@ -108,7 +108,7 @@ See the next section — this is the longest step by far.
 
 - A Mac with Xcode (free)
 - Apple Developer Program — $99/year
-- A bundle identifier, e.g. `com.yourdomain.conclave`
+- A bundle identifier, e.g. `com.yourdomain.interlink`
 - A 1024×1024 app icon and screenshots at the device sizes Apple requires
 - A privacy policy URL (step 9) and answers to Apple's App Privacy questionnaire
 - **A real test account for the reviewer.** There's no demo mode anymore, so create an account, complete the profile, and put the email and password in the review notes — otherwise the reviewer hits a sign-up wall and rejects the app.

@@ -6,8 +6,11 @@ let done: Promise<void> | null = null;
 /** Ids of the fake members this app used to ship with. */
 const LEGACY_SEED_IDS = Array.from({ length: 18 }, (_, i) => `p${i + 1}`);
 
-/** The old "Enter demo" account signed itself with this LinkedIn value. */
-const DEMO_PROFILE_MARKER = "linkedin.com/in/conclave-demo";
+/** The old "Enter demo" account signed itself with these LinkedIn values. */
+const DEMO_PROFILE_MARKERS = [
+  "linkedin.com/in/interlink-demo",
+  "linkedin.com/in/conclave-demo",
+];
 
 async function removeMembers(ids: string[]): Promise<void> {
   if (!ids.length) return;
@@ -25,7 +28,7 @@ async function removeMembers(ids: string[]): Promise<void> {
 }
 
 /**
- * Conclave only shows real members. Older builds seeded fake profiles and shipped
+ * Interlink only shows real members. Older builds seeded fake profiles and shipped
  * an "Enter demo" account that synced itself to the server, so clear both (and
  * their graph edges) once per server process.
  */
@@ -43,7 +46,9 @@ export function purgeDemoResidue(): Promise<void> {
 
       const demoAccounts = await prisma.member.findMany({
         where: {
-          verificationsJson: { contains: DEMO_PROFILE_MARKER },
+          OR: DEMO_PROFILE_MARKERS.map((marker) => ({
+            verificationsJson: { contains: marker },
+          })),
           // Keep the fixed Brian walkthrough account.
           NOT: { email: "brianasome@gmail.com" },
         },

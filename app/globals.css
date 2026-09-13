@@ -33,7 +33,7 @@ body {
   background: var(--color-ink);
   color: var(--color-ivory);
   font-family: var(--font-sans);
-  font-feature-settings: "ss01", "cv11", "kern";
+  font-feature-settings: "kern";
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-tap-highlight-color: transparent;
@@ -124,6 +124,18 @@ body:has([data-shot]) nextjs-portal {
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--color-accent);
+}
+
+.font-display,
+[class*="font-display"] {
+  font-feature-settings: "kern";
+  font-variant-ligatures: none;
+}
+
+.font-display,
+[class*="font-display"] {
+  font-feature-settings: "kern";
+  font-variant-ligatures: none;
 }
 
 /* Person row / list card */
@@ -323,7 +335,6 @@ html.mp-has-site-nav body {
 @media (max-width: 639px) {
   html.mp-sheet-open header,
   html.mp-sheet-open nav[aria-label="Interlink"],
-  html.mp-sheet-open nav[aria-label="Conclave"],
   html.mp-sheet-open nav[aria-label="App"] {
     visibility: hidden;
   }

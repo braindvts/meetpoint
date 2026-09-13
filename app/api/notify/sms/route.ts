@@ -98,6 +98,6 @@ export async function POST(req: Request) {
     }
   }
 
-  console.info("[conclave sms skipped]", { to, body: text.slice(0, 80) });
+  console.info("[interlink sms skipped]", { to, body: text.slice(0, 80) });
   return NextResponse.json({ ok: true, provider: "none" });
 }

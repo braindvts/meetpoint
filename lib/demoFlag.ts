@@ -2,7 +2,7 @@ import { DEMO_OWNER_FLAG_KEY } from "./demoOwner";
 
 /**
  * Demo mode is for looking at the app locally. Env flags default to off, so a
- * deployed Conclave only ever shows real members — unless someone signs in with
+ * deployed Interlink only ever shows real members — unless someone signs in with
  * the fixed Brian demo account, which turns sample people on for that browser.
  */
 

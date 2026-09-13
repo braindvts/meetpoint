@@ -1,8 +1,8 @@
-# Conclave — how the product works
+# Interlink — how the product works
 
 Keep this open as your product handbook. Update it when rules change.
 
-**One-liner:** Conclave introduces ambitious people, then settles it over dinner.
+**One-liner:** Interlink introduces ambitious people, then settles it over dinner.
 
 **Delivery plan:** **Website first** (browser on laptop/phone). Turn it into a native app later once the website is making money. Do not rebuild the UI as a phone-frame “app shell” for web.
 
@@ -162,7 +162,7 @@ Details: [WEBSITE.md](./WEBSITE.md) · [KEYS.md](./KEYS.md) · [LAUNCH.md](./LAU
 
 ## Design rules (don’t break these)
 
-- User-facing brand is **Interlink** (repo / handbook may still say Conclave)
+- User-facing brand is **Interlink** (handbook filename may still be CONCLAVE.md)
 - Night ink `#07080c` + champagne as a precision accent; Syne for display, Outfit for UI
 - Standing is a **signal lockup** (node + word) — not metal chips, not numbered 01/02, not a membership board
 - Verified / BLACK CONNECTION **check SVGs stay unchanged**

@@ -26,7 +26,7 @@ interface Mail {
 export async function sendEmail({ to, subject, html, text }: Mail): Promise<boolean> {
   const key = process.env.RESEND_API_KEY?.trim();
   if (!key) {
-    console.info("[conclave email skipped]", { to, subject });
+    console.info("[interlink email skipped]", { to, subject });
     return false;
   }
 
@@ -40,12 +40,12 @@ export async function sendEmail({ to, subject, html, text }: Mail): Promise<bool
       body: JSON.stringify({ from: fromAddress(), to: [to], subject, html, text }),
     });
     if (!res.ok) {
-      console.error("[conclave email failed]", res.status, await res.text());
+      console.error("[interlink email failed]", res.status, await res.text());
       return false;
     }
     return true;
   } catch (err) {
-    console.error("[conclave email error]", err);
+    console.error("[interlink email error]", err);
     return false;
   }
 }

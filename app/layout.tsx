@@ -19,9 +19,26 @@ const syne = Syne({
   variable: "--font-syne",
 });
 
+const description = `${BRAND} — ${BRAND_LINE} Use it in the browser now; native app later.`;
+
 export const metadata: Metadata = {
   title: BRAND,
-  description: `${BRAND} — ${BRAND_LINE} Use it in the browser now; native app later.`,
+  applicationName: BRAND,
+  description,
+  openGraph: {
+    title: BRAND,
+    description,
+    siteName: BRAND,
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: BRAND,
+    description,
+  },
+  appleWebApp: {
+    title: BRAND,
+  },
 };
 
 export const viewport: Viewport = {

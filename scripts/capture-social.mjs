@@ -1,5 +1,5 @@
 /**
- * Capture Conclave product screens and /story export frames via Chrome CDP.
+ * Capture Interlink product screens and /story export frames via Chrome CDP.
  * Isolated --user-data-dir so Chrome does not hang on the default profile.
  */
 import { spawn } from "node:child_process";
@@ -8,7 +8,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const BASE = process.env.CONCLAVE_URL || "http://127.0.0.1:43123";
+const BASE = process.env.INTERLINK_URL || process.env.CONCLAVE_URL || "http://127.0.0.1:43123";
 const PORT = Number(process.env.CDP_PORT || 9333);
 const USER_DATA = `/tmp/conclave-chrome-${Date.now()}`;
 const CHROME = process.env.CHROME || "google-chrome";
@@ -230,9 +230,9 @@ async function main() {
     });
 
     const exports = [
-      { q: "story", w: 1080, h: 1920, file: "conclave-story.png" },
-      { q: "feed", w: 1080, h: 1080, file: "conclave-feed.png" },
-      { q: "portrait", w: 1080, h: 1350, file: "conclave-portrait.png" },
+      { q: "story", w: 1080, h: 1920, file: "interlink-ad-story.png" },
+      { q: "feed", w: 1080, h: 1080, file: "interlink-ad-feed.png" },
+      { q: "portrait", w: 1080, h: 1350, file: "interlink-ad-portrait.png" },
     ];
     for (const exp of exports) {
       await screenshotPage(page, {

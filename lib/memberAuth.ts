@@ -33,7 +33,7 @@ export async function clearMemberCookie(): Promise<void> {
   jar.delete(MEMBER_COOKIE);
 }
 
-/** Resolve the signed-in Conclave member (OAuth session and/or member cookie). */
+/** Resolve the signed-in Interlink member (OAuth session and/or member cookie). */
 export async function getCurrentMember(): Promise<Member | null> {
   const session = await getSession();
   if (session?.id) {

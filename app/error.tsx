@@ -11,7 +11,7 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error("[conclave]", error);
+    console.error("[interlink]", error);
   }, [error]);
 
   return (

@@ -3,7 +3,7 @@ import XCTest
 
 final class ConclaveTests: XCTestCase {
     func testAppName() {
-        XCTAssertEqual(AppConfig.appName, "Conclave")
+        XCTAssertEqual(AppConfig.appName, "Interlink")
     }
 
     func testDevServerHost() {

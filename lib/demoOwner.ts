@@ -32,12 +32,12 @@ export const DEMO_OWNER_PROFILE: MyProfile = {
     },
     {
       method: "linkedin",
-      value: "https://linkedin.com/in/conclave-brian-demo",
+      value: "https://linkedin.com/in/interlink-brian-demo",
       verifiedAt: new Date().toISOString(),
     },
     {
       method: "resume",
-      value: "https://conclave.app/brian-resume.pdf",
+      value: "https://interlink.app/brian-resume.pdf",
       verifiedAt: new Date().toISOString(),
     },
   ],

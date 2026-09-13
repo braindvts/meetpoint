@@ -76,12 +76,12 @@ function Section({
     >
       <div className="mb-2.5 flex items-baseline gap-2 sm:mb-6 sm:gap-4">
         <span
-          className={`text-[10px] font-medium tabular-nums sm:text-sm ${
-            missing ? "text-accent-2" : "text-accent"
+          className={`stand-node mt-1.5 !h-2 !w-2 ${
+            missing ? "bg-accent" : "bg-accent/55"
           }`}
-        >
-          {num}
-        </span>
+          aria-hidden
+        />
+        <span className="sr-only">{num}</span>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <h2 className="text-base font-semibold tracking-tight text-ivory sm:text-xl">

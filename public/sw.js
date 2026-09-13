@@ -1,4 +1,4 @@
-/* Conclave — notification click handler (browser alerts; not FCM). */
+/* Interlink — notification click handler (browser alerts; not FCM). */
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
   const url = event.notification.data?.url || "/connections";
