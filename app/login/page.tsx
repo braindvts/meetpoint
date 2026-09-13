@@ -48,7 +48,7 @@ function LoginContent() {
   }, [router]);
 
   return (
-    <main className="mp-app flex min-h-dvh flex-col px-6 pb-10 pt-16 md:max-w-lg md:pt-20">
+    <main className="mp-app mp-auth-page flex min-h-dvh flex-col px-6 pb-10 pt-16 md:pt-20">
       <p className="mp-reveal text-[11px] font-semibold uppercase tracking-[0.3em] text-accent">
         Interlink
       </p>
@@ -76,7 +76,7 @@ function LoginContent() {
         <EmailAuthForm />
         <Link
           href="/onboarding"
-          className="inline-flex w-full items-center justify-center rounded-xl border border-accent/25 py-3.5 text-[12px] font-medium text-muted"
+          className="mp-row inline-flex w-full items-center justify-center rounded-[4px] border border-accent/25 py-3.5 text-[12px] font-medium text-muted"
         >
           Continue to profile
         </Link>

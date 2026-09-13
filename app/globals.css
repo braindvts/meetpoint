@@ -78,6 +78,10 @@ body::after {
   background: transparent;
 }
 
+.mp-auth-page {
+  max-width: 28rem;
+}
+
 /* Marketing / full-bleed pages */
 .mp-site {
   width: 100%;
@@ -1403,11 +1407,12 @@ html.mp-landing-scrolled .mp-landing-nav {
 
 .mp-hero-foot {
   margin: 0 auto;
+  max-width: 22rem;
   padding-top: 2.5rem;
   font-size: 11px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
+  letter-spacing: 0.08em;
   color: var(--color-muted);
+  text-align: center;
   animation: heroFade 0.8s var(--mp-ease) 0.7s both;
 }
 
