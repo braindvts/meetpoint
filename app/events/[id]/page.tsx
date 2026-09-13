@@ -19,9 +19,11 @@ import {
   findEvent,
   getRsvp,
   listPublishedEvents,
+  loadRsvps,
   networkAttendingCount,
   setRsvp,
 } from "@/lib/eventStore";
+import { formatMatchReasons, interestsFromRsvps, scoreEvent } from "@/lib/eventMatch";
 import { findPerson } from "@/lib/directory";
 import { hydrateLocalProfile } from "@/lib/hydrateSession";
 import { loadConnections } from "@/lib/store";
@@ -35,7 +37,7 @@ export default function EventDetailPage() {
   const [profile, setProfile] = useState<MyProfile | null>(null);
   const [event, setEvent] = useState<InterlinkEvent | null | undefined>(undefined);
   const [connectedIds, setConnectedIds] = useState<string[]>([]);
-  const [, setTick] = useState(0);
+  const [tick, setTick] = useState(0);
 
   const refresh = useCallback(() => {
     setEvent(findEvent(id) ?? null);
@@ -79,6 +81,15 @@ export default function EventDetailPage() {
       )
       .slice(0, 3);
   }, [event]);
+
+  const match = useMemo(() => {
+    if (!event || !profile) return null;
+    const scored = scoreEvent(profile, event, {
+      catalog: listPublishedEvents(),
+      interests: interestsFromRsvps(loadRsvps()),
+    });
+    return scored.score > 0 ? scored : null;
+  }, [event, profile, tick]);
 
   const attendees = useMemo(() => {
     if (!event) return [] as Person[];
@@ -174,6 +185,11 @@ export default function EventDetailPage() {
             <h1 className="text-2xl font-medium tracking-tight text-ivory sm:text-3xl">
               {event.name}
             </h1>
+            {match && match.reasons.length > 0 ? (
+              <p className="text-sm text-accent/90">
+                {formatMatchReasons(match.reasons)}
+              </p>
+            ) : null}
 
             <div className="space-y-1.5 text-sm text-muted">
               <p>{formatEventRange(event.startsAt, event.endsAt)}</p>

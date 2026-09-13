@@ -19,9 +19,16 @@ import {
   displayCounts,
   getRsvp,
   listPublishedEvents,
+  loadRsvps,
   networkAttendingCount,
   setRsvp,
 } from "@/lib/eventStore";
+import {
+  formatMatchReasons,
+  interestsFromRsvps,
+  rankEvents,
+  type EventMatchResult,
+} from "@/lib/eventMatch";
 import { hydrateLocalProfile } from "@/lib/hydrateSession";
 import { loadConnections } from "@/lib/store";
 import { showToast } from "@/lib/notify";
@@ -56,6 +63,18 @@ function Section({
 function Grid({ children }: { children: React.ReactNode }) {
   return (
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{children}</div>
+  );
+}
+
+function hasFilterSignal(filters: EventFilters): boolean {
+  return (
+    !!(filters.query && filters.query.trim()) ||
+    (filters.category && filters.category !== "all") ||
+    (filters.industry && filters.industry !== "all") ||
+    (filters.format && filters.format !== "all") ||
+    (filters.kind && filters.kind !== "all") ||
+    (filters.dateWindow && filters.dateWindow !== "all") ||
+    !!(filters.city && filters.city.trim())
   );
 }
 
@@ -109,19 +128,29 @@ export default function EventsPage() {
 
   const cityHint = profile?.city?.name || "";
 
-  const filtered = useMemo(
-    () => getUpcomingSorted(filterEvents(events, filters)),
-    [events, filters]
-  );
+  const ranked = useMemo<EventMatchResult[]>(() => {
+    if (!profile) return [];
+    return rankEvents(profile, events, interestsFromRsvps(loadRsvps()));
+  }, [profile, events, rsvpTick]);
 
-  const hasActiveFilters =
-    !!(filters.query && filters.query.trim()) ||
-    (filters.category && filters.category !== "all") ||
-    (filters.industry && filters.industry !== "all") ||
-    (filters.format && filters.format !== "all") ||
-    (filters.kind && filters.kind !== "all") ||
-    (filters.dateWindow && filters.dateWindow !== "all") ||
-    !!(filters.city && filters.city.trim());
+  const rankedById = useMemo(() => {
+    const map = new Map<string, EventMatchResult>();
+    for (const m of ranked) map.set(m.event.id, m);
+    return map;
+  }, [ranked]);
+
+  const filtered = useMemo(() => {
+    const list = filterEvents(events, filters);
+    if (!profile || !hasFilterSignal(filters)) return getUpcomingSorted(list);
+    return [...list].sort((a, b) => {
+      const sa = rankedById.get(a.id)?.score ?? -1;
+      const sb = rankedById.get(b.id)?.score ?? -1;
+      if (sb !== sa) return sb - sa;
+      return new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime();
+    });
+  }, [events, filters, profile, rankedById]);
+
+  const hasActiveFilters = hasFilterSignal(filters);
 
   const featured = useMemo(
     () => getUpcomingSorted(events.filter((e) => e.featured)).slice(0, 6),
@@ -170,18 +199,22 @@ export default function EventsPage() {
     [events]
   );
 
-  void rsvpTick;
-
-  const cardProps = (event: InterlinkEvent) => {
+  const cardProps = (event: InterlinkEvent, opts?: { forYou?: boolean }) => {
     const counts = displayCounts(event);
     const network = networkAttendingCount(event, connectedIds);
-    const interested = getRsvp(event.id) === "interested" || getRsvp(event.id) === "going";
+    const rsvp = getRsvp(event.id);
+    const interested = rsvp === "interested" || rsvp === "going";
+    const match = rankedById.get(event.id);
+    const matchReasons = match
+      ? formatMatchReasons(match.reasons).split(" · ").filter(Boolean)
+      : undefined;
     return {
       event,
       interestedCount: counts.interested,
       attendeeCount: counts.attendees,
       networkCount: network,
       interested,
+      matchReasons,
       onToggleInterested: () => {
         const cur = getRsvp(event.id);
         if (cur === "interested" || cur === "going") {
@@ -193,6 +226,13 @@ export default function EventsPage() {
         }
         refresh();
       },
+      onPass: opts?.forYou
+        ? () => {
+            setRsvp(event.id, "passed");
+            showToast("Passed — we’ll show fewer like this");
+            refresh();
+          }
+        : undefined,
     };
   };
 
@@ -226,11 +266,30 @@ export default function EventsPage() {
 
         <div className="space-y-3">
           <p className="max-w-2xl text-sm leading-relaxed text-muted sm:text-[15px]">
-            Upcoming dinners, conferences, and conventions — near you and across
-            the globe. Filter by city or browse worldwide rooms worth clearing
-            your calendar for.
+            Upcoming dinners, conferences, and conventions — ranked from what
+            you’re into, what you do, and what your profile says you’re seeking.
           </p>
           <div className="flex flex-wrap gap-2">
+            {ranked.length > 0 ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setFilters({
+                    query: "",
+                    category: "all",
+                    industry: "all",
+                    format: "all",
+                    kind: "all",
+                    city: "",
+                    dateWindow: "all",
+                  });
+                  document.getElementById("for-you")?.scrollIntoView({ behavior: "smooth" });
+                }}
+                className="rounded-lg border border-accent/30 px-3.5 py-1.5 text-[11px] font-medium text-accent transition hover:border-accent/55 hover:bg-accent/10"
+              >
+                For you · {Math.min(ranked.length, 6)}
+              </button>
+            ) : null}
             <button
               type="button"
               onClick={() => {
@@ -247,7 +306,7 @@ export default function EventsPage() {
                 }));
                 document.getElementById("near-you")?.scrollIntoView({ behavior: "smooth" });
               }}
-              className="rounded-lg border border-accent/30 px-3.5 py-1.5 text-[11px] font-medium text-accent transition hover:border-accent/55 hover:bg-accent/10"
+              className="rounded-lg border border-line px-3.5 py-1.5 text-[11px] font-medium text-muted transition hover:border-accent/40 hover:text-ivory"
             >
               Near you{cityHint ? ` · ${cityHint}` : ""}
             </button>
@@ -285,7 +344,9 @@ export default function EventsPage() {
         {hasActiveFilters ? (
           <Section
             title="Results"
-            subtitle={`${filtered.length} matching ${filtered.length === 1 ? "event" : "events"}`}
+            subtitle={`${filtered.length} matching ${filtered.length === 1 ? "event" : "events"}${
+              ranked.length ? " · stronger fits first" : ""
+            }`}
           >
             {filtered.length === 0 ? (
               <EmptyState
@@ -314,6 +375,20 @@ export default function EventsPage() {
           </Section>
         ) : (
           <>
+            {ranked.length > 0 ? (
+              <Section
+                id="for-you"
+                title="For you"
+                subtitle="Ranked from your interests, role, and what you’re looking for — not the whole catalog."
+              >
+                <Grid>
+                  {ranked.slice(0, 6).map((m) => (
+                    <EventCard key={m.event.id} {...cardProps(m.event, { forYou: true })} />
+                  ))}
+                </Grid>
+              </Section>
+            ) : null}
+
             {featured.length > 0 ? (
               <Section
                 title="Featured"

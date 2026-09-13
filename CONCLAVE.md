@@ -126,6 +126,8 @@ Separate from BLACK. Shown as a **blue checkmark** next to the name (trusted). E
 
 Discover ranks people by shared ambitions, complementary “looking for,” same profession, and distance. Nearby narrows by city/geo. The filter also lets you narrow by **rank** (Member / Verified / BLACK). **Members** only introduce to other Members. **Verified** and **BLACK** can meet anyone. Looking-for preferences can be edited from Discover’s filter anytime.
 
+**Events** (`/events`) ranks gatherings the same way: interests/tags, job/role, looking-for, and bio intent phrases, against title, description, topics, audience, and host. Hybrid score (canonical tags + related clusters + TF-IDF + intent heuristics). Short match reasons on cards. Precision over dumping the catalog. Sparse profiles fall back to job and looking-for. Local RSVP (interested / going / pass) nudges similar rooms.
+
 ---
 
 ## Demo / owner login
@@ -189,6 +191,7 @@ See [MISSING.md](./MISSING.md). Big ones: email verify + password reset links, c
 | BLACK CONNECTION checkmark | `components/BlackConnectionBadge.tsx` |
 | Discover cards | `components/MatchCard.tsx` |
 | Events catalog | `lib/events.ts`, `lib/eventStore.ts` |
+| Event ranking | `lib/eventMatch.ts`, `lib/eventTaxonomy.ts`, `lib/eventSignals.ts` |
 | Event UI | `components/events/*`, `app/events/*` |
 | Signup missing fields | `components/ProfileForm.tsx` |
 | BLACK rules | `lib/black.ts` |

@@ -12,7 +12,7 @@ import {
 const RSVP_KEY = "meetpoint.event.rsvp";
 const OVERLAY_KEY = "meetpoint.event.overlay";
 
-export type EventRsvp = "interested" | "going" | null;
+export type EventRsvp = "interested" | "going" | "passed" | null;
 
 type RsvpMap = Record<string, EventRsvp>;
 

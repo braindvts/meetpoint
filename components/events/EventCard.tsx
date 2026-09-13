@@ -15,6 +15,8 @@ type Props = {
   networkCount?: number;
   interested?: boolean;
   onToggleInterested?: () => void;
+  onPass?: () => void;
+  matchReasons?: string[];
   compact?: boolean;
 };
 
@@ -25,6 +27,8 @@ export default function EventCard({
   networkCount = 0,
   interested,
   onToggleInterested,
+  onPass,
+  matchReasons,
   compact,
 }: Props) {
   const interestedN = interestedCount ?? event.interestedCount;
@@ -83,6 +87,11 @@ export default function EventCard({
           <p className="line-clamp-2 text-sm leading-relaxed text-ivory/75">
             {event.shortDescription}
           </p>
+          {matchReasons && matchReasons.length > 0 ? (
+            <p className="line-clamp-1 text-[11px] leading-relaxed text-accent/90">
+              {matchReasons.join(" · ")}
+            </p>
+          ) : null}
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-1 text-[11px] text-muted">
             <span>{interestedN.toLocaleString()} interested</span>
             <span className="text-line">·</span>
@@ -121,6 +130,18 @@ export default function EventCard({
             }`}
           >
             {interested ? "Saved" : "Interested"}
+          </button>
+        ) : null}
+        {onPass ? (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              onPass();
+            }}
+            className="rounded-xl border border-line px-3 py-2.5 text-[11px] font-medium text-muted transition hover:border-accent/30 hover:text-ivory"
+          >
+            Pass
           </button>
         ) : null}
       </div>
