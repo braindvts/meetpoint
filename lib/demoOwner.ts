@@ -7,7 +7,7 @@ import type { MyProfile } from "./types";
 export const WALKTHROUGH_OWNER_PROFILE: MyProfile = {
   name: "Walkthrough",
   jobTitle: "Founder",
-  bio: "Building Conclave — private introductions that end at a table.",
+  bio: "Building Interlink — private introductions that end at a table.",
   photo:
     "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&h=400&q=90",
   city: {
@@ -29,12 +29,12 @@ export const WALKTHROUGH_OWNER_PROFILE: MyProfile = {
     },
     {
       method: "linkedin",
-      value: "https://linkedin.com/in/conclave-walkthrough",
+      value: "https://linkedin.com/in/interlink-walkthrough",
       verifiedAt: new Date().toISOString(),
     },
     {
       method: "resume",
-      value: "https://conclave.app/walkthrough-resume.pdf",
+      value: "https://interlink.app/walkthrough-resume.pdf",
       verifiedAt: new Date().toISOString(),
     },
   ],
