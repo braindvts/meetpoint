@@ -162,7 +162,7 @@ function ProfileContent() {
           <button
             type="button"
             onClick={() => void ensureNotifyPermission()}
-            className="mt-3 rounded-md border border-accent/40 px-4 py-2 text-[12px] text-accent"
+            className="mp-press mt-3 rounded-md border border-accent/40 px-4 py-2 text-[12px] text-accent"
           >
             Enable alerts
           </button>

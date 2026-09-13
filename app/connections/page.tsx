@@ -252,14 +252,14 @@ export default function ConnectionsPage() {
                               <button
                                 type="button"
                                 onClick={() => accept(person)}
-                                className="rounded-md bg-ivory px-3 py-1.5 text-[11px] font-medium text-ink"
+                                className="mp-btn-lux rounded-md px-3 py-1.5 text-[11px] font-medium"
                               >
                                 Accept
                               </button>
                               <button
                                 type="button"
                                 onClick={() => decline(person.id)}
-                                className="border border-line px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted"
+                                className="mp-press border border-line px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted"
                               >
                                 Decline
                               </button>
@@ -330,7 +330,7 @@ export default function ConnectionsPage() {
                               )}
                               <Link
                                 href={`/plan/${item.peerId}`}
-                                className="border border-line px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted hover:text-ivory"
+                                className="mp-press border border-line px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted hover:text-ivory"
                               >
                                 Edit
                               </Link>
@@ -385,7 +385,7 @@ export default function ConnectionsPage() {
                           )}
                           <Link
                             href={`/chats?c=${encodeURIComponent(item.chat.id)}`}
-                            className="mt-4 inline-flex border border-accent/30 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-ivory transition hover:border-accent/60"
+                            className="mp-press mt-4 inline-flex border border-accent/30 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-ivory hover:border-accent/60"
                           >
                             Open chat
                           </Link>

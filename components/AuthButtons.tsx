@@ -5,7 +5,7 @@ interface Props {
 }
 
 const shell =
-  "inline-flex w-full items-center justify-center gap-2.5 rounded-lg px-4 py-2.5 text-[13px] font-semibold tracking-wide transition";
+  "mp-press inline-flex w-full items-center justify-center gap-2.5 rounded-lg px-4 py-2.5 text-[13px] font-semibold tracking-wide";
 
 /** Official LinkedIn logo mark (boxed “in”). */
 function LinkedInIcon({ className = "h-[18px] w-[18px]" }: { className?: string }) {

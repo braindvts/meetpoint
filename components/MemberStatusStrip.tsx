@@ -31,10 +31,10 @@ export default function MemberStatusStrip({ profile, tier }: Props) {
   return (
     <div className="mb-5 flex flex-wrap items-center gap-2">
       <span
-        className="inline-flex shrink-0 items-center rounded-md border border-white/12 bg-transparent px-2.5 py-1 text-[9.5px] font-semibold uppercase tracking-[0.16em] text-muted"
+        className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted"
         title="Free standing — get Verified to meet anyone"
       >
-        Free member
+        Free
       </span>
 
       <TierBadge tier={tier} size="sm" />

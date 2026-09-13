@@ -120,6 +120,8 @@ export default function MatchCard({
       onClick={() => onOpenProfile?.(person.id)}
       onKeyDown={handleKey}
       className={`relative flex h-full min-h-[320px] flex-col overflow-hidden rounded-xl border border-white/[0.08] bg-[#0a0a0a] ${
+        leaving || connecting ? "" : "mp-card-motion"
+      } ${
         onOpenProfile || preview ? "cursor-pointer [-webkit-tap-highlight-color:transparent]" : ""
       } ${leaving ? "mp-card-pass" : ""} ${connecting ? "mp-card-connect" : ""}`}
     >
@@ -236,7 +238,7 @@ export default function MatchCard({
               e.stopPropagation();
               onSkip(person.id);
             }}
-            className="rounded-lg border border-white/15 px-3 py-2 text-[11px] font-medium uppercase tracking-[0.12em] text-muted transition hover:border-white/30 hover:text-ivory active:scale-[0.98] disabled:opacity-40"
+            className="mp-press rounded-lg border border-white/15 px-3 py-2 text-[11px] font-medium uppercase tracking-[0.12em] text-muted hover:border-white/30 hover:text-ivory disabled:opacity-40"
           >
             Pass
           </button>
@@ -254,7 +256,7 @@ export default function MatchCard({
             (!status && !canConnect && !onNeedVerified)
           }
           onClick={handleConnect}
-          className={`rounded-lg px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] transition active:scale-[0.98] disabled:opacity-45 ${
+          className={`mp-press rounded-lg px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] disabled:opacity-45 ${
             status === "connected"
               ? onChat
                 ? "bg-ivory text-ink"

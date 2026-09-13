@@ -13,7 +13,7 @@ type Props = {
 /** Larger convention / conference card for the conventions strip. */
 export default function ConventionCard({ event }: Props) {
   return (
-    <article className="mp-reveal group relative flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#0a0a0a] transition hover:border-accent/35">
+    <article className="mp-reveal mp-card-motion group relative flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#0a0a0a]">
       <Link href={`/events/${event.slug}`} className="flex flex-1 flex-col">
         <div className="relative aspect-[2/1] overflow-hidden sm:aspect-[21/9]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
