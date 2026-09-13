@@ -1,3 +1,4 @@
+import type { EventInterest, EventInterestStatus, EventMatchResult, MeetEvent } from "./eventTypes";
 import type { Connection, GroupChat, MyProfile, Person } from "./types";
 
 /** Sync local membership to SQLite / multi-device backend. */
@@ -171,6 +172,47 @@ export async function setBlocked(
     });
     const data = (await res.json()) as { ok?: boolean; blockedIds?: string[] };
     return data.ok && data.blockedIds ? data.blockedIds : null;
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchRankedEvents(): Promise<{
+  events: MeetEvent[];
+  matches: EventMatchResult[];
+  interests: EventInterest[];
+} | null> {
+  try {
+    const res = await fetch("/api/events");
+    const data = (await res.json()) as {
+      ok?: boolean;
+      events?: MeetEvent[];
+      matches?: EventMatchResult[];
+      interests?: EventInterest[];
+    };
+    if (!data.ok) return null;
+    return {
+      events: data.events || [],
+      matches: data.matches || [],
+      interests: data.interests || [],
+    };
+  } catch {
+    return null;
+  }
+}
+
+export async function saveEventInterest(
+  eventId: string,
+  status: EventInterestStatus | null
+): Promise<EventInterest[] | null> {
+  try {
+    const res = await fetch("/api/events/interest", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(status ? { eventId, status } : { eventId, clear: true }),
+    });
+    const data = (await res.json()) as { ok?: boolean; interests?: EventInterest[] };
+    return data.ok && data.interests ? data.interests : null;
   } catch {
     return null;
   }
