@@ -77,7 +77,7 @@ That last row is the one to watch — on a $5 charge Stripe's cut is 9%, because
 - [ ] Redeploy
 - [ ] Open `https://yourdomain.com` — the landing page loads
 - [ ] Open `https://yourdomain.com/api/members` — returns `{"ok":true,"members":[]}`
-- [x] Database schema is created automatically on deploy (`vercel.json` build command)
+- [x] Vercel build is `prisma generate && next build` (no `db push` — that tried to DROP live Report columns). First-time empty DB: `npx prisma db push`. See [prisma/README.md](./prisma/README.md).
 
 ## Phase 3 — Email · $0 (free to 3,000/month)
 

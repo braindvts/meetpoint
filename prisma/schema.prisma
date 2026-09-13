@@ -179,10 +179,22 @@ model Message {
   @@index([chatId, createdAt])
 }
 
+/// Safety report from one member about another. Production already stores
+/// moderation fields (`alsoBlocked`, `category`, `notes`, `status`) that were
+/// never committed in this repo. They stay on the model so schema sync will
+/// not DROP them — those columns still have data.
 model Report {
-  id         String   @id @default(cuid())
-  reporterId String
-  peerId     String
-  reason     String
-  createdAt  DateTime @default(now())
+  id          String   @id @default(cuid())
+  reporterId  String
+  peerId      String
+  reason      String
+  /// Harassment, spam, fake, other — from the earlier moderation form.
+  category    String?
+  /// Extra reporter or operator notes. Distinct from `reason`.
+  notes       String?
+  /// Review workflow. Existing production rows already have values.
+  status      String   @default("open")
+  /// True when the reporter also blocked the peer at report time.
+  alsoBlocked Boolean  @default(false)
+  createdAt   DateTime @default(now())
 }

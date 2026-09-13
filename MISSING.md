@@ -161,8 +161,9 @@ Local SQLite (`file:./dev.db`) is fine for one machine. For phones / Vercel / mu
    ```
 4. Run:
    ```bash
-   npx prisma migrate deploy
-   # or: npx prisma db push
+   npx prisma db push
+   # never: prisma db push --accept-data-loss
+   # Vercel: prisma generate && next build (see prisma/README.md)
    ```
 5. Deploy the app with the same `DATABASE_URL` set on the host
 

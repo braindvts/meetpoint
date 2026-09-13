@@ -12,7 +12,13 @@ export async function POST(req: Request) {
     );
   }
 
-  const body = (await req.json()) as { peerId?: string; reason?: string };
+  const body = (await req.json()) as {
+    peerId?: string;
+    reason?: string;
+    category?: string;
+    notes?: string;
+    alsoBlocked?: boolean;
+  };
   if (!body.peerId || !body.reason?.trim()) {
     return NextResponse.json({ ok: false, error: "Missing peerId/reason" }, { status: 400 });
   }
@@ -22,6 +28,10 @@ export async function POST(req: Request) {
       reporterId: me.id,
       peerId: body.peerId,
       reason: body.reason.trim().slice(0, 500),
+      category: body.category?.trim().slice(0, 80) || null,
+      notes: body.notes?.trim().slice(0, 1000) || null,
+      alsoBlocked: body.alsoBlocked === true,
+      status: "open",
     },
   });
 
