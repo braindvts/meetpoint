@@ -195,8 +195,8 @@ export default function WaitlistForm({
         </p>
       )}
       {showEmbed && !compact && (
-        <div className="mt-6 space-y-3">
-          <p className="text-center text-[13px] leading-relaxed text-muted">
+        <div className="mt-6 space-y-3 rounded-xl border border-accent/20 bg-panel/70 px-5 py-6 text-center">
+          <p className="text-[13px] leading-relaxed text-ivory/75">
             Finish on the live waitlist form — same list as everyone already on it.
           </p>
           <a
@@ -207,11 +207,6 @@ export default function WaitlistForm({
           >
             Open waitlist form
           </a>
-          <iframe
-            title="Interlink waitlist"
-            src={fallbackUrl}
-            className="h-[28rem] w-full rounded-xl border border-line/70 bg-panel"
-          />
         </div>
       )}
       {apiReady === false && compact && (
