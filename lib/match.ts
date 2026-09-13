@@ -245,9 +245,10 @@ export function scoreMatch(
   const reputation = summarizeReputation(person.id, ratings);
   const tier = tierForPerson(person, reputation);
 
-  const distance = distanceKm(me.city, person.city);
-  const isLocal = distance <= LOCAL_RADIUS_KM;
-  const sameCountry = me.city.country === person.city.country;
+  const hasCities = !!(me.city?.lat != null && person.city?.lat != null);
+  const distance = hasCities ? distanceKm(me.city, person.city) : Number.POSITIVE_INFINITY;
+  const isLocal = hasCities && distance <= LOCAL_RADIUS_KM;
+  const sameCountry = !!(me.city?.country && person.city?.country && me.city.country === person.city.country);
 
   const meReach =
     me.travel === "worldwide" || (me.travel === "country" && sameCountry) || isLocal;

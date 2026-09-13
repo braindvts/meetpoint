@@ -112,7 +112,7 @@ Separate from BLACK. Shown as a **blue checkmark** next to the name (trusted). E
 | `/login` | Email + OAuth sign-in |
 | `/onboarding` | Profile setup (highlights missing fields) |
 | `/discover` | The Room — For you / Nearby match cards |
-| `/events` | Events & conventions — curated professional gatherings |
+| `/events` | Events & conventions — public catalog (RSVP needs an account) |
 | `/events/[id]` | Event detail, RSVP, related rooms, people attending |
 | `/admin/events` | Create / edit / publish events (ADMIN_SECRET + local overlay) |
 | `/circle` | Incoming connects + booked reservations |

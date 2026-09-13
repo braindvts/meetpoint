@@ -13,7 +13,7 @@ import MembershipTiers from "@/components/MembershipTiers";
 import { ensureNotifyPermission } from "@/lib/notify";
 import { clearProfile, getMeetingsAttended, loadProfile } from "@/lib/store";
 import { readClientProfile } from "@/lib/clientProfile";
-import { hydrateLocalProfile } from "@/lib/hydrateSession";
+import { gateRedirect, resolveSessionGate } from "@/lib/hydrateSession";
 import {
   computeMemberTier,
   hasRequiredVerifications,
@@ -38,14 +38,16 @@ function ProfileContent() {
   useEffect(() => {
     let cancelled = false;
     void (async () => {
-      const p = await hydrateLocalProfile();
+      const gate = await resolveSessionGate();
       if (cancelled) return;
-      if (!p) {
-        router.replace("/onboarding");
+      const dest = gateRedirect(gate, "/profile");
+      if (dest) {
+        router.replace(dest);
         return;
       }
-      setProfile(p);
-      setMeetings(getMeetingsAttended(p));
+      if (gate.status !== "member") return;
+      setProfile(gate.profile);
+      setMeetings(getMeetingsAttended(gate.profile));
     })();
 
     const onProfile = () => {
@@ -78,7 +80,17 @@ function ProfileContent() {
     }
   }
 
-  if (!profile) return null;
+  if (!profile) {
+    return (
+      <>
+        <Nav />
+        <main className="mp-app px-5 pb-10 pt-6 md:px-6">
+          <PageHeader title="Profile" />
+          <p className="mt-3 text-sm text-muted">Loading profile…</p>
+        </main>
+      </>
+    );
+  }
 
   const strength = scoreProfileStrength(profile);
   const missingVerify = missingRequiredVerifications(profile.verifications);

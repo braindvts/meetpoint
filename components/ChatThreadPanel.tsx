@@ -17,6 +17,8 @@ import {
   suggestSpotsForChatLive,
   type FoodSuggestion,
 } from "@/lib/foodAi";
+import { loginUrl } from "@/lib/appPath";
+import { hydrateLocalProfile } from "@/lib/hydrateSession";
 import {
   agreeToTable,
   bookTable,
@@ -82,12 +84,20 @@ export default function ChatThreadPanel({ chatId, embedded = false, onBack }: Pr
 
   // Load / switch thread — only when chatId changes (do NOT clear composer on parent re-renders).
   useEffect(() => {
+    let cancelled = false;
     const p = loadProfile();
-    if (!p) {
-      router.replace("/onboarding");
-      return;
+    if (p) {
+      setProfile(p);
+    } else {
+      void hydrateLocalProfile().then((hydrated) => {
+        if (cancelled) return;
+        if (!hydrated) {
+          if (!embedded) router.replace(loginUrl("/chats"));
+          return;
+        }
+        setProfile(hydrated);
+      });
     }
-    setProfile(p);
     const c = getChat(chatId);
     if (!c) {
       if (onBackRef.current) onBackRef.current();
@@ -131,7 +141,9 @@ export default function ChatThreadPanel({ chatId, embedded = false, onBack }: Pr
         !(next.tableProposal && !next.tableProposal.booked)
       ) {
         const peers = loadDirectory().filter((x) => next.memberIds.includes(x.id));
-        void suggestSpotsForChatLive(p.city, peers).then(({ suggestions }) => {
+        const me = p || loadProfile();
+        if (!me) return;
+        void suggestSpotsForChatLive(me.city, peers).then(({ suggestions }) => {
           if (suggestions.length > 0) {
             setFoodSuggestions(suggestions);
             setFoodHint(true);
@@ -182,12 +194,13 @@ export default function ChatThreadPanel({ chatId, embedded = false, onBack }: Pr
     }, 4000);
 
     return () => {
+      cancelled = true;
       window.removeEventListener("meetpoint:chats-changed", refresh);
       window.removeEventListener("meetpoint:mute-changed", onMute);
       window.clearInterval(poll);
       void import("@/lib/chatUnread").then(({ setActiveChatId }) => setActiveChatId(null));
     };
-  }, [chatId, router]);
+  }, [chatId, embedded, router]);
 
   // Stripe return — finish booking once per chat, without resetting the composer.
   useEffect(() => {

@@ -569,7 +569,14 @@ export function filterEvents(
     }
     if (filters.city) {
       const c = filters.city.toLowerCase();
-      if (!e.city.toLowerCase().includes(c) && !e.country.toLowerCase().includes(c)) return false;
+      if (c === "online") {
+        if (e.format !== "online" && e.city.toLowerCase() !== "online") return false;
+      } else if (
+        !e.city.toLowerCase().includes(c) &&
+        !e.country.toLowerCase().includes(c)
+      ) {
+        return false;
+      }
     }
     if (filters.dateWindow && filters.dateWindow !== "all") {
       const t = new Date(e.startsAt).getTime();

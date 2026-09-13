@@ -421,6 +421,56 @@ function saveChats(chats: GroupChat[]): void {
   window.dispatchEvent(new CustomEvent("meetpoint:chats-changed"));
 }
 
+/** Replace local connections with the signed-in member’s server list. */
+export function applyServerConnections(remote: Connection[]): Connection[] {
+  if (isDemoProfile(loadProfile())) return loadConnections();
+  saveConnections(remote);
+  window.dispatchEvent(new CustomEvent("meetpoint:connections-changed"));
+  return remote;
+}
+
+/** Merge `/api/chats` into local inbox so a cookie session isn’t an empty rail. */
+export function mergeServerChats(remote: GroupChat[]): GroupChat[] {
+  if (isDemoProfile(loadProfile())) return loadChats();
+  const byId = new Map<string, GroupChat>();
+  for (const chat of loadChats()) byId.set(chat.id, chat);
+  for (const remoteChat of remote) {
+    const existing = byId.get(remoteChat.id);
+    if (!existing) {
+      const messages = remoteChat.messages?.length
+        ? remoteChat.messages
+        : [
+            {
+              id: `sys-${remoteChat.id}`,
+              senderId: "system",
+              text: "This private room is open. Speak freely.",
+              createdAt: remoteChat.createdAt,
+            },
+          ];
+      byId.set(remoteChat.id, { ...remoteChat, messages });
+      continue;
+    }
+    const msgById = new Map(existing.messages.map((m) => [m.id, m]));
+    for (const message of remoteChat.messages || []) {
+      if (!msgById.has(message.id)) msgById.set(message.id, message);
+    }
+    const messages = [...msgById.values()].sort((a, b) =>
+      a.createdAt.localeCompare(b.createdAt)
+    );
+    const remoteNewer = (remoteChat.updatedAt || "") > (existing.updatedAt || "");
+    byId.set(remoteChat.id, {
+      ...existing,
+      name: remoteChat.name || existing.name,
+      memberIds: remoteChat.memberIds?.length ? remoteChat.memberIds : existing.memberIds,
+      updatedAt: remoteNewer ? remoteChat.updatedAt : existing.updatedAt,
+      messages,
+    });
+  }
+  const merged = Array.from(byId.values());
+  saveChats(merged);
+  return merged;
+}
+
 export function getChat(id: string): GroupChat | undefined {
   return loadChats().find((c) => c.id === id);
 }

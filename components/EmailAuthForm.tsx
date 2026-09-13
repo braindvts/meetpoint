@@ -1,12 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { safeAppPath } from "@/lib/appPath";
 import { clearDemoOwnerSession, markDemoOwnerSession } from "@/lib/demoFlag";
 import { DEMO_OWNER_EMAIL, isDemoOwnerEmail } from "@/lib/demoOwner";
 import { saveProfile } from "@/lib/store";
 import type { MyProfile } from "@/lib/types";
 
 export default function EmailAuthForm() {
+  const searchParams = useSearchParams();
+  const requestedNext = safeAppPath(searchParams.get("next"));
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -33,7 +37,11 @@ export default function EmailAuthForm() {
     } else {
       clearDemoOwnerSession();
     }
-    window.location.href = data.next || "/onboarding";
+    const dest =
+      data.profile?.jobTitle && requestedNext
+        ? requestedNext
+        : data.next || requestedNext || "/onboarding";
+    window.location.href = dest;
   }
 
   async function submit(e: React.FormEvent) {

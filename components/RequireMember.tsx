@@ -1,22 +1,31 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { loadProfile } from "@/lib/store";
+import { usePathname, useRouter } from "next/navigation";
+import { gateRedirect, resolveSessionGate } from "@/lib/hydrateSession";
 
-/** Redirects to onboarding when there is no local membership profile. */
+/** Redirects guests to login and incomplete identities to onboarding. */
 export default function RequireMember({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [ok, setOk] = useState(false);
 
   useEffect(() => {
-    const p = loadProfile();
-    if (!p) {
-      router.replace("/onboarding");
-      return;
-    }
-    setOk(true);
-  }, [router]);
+    let cancelled = false;
+    void (async () => {
+      const gate = await resolveSessionGate();
+      if (cancelled) return;
+      const dest = gateRedirect(gate, pathname || "/discover");
+      if (dest) {
+        router.replace(dest);
+        return;
+      }
+      setOk(true);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [router, pathname]);
 
   if (!ok) return null;
   return <>{children}</>;
