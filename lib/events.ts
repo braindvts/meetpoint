@@ -3,6 +3,8 @@
  * Swap EVENTS for a real API later without changing UI components.
  */
 
+import type { LookingFor } from "./types";
+
 export type EventFormat = "in-person" | "online" | "hybrid";
 
 export type EventCategory =
@@ -60,6 +62,14 @@ export interface InterlinkEvent {
   speakers?: string[];
   companies?: string[];
   published?: boolean;
+  /** Canonical idea-tag topics for ranking (optional; inferred when omitted). */
+  topics?: string[];
+  /** lookingFor vocabulary this room is seating. */
+  audience?: LookingFor[];
+  /** Role families the host is seating (founder, designer, engineer, …). */
+  roles?: string[];
+  /** Extra matching tokens that are not shown as chips. */
+  keywords?: string[];
 }
 
 export const EVENT_CATEGORIES: { id: EventCategory | "all"; label: string }[] = [
