@@ -100,7 +100,7 @@ export default function MatchCard({
       tabIndex={onOpenProfile ? 0 : undefined}
       onClick={() => onOpenProfile?.(person.id)}
       onKeyDown={handleKey}
-      className={`flex h-full min-h-[320px] flex-col overflow-hidden rounded-[18px] border border-accent/20 bg-[#12110f] ${
+      className={`mp-card-motion flex h-full min-h-[320px] flex-col overflow-hidden rounded-[12px] border border-accent/20 bg-[#12110f] ${
         onOpenProfile || preview ? "cursor-pointer [-webkit-tap-highlight-color:transparent]" : ""
       }`}
     >
@@ -111,7 +111,7 @@ export default function MatchCard({
             <img
               src={person.photoUrl}
               alt=""
-              className="h-full w-full object-cover object-top"
+              className="mp-card-photo h-full w-full object-cover object-top"
             />
           ) : (
             <div className="grid h-full place-items-center bg-panel-2 text-lg font-semibold text-ivory/40">

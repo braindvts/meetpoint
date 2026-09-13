@@ -166,7 +166,7 @@ export default function DiscoverPage() {
               aria-label="Filter"
               aria-expanded={filterOpen}
               onClick={() => setFilterOpen((v) => !v)}
-              className="absolute right-0 text-accent md:static"
+              className="absolute right-0 text-accent transition-transform duration-300 ease-out active:scale-90 md:static"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" className="h-5 w-5">
                 <path d="M4 5h16l-5.5 7.2V19l-5 2v-8.8L4 5z" strokeLinejoin="round" />
@@ -177,7 +177,7 @@ export default function DiscoverPage() {
             Discover
           </h1>
           <p className="mt-1 text-[13px] leading-snug text-ivory/60 md:mt-2">
-            Curated professionals. Meaningful connections.
+            The room. Ranked by ambition, then seated in person.
           </p>
           {myTier === 1 && !premier && (
             <button
@@ -194,13 +194,13 @@ export default function DiscoverPage() {
         </header>
 
         <div className="px-4 pt-3 md:px-0 md:pt-4">
-          <div className="flex max-w-md rounded-full border border-white/12 bg-[#12110f] p-1 md:max-w-lg">
+          <div className="flex max-w-md border border-white/12 bg-[#12110f] p-1 md:max-w-lg">
             {(["open", "local"] as Filter[]).map((key) => (
               <button
                 key={key}
                 type="button"
                 onClick={() => setFilter(key)}
-                className={`flex-1 rounded-full py-2 text-[12px] font-medium transition ${
+                className={`flex-1 py-2 text-[12px] font-medium transition-colors duration-300 ${
                   filter === key ? "bg-accent text-ink" : "text-ivory/70"
                 }`}
               >
