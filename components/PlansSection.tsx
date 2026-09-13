@@ -91,9 +91,9 @@ export default function PlansSection({
   }
 
   return (
-    <section className="mb-6 border border-line/50 bg-panel/40 p-3 sm:mb-10 sm:p-5">
-      <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-        <p className="text-[9px] font-semibold uppercase tracking-[0.22em] text-accent sm:text-[11px]">
+    <section className="mb-8 border-t border-accent/15 pt-5">
+      <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
+        <p className="mp-kicker">
           Plans
         </p>
         <p className="text-[10px] text-muted sm:text-xs">
@@ -107,7 +107,7 @@ export default function PlansSection({
 
       <div className="space-y-2.5">
         {/* Free */}
-        <div className="border border-line/60 bg-ink/40 px-3.5 py-3 sm:px-4 sm:py-3.5">
+        <div className="border-b border-white/10 px-0 py-3.5">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-[15px] font-semibold text-ivory">Free</p>
@@ -126,7 +126,7 @@ export default function PlansSection({
         </div>
 
         {/* Premier */}
-        <div className="border border-accent/30 bg-ink/50 px-3.5 py-3 sm:px-4 sm:py-3.5">
+        <div className="border-b border-accent/20 py-3.5 pl-3" style={{ borderLeft: "1px solid #d4c4a8" }}>
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-[15px] font-semibold text-ivory">Premier</p>
@@ -187,7 +187,7 @@ export default function PlansSection({
             <button
               type="button"
               onClick={() => onBuyPremier("year")}
-              className="mp-btn-lux mt-2.5 w-full rounded-xl bg-gradient-to-b from-accent-2 to-accent py-2.5 text-[12px] font-semibold text-ink"
+              className="mp-btn-lux mp-spot mt-2.5 w-full rounded-[2px] bg-gradient-to-b from-accent-2 to-accent py-2.5 text-[12px] font-semibold text-ink"
             >
               Get Premier
             </button>
@@ -198,7 +198,7 @@ export default function PlansSection({
         </div>
 
         {/* BLACK */}
-        <div className="border border-white/15 bg-black px-3.5 py-3 black-centurion sm:px-4 sm:py-3.5">
+        <div className="border border-white/15 bg-black px-3.5 py-3.5">
           <div className="relative z-[1]">
             <div className="flex items-start justify-between gap-3">
               <div>
@@ -249,7 +249,7 @@ export default function PlansSection({
                     type="button"
                     disabled={!verified || busy !== null}
                     onClick={() => void buyBlack("month")}
-                    className="rounded-xl border border-white/20 py-2 text-[11px] font-semibold text-[#f5f5f5] disabled:opacity-40"
+                    className="rounded-[2px] border border-white/20 py-2 text-[11px] font-semibold text-[#f5f5f5] transition hover:border-white/40 disabled:opacity-40"
                   >
                     {busy === "month" ? "…" : formatBlackPrice("month")}
                   </button>
@@ -257,7 +257,7 @@ export default function PlansSection({
                     type="button"
                     disabled={!verified || busy !== null}
                     onClick={() => void buyBlack("year")}
-                    className="rounded-xl bg-[#f5f5f5] py-2 text-[11px] font-semibold text-black disabled:opacity-40"
+                    className="rounded-[2px] bg-[#f5f5f5] py-2 text-[11px] font-semibold text-black transition hover:brightness-110 disabled:opacity-40"
                   >
                     {busy === "year" ? "…" : formatBlackPrice("year")}
                   </button>

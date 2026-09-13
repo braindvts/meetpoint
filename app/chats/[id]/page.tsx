@@ -255,11 +255,11 @@ function ChatThreadInner() {
       <Nav />
       <div className="mp-chat-shell">
         <div className="mx-auto flex h-full min-h-0 w-full max-w-3xl flex-col px-3 sm:px-6">
-          <header className="shrink-0 border-b border-line/60 pb-2.5 pt-[max(0.5rem,env(safe-area-inset-top))] sm:py-4 sm:pt-4">
+          <header className="shrink-0 border-b border-accent/15 pb-2.5 pt-[max(0.5rem,env(safe-area-inset-top))] sm:py-4 sm:pt-4">
             <div className="flex items-center gap-3">
               <Link
                 href="/chats"
-                className="shrink-0 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted transition hover:text-accent-2"
+                className="shrink-0 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted transition hover:text-ivory active:scale-95"
               >
                 ← Back
               </Link>

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect } from "react";
 import DemoEnterButton from "@/components/DemoEnterButton";
 import Reveal from "@/components/Reveal";
+import TierBadge from "@/components/TierBadge";
 import { BRAND_MARK, BRAND_NAME, BRAND_TAGLINE } from "@/lib/brand";
 import { demoEntryEnabled } from "@/lib/demoFlag";
 
@@ -27,18 +28,15 @@ const STEPS = [
 
 const LEVELS = [
   {
-    name: "Member",
-    mark: "level-mark level-mark--member",
+    tier: 1 as const,
     copy: "Identity only — photo, name, role, ambitions, looking for. Verification is optional. Skip it and you stay Member.",
   },
   {
-    name: "Verified",
-    mark: "level-mark level-mark--verified",
+    tier: 2 as const,
     copy: "Add all three: business email, LinkedIn, and resume. Website and portfolio do not replace them.",
   },
   {
-    name: "BLACK",
-    mark: "level-mark level-mark--black",
+    tier: 3 as const,
     copy: "$50/mo or $500/yr, or earn it through dinners and reputation. Must already be Verified. Peer invites never grant BLACK.",
   },
 ] as const;
@@ -96,9 +94,9 @@ export default function LandingView() {
             <Link href="/login" className="mp-landing-ghost">
               Sign in
             </Link>
-            <Link href="/login" className="mp-btn-lux mp-landing-cta">
-              Join {BRAND_NAME}
-            </Link>
+                <Link href="/login" className="mp-btn-lux mp-spot mp-landing-cta">
+                  Join {BRAND_NAME}
+                </Link>
           </div>
         </div>
       </header>
@@ -114,7 +112,7 @@ export default function LandingView() {
             <div className="mp-hero-aside">
               <p>Identity makes you a Member. Verification can wait. Dinner cannot.</p>
               <div className="mp-hero-actions">
-                <Link href="/login" className="mp-btn-lux mp-landing-cta mp-landing-cta--wide">
+                <Link href="/login" className="mp-btn-lux mp-spot mp-landing-cta mp-landing-cta--wide">
                   Join {BRAND_NAME}
                 </Link>
                 <Link href="/login" className="mp-landing-secondary">
@@ -184,13 +182,8 @@ export default function LandingView() {
 
           <div className="mp-board">
             {LEVELS.map((level, i) => (
-              <Reveal key={level.name} delay={i * 80} className="mp-board-row">
-                <span
-                  className={`inline-flex items-center px-2.5 py-1 text-[9.5px] font-semibold uppercase tracking-[0.22em] text-ivory ${level.mark}`}
-                >
-                  <span className="level-mark-sheen" aria-hidden />
-                  <span className="relative">{level.name}</span>
-                </span>
+              <Reveal key={level.tier} delay={i * 80} className="mp-board-row">
+                <TierBadge tier={level.tier} size="sm" />
                 <p>{level.copy}</p>
               </Reveal>
             ))}
@@ -245,7 +238,7 @@ export default function LandingView() {
         <Reveal className="mp-close">
           <h2>Your Identity is enough to enter.</h2>
           <p>Verification is optional. The table is not.</p>
-          <Link href="/login" className="mp-btn-lux mp-landing-cta mp-landing-cta--wide">
+          <Link href="/login" className="mp-btn-lux mp-spot mp-landing-cta mp-landing-cta--wide">
             Join {BRAND_NAME}
           </Link>
         </Reveal>

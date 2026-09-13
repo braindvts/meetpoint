@@ -153,67 +153,63 @@ export default function DiscoverPage() {
     <>
       <Nav />
       <main className="mp-app px-0 pb-10 md:px-6">
-        <header className="sticky top-0 z-40 bg-ink/95 px-5 pb-3 pt-4 backdrop-blur-xl md:px-0 md:pt-6">
-          <div className="relative flex h-7 items-center justify-center md:justify-between">
-            <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-accent md:hidden">
-              Interlink
+        <header className="mp-page-head !items-end px-5 md:!px-0">
+          <div>
+            <p className="mp-kicker">The room</p>
+            <h1>Discover</h1>
+            <p className="mt-1.5 max-w-md text-[13px] leading-snug text-muted">
+              Ranked by ambition, then seated in person.
             </p>
-            <h1 className="hidden text-[1.85rem] font-semibold tracking-tight text-ivory md:block">
-              Discover
-            </h1>
-            <button
-              type="button"
-              aria-label="Filter"
-              aria-expanded={filterOpen}
-              onClick={() => setFilterOpen((v) => !v)}
-              className="absolute right-0 text-accent transition-transform duration-300 ease-out active:scale-90 md:static"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" className="h-5 w-5">
-                <path d="M4 5h16l-5.5 7.2V19l-5 2v-8.8L4 5z" strokeLinejoin="round" />
-              </svg>
-            </button>
+            {myTier === 1 && !premier && (
+              <button
+                type="button"
+                onClick={() => {
+                  setPremierPeerName(undefined);
+                  setPremierOpen(true);
+                }}
+                className="mt-2 text-[12px] font-medium text-accent transition hover:text-accent-2"
+              >
+                Unlock Premier
+              </button>
+            )}
           </div>
-          <h1 className="mt-2 text-[1.85rem] font-semibold tracking-tight text-ivory md:hidden">
-            Discover
-          </h1>
-          <p className="mt-1 text-[13px] leading-snug text-ivory/60 md:mt-2">
-            The room. Ranked by ambition, then seated in person.
-          </p>
-          {myTier === 1 && !premier && (
-            <button
-              type="button"
-              onClick={() => {
-                setPremierPeerName(undefined);
-                setPremierOpen(true);
-              }}
-              className="mt-2 text-[12px] font-medium text-accent"
-            >
-              Unlock Premier
-            </button>
-          )}
+          <button
+            type="button"
+            aria-label="Filter"
+            aria-expanded={filterOpen}
+            onClick={() => setFilterOpen((v) => !v)}
+            className="mp-page-head-action text-accent transition duration-300 hover:text-accent-2 active:scale-90"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" className="h-5 w-5">
+              <path d="M4 5h16l-5.5 7.2V19l-5 2v-8.8L4 5z" strokeLinejoin="round" />
+            </svg>
+          </button>
         </header>
 
-        <div className="px-4 pt-3 md:px-0 md:pt-4">
-          <div className="flex max-w-md border border-white/12 bg-[#12110f] p-1 md:max-w-lg">
+        <div className="px-4 pt-4 md:px-0">
+          <div className="flex max-w-md gap-6 border-b border-white/10 md:max-w-lg">
             {(["open", "local"] as Filter[]).map((key) => (
               <button
                 key={key}
                 type="button"
                 onClick={() => setFilter(key)}
-                className={`flex-1 py-2 text-[12px] font-medium transition-colors duration-300 ${
-                  filter === key ? "bg-accent text-ink" : "text-ivory/70"
+                className={`relative pb-2.5 text-[13px] font-medium transition-colors duration-300 ${
+                  filter === key ? "text-ivory" : "text-muted hover:text-ivory"
                 }`}
               >
                 {key === "open"
                   ? `For you · ${remainingForYou}`
                   : `Nearby · ${remainingNearby}`}
+                {filter === key ? (
+                  <span className="mp-tab-active absolute inset-x-0 -bottom-px h-px bg-accent" />
+                ) : null}
               </button>
             ))}
           </div>
         </div>
 
         {filterOpen && profile ? (
-          <div className="mx-4 mt-3 border border-accent/25 bg-panel/50 px-3 py-3 md:mx-0">
+          <div className="mp-modal-in mx-4 mt-3 border border-accent/25 bg-panel/50 px-3 py-3 md:mx-0">
             <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-accent">
               What you’re looking for
             </p>
@@ -235,7 +231,7 @@ export default function DiscoverPage() {
                       saveProfile(updated);
                       setProfile(updated);
                     }}
-                    className={`border px-2.5 py-1 text-[12px] transition ${
+                    className={`rounded-[2px] border px-2.5 py-1 text-[12px] transition duration-300 ${
                       on
                         ? "border-accent/50 bg-accent/15 text-accent-2"
                         : "border-line/80 text-muted hover:border-accent/35 hover:text-ivory"

@@ -100,12 +100,12 @@ export default function MatchCard({
       tabIndex={onOpenProfile ? 0 : undefined}
       onClick={() => onOpenProfile?.(person.id)}
       onKeyDown={handleKey}
-      className={`mp-card-motion flex h-full min-h-[320px] flex-col overflow-hidden rounded-[12px] border border-accent/20 bg-[#12110f] ${
+      className={`mp-card-motion mp-spot flex h-full min-h-[320px] flex-col overflow-hidden rounded-[4px] border border-accent/20 bg-[#12110f] ${
         onOpenProfile || preview ? "cursor-pointer [-webkit-tap-highlight-color:transparent]" : ""
       }`}
     >
       <div className="flex gap-3.5 px-4 pb-3 pt-4">
-        <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-[12px] border border-accent/20 bg-black sm:h-[72px] sm:w-[72px]">
+        <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-[3px] border border-accent/20 bg-black sm:h-[72px] sm:w-[72px]">
           {person.photoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -131,7 +131,7 @@ export default function MatchCard({
               {person.name}
             </h3>
             {isNew ? (
-              <span className="shrink-0 rounded-full bg-accent px-2 py-0.5 text-[9.5px] font-semibold uppercase tracking-[0.14em] text-ink">
+              <span className="shrink-0 border border-accent/50 px-1.5 py-0.5 text-[9.5px] font-semibold uppercase tracking-[0.14em] text-accent">
                 New
               </span>
             ) : null}
@@ -162,7 +162,7 @@ export default function MatchCard({
               return (
                 <span
                   key={tag}
-                  className={`rounded-full border px-2 py-[3px] text-[11px] ${
+                  className={`rounded-[2px] border px-2 py-[3px] text-[11px] ${
                     shared
                       ? "border-accent/45 bg-accent/10 text-accent"
                       : "border-white/12 bg-white/[0.04] text-ivory/70"
@@ -207,7 +207,7 @@ export default function MatchCard({
               e.stopPropagation();
               onSkip(person.id);
             }}
-            className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-white/18 text-ivory/80 transition active:scale-95"
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-[3px] border border-white/18 text-ivory/80 transition duration-200 hover:border-accent/45 hover:text-ivory active:scale-95"
           >
             <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth="1.8">
               <path d="M7 7l10 10M17 7 7 17" strokeLinecap="round" />
@@ -220,7 +220,7 @@ export default function MatchCard({
           aria-label={connectAria()}
           disabled={connectLocked && status !== "connected"}
           onClick={handleConnect}
-          className={`grid h-11 w-11 shrink-0 place-items-center rounded-full transition active:scale-95 ${
+          className={`mp-spot grid h-11 w-11 shrink-0 place-items-center rounded-[3px] transition duration-200 active:scale-95 ${
             status === "connected"
               ? "border border-accent/25 text-muted"
               : status === "requested"

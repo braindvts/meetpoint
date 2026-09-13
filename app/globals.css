@@ -125,7 +125,24 @@ body:has([data-shot]) nextjs-portal {
 .mp-person-card {
   border: 1px solid rgba(212, 196, 168, 0.16);
   background: #12110f;
-  border-radius: 14px;
+  border-radius: 4px;
+  transition:
+    border-color 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@media (hover: hover) and (pointer: fine) {
+  .mp-person-card:hover {
+    border-color: rgba(212, 196, 168, 0.34);
+    background-image: radial-gradient(
+      280px circle at var(--spot-x, 50%) var(--spot-y, 40%),
+      rgba(212, 196, 168, 0.07),
+      transparent 55%
+    );
+  }
+}
+.mp-person-card:active {
+  transform: scale(0.992);
 }
 
 .mp-card-poster {
@@ -616,11 +633,31 @@ svg {
 
 /* Primary CTA — soft light sweep (not neon) */
 .mp-btn-lux {
+  --spot-x: 50%;
+  --spot-y: 50%;
   position: relative;
   overflow: hidden;
   transition:
     transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
     filter 0.25s ease;
+}
+.mp-btn-lux::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    130px circle at var(--spot-x) var(--spot-y),
+    rgba(255, 255, 255, 0.28),
+    transparent 58%
+  );
+  opacity: 0;
+  transition: opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .mp-btn-lux:hover::before {
+    opacity: 1;
+  }
 }
 .mp-btn-lux::after {
   content: "";
@@ -1108,6 +1145,99 @@ svg {
 .mp-inview.is-in {
   opacity: 1;
   transform: none;
+}
+
+.mp-pointer-glow {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: radial-gradient(
+    420px circle at var(--mx, 50%) var(--my, 40%),
+    rgba(212, 196, 168, 0.05),
+    transparent 58%
+  );
+  mix-blend-mode: screen;
+}
+@media (hover: none), (pointer: coarse) {
+  .mp-pointer-glow {
+    display: none;
+  }
+}
+
+.mp-spot {
+  --spot-x: 50%;
+  --spot-y: 50%;
+}
+
+.tier-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+.tier-mark-bar {
+  display: block;
+  width: 1px;
+  height: 0.78em;
+  background: currentColor;
+  opacity: 0.85;
+}
+.tier-mark--member {
+  color: #c5cdd8;
+}
+.tier-mark--verified {
+  color: var(--color-accent);
+}
+.tier-mark--black {
+  gap: 0;
+  color: #f3f3f3;
+  letter-spacing: 0.26em;
+  border: 1px solid #8d8d8d;
+  background: #000;
+}
+
+.mp-page-head {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1rem 0.85rem;
+  background: rgba(5, 5, 5, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(212, 196, 168, 0.12);
+}
+.mp-page-head h1 {
+  margin-top: 0.35rem;
+  font-size: 1.55rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: var(--color-ivory);
+}
+.mp-page-head-action {
+  flex-shrink: 0;
+  padding-bottom: 0.15rem;
+}
+@media (min-width: 768px) {
+  .mp-page-head {
+    padding-left: 0;
+    padding-right: 0;
+  }
+  .mp-page-head h1 {
+    font-size: 1.85rem;
+  }
+}
+
+.mp-board-row.is-you {
+  padding-left: 0.85rem;
+  border-left: 1px solid var(--color-accent);
 }
 .mp-inview--line.is-in .mp-hero-rule,
 .mp-inview--line.is-in .mp-ladder-line {
@@ -1714,6 +1844,9 @@ html.mp-landing-scrolled .mp-landing-nav {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .mp-pointer-glow {
+    display: none !important;
+  }
   .mp-inview,
   .mp-landing-hero-mark,
   .mp-hero-kicker,

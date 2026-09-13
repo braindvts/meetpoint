@@ -131,7 +131,7 @@ export default function ConnectionsPage() {
               return (
                 <div
                   key={conn.peerId}
-                  className={`mp-row mp-person-card p-3 ${
+                  className={`mp-row mp-person-card mp-spot p-3.5 ${
                     isInbound ? "bg-accent/[0.06]" : ""
                   }`}
                 >

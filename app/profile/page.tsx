@@ -112,33 +112,40 @@ function ProfileContent() {
         <PageHeader title="Profile" />
         <div className="px-4 pb-6 pt-2">
         {needsVerify && (
-          <div className="mb-4 rounded-xl border border-accent/30 bg-accent/5 px-3 py-2 text-[12px] leading-snug text-accent-2">
+          <div className="mb-4 border border-accent/30 bg-accent/5 px-3 py-2 text-[12px] leading-snug text-accent-2">
             Want Verified? Add business email, LinkedIn, and resume below — or skip and stay a
             Member.
           </div>
         )}
 
-        <section className="mp-person-card mb-5 flex items-center justify-between gap-3 p-3">
-          <div className="flex items-center gap-3">
+        <section className="mp-person-card mp-spot mb-6 flex items-center justify-between gap-3 p-4">
+          <div className="flex items-center gap-3.5">
             <button
               type="button"
               onClick={() => setEditPopupOpen(true)}
-              className="shrink-0"
+              className="shrink-0 transition duration-300 hover:opacity-90 active:scale-95"
               aria-label="Edit profile"
             >
               <Avatar
                 src={profile.photo}
                 name={profile.name}
-                sizeCls="h-14 w-14"
-                rounded="rounded-[12px]"
+                sizeCls="h-16 w-16"
+                rounded="rounded-[3px]"
               />
             </button>
             <div>
-              <h2 className="font-display text-xl font-semibold text-ivory">{profile.name}</h2>
-              <p className="text-[12px] text-accent">{profile.jobTitle || "Member"}</p>
+              <p className="mp-kicker">Your card</p>
+              <h2 className="mt-1 font-display text-xl font-semibold tracking-tight text-ivory">
+                {profile.name}
+              </h2>
+              <p className="text-[13px] text-accent">{profile.jobTitle || "Member"}</p>
             </div>
           </div>
-          <button type="button" onClick={reset} className="text-[12px] text-red-400">
+          <button
+            type="button"
+            onClick={reset}
+            className="text-[12px] text-red-400/80 transition hover:text-red-300"
+          >
             Reset
           </button>
         </section>
@@ -158,15 +165,15 @@ function ProfileContent() {
           onSwitchPremier={switchInterval}
         />
 
-        <section className="mp-person-card mb-5 p-4">
-          <p className="text-[12px] font-medium text-accent">Alerts</p>
-          <p className="mt-1 text-sm text-muted">
+        <section className="mp-person-card mb-8 p-4">
+          <p className="mp-kicker">Alerts</p>
+          <p className="mt-2 text-sm text-muted">
             Browser notifications for intros and table confirmations.
           </p>
           <button
             type="button"
             onClick={() => void ensureNotifyPermission()}
-            className="mt-3 rounded-md border border-accent/40 px-4 py-2 text-[12px] text-accent"
+            className="mt-3 border border-accent/40 px-4 py-2 text-[12px] text-accent transition hover:bg-accent/5 active:scale-[0.98]"
           >
             Enable alerts
           </button>
