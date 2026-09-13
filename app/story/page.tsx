@@ -21,30 +21,23 @@ export default function StoryPage() {
 
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="/conclave-instagram.png"
+        src="/interlink-instagram.png"
         alt="Interlink Instagram post"
         className="mx-auto mt-8 w-full max-w-[360px] rounded-lg border border-accent/25"
       />
 
       <div className="mt-6 flex flex-col gap-2">
         <a
-          href="/conclave-instagram.png"
+          href="/interlink-instagram.png"
           download="interlink-instagram.png"
           className="mp-btn-lux rounded-xl bg-gradient-to-b from-accent-2 to-accent py-3.5 text-[12px] font-semibold text-ink"
         >
           Save picture (PNG)
         </a>
         <a
-          href="/conclave-instagram.pdf"
-          download="interlink-instagram.pdf"
-          className="rounded-xl border border-accent/30 py-3.5 text-[12px] font-semibold text-ivory"
-        >
-          Save PDF
-        </a>
-        <a
-          href="/conclave-instagram-story.png"
+          href="/interlink-instagram-story.png"
           download="interlink-instagram-story.png"
-          className="text-[13px] text-accent"
+          className="rounded-xl border border-accent/30 py-3.5 text-[12px] font-semibold text-ivory"
         >
           Story version (vertical)
         </a>

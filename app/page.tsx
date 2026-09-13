@@ -190,11 +190,7 @@ export default function Landing() {
                     {plan.name}
                   </p>
                   <p className="mt-3 text-2xl font-semibold tracking-tight text-ivory">{plan.price}</p>
-                  {plan.note ? (
-                    <p className="mt-1 text-[12px] text-muted">{plan.note}</p>
-                  ) : (
-                    <p className="mt-1 text-[12px] text-transparent">.</p>
-                  )}
+                  <p className="mt-1 min-h-[1.125rem] text-[12px] text-muted">{plan.note}</p>
                   <p className="mt-5 text-[14px] leading-relaxed text-muted">{plan.copy}</p>
                 </div>
               ))}
