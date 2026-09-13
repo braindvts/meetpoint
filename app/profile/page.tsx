@@ -109,7 +109,7 @@ function ProfileContent() {
     <>
       <Nav />
       <main className="mp-app px-0 pb-10 md:px-6">
-        <PageHeader title="Profile" />
+        <PageHeader title="Profile" kicker="Your card" />
         <div className="px-4 pb-6 pt-2">
         {needsVerify && (
           <div className="mb-4 border border-accent/30 bg-accent/5 px-3 py-2 text-[12px] leading-snug text-accent-2">

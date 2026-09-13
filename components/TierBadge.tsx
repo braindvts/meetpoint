@@ -7,8 +7,9 @@ interface Props {
 }
 
 /**
- * Editorial standing marks — a hairline rule + the name.
- * Not metal chips. BLACK is its own plaque.
+ * Editorial standing — index + name, not metal chips.
+ * Verified is the champagne word only; do not add a check here.
+ * BLACK is its own plaque.
  */
 export const TIER_CARD: Record<
   MemberTier,
@@ -31,6 +32,8 @@ export const TIER_CARD: Record<
   },
 };
 
+const INDEX: Record<1 | 2, string> = { 1: "01", 2: "02" };
+
 export default function TierBadge({ tier, size = "sm" }: Props) {
   const resolved: MemberTier = tier ?? 1;
 
@@ -38,14 +41,16 @@ export default function TierBadge({ tier, size = "sm" }: Props) {
     return <BlackBadge size={size === "md" ? "md" : "sm"} />;
   }
 
-  const pad = size === "md" ? "text-[11px] tracking-[0.2em]" : "text-[10px] tracking-[0.18em]";
+  const scale = size === "md" ? "tier-mark--md" : "";
 
   return (
     <span
-      className={`tier-mark ${resolved === 2 ? "tier-mark--verified" : "tier-mark--member"} ${pad}`}
+      className={`tier-mark ${resolved === 2 ? "tier-mark--verified" : "tier-mark--member"} ${scale}`}
       title={formatTierLabel(resolved)}
     >
-      <span className="tier-mark-bar" aria-hidden />
+      <span className="tier-mark-idx" aria-hidden>
+        {INDEX[resolved]}
+      </span>
       <span>{formatTierLabel(resolved)}</span>
     </span>
   );

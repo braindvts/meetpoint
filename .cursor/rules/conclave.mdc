@@ -29,7 +29,8 @@ Premier ($20/mo) is a plan that expands who Members can meet. Standing levels ar
 
 ## UX
 
-- Level badges: matching metal marks — steel / champagne / black (BLACK is the coolest)
+- Standing marks: editorial index + name (Member / Verified); BLACK is a black plaque — not matching metal chips
+- Do not restyle Verified checkmarks; BLACK CONNECTION stays a black checkmark
 - BLACK CONNECTION: black checkmark badge (not a chain icon)
 - Never show “Tier N · Name”
 - Signup: Identity required; verification optional (skip = stay Member)

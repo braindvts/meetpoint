@@ -35,12 +35,9 @@ export default function MemberStatusStrip({ profile, tier }: Props) {
   return (
     <div className="mb-6 flex flex-wrap items-center gap-x-4 gap-y-2">
       <span
-        className={`tier-mark text-[10px] tracking-[0.16em] ${
-          premier ? "tier-mark--verified" : "text-muted"
-        }`}
+        className={`mp-plan-mark ${premier ? "is-on" : ""}`}
         title={premier ? "Premier" : "Free member"}
       >
-        <span className="tier-mark-bar" aria-hidden />
         {premier ? (onTrial ? "Premier · Trial" : "Premier") : "Free"}
       </span>
 

@@ -6,15 +6,15 @@ interface Props {
 }
 
 /**
- * BLACK — the loudest standing. A tight black plaque, not a metal chip.
+ * BLACK — the loudest standing. A letterpress plaque, not a metal chip.
  */
 export default function BlackBadge({ size = "sm", className = "" }: Props) {
   const pad =
     size === "md"
-      ? "px-2.5 py-1 text-[11px] tracking-[0.28em]"
+      ? "tier-mark--md"
       : size === "xs"
-        ? "px-1.5 py-[2px] text-[8.5px] tracking-[0.24em]"
-        : "px-2 py-[3px] text-[10px] tracking-[0.26em]";
+        ? "tier-mark--xs"
+        : "";
 
   return (
     <span

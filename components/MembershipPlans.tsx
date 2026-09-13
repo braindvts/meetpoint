@@ -60,7 +60,7 @@ export default function MembershipPlans({
         <div
           className={`border px-3 py-2.5 sm:p-5 ${
             premier
-              ? "border-white/25 bg-black black-centurion"
+              ? "border-white/25 bg-black"
               : "border-accent/30 bg-panel/70"
           }`}
         >

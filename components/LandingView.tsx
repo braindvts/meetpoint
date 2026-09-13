@@ -175,8 +175,8 @@ export default function LandingView() {
               Named, not ranked.
             </h2>
             <p className="mp-section-lede">
-              Steel, champagne, black. Signup never blocks on verification — Identity is enough to
-              enter.
+              Named standing — not a ranked ladder. Signup never blocks on verification. Identity
+              is enough to enter.
             </p>
           </Reveal>
 

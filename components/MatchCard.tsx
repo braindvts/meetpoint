@@ -100,7 +100,7 @@ export default function MatchCard({
       tabIndex={onOpenProfile ? 0 : undefined}
       onClick={() => onOpenProfile?.(person.id)}
       onKeyDown={handleKey}
-      className={`mp-card-motion mp-spot flex h-full min-h-[320px] flex-col overflow-hidden rounded-[4px] border border-accent/20 bg-[#12110f] ${
+      className={`mp-card-motion mp-card-corners mp-spot flex h-full min-h-[320px] flex-col overflow-hidden rounded-[4px] border border-accent/20 bg-[#12110f] ${
         onOpenProfile || preview ? "cursor-pointer [-webkit-tap-highlight-color:transparent]" : ""
       }`}
     >
@@ -220,14 +220,14 @@ export default function MatchCard({
           aria-label={connectAria()}
           disabled={connectLocked && status !== "connected"}
           onClick={handleConnect}
-          className={`mp-spot grid h-11 w-11 shrink-0 place-items-center rounded-[3px] transition duration-200 active:scale-95 ${
+          className={`mp-spot grid h-11 w-11 shrink-0 place-items-center rounded-[2px] transition duration-200 active:scale-95 ${
             status === "connected"
               ? "border border-accent/25 text-muted"
               : status === "requested"
                 ? "border border-accent/45 text-accent"
                 : !canConnect && !preview
                   ? "border border-accent/40 text-accent"
-                  : "bg-gradient-to-b from-accent-2 to-accent text-ink shadow-[0_8px_20px_rgba(212,196,168,0.22)]"
+                  : "mp-btn-lux bg-gradient-to-b from-accent-2 to-accent text-ink"
           }`}
         >
           {status === "requested" ? (

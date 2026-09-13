@@ -20,11 +20,19 @@ export default function InteractionLayer() {
       raf = requestAnimationFrame(() => {
         root.style.setProperty("--mx", `${e.clientX}px`);
         root.style.setProperty("--my", `${e.clientY}px`);
-        const spot = (e.target as HTMLElement | null)?.closest<HTMLElement>(".mp-spot");
-        if (!spot) return;
-        const r = spot.getBoundingClientRect();
-        spot.style.setProperty("--spot-x", `${e.clientX - r.left}px`);
-        spot.style.setProperty("--spot-y", `${e.clientY - r.top}px`);
+        const el = (e.target as HTMLElement | null)?.closest<HTMLElement>(
+          ".mp-spot, .mp-btn-lux"
+        );
+        if (!el) return;
+        const r = el.getBoundingClientRect();
+        el.style.setProperty("--spot-x", `${e.clientX - r.left}px`);
+        el.style.setProperty("--spot-y", `${e.clientY - r.top}px`);
+        if (el.classList.contains("mp-btn-lux")) {
+          const dx = ((e.clientX - (r.left + r.width / 2)) / r.width) * 8;
+          const dy = ((e.clientY - (r.top + r.height / 2)) / r.height) * 6;
+          el.style.setProperty("--pull-x", `${Math.max(-4, Math.min(4, dx))}px`);
+          el.style.setProperty("--pull-y", `${Math.max(-3, Math.min(3, dy))}px`);
+        }
       });
     };
 

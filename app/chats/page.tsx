@@ -109,6 +109,8 @@ export default function ChatsPage() {
       <main className="mp-app px-0 pb-10 md:px-6">
         <PageHeader
           title="Chats"
+          kicker="Private"
+          lede="Private messages. The table is proposed here."
           action={
             <button
               onClick={() => setCreating((c) => !c)}
@@ -128,10 +130,6 @@ export default function ChatsPage() {
             </button>
           }
         />
-        <div className="px-4 pt-3">
-          <p className="text-[13px] text-muted">Private messages. The table is proposed here.</p>
-        </div>
-
         <div className="px-4 pb-6 pt-4">
         {creating && (
           <div className="mp-modal-in mp-person-card mb-6 p-4">
@@ -166,7 +164,7 @@ export default function ChatsPage() {
                           on ? "border-accent/50 bg-accent/10" : "border-line/60 bg-ink/40"
                         }`}
                       >
-                        <Avatar src={p.photoUrl} name={p.name} sizeCls="h-10 w-10" rounded="rounded-[12px]" />
+                        <Avatar src={p.photoUrl} name={p.name} sizeCls="h-10 w-10" rounded="rounded-[3px]" />
                         <div className="min-w-0 flex-1">
                           <p className="font-display text-lg font-semibold text-ivory">{p.name}</p>
                           <p className="truncate text-[10px] uppercase tracking-[0.16em] text-muted">

@@ -34,7 +34,7 @@ export default function EmptyState({
             {actionHref ? (
               <Link
                 href={actionHref}
-                className="mp-btn-lux inline-flex rounded-xl bg-gradient-to-b from-accent-2 to-accent px-9 py-3.5 text-[12px] font-semibold text-ink"
+                className="mp-btn-lux mp-spot inline-flex rounded-[2px] bg-gradient-to-b from-accent-2 to-accent px-9 py-3.5 text-[12px] font-semibold uppercase tracking-[0.16em] text-ink"
               >
                 {actionLabel}
               </Link>
@@ -42,7 +42,7 @@ export default function EmptyState({
               <button
                 type="button"
                 onClick={onAction}
-                className="mp-btn-lux inline-flex rounded-xl bg-gradient-to-b from-accent-2 to-accent px-9 py-3.5 text-[12px] font-semibold text-ink"
+                className="mp-btn-lux mp-spot inline-flex rounded-[2px] bg-gradient-to-b from-accent-2 to-accent px-9 py-3.5 text-[12px] font-semibold uppercase tracking-[0.16em] text-ink"
               >
                 {actionLabel}
               </button>

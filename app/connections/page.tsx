@@ -93,17 +93,17 @@ export default function ConnectionsPage() {
     <>
       <Nav />
       <main className="mp-app px-0 pb-10 md:px-6">
-        <PageHeader title="Circle" />
-        <div className="px-4 pt-2">
-          <p className="text-[14px] text-ivory/70">Your introductions</p>
-          <p className="mt-1 text-[12px] text-muted">
-            {connections.length > 0
+        <PageHeader
+          title="Circle"
+          kicker="Introductions"
+          lede={
+            connections.length > 0
               ? `${connected.length} connected${
                   inbound.length ? ` · ${inbound.length} to review` : ""
                 }${outbound.length ? ` · ${outbound.length} waiting` : ""}`
-              : "Introductions you accept live here."}
-          </p>
-        </div>
+              : "Introductions you accept live here."
+          }
+        />
 
         <div className="px-4 pb-6 pt-4">
         {connections.length === 0 ? (
@@ -145,7 +145,7 @@ export default function ConnectionsPage() {
                         src={person.photoUrl}
                         name={person.name}
                         sizeCls="h-14 w-14 sm:h-16 sm:w-16"
-                        rounded="rounded-[12px]"
+                        rounded="rounded-[3px]"
                       />
                       <div className="min-w-0">
                         <h3 className="truncate font-display text-xl font-semibold text-ivory sm:text-2xl">
@@ -174,7 +174,7 @@ export default function ConnectionsPage() {
                           <button
                             type="button"
                             onClick={() => accept(person.id)}
-                            className="rounded-md bg-gradient-to-b from-accent-2 to-accent px-3 py-1.5 text-[11px] font-medium text-ink"
+                            className="mp-btn-lux mp-spot rounded-[2px] bg-gradient-to-b from-accent-2 to-accent px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-ink"
                           >
                             Accept
                           </button>

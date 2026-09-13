@@ -161,7 +161,7 @@ Details: [WEBSITE.md](./WEBSITE.md) · [KEYS.md](./KEYS.md) · [LAUNCH.md](./LAU
 
 - Brand first: Interlink / champagne on dark ink  
 - One typeface family (Outfit)  
-- Level marks are the same metal shape: steel Member · champagne Verified · black sheen BLACK  
+- Standing marks are editorial, not metal chips: index + name for Member / Verified; BLACK is a black plaque. Do not restyle Verified checkmarks or the BLACK CONNECTION check.
 - Signup must show **what** is missing and **where** (Needed sections + sticky chips)  
 - No purple AI-default theme, no cream+terracotta cliché  
 

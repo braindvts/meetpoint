@@ -204,7 +204,6 @@ export default function PlansSection({
               <div>
                 <div className="flex items-center gap-2">
                   <BlackBadge size="xs" />
-                  <p className="text-[15px] font-semibold text-[#f5f5f5]">BLACK</p>
                 </div>
                 <p className="mt-1 text-[12px] leading-snug text-[#a8a8a8]">
                   Top of the room · meet anyone · {formatBlackPrice("month")} or{" "}
