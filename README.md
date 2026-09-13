@@ -104,6 +104,7 @@ Full steps: **[ios/README.md](./ios/README.md)**
 
 ## Tech
 
-- Next.js 15 · React 19 · TypeScript · Tailwind CSS v4 · Prisma 5  
+- Next.js 15 · React 19 · TypeScript · Tailwind CSS v4 · Prisma 5
+- Vercel build: `prisma generate && node scripts/prisma-migrate-deploy.mjs && next build` (`migrate deploy` only — never `db push` on Production) ([prisma/README.md](./prisma/README.md))
 - LinkedIn OIDC + signed cookies + member cookie  
 - Hybrid: `localStorage` + SQLite APIs for multi-device

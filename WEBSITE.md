@@ -60,7 +60,7 @@ Skipping the iPhone app saves you the $99/year Apple membership, and it also mea
 - [ ] `https://yourdomain.com` loads the landing page
 - [ ] `https://yourdomain.com/api/members` returns `{"ok":true,"members":[]}`
 - [ ] Switch Vercel to Pro before you take real money (Hobby is non-commercial)
-- [x] Database tables are created automatically on every deploy
+- [x] Vercel build is `prisma generate && node scripts/prisma-migrate-deploy.mjs && next build` (`migrate deploy` only — no `db push`, no `--accept-data-loss`). See [prisma/README.md](./prisma/README.md).
 
 ## Phase 3 — Welcome email · $0
 

@@ -156,7 +156,8 @@ NEXT_PUBLIC_ENABLE_DEMO_PROFILES=1
 ## Tech & data
 
 - **Frontend:** Next.js App Router, TypeScript, Tailwind  
-- **DB:** Postgres via Prisma (`Member`, connections, chats, BLACK tables)  
+- **DB:** Postgres via Prisma (`Member`, connections, chats, BLACK tables, `Report`)
+- **Vercel build:** `prisma generate && node scripts/prisma-migrate-deploy.mjs && next build` (`migrate deploy` only). Never `prisma db push` on Production (that tried to DROP live `Report` columns). Never `--accept-data-loss`. Details: [prisma/README.md](./prisma/README.md).
 - **Auth:** email/password + Google / LinkedIn / Apple (when keyed)  
 - **Payments:** Stripe Checkout (`black_month`, `black_year`, table fee)  
 - **Email:** Resend welcome on sign-up  
@@ -205,3 +206,4 @@ See [MISSING.md](./MISSING.md). Big ones: email verify + password reset links, c
 | BLACK rules | `lib/black.ts` |
 | Intro reach | `lib/plans.ts` (`canIntroduceToTier`) |
 | Walkthrough owner (env-gated) | `lib/walkthroughOwner.ts`, `lib/ensureDemoOwner.ts` |
+| Reports / migrate deploy | `app/api/report/route.ts`, [prisma/README.md](./prisma/README.md) |
