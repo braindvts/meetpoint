@@ -52,6 +52,7 @@ model Member {
   blackInvitesReceived BlackInvite[]     @relation("blackInviteTo")
   blackConnectionsHeld BlackConnection[] @relation("blackHolder")
   blackConnectionsWith BlackConnection[] @relation("blackPeer")
+  eventInterests       EventInterest[]
 }
 
 /// An invitation into the BLACK network, always raised inside a private DM.
@@ -90,6 +91,22 @@ model BlackConnection {
 
   @@unique([blackMemberId, peerId])
   @@index([peerId])
+}
+
+/// RSVP / save / pass on a curated Conclave table.
+/// Event bodies live in `lib/events.ts`; this is the member's feedback only.
+model EventInterest {
+  id        String   @id @default(cuid())
+  memberId  String
+  eventId   String
+  /// going | saved | passed
+  status    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  member    Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([memberId, eventId])
+  @@index([memberId])
 }
 
 model Block {

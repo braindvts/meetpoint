@@ -94,6 +94,7 @@ Separate from BLACK. Shown as a **black checkmark** badge. Earned when a BLACK m
 - Cards are **even height**; only the important info: name, role, city, level badge, short bio, focus tags, wants, match line.
 - Do **not** list how someone verified (email / LinkedIn / resume). The **Verified** level badge is enough.
 - Filter (funnel icon): change **what you’re looking for** anytime after signup — Discover updates immediately.
+- **Tables** tab: hosted dinners / salons ranked for you. Cards stay even height; show title, host, city, topics, audience, and a short match line (not a dump of the catalog).
 
 ---
 
@@ -108,7 +109,7 @@ Separate from BLACK. Shown as a **black checkmark** badge. Earned when a BLACK m
 | `/` | Landing |
 | `/login` | Email + OAuth sign-in |
 | `/onboarding` | Profile setup (highlights missing fields) |
-| `/discover` | The Room — For you / Nearby match cards |
+| `/discover` | The Room — For you / Nearby people, plus Tables matched to you |
 | `/circle` | Incoming / outgoing connection requests |
 | `/chats` | Private DMs (poll ~4s) + table proposals |
 | `/profile` | Your card, grouped Plans (Free/Premier/BLACK), levels |
@@ -119,6 +120,8 @@ Separate from BLACK. Shown as a **black checkmark** badge. Earned when a BLACK m
 ## How matching works (short)
 
 Discover ranks people by shared ambitions, complementary “looking for,” same profession, and distance. Nearby narrows by city/geo. Members without Premier only introduce to other Members. Verified and BLACK (or Premier) can reach further. Looking-for preferences can be edited from Discover’s filter anytime.
+
+**Tables** (hosted dinners) are ranked separately in `lib/eventMatch.ts`: interests ↔ topics, job/role ↔ audience, and bio intent phrases (“looking for…”, “hiring…”, “founder intros”) ↔ the table’s purpose. Scoring is a hybrid of canonical tags, related clusters, TF-IDF overlap, and light RSVP feedback (going / saved / passed). Weak matches are dropped — precision over a full catalog dump. Sparse profiles fall back to role and looking-for.
 
 ---
 
@@ -140,7 +143,7 @@ NEXT_PUBLIC_ENABLE_DEMO_PROFILES=1
 ## Tech & data
 
 - **Frontend:** Next.js App Router, TypeScript, Tailwind  
-- **DB:** Postgres via Prisma (`Member`, connections, chats, BLACK tables)  
+- **DB:** Postgres via Prisma (`Member`, connections, chats, BLACK tables, `EventInterest`)  
 - **Auth:** email/password + Google / LinkedIn / Apple (when keyed)  
 - **Payments:** Stripe Checkout (`premier`, `black_month`, `black_year`)  
 - **Email:** Resend welcome on sign-up  
@@ -182,6 +185,8 @@ See [MISSING.md](./MISSING.md). Big ones: email verify + password reset links, c
 | Plans (Free / Premier / BLACK) | `components/PlansSection.tsx` |
 | BLACK CONNECTION checkmark | `components/BlackConnectionBadge.tsx` |
 | Discover cards | `components/MatchCard.tsx` |
+| Table matching | `lib/eventMatch.ts`, `lib/events.ts` |
+| Table cards | `components/EventCard.tsx` |
 | Signup missing fields | `components/ProfileForm.tsx` |
 | BLACK rules | `lib/black.ts` |
 | Premier access | `lib/plans.ts` |

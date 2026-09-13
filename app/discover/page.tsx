@@ -4,9 +4,20 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Nav from "@/components/Nav";
+import EventCard from "@/components/EventCard";
 import MatchCard from "@/components/MatchCard";
 import PersonProfileSheet from "@/components/PersonProfileSheet";
 import PremierPlanSheet from "@/components/PremierPlanSheet";
+import { fetchRankedEvents, saveEventInterest, syncProfileToServer } from "@/lib/apiClient";
+import { CONCLAVE_TABLES } from "@/lib/events";
+import { rankEvents } from "@/lib/eventMatch";
+import type { EventInterest, EventInterestStatus } from "@/lib/eventTypes";
+import {
+  clearEventInterest,
+  loadEventInterests,
+  mergeEventInterests,
+  setEventInterest,
+} from "@/lib/eventStore";
 import { filterByPreference, rankMatches } from "@/lib/match";
 import { canIntroduceToTier, hasActivePremier } from "@/lib/plans";
 import {
@@ -23,7 +34,6 @@ import {
   saveProfile,
 } from "@/lib/store";
 import { refreshDirectory, loadDirectory } from "@/lib/directory";
-import { syncProfileToServer } from "@/lib/apiClient";
 import { readClientConnections, readClientProfile } from "@/lib/clientProfile";
 import { tierForPerson, tierForProfile } from "@/lib/tiers";
 import type { Connection, LookingFor, MyProfile, Person } from "@/lib/types";
@@ -34,7 +44,7 @@ import SkeletonCard from "@/components/SkeletonCard";
 import { myBlackConnectionCount, syncBlackFromServer } from "@/lib/blackStore";
 import { track } from "@/lib/analytics";
 
-type Filter = "open" | "local";
+type Filter = "open" | "local" | "tables";
 
 export default function DiscoverPage() {
   const router = useRouter();
@@ -51,10 +61,15 @@ export default function DiscoverPage() {
   const [profilePerson, setProfilePerson] = useState<Person | null>(null);
   const [directoryReady, setDirectoryReady] = useState(() => loadDirectory().length > 0);
   const [blackConnections, setBlackConnections] = useState(0);
+  const [eventInterests, setEventInterests] = useState<EventInterest[]>(() =>
+    loadEventInterests()
+  );
+  const [hydrated, setHydrated] = useState(false);
 
   const refreshConnections = useCallback(() => setConnections(loadConnections()), []);
 
   useEffect(() => {
+    setHydrated(true);
     const p = loadProfile();
     if (!p) {
       router.replace("/onboarding");
@@ -70,6 +85,9 @@ export default function DiscoverPage() {
       setPeople(list);
       setDirectoryReady(true);
     });
+    void fetchRankedEvents().then((data) => {
+      if (data?.interests) setEventInterests(mergeEventInterests(data.interests));
+    });
 
     const onProfile = () => setProfile(loadProfile());
     const onDir = () => setPeople(loadDirectory());
@@ -82,12 +100,15 @@ export default function DiscoverPage() {
     void syncBlackFromServer().then(onBlack);
     window.addEventListener("meetpoint:black-changed", onBlack);
     window.addEventListener("meetpoint:blocks-changed", onBlocks);
+    const onEvents = () => setEventInterests(loadEventInterests());
+    window.addEventListener("meetpoint:events-changed", onEvents);
     return () => {
       window.removeEventListener("meetpoint:connections-changed", refreshConnections);
       window.removeEventListener("meetpoint:profile-changed", onProfile);
       window.removeEventListener("meetpoint:directory-changed", onDir);
       window.removeEventListener("meetpoint:black-changed", onBlack);
       window.removeEventListener("meetpoint:blocks-changed", onBlocks);
+      window.removeEventListener("meetpoint:events-changed", onEvents);
     };
   }, [router, refreshConnections]);
 
@@ -111,6 +132,26 @@ export default function DiscoverPage() {
 
   const remainingForYou = forYou.filter((m) => !skipped.includes(m.person.id)).length;
   const remainingNearby = nearby.filter((m) => !skipped.includes(m.person.id)).length;
+
+  const tableMatches = useMemo(
+    () => (profile ? rankEvents(profile, CONCLAVE_TABLES, eventInterests) : []),
+    [profile, eventInterests]
+  );
+  const visibleTables = useMemo(
+    () => tableMatches.filter((m) => !skipped.includes(m.event.id)),
+    [tableMatches, skipped]
+  );
+
+  function setTableInterest(eventId: string, status: EventInterestStatus) {
+    setEventInterests(setEventInterest(eventId, status));
+    if (!isDemoProfile(profile)) void saveEventInterest(eventId, status);
+    if (status === "passed") skip(eventId);
+  }
+
+  function undoTableInterest(eventId: string) {
+    setEventInterests(clearEventInterest(eventId));
+    if (!isDemoProfile(profile)) void saveEventInterest(eventId, null);
+  }
 
   const myTier = useMemo(() => {
     if (!profile) return null;
@@ -145,7 +186,7 @@ export default function DiscoverPage() {
     }, 220);
   }
 
-  if (!profile) return null;
+  if (!hydrated || !profile) return null;
 
   const showSkeletons = !directoryReady && visiblePeople.length === 0;
 
@@ -194,8 +235,8 @@ export default function DiscoverPage() {
         </header>
 
         <div className="px-4 pt-3 md:px-0 md:pt-4">
-          <div className="flex max-w-md rounded-full border border-white/12 bg-[#12110f] p-1 md:max-w-lg">
-            {(["open", "local"] as Filter[]).map((key) => (
+          <div className="flex max-w-xl rounded-full border border-white/12 bg-[#12110f] p-1 md:max-w-2xl">
+            {(["open", "local", "tables"] as Filter[]).map((key) => (
               <button
                 key={key}
                 type="button"
@@ -206,7 +247,9 @@ export default function DiscoverPage() {
               >
                 {key === "open"
                   ? `For you · ${remainingForYou}`
-                  : `Nearby · ${remainingNearby}`}
+                  : key === "local"
+                    ? `Nearby · ${remainingNearby}`
+                    : `Tables · ${visibleTables.length}`}
               </button>
             ))}
           </div>
@@ -247,16 +290,67 @@ export default function DiscoverPage() {
               })}
             </div>
             <p className="mt-2.5 text-[11px] text-muted">
-              For you ranks by overlap. Nearby is people close to your city.
+              For you ranks people by overlap. Tables ranks hosted dinners against
+              your interests, role, and what your description says you want.
             </p>
           </div>
         ) : null}
 
         <div className="px-4 pb-6 pt-4 md:px-0">
-          {showSkeletons ? (
+          {filter !== "tables" && tableMatches.length > 0 ? (
+            <button
+              type="button"
+              onClick={() => setFilter("tables")}
+              className="mb-4 w-full border border-accent/25 bg-accent/[0.06] px-4 py-3 text-left transition hover:border-accent/40"
+            >
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent">
+                Tables for you
+              </p>
+              <p className="mt-1 text-[13px] text-ivory/80">
+                {tableMatches.length} hosted{" "}
+                {tableMatches.length === 1 ? "dinner matches" : "dinners match"} what
+                you&apos;re into
+                {tableMatches[0] ? ` — ${tableMatches[0].event.title}` : ""}.
+              </p>
+            </button>
+          ) : null}
+
+          {showSkeletons && filter !== "tables" ? (
             <div className="space-y-3">
               <SkeletonCard />
               <SkeletonCard />
+            </div>
+          ) : filter === "tables" && visibleTables.length === 0 ? (
+            <EmptyState
+              title={tableMatches.length === 0 ? "No tables for this card yet" : "You've seen these tables"}
+              body={
+                tableMatches.length === 0 ? (
+                  <>
+                    Add interests, a role, or a line about what you&apos;re looking for in{" "}
+                    <Link href="/profile" className="text-accent underline underline-offset-2">
+                      Profile
+                    </Link>{" "}
+                    — we only surface dinners that are a real fit.
+                  </>
+                ) : (
+                  <>Pass is just for this session. Restore the list, or come back when new tables land.</>
+                )
+              }
+              actionHref={tableMatches.length === 0 ? "/profile" : undefined}
+              actionLabel={tableMatches.length === 0 ? "Open profile" : "Restore list"}
+              onAction={tableMatches.length === 0 ? undefined : () => setSkipped([])}
+            />
+          ) : filter === "tables" ? (
+            <div key="tables" className="mp-stagger grid gap-3 md:grid-cols-2 md:gap-4">
+              {visibleTables.map((m) => (
+                <EventCard
+                  key={m.event.id}
+                  match={m}
+                  status={eventInterests.find((i) => i.eventId === m.event.id)?.status}
+                  onInterest={setTableInterest}
+                  onClear={undoTableInterest}
+                />
+              ))}
             </div>
           ) : pool.length === 0 ? (
             <EmptyState
