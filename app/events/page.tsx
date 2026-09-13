@@ -11,17 +11,20 @@ import ConventionCard from "@/components/events/ConventionCard";
 import EventFiltersBar from "@/components/events/EventFiltersBar";
 import {
   filterEvents,
+  getPublishedEvents,
   getUpcomingSorted,
   type EventFilters,
   type InterlinkEvent,
 } from "@/lib/events";
 import {
   displayCounts,
+  fetchPublishedEvents,
   getRsvp,
   listPublishedEvents,
   networkAttendingCount,
   setRsvp,
 } from "@/lib/eventStore";
+import { loginUrl } from "@/lib/appPath";
 import { hydrateLocalProfile } from "@/lib/hydrateSession";
 import { loadConnections } from "@/lib/store";
 import { showToast } from "@/lib/notify";
@@ -62,7 +65,8 @@ function Grid({ children }: { children: React.ReactNode }) {
 export default function EventsPage() {
   const router = useRouter();
   const [profile, setProfile] = useState<MyProfile | null>(null);
-  const [events, setEvents] = useState<InterlinkEvent[]>([]);
+  const [events, setEvents] = useState<InterlinkEvent[]>(() => getPublishedEvents());
+  const [catalogReady, setCatalogReady] = useState(false);
   const [filters, setFilters] = useState<EventFilters>({
     query: "",
     category: "all",
@@ -88,14 +92,19 @@ export default function EventsPage() {
   useEffect(() => {
     let cancelled = false;
     void (async () => {
+      setEvents(listPublishedEvents());
+      const remote = await fetchPublishedEvents();
+      if (cancelled) return;
+      setEvents(remote);
+      setCatalogReady(true);
       const p = await hydrateLocalProfile();
       if (cancelled) return;
-      if (!p) {
-        router.replace("/onboarding");
-        return;
-      }
       setProfile(p);
-      refresh();
+      setConnectedIds(
+        loadConnections()
+          .filter((c) => c.status === "connected")
+          .map((c) => c.peerId)
+      );
     })();
     const onEvt = () => refresh();
     window.addEventListener("meetpoint:events", onEvt);
@@ -105,7 +114,7 @@ export default function EventsPage() {
       window.removeEventListener("meetpoint:events", onEvt);
       window.removeEventListener("meetpoint:connections-changed", onEvt);
     };
-  }, [router, refresh]);
+  }, [refresh]);
 
   const cityHint = profile?.city?.name || "";
 
@@ -183,6 +192,10 @@ export default function EventsPage() {
       networkCount: network,
       interested,
       onToggleInterested: () => {
+        if (!profile) {
+          router.push(loginUrl("/events"));
+          return;
+        }
         const cur = getRsvp(event.id);
         if (cur === "interested" || cur === "going") {
           setRsvp(event.id, null);
@@ -196,13 +209,13 @@ export default function EventsPage() {
     };
   };
 
-  if (!profile) {
+  if (!catalogReady && events.length === 0) {
     return (
       <div className="mp-app">
         <Nav />
         <main className="mx-auto max-w-5xl px-4 pb-24 pt-4 md:px-6">
           <PageHeader title="Events" />
-          <p className="mt-8 text-sm text-muted">Loading the room…</p>
+          <p className="mt-8 text-sm text-muted">Loading events…</p>
         </main>
       </div>
     );
@@ -282,7 +295,12 @@ export default function EventsPage() {
           <EventFiltersBar value={filters} onChange={setFilters} />
         </div>
 
-        {hasActiveFilters ? (
+        {!hasActiveFilters && events.length === 0 ? (
+          <EmptyState
+            title="No events yet"
+            body="The calendar is empty on this server. Check back soon, or ask an operator to publish gatherings."
+          />
+        ) : hasActiveFilters ? (
           <Section
             title="Results"
             subtitle={`${filtered.length} matching ${filtered.length === 1 ? "event" : "events"}`}
@@ -328,11 +346,18 @@ export default function EventsPage() {
             ) : null}
 
             <Section title="Upcoming" id="worldwide" subtitle="Soonest on the calendar — cities worldwide.">
-              <Grid>
-                {upcoming.map((e) => (
-                  <EventCard key={e.id} {...cardProps(e)} />
-                ))}
-              </Grid>
+              {upcoming.length === 0 ? (
+                <EmptyState
+                  title="Nothing upcoming"
+                  body="No published dates yet. Try Popular or Conventions, or check back later."
+                />
+              ) : (
+                <Grid>
+                  {upcoming.map((e) => (
+                    <EventCard key={e.id} {...cardProps(e)} />
+                  ))}
+                </Grid>
+              )}
             </Section>
 
             <Section title="Popular" subtitle="Where professionals are already gathering.">

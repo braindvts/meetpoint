@@ -11,10 +11,13 @@ import EmptyState from "@/components/EmptyState";
 import NewChatSheet from "@/components/NewChatSheet";
 import InterlinksSheet from "@/components/InterlinksSheet";
 import ChatOverflowMenu from "@/components/ChatOverflowMenu";
+import { fetchServerChats, fetchServerConnections } from "@/lib/apiClient";
+import { gateRedirect, resolveSessionGate } from "@/lib/hydrateSession";
 import {
+  applyServerConnections,
   loadChats,
   loadConnections,
-  loadProfile,
+  mergeServerChats,
   openOrCreateDirectChat,
 } from "@/lib/store";
 import {
@@ -127,21 +130,45 @@ function ChatsInner() {
   const [interlinksOpen, setInterlinksOpen] = useState(false);
   const [unreadTick, setUnreadTick] = useState(0);
   const [muteTick, setMuteTick] = useState(0);
+  const [ready, setReady] = useState(() => !!readClientProfile());
 
   const refreshConnections = useCallback(() => setConnections(loadConnections()), []);
 
   useEffect(() => {
-    const p = loadProfile();
-    if (!p) {
-      router.replace("/onboarding");
-      return;
-    }
-    setProfile(p);
-    const loaded = loadChats();
-    ensureReadBaseline(loaded);
-    setChats(loaded);
-    refreshConnections();
-    void refreshDirectory().then(setDirectory);
+    let cancelled = false;
+    void (async () => {
+      const gate = await resolveSessionGate();
+      if (cancelled) return;
+      const dest = gateRedirect(gate, "/chats");
+      if (dest) {
+        router.replace(dest);
+        return;
+      }
+      if (gate.status === "member") setProfile(gate.profile);
+
+      const loaded = loadChats();
+      ensureReadBaseline(loaded);
+      setChats(loaded);
+      refreshConnections();
+      setReady(true);
+
+      const [remoteChats, remoteConnections, dir] = await Promise.all([
+        fetchServerChats(),
+        fetchServerConnections(),
+        refreshDirectory(),
+      ]);
+      if (cancelled) return;
+      if (remoteChats) {
+        const merged = mergeServerChats(remoteChats);
+        ensureReadBaseline(merged);
+        setChats(merged);
+      }
+      if (remoteConnections) {
+        applyServerConnections(remoteConnections);
+        setConnections(remoteConnections);
+      }
+      setDirectory(dir);
+    })();
 
     const refreshChats = () => setChats(loadChats());
     const onUnread = () => setUnreadTick((n) => n + 1);
@@ -153,6 +180,7 @@ function ChatsInner() {
     window.addEventListener("meetpoint:connections-changed", refreshConnections);
     window.addEventListener("meetpoint:directory-changed", onDir);
     return () => {
+      cancelled = true;
       window.removeEventListener("meetpoint:chats-changed", refreshChats);
       window.removeEventListener("meetpoint:unread-changed", onUnread);
       window.removeEventListener("meetpoint:mute-changed", onMute);
@@ -223,7 +251,23 @@ function ChatsInner() {
     router.replace("/chats", { scroll: false });
   }, [router]);
 
-  if (!profile) return null;
+  if (!profile) {
+    return (
+      <>
+        <Nav />
+        <main className="mp-chats-layout">
+          <aside className="mp-chats-rail flex border-r border-line/50">
+            <div className="px-4 py-8">
+              <h1 className="font-display text-2xl font-semibold text-ivory">Chats</h1>
+              <p className="mt-3 text-sm text-muted">
+                {ready ? "Opening your inbox…" : "Loading chats…"}
+              </p>
+            </div>
+          </aside>
+        </main>
+      </>
+    );
+  }
 
   const threadOpen = !!selectedId;
 
@@ -490,7 +534,13 @@ function ChatsInner() {
 
 export default function ChatsPage() {
   return (
-    <Suspense fallback={<main className="min-h-dvh" />}>
+    <Suspense
+      fallback={
+        <main className="mp-app">
+          <p className="px-5 pt-8 text-sm text-muted">Loading chats…</p>
+        </main>
+      }
+    >
       <ChatsInner />
     </Suspense>
   );

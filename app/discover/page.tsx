@@ -9,6 +9,7 @@ import PersonProfileSheet from "@/components/PersonProfileSheet";
 import { filterByPreference, rankMatches } from "@/lib/match";
 import { canIntroduceToTier } from "@/lib/plans";
 import {
+  applyServerConnections,
   ensureSampleInboundRequest,
   getMeetingsAttended,
   getPeerReputation,
@@ -22,9 +23,9 @@ import {
   saveProfile,
 } from "@/lib/store";
 import { findPerson, refreshDirectory, loadDirectory } from "@/lib/directory";
-import { syncProfileToServer } from "@/lib/apiClient";
+import { fetchServerConnections, syncProfileToServer } from "@/lib/apiClient";
 import { readClientConnections, readClientProfile } from "@/lib/clientProfile";
-import { hydrateLocalProfile } from "@/lib/hydrateSession";
+import { gateRedirect, resolveSessionGate } from "@/lib/hydrateSession";
 import { TIER_DEFINITIONS, tierForPerson, tierForProfile, type MemberTier } from "@/lib/tiers";
 import type { Connection, LookingFor, MyProfile, Person } from "@/lib/types";
 import { LOOKING_FOR_OPTIONS } from "@/lib/types";
@@ -52,30 +53,43 @@ export default function DiscoverPage() {
   const [exiting, setExiting] = useState<string | null>(null);
   const [profilePerson, setProfilePerson] = useState<Person | null>(null);
   const [directoryReady, setDirectoryReady] = useState(() => loadDirectory().length > 0);
+  const [gateReady, setGateReady] = useState(() => !!readClientProfile());
 
   const refreshConnections = useCallback(() => setConnections(loadConnections()), []);
 
   useEffect(() => {
     let cancelled = false;
     void (async () => {
-      const p = await hydrateLocalProfile();
+      const gate = await resolveSessionGate();
       if (cancelled) return;
+      const dest = gateRedirect(gate, "/discover");
+      if (dest) {
+        router.replace(dest);
+        return;
+      }
+      const p = gate.status === "member" ? gate.profile : null;
       if (!p) {
         router.replace("/onboarding");
         return;
       }
       setProfile(p);
+      setGateReady(true);
       setFilter("open");
       refreshConnections();
       ensureSampleInboundRequest();
       if (!isDemoProfile(p)) void syncProfileToServer(p);
       track("discover_open");
-      void refreshDirectory().then((list) => {
-        if (!cancelled) {
-          setPeople(list);
-          setDirectoryReady(true);
-        }
-      });
+      const [list, remoteConnections] = await Promise.all([
+        refreshDirectory(),
+        fetchServerConnections(),
+      ]);
+      if (cancelled) return;
+      setPeople(list);
+      setDirectoryReady(true);
+      if (remoteConnections) {
+        applyServerConnections(remoteConnections);
+        setConnections(remoteConnections);
+      }
     })();
 
     const onProfile = () => setProfile(loadProfile());
@@ -163,7 +177,19 @@ export default function DiscoverPage() {
     }, 520);
   }
 
-  if (!profile) return null;
+  if (!profile) {
+    return (
+      <>
+        <Nav />
+        <main className="mp-app px-5 pb-10 pt-6 md:px-6">
+          <h1 className="text-[1.85rem] font-semibold tracking-tight text-ivory">Discover</h1>
+          <p className="mt-3 text-sm text-muted">
+            {gateReady ? "Opening the room…" : "Loading people…"}
+          </p>
+        </main>
+      </>
+    );
+  }
 
   const showSkeletons = !directoryReady && visiblePeople.length === 0;
 
@@ -339,7 +365,17 @@ export default function DiscoverPage() {
                     so introductions stay intentional.
                   </>
                 ) : filter === "local" ? (
-                  <>No relevant people nearby yet. Try For you, or refine your ideas in Profile.</>
+                  !profile.city?.name ? (
+                    <>
+                      Set your city in{" "}
+                      <Link href="/profile" className="text-accent underline underline-offset-2">
+                        Profile
+                      </Link>{" "}
+                      so Nearby can find people close to you.
+                    </>
+                  ) : (
+                    <>No relevant people nearby yet. Try For you, or refine your ideas in Profile.</>
+                  )
                 ) : (
                   <>Add more business ideas in Profile so we can find stronger fits.</>
                 )

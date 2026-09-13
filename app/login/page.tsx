@@ -6,6 +6,7 @@ import AuthButtons from "@/components/AuthButtons";
 import DemoEnterButton from "@/components/DemoEnterButton";
 import EmailAuthForm from "@/components/EmailAuthForm";
 import { demoEntryEnabled } from "@/lib/demoFlag";
+import { safeAppPath } from "@/lib/appPath";
 import { loadProfile, saveProfile } from "@/lib/store";
 import type { MyProfile } from "@/lib/types";
 
@@ -29,11 +30,12 @@ function LoginContent() {
   const params = useSearchParams();
   const errorKey = params.get("error") || "";
   const error = ERRORS[errorKey] || (errorKey ? "Entry failed. Please try again." : "");
+  const next = safeAppPath(params.get("next")) || "/discover";
 
   useEffect(() => {
     const p = loadProfile();
     if (p?.verifications?.length && p.name) {
-      router.replace("/discover");
+      router.replace(next);
       return;
     }
     void fetch("/api/members/me")
@@ -41,11 +43,11 @@ function LoginContent() {
       .then((data: { ok?: boolean; profile?: MyProfile | null }) => {
         if (data.ok && data.profile?.name) {
           saveProfile(data.profile);
-          if (data.profile.verifications?.length) router.replace("/discover");
+          if (data.profile.verifications?.length) router.replace(next);
         }
       })
       .catch(() => undefined);
-  }, [router]);
+  }, [router, next]);
 
   return (
     <main className="mp-app relative flex min-h-dvh flex-col items-center justify-center px-5 py-12">

@@ -102,6 +102,32 @@ export function listPublishedEvents(): InterlinkEvent[] {
   return listAllEvents().filter((e) => e.published !== false);
 }
 
+/** Server catalog when available; local catalog + overlay otherwise. */
+export async function fetchPublishedEvents(): Promise<InterlinkEvent[]> {
+  try {
+    const res = await fetch("/api/events", { credentials: "include" });
+    const data = (await res.json()) as { ok?: boolean; events?: InterlinkEvent[] };
+    if (data.ok && Array.isArray(data.events) && data.events.length > 0) {
+      const overlay =
+        typeof window !== "undefined" ? loadOverlay() : emptyOverlay();
+      const deleted = new Set(overlay.deleted);
+      const map = new Map<string, InterlinkEvent>();
+      for (const e of data.events) {
+        if (deleted.has(e.id) || e.published === false) continue;
+        map.set(e.id, e);
+      }
+      for (const e of Object.values(overlay.byId)) {
+        if (deleted.has(e.id) || e.published === false) continue;
+        map.set(e.id, e);
+      }
+      return Array.from(map.values());
+    }
+  } catch {
+    /* offline — use local catalog */
+  }
+  return listPublishedEvents();
+}
+
 export function findEvent(idOrSlug: string): InterlinkEvent | undefined {
   return listAllEvents().find((e) => e.id === idOrSlug || e.slug === idOrSlug);
 }

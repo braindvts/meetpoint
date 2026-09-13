@@ -11,6 +11,7 @@ import EventCard from "@/components/events/EventCard";
 import {
   CATEGORY_LABEL,
   formatEventRange,
+  getEventById,
   getUpcomingSorted,
   type InterlinkEvent,
 } from "@/lib/events";
@@ -22,6 +23,7 @@ import {
   networkAttendingCount,
   setRsvp,
 } from "@/lib/eventStore";
+import { loginUrl } from "@/lib/appPath";
 import { findPerson } from "@/lib/directory";
 import { hydrateLocalProfile } from "@/lib/hydrateSession";
 import { loadConnections } from "@/lib/store";
@@ -33,7 +35,9 @@ export default function EventDetailPage() {
   const id = String(params?.id || "");
   const router = useRouter();
   const [profile, setProfile] = useState<MyProfile | null>(null);
-  const [event, setEvent] = useState<InterlinkEvent | null | undefined>(undefined);
+  const [event, setEvent] = useState<InterlinkEvent | null | undefined>(() =>
+    id ? getEventById(id) ?? undefined : undefined
+  );
   const [connectedIds, setConnectedIds] = useState<string[]>([]);
   const [, setTick] = useState(0);
 
@@ -49,15 +53,11 @@ export default function EventDetailPage() {
 
   useEffect(() => {
     let cancelled = false;
+    refresh();
     void (async () => {
       const p = await hydrateLocalProfile();
       if (cancelled) return;
-      if (!p) {
-        router.replace("/onboarding");
-        return;
-      }
       setProfile(p);
-      refresh();
     })();
     const onEvt = () => refresh();
     window.addEventListener("meetpoint:events", onEvt);
@@ -65,7 +65,7 @@ export default function EventDetailPage() {
       cancelled = true;
       window.removeEventListener("meetpoint:events", onEvt);
     };
-  }, [router, refresh]);
+  }, [refresh]);
 
   const related = useMemo(() => {
     if (!event) return [];
@@ -87,7 +87,7 @@ export default function EventDetailPage() {
       .filter((p): p is Person => !!p);
   }, [event]);
 
-  if (event === undefined || !profile) {
+  if (event === undefined) {
     return (
       <div className="mp-app">
         <Nav />
@@ -211,6 +211,10 @@ export default function EventDetailPage() {
               <button
                 type="button"
                 onClick={() => {
+                  if (!profile) {
+                    router.push(loginUrl(`/events/${event.slug}`));
+                    return;
+                  }
                   if (myRsvp === "going") {
                     setRsvp(event.id, null);
                     showToast("Registration cleared");
@@ -227,6 +231,10 @@ export default function EventDetailPage() {
               <button
                 type="button"
                 onClick={() => {
+                  if (!profile) {
+                    router.push(loginUrl(`/events/${event.slug}`));
+                    return;
+                  }
                   if (myRsvp === "interested") {
                     setRsvp(event.id, null);
                     showToast("Removed from saved");
@@ -390,6 +398,10 @@ export default function EventDetailPage() {
                     getRsvp(e.id) === "interested" || getRsvp(e.id) === "going"
                   }
                   onToggleInterested={() => {
+                    if (!profile) {
+                      router.push(loginUrl(`/events/${event.slug}`));
+                      return;
+                    }
                     const cur = getRsvp(e.id);
                     setRsvp(
                       e.id,

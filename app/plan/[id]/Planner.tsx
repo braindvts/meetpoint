@@ -9,6 +9,7 @@ import BlackBadge from "@/components/BlackBadge";
 import StarRating, { cuisineLine } from "@/components/StarRating";
 import { findPerson, refreshDirectory } from "@/lib/directory";
 import { distanceKm, formatDistance, midpointRestaurants, restaurantsInCity } from "@/lib/match";
+import { loginUrl } from "@/lib/appPath";
 import { getConnection, loadProfile, setMeetup } from "@/lib/store";
 import type { MeetMode, MyProfile, Person, Restaurant } from "@/lib/types";
 
@@ -27,7 +28,7 @@ export default function Planner({ peerId }: { peerId: string }) {
   useEffect(() => {
     const p = loadProfile();
     if (!p) {
-      router.replace("/onboarding");
+      router.replace(loginUrl(`/plan/${peerId}`));
       return;
     }
     setProfile(p);

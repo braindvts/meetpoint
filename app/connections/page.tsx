@@ -14,12 +14,14 @@ import RateMeeting from "@/components/RateMeeting";
 import StarRating, { cuisineLine } from "@/components/StarRating";
 import { blackConnectionWith } from "@/lib/blackStore";
 import { RESTAURANTS } from "@/lib/data";
+import { fetchServerConnections } from "@/lib/apiClient";
+import { gateRedirect, resolveSessionGate } from "@/lib/hydrateSession";
 import {
   acceptConnection,
+  applyServerConnections,
   declineConnection,
   loadChats,
   loadConnections,
-  loadProfile,
   openOrCreateDirectChat,
 } from "@/lib/store";
 import { findPerson, refreshDirectory } from "@/lib/directory";
@@ -86,18 +88,33 @@ export default function ConnectionsPage() {
   }, []);
 
   useEffect(() => {
-    const p = loadProfile();
-    if (!p) {
-      router.replace("/onboarding");
-      return;
-    }
-    setProfile(p);
-    refresh();
-    void refreshDirectory().then(() => setTick((n) => n + 1));
+    let cancelled = false;
+    void (async () => {
+      const gate = await resolveSessionGate();
+      if (cancelled) return;
+      const dest = gateRedirect(gate, "/circle");
+      if (dest) {
+        router.replace(dest);
+        return;
+      }
+      if (gate.status === "member") setProfile(gate.profile);
+      refresh();
+      const [remote, _dir] = await Promise.all([
+        fetchServerConnections(),
+        refreshDirectory(),
+      ]);
+      if (cancelled) return;
+      if (remote) {
+        applyServerConnections(remote);
+        setConnections(remote);
+      }
+      setTick((n) => n + 1);
+    })();
     window.addEventListener("meetpoint:connections-changed", refresh);
     window.addEventListener("meetpoint:chats-changed", refresh);
     window.addEventListener("meetpoint:directory-changed", refresh);
     return () => {
+      cancelled = true;
       window.removeEventListener("meetpoint:connections-changed", refresh);
       window.removeEventListener("meetpoint:chats-changed", refresh);
       window.removeEventListener("meetpoint:directory-changed", refresh);
@@ -154,10 +171,6 @@ export default function ConnectionsPage() {
     return items.sort((a, b) => a.sortAt.localeCompare(b.sortAt));
   }, [tick]);
 
-  function accept(person: Person) {
-    setConnections(acceptConnection(person.id));
-  }
-
   function openChat(person: Person) {
     const chat = openOrCreateDirectChat(person.id, person.name);
     router.push(`/chats?c=${encodeURIComponent(chat.id)}`);
@@ -167,7 +180,17 @@ export default function ConnectionsPage() {
     setConnections(declineConnection(peerId));
   }
 
-  if (!profile) return null;
+  if (!profile) {
+    return (
+      <>
+        <Nav />
+        <main className="mp-app px-5 pb-10 pt-6 md:px-6">
+          <PageHeader title="Circle" />
+          <p className="mt-3 text-sm text-muted">Loading your circle…</p>
+        </main>
+      </>
+    );
+  }
 
   const empty = inbound.length === 0 && reservations.length === 0;
 
@@ -212,7 +235,7 @@ export default function ConnectionsPage() {
                   <div className="mp-stagger space-y-3">
                     {inbound.map((conn) => {
                       const person = findPerson(conn.peerId);
-                      if (!person) return null;
+                      const name = person?.name || "Member";
                       return (
                         <div
                           key={conn.peerId}
@@ -221,25 +244,27 @@ export default function ConnectionsPage() {
                           <div className="flex flex-wrap items-center justify-between gap-3">
                             <button
                               type="button"
-                              onClick={() => setProfilePerson(person)}
+                              onClick={() => person && setProfilePerson(person)}
                               className="flex min-w-0 items-center gap-3 text-left"
                             >
                               <Avatar
-                                src={person.photoUrl}
-                                name={person.name}
+                                src={person?.photoUrl}
+                                name={name}
                                 sizeCls="h-14 w-14"
                                 rounded="rounded-[12px]"
                               />
                               <div className="min-w-0">
                                 <h3 className="truncate font-display text-xl font-semibold text-ivory">
-                                  {person.name}
+                                  {name}
                                 </h3>
                                 <p className="mt-0.5 truncate text-[11px] text-muted">
-                                  {person.jobTitle} · {person.city.name}
+                                  {person
+                                    ? `${person.jobTitle}${person.city?.name ? ` · ${person.city.name}` : ""}`
+                                    : "Loading profile…"}
                                 </p>
                                 <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                                  {person.black ? <BlackBadge size="xs" /> : null}
-                                  {blackConnectionWith(person.id) ? (
+                                  {person?.black ? <BlackBadge size="xs" /> : null}
+                                  {blackConnectionWith(conn.peerId) ? (
                                     <BlackConnectionBadge count={1} />
                                   ) : null}
                                 </div>
@@ -251,7 +276,7 @@ export default function ConnectionsPage() {
                             <div className="flex flex-wrap items-center gap-2">
                               <button
                                 type="button"
-                                onClick={() => accept(person)}
+                                onClick={() => setConnections(acceptConnection(conn.peerId))}
                                 className="mp-btn-lux rounded-md px-3 py-1.5 text-[11px] font-medium"
                               >
                                 Accept
