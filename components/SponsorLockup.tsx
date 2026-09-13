@@ -24,7 +24,7 @@ export default function SponsorLockup({ className = "" }: Props) {
         height={27}
         className="mp-sponsor-lockup-mark"
       />
-      <span className="mp-sponsor-lockup-name">BijuuFlow</span>
+      <span className="mp-sponsor-lockup-name"> BijuuFlow</span>
     </a>
   );
 }
