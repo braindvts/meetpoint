@@ -37,15 +37,12 @@ export default function MembershipTiers({ input, missing }: Props) {
             >
               <TierBadge tier={t.tier} size="sm" />
               <div className="min-w-0">
-                <div className="flex items-baseline gap-2">
-                  <p className={`text-[14px] font-semibold ${TIER_CARD[t.tier].label}`}>{t.name}</p>
-                  {active ? (
-                    <span className="text-[9px] font-semibold uppercase tracking-[0.16em] text-accent">
-                      You
-                    </span>
-                  ) : null}
-                </div>
-                <p className="mt-1 text-[12px] leading-relaxed text-muted">{t.howToEarn}</p>
+                {active ? (
+                  <p className="mb-1 text-[9px] font-semibold uppercase tracking-[0.16em] text-accent">
+                    You
+                  </p>
+                ) : null}
+                <p className="text-[13px] leading-relaxed text-muted">{t.howToEarn}</p>
               </div>
             </div>
           );

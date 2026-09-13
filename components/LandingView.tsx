@@ -172,7 +172,7 @@ export default function LandingView() {
             <h2 className="mp-landing-h2">
               Three levels.
               <br />
-              One metal mark.
+              Named, not ranked.
             </h2>
             <p className="mp-section-lede">
               Steel, champagne, black. Signup never blocks on verification — Identity is enough to
