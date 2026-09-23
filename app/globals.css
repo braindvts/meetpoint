@@ -667,9 +667,9 @@ svg {
   }
 }
 .mp-press:active {
-  transform: scale(0.965);
+  transform: scale(0.94);
   transition-duration: 0.08s;
-  box-shadow: inset 0 0 0 1px rgba(212, 196, 168, 0.7), 0 0 0 4px rgba(212, 196, 168, 0.16);
+  box-shadow: inset 0 0 0 1px #d4c4a8, 0 0 0 6px rgba(212, 196, 168, 0.28);
 }
 
 /* Primary CTA — ivory field, quiet sheen, firm press */
@@ -715,8 +715,10 @@ svg {
   }
 }
 .mp-btn-lux:active {
-  transform: scale(0.965);
-  box-shadow: inset 0 0 0 1px rgba(212, 196, 168, 0.85), 0 0 0 5px rgba(212, 196, 168, 0.22);
+  transform: scale(0.94);
+  background: #d4c4a8 !important;
+  color: #050505 !important;
+  box-shadow: 0 0 0 7px rgba(212, 196, 168, 0.38);
   transition-duration: 0.08s;
 }
 
