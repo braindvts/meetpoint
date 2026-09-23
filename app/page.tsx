@@ -1,9 +1,17 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import BlackBadge from "@/components/BlackBadge";
 import DemoEnterButton from "@/components/DemoEnterButton";
 import SponsorLockup from "@/components/SponsorLockup";
 import TierBadge from "@/components/TierBadge";
 import { demoEntryEnabled } from "@/lib/demoFlag";
+import { SITE_DESCRIPTION, SITE_TITLE } from "@/lib/site";
+
+export const metadata: Metadata = {
+  title: SITE_TITLE,
+  description: SITE_DESCRIPTION,
+  alternates: { canonical: "/" },
+};
 
 const STEPS = [
   {
@@ -79,8 +87,9 @@ export default function Landing() {
               <span className="block text-accent">then a table.</span>
             </h1>
             <p className="mp-reveal mp-reveal-delay-2 mt-6 max-w-md text-[1.05rem] leading-relaxed text-ivory/70">
-              Interlink introduces people matched by what they’re building — then
-              settles it over dinner. A private room, not a feed.
+              Interlink is a private network for professional introductions — people
+              matched by what they’re building, then a real meeting over dinner. A
+              room, not a feed.
             </p>
             <div className="mp-reveal mp-reveal-delay-3 mt-10 flex flex-col items-start gap-3 sm:flex-row sm:items-center">
               <Link
@@ -143,6 +152,9 @@ export default function Landing() {
           <h2 className="mt-4 max-w-xl text-2xl font-semibold tracking-tight text-ivory sm:text-3xl">
             Match in the browser. Meet at dinner.
           </h2>
+          <p className="mt-4 max-w-xl text-[15px] leading-relaxed text-muted">
+            Interlink makes the introduction. The table is where the business happens.
+          </p>
           <div className="mt-12 grid gap-10 md:grid-cols-3 md:gap-8">
             {STEPS.map((step) => (
               <div key={step.n}>
@@ -170,7 +182,7 @@ export default function Landing() {
             </h2>
             <p className="mt-4 max-w-md text-[15px] leading-relaxed text-muted">
               Professional dinners, conferences, and conventions in your city — or
-              across the world. See who will be in the room before you walk in.
+              across the world. Interlink shows who will be in the room before you walk in.
             </p>
             <Link
               href="/login"
@@ -202,7 +214,7 @@ export default function Landing() {
             Standing
           </p>
           <h2 className="mt-4 max-w-xl text-2xl font-semibold tracking-tight text-ivory sm:text-3xl">
-            Three ways to be in the room. Not a ladder.
+            Three ways to be in the room on Interlink. Not a ladder.
           </h2>
           <div className="mt-12 grid gap-8 sm:grid-cols-3">
             {STANDING.map((level) => (
