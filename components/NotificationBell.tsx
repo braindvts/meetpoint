@@ -45,7 +45,7 @@ function NoticeList({
   if (!items.length) {
     return (
       <div className="px-5 py-10 text-center">
-        <span className="mx-auto mb-4 block h-px w-8 bg-accent/50" />
+        <span className="mp-empty-mark mx-auto mb-5" aria-hidden="true" />
         <p className="text-base font-medium tracking-tight text-ivory">You’re up to date</p>
         <p className="mx-auto mt-2 max-w-xs text-sm leading-relaxed text-muted">
           When someone accepts your introduction, or a gathering is coming up, it shows up here.
@@ -55,33 +55,43 @@ function NoticeList({
   }
 
   return (
-    <ul className="divide-y divide-white/[0.06]">
-      {items.map((item) => (
-        <li key={item.id}>
-          <Link
-            href={item.href}
-            onClick={() => {
-              markNoticeRead(item.id);
-              onOpen?.();
-            }}
-            className="flex gap-3 px-4 py-3.5 text-left transition-colors hover:bg-white/[0.03]"
-          >
-            <span
-              className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${item.read ? "bg-transparent" : "bg-accent"}`}
-              aria-hidden="true"
-            />
-            <span className="min-w-0">
-              <span className="block text-[10px] font-semibold uppercase tracking-[0.18em] text-accent">
-                {item.eyebrow}
+    <ul className="mp-stagger divide-y divide-white/[0.06]">
+      {items.map((item) => {
+        const photo = item.kind === "event" ? item.image || "/events/hero-service.jpg" : "";
+        return (
+          <li key={item.id}>
+            <Link
+              href={item.href}
+              onClick={() => {
+                markNoticeRead(item.id);
+                onOpen?.();
+              }}
+              className="mp-notice-row flex gap-3 px-4 py-3.5 text-left"
+            >
+              {photo ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={photo} alt="" className="mp-notice-thumb" />
+              ) : (
+                <span className="mp-notice-seal" aria-hidden="true">
+                  In
+                </span>
+              )}
+              <span className="min-w-0 flex-1">
+                <span className="flex items-center gap-2">
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-accent">
+                    {item.eyebrow}
+                  </span>
+                  {item.read ? null : <span className="mp-notice-dot" aria-hidden="true" />}
+                </span>
+                <span className="mt-1 block truncate text-[15px] font-medium text-ivory">
+                  {item.title}
+                </span>
+                <span className="mt-0.5 block text-[13px] leading-snug text-muted">{item.body}</span>
               </span>
-              <span className="mt-1 block truncate text-[15px] font-medium text-ivory">
-                {item.title}
-              </span>
-              <span className="mt-0.5 block text-[13px] leading-snug text-muted">{item.body}</span>
-            </span>
-          </Link>
-        </li>
-      ))}
+            </Link>
+          </li>
+        );
+      })}
     </ul>
   );
 }
@@ -97,7 +107,7 @@ export function NotificationFeed({ onOpen }: { onOpen?: () => void }) {
           type="button"
           onClick={() => markAllNoticesRead()}
           disabled={unread === 0}
-          className="px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-accent disabled:text-muted/50"
+          className="mp-press px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-accent disabled:text-muted/50"
         >
           Mark read
         </button>
@@ -105,7 +115,7 @@ export function NotificationFeed({ onOpen }: { onOpen?: () => void }) {
           type="button"
           onClick={() => clearNotices()}
           disabled={state.items.length === 0}
-          className="px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted disabled:text-muted/40"
+          className="mp-press px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted disabled:text-muted/40"
         >
           Clear
         </button>
@@ -120,9 +130,19 @@ export default function NotificationBell({ active = false }: { active?: boolean 
   const unread = unreadCount(state);
   const panelId = useId();
   const [open, setOpen] = useState(false);
+  const [shown, setShown] = useState(false);
 
   useEffect(() => {
-    if (!open) return;
+    if (open) {
+      setShown(true);
+      return;
+    }
+    const timer = window.setTimeout(() => setShown(false), 200);
+    return () => window.clearTimeout(timer);
+  }, [open]);
+
+  useEffect(() => {
+    if (!shown) return;
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") setOpen(false);
     };
@@ -133,7 +153,7 @@ export default function NotificationBell({ active = false }: { active?: boolean 
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = prev;
     };
-  }, [open]);
+  }, [shown]);
 
   const label =
     unread > 0
@@ -153,17 +173,17 @@ export default function NotificationBell({ active = false }: { active?: boolean 
       >
         <BellIcon />
         {unread > 0 ? (
-          <span className="absolute -right-0.5 -top-0.5 grid min-h-[1rem] min-w-[1rem] place-items-center rounded-full bg-accent px-1 text-[9px] font-bold leading-none text-ink">
+          <span className="mp-notice-badge absolute -right-0.5 -top-0.5 grid min-h-[1rem] min-w-[1rem] place-items-center rounded-full bg-accent px-1 text-[9px] font-bold leading-none text-ink">
             {unread > 99 ? "99+" : unread}
           </span>
         ) : null}
       </button>
-      {open ? (
+      {shown ? (
         <>
           <button
             type="button"
             aria-label="Close notifications"
-            className="fixed inset-0 top-14 z-[90] bg-black/55"
+            className={`mp-notice-scrim fixed inset-0 top-14 z-[90] bg-black/60 ${open ? "" : "is-closing"}`}
             onClick={() => setOpen(false)}
           />
           <div
@@ -171,7 +191,7 @@ export default function NotificationBell({ active = false }: { active?: boolean 
             role="dialog"
             aria-modal="true"
             aria-labelledby={`${panelId}-title`}
-            className="fixed right-3 top-[3.65rem] z-[95] flex max-h-[min(32rem,calc(100dvh-5rem))] w-[min(24rem,calc(100vw-1.5rem))] flex-col overflow-hidden border border-accent/25 bg-[#050505] shadow-[0_18px_50px_rgba(0,0,0,0.45)]"
+            className={`mp-notice-panel fixed right-3 top-[3.65rem] z-[95] flex max-h-[min(34rem,calc(100dvh-5rem))] w-[min(26rem,calc(100vw-1.5rem))] flex-col overflow-hidden border border-accent/30 bg-[#050505] shadow-[0_24px_60px_rgba(0,0,0,0.55)] ${open ? "" : "is-closing"}`}
           >
             <div className="flex items-start justify-between gap-3 border-b border-white/[0.08] px-4 py-3">
               <div>

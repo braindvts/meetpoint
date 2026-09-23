@@ -7,7 +7,10 @@ export default function PageHeader({
 }) {
   return (
     <header className="sticky top-0 z-40 flex h-14 items-center justify-center bg-ink/95 px-4 backdrop-blur-xl md:justify-start md:px-0">
-      <h1 className="text-[1.15rem] font-medium tracking-tight text-ivory">{title}</h1>
+      <div className="text-center md:text-left">
+        <h1 className="text-[1.15rem] font-medium tracking-tight text-ivory">{title}</h1>
+        <span className="mp-title-rule" aria-hidden="true" />
+      </div>
       {action ? (
         <div className="absolute right-4 top-1/2 -translate-y-1/2 md:right-0">{action}</div>
       ) : null}

@@ -103,6 +103,7 @@ The bell in the top nav opens the feed. The same list is at `/notifications`.
 - **In {city}** — a published gathering whose city string matches the city on your profile. That is the local signal the catalog already has.
 - **Upcoming** — gatherings (including a convention, when the catalog has one) when none match your city, or a convention outside your city.
 - Mark read and Clear stay in this browser. There is no notifications table.
+- Event rows show the gathering’s photograph (catalog image). Connection rows do not.
 
 ## Chats
 

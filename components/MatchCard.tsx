@@ -128,7 +128,7 @@ export default function MatchCard({
       tabIndex={onOpenProfile ? 0 : undefined}
       onClick={() => onOpenProfile?.(person.id)}
       onKeyDown={handleKey}
-      className={`relative flex h-full min-h-[320px] flex-col overflow-hidden rounded-xl border border-white/[0.08] bg-[#0a0a0a] ${
+      className={`mp-place-card relative flex h-full min-h-[320px] flex-col overflow-hidden rounded-xl border border-white/[0.08] bg-[#0a0a0a] ${
         leaving || connecting ? "" : "mp-card-motion"
       } ${
         onOpenProfile || preview ? "cursor-pointer [-webkit-tap-highlight-color:transparent]" : ""

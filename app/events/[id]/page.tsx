@@ -156,7 +156,7 @@ export default function EventDetailPage() {
             <img
               src={event.image}
               alt=""
-              className="h-full w-full object-cover"
+              className="mp-card-photo h-full w-full object-cover"
             />
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#12110f] via-transparent to-transparent" />
           </div>
@@ -240,7 +240,9 @@ export default function EventDetailPage() {
                   }
                   refresh();
                 }}
-                className="mp-btn-lux inline-flex flex-1 items-center justify-center rounded-lg bg-ivory px-5 py-3.5 text-[12px] font-semibold text-ink"
+                className={`mp-btn-lux mp-rsvp inline-flex flex-1 items-center justify-center rounded-lg bg-ivory px-5 py-3.5 text-[12px] font-semibold text-ink ${
+                  myRsvp === "going" ? "is-going" : ""
+                }`}
               >
                 {myRsvp === "going" ? "Attending ✓" : "Attend / Register"}
               </button>

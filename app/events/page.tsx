@@ -283,6 +283,20 @@ export default function EventsPage() {
           }
         />
 
+        {featured[0] ? (
+          <Link href={`/events/${featured[0].slug}`} className="mp-event-hero mp-card-motion group">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={featured[0].image} alt="" className="mp-card-photo" />
+            <span className="mp-event-hero-copy">
+              <em>On the floor</em>
+              <strong>{featured[0].name}</strong>
+              <span>
+                {featured[0].city} · {featured[0].venue}
+              </span>
+            </span>
+          </Link>
+        ) : null}
+
         <div className="space-y-3">
           <p className="max-w-2xl text-sm leading-relaxed text-muted sm:text-[15px]">
             Upcoming dinners, conferences, and conventions — ranked from what
