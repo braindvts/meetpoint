@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
+import NotificationBell from "@/components/NotificationBell";
 import { loadChats } from "@/lib/store";
 import { totalUnread } from "@/lib/chatUnread";
 
@@ -80,6 +81,7 @@ export default function Nav() {
             );
           })}
         </div>
+        <NotificationBell active={pathname.startsWith("/notifications")} />
       </div>
     </nav>,
     document.body
