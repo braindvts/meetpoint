@@ -19,6 +19,7 @@ import {
   loadConnections,
   mergeServerChats,
   openOrCreateDirectChat,
+  resolveStoredChatId,
 } from "@/lib/store";
 import {
   ensureReadBaseline,
@@ -187,6 +188,19 @@ function ChatsInner() {
       window.removeEventListener("meetpoint:directory-changed", onDir);
     };
   }, [router, refreshConnections]);
+
+  useEffect(() => {
+    const onRemap = (event: Event) => {
+      const detail = (event as CustomEvent<{ fromId?: string; toId?: string }>).detail;
+      if (!detail?.fromId || !detail.toId) return;
+      setChats(loadChats());
+      if (searchParams.get("c") === detail.fromId) {
+        router.replace(`/chats?c=${encodeURIComponent(detail.toId)}`, { scroll: false });
+      }
+    };
+    window.addEventListener("meetpoint:chat-id-remapped", onRemap);
+    return () => window.removeEventListener("meetpoint:chat-id-remapped", onRemap);
+  }, [router, searchParams]);
 
   const connectedPeople = useMemo(() => {
     return connections
@@ -370,7 +384,9 @@ function ChatsInner() {
             ) : (
               <div className="mp-stagger space-y-1">
                 {filteredRows.map((row) => {
-                  const active = row.chat.id === selectedId;
+                  const active =
+                    !!selectedId &&
+                    resolveStoredChatId(row.chat.id) === resolveStoredChatId(selectedId);
                   const unread = unreadCountForChat(row.chat);
                   const muted = isChatMuted(row.chat.id);
                   return (

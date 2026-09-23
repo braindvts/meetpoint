@@ -96,6 +96,15 @@ export function ensureReadBaseline(chats: GroupChat[]): void {
   if (changed) writeMap(map);
 }
 
+/** Keep the read cursor when a local thread id is replaced by the server id. */
+export function remapChatRead(fromId: string, toId: string): void {
+  if (!fromId || !toId || fromId === toId) return;
+  const map = readMap();
+  if (map[fromId] && !map[toId]) map[toId] = map[fromId];
+  delete map[fromId];
+  writeMap(map);
+}
+
 /** Mark everything in this thread as read up to the latest message. */
 export function markChatRead(chat: GroupChat): void {
   const last = chat.messages[chat.messages.length - 1];

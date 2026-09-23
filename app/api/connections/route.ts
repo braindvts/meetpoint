@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { collapseConnections, planConnectionRequest } from "@/lib/connectionSync";
 import { publicError } from "@/lib/safeError";
 import { prisma } from "@/lib/db";
 import { getCurrentMember } from "@/lib/memberAuth";
@@ -37,14 +38,14 @@ export async function GET() {
 
     return NextResponse.json({
       ok: true,
-      connections: rows.map((r) => toClient(r, me.id)),
+      connections: collapseConnections(rows.map((r) => toClient(r, me.id))),
     });
   } catch (e) {
     return publicError(e, "Failed");
   }
 }
 
-/** Request an introduction to peerId. */
+/** Request an introduction to peerId. An existing inbound request is accepted. */
 export async function POST(req: Request) {
   try {
     const limited = rateLimit(req, { name: "connections-post", limit: 40, windowMs: 60_000 });
@@ -65,11 +66,27 @@ export async function POST(req: Request) {
     const peer = await prisma.member.findUnique({ where: { id: peerId } });
     if (!peer) return NextResponse.json({ ok: false, error: "Peer not found" }, { status: 404 });
 
-    await prisma.connection.upsert({
-      where: { fromId_toId: { fromId: me.id, toId: peerId } },
-      create: { fromId: me.id, toId: peerId, status: "requested" },
-      update: {},
+    const pair = await prisma.connection.findMany({
+      where: {
+        OR: [
+          { fromId: me.id, toId: peerId },
+          { fromId: peerId, toId: me.id },
+        ],
+      },
     });
+    const plan = planConnectionRequest(pair, me.id, peerId);
+    if (plan === "accept") {
+      await prisma.connection.updateMany({
+        where: { fromId: peerId, toId: me.id, status: "requested" },
+        data: { status: "connected" },
+      });
+    } else if (plan === "request") {
+      await prisma.connection.upsert({
+        where: { fromId_toId: { fromId: me.id, toId: peerId } },
+        create: { fromId: me.id, toId: peerId, status: "requested" },
+        update: {},
+      });
+    }
 
     const rows = await prisma.connection.findMany({
       where: { OR: [{ fromId: me.id }, { toId: me.id }] },
@@ -77,7 +94,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       ok: true,
-      connections: rows.map((r) => toClient(r, me.id)),
+      connections: collapseConnections(rows.map((r) => toClient(r, me.id))),
     });
   } catch (e) {
     return publicError(e, "Failed");
@@ -120,7 +137,7 @@ export async function PATCH(req: Request) {
 
     return NextResponse.json({
       ok: true,
-      connections: rows.map((r) => toClient(r, me.id)),
+      connections: collapseConnections(rows.map((r) => toClient(r, me.id))),
     });
   } catch (e) {
     return publicError(e, "Failed");

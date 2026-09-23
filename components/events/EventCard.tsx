@@ -14,6 +14,7 @@ type Props = {
   attendeeCount?: number;
   networkCount?: number;
   interested?: boolean;
+  going?: boolean;
   onToggleInterested?: () => void;
   onPass?: () => void;
   matchReasons?: string[];
@@ -26,6 +27,7 @@ export default function EventCard({
   attendeeCount,
   networkCount = 0,
   interested,
+  going = false,
   onToggleInterested,
   onPass,
   matchReasons,
@@ -122,14 +124,14 @@ export default function EventCard({
               e.preventDefault();
               onToggleInterested();
             }}
-            aria-pressed={!!interested}
+            aria-pressed={!!interested || going}
             className={`mp-press rounded-xl border px-3 py-2.5 text-[11px] font-medium ${
-              interested
+              interested || going
                 ? "border-accent/50 bg-accent/10 text-accent"
                 : "border-accent/20 text-muted hover:border-accent/40 hover:text-ivory"
             }`}
           >
-            {interested ? "Saved" : "Interested"}
+            {going ? "Going" : interested ? "Saved" : "Interested"}
           </button>
         ) : null}
         {onPass ? (

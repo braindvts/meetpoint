@@ -1,12 +1,11 @@
 "use client";
 
 import { loginUrl } from "@/lib/appPath";
+import { isUsableProfile } from "@/lib/roomGate";
 import { loadProfile, saveProfile } from "@/lib/store";
 import type { MyProfile } from "@/lib/types";
 
-function isUsableProfile(p: MyProfile | null | undefined): p is MyProfile {
-  return !!p?.name?.trim() && !!p.jobTitle?.trim();
-}
+export { isUsableProfile };
 
 /**
  * Prefer the local profile when one exists.
