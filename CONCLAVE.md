@@ -95,6 +95,15 @@ Separate from BLACK. Shown as a **blue checkmark** next to the name (trusted). E
 
 ---
 
+## Notifications
+
+The bell in the top nav opens the feed. The same list is at `/notifications`.
+
+- **Connection** — someone accepts an introduction you sent. Accepting their request does not notify you.
+- **In {city}** — a published gathering whose city string matches the city on your profile. That is the local signal the catalog already has.
+- **Upcoming** — gatherings (including a convention, when the catalog has one) when none match your city, or a convention outside your city.
+- Mark read and Clear stay in this browser. There is no notifications table.
+
 ## Chats
 
 - **Messenger layout:** left = people you’ve accepted / talk to; right = the selected thread.
@@ -116,6 +125,7 @@ Separate from BLACK. Shown as a **blue checkmark** next to the name (trusted). E
 | `/events/[id]` | Event detail, RSVP, related rooms, people attending |
 | `/admin/events` | Create / edit / publish events (ADMIN_SECRET + local overlay) |
 | `/circle` | Incoming connects + booked reservations |
+| `/notifications` | Acceptances and upcoming gatherings (also the bell in the top nav) |
 | `/chats` | People list (left) + open thread (right) |
 | `/profile` | Your card, Plans (BLACK · Free), levels |
 | `/demo` | Demo bypass (only if `NEXT_PUBLIC_ENABLE_DEMO=1`) |
@@ -204,6 +214,7 @@ See [MISSING.md](./MISSING.md). Big ones: email verify + password reset links, c
 | Events catalog | `lib/events.ts`, `lib/eventStore.ts` |
 | Event ranking | `lib/eventMatch.ts`, `lib/eventTaxonomy.ts`, `lib/eventSignals.ts` |
 | Event UI | `components/events/*`, `app/events/*` |
+| Notifications | `lib/notifications.ts`, `components/NotificationBell.tsx` |
 | Signup missing fields | `components/ProfileForm.tsx` |
 | BLACK rules | `lib/black.ts` |
 | Intro reach | `lib/plans.ts` (`canIntroduceToTier`) |

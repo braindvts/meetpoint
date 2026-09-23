@@ -9,6 +9,7 @@ import { DEMO_PROFILE } from "./demoAccount";
 import { demoEntryEnabled, demoProfilesEnabled } from "./demoFlag";
 import { DEMO_PEOPLE } from "./demoPeople";
 import { findPerson } from "./directory";
+import { clearNoticeStore } from "./notifications";
 import {
   BOOKING_FEE_PER_PERSON_USD,
   bookingHeadcount,
@@ -196,6 +197,7 @@ export function clearProfile(): void {
   localStorage.removeItem(CONNECTIONS_KEY);
   localStorage.removeItem(CHATS_KEY);
   localStorage.removeItem(RATINGS_KEY);
+  clearNoticeStore();
   void import("./demoFlag").then(({ clearDemoOwnerSession }) => clearDemoOwnerSession());
 }
 
@@ -226,6 +228,7 @@ export function requestConnection(peerId: string): Connection[] {
   if (!connections.some((c) => c.peerId === peerId)) {
     connections.push({ peerId, status: "requested", direction: "out" });
     saveConnections(connections);
+    window.dispatchEvent(new CustomEvent("meetpoint:connections-changed"));
     if (demoProfilesEnabled() && isDemoPeer(peerId)) {
       scheduleDemoAccept(peerId);
       return connections;

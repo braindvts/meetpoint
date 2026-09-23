@@ -207,6 +207,7 @@ body:has([data-shot]) nextjs-portal {
 .mp-site-nav-links {
   display: flex;
   flex: 1;
+  min-width: 0;
   align-items: center;
   justify-content: flex-end;
   gap: 0.15rem;
