@@ -4,6 +4,7 @@ import AnalyticsBeacon from "@/components/AnalyticsBeacon";
 import AppChrome from "@/components/AppChrome";
 import PlausibleScript from "@/components/PlausibleScript";
 import ToastHost from "@/components/ToastHost";
+import { SITE_DESCRIPTION, SITE_ORIGIN, SITE_TITLE } from "@/lib/site";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -13,9 +14,23 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "Interlink",
-  description:
-    "Interlink — the private network for ambitious people. Use it in the browser now; native app later.",
+  metadataBase: new URL(SITE_ORIGIN),
+  title: SITE_TITLE,
+  description: SITE_DESCRIPTION,
+  applicationName: "Interlink",
+  openGraph: {
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    siteName: "Interlink",
+    type: "website",
+    url: SITE_ORIGIN,
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+  },
 };
 
 export const viewport: Viewport = {
