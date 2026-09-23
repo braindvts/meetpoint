@@ -932,6 +932,7 @@ html.mp-boot-splash body::before {
 
 .mp-splash {
   animation: fadeIn 0.3s ease-out both;
+  padding-bottom: 6.75rem;
 }
 .mp-splash-out {
   animation: splashOut 0.9s cubic-bezier(0.4, 0, 0.2, 1) forwards;
@@ -1078,6 +1079,235 @@ html.mp-boot-splash body::before {
 }
 .mp-splash-caption {
   animation: splashCaption 0.8s ease-out 0.2s both;
+}
+
+/* Featured partners — open credit on the ink. Flash stays on the mark, not a box. */
+.mp-splash-partners {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: max(1.35rem, env(safe-area-inset-bottom));
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.65rem;
+  padding-inline: 1.25rem;
+  pointer-events: none;
+}
+.mp-splash-partners--in {
+  pointer-events: auto;
+}
+.mp-featured-partners-rule {
+  display: block;
+  width: 3.25rem;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #d4c4a8, transparent);
+  opacity: 0;
+  transform: scaleX(0);
+}
+.mp-featured-partners-kicker {
+  margin: 0;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.36em;
+  text-transform: uppercase;
+  color: #d4c4a8;
+  opacity: 0;
+}
+.mp-featured-partners-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  max-width: 38rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.mp-featured-partner {
+  opacity: 0;
+}
+.mp-featured-partner-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  color: #ece8e0;
+  text-decoration: none;
+}
+.mp-featured-partner--lead .mp-featured-partner-link {
+  gap: 0.85rem;
+}
+.mp-featured-partner-mark-wrap {
+  position: relative;
+  z-index: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.mp-featured-partner-mark-wrap::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -55%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(212, 196, 168, 0.55), transparent 68%);
+  opacity: 0;
+  pointer-events: none;
+}
+.mp-featured-partner-mark-wrap::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    112deg,
+    transparent 30%,
+    rgba(212, 196, 168, 0.72) 50%,
+    transparent 70%
+  );
+  mix-blend-mode: screen;
+}
+.mp-featured-partner-mark {
+  width: 1.7rem;
+  height: 1.65rem;
+  object-fit: contain;
+  /* Same dark-field treatment as the landing BijuuFlow lockup */
+  filter: invert(1) sepia(0.18) saturate(0.45) hue-rotate(6deg) brightness(1.02);
+  opacity: 0.94;
+}
+.mp-featured-partner--lead .mp-featured-partner-mark {
+  width: 2.45rem;
+  height: 2.35rem;
+}
+.mp-featured-partner-name {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+}
+.mp-featured-partner--lead .mp-featured-partner-name {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+.mp-featured-partner-link:focus-visible {
+  outline: 1px solid #d4c4a8;
+  outline-offset: 4px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .mp-featured-partner-link:hover .mp-featured-partner-name {
+    color: #d4c4a8;
+  }
+}
+.mp-splash-partners--in .mp-featured-partners-rule {
+  animation: splashPartnerRule 0.7s var(--ease-out) both;
+}
+.mp-splash-partners--in .mp-featured-partners-kicker {
+  animation: splashPartnerIn 0.72s var(--ease-out) 0.06s both;
+}
+.mp-splash-partners--in .mp-featured-partner {
+  animation: splashPartnerIn 0.78s var(--ease-out) both;
+}
+.mp-splash-partners--in .mp-featured-partner--lead .mp-featured-partner-mark-wrap::before {
+  animation: splashPartnerFlash 0.9s var(--ease-out) calc(0.48s + var(--mp-partner-delay, 0ms)) both;
+}
+.mp-splash-partners--in .mp-featured-partner--lead .mp-featured-partner-mark-wrap::after {
+  animation: splashPartnerSheen 0.72s var(--ease-out) calc(0.46s + var(--mp-partner-delay, 0ms)) both;
+}
+.mp-splash-partners--in .mp-featured-partner--lead .mp-featured-partner-mark {
+  animation: splashPartnerMark 1.35s ease-in-out calc(0.86s + var(--mp-partner-delay, 0ms)) 1 both;
+}
+@keyframes splashPartnerRule {
+  from {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+  to {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+@keyframes splashPartnerIn {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.9);
+  }
+  64% {
+    opacity: 1;
+    transform: translateY(0) scale(1.035);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes splashPartnerFlash {
+  0% {
+    opacity: 0;
+    transform: scale(0.72);
+  }
+  38% {
+    opacity: 0.95;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.2);
+  }
+}
+@keyframes splashPartnerSheen {
+  0% {
+    opacity: 0;
+    transform: translateX(-130%);
+  }
+  18% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(130%);
+  }
+}
+@keyframes splashPartnerMark {
+  0%,
+  100% {
+    transform: scale(1);
+    filter: invert(1) sepia(0.18) saturate(0.45) hue-rotate(6deg) brightness(1.02);
+  }
+  42% {
+    transform: scale(1.08);
+    filter: invert(1) sepia(0.42) saturate(0.95) hue-rotate(4deg) brightness(1.16);
+  }
+}
+@media (max-height: 720px) {
+  .mp-splash {
+    padding-bottom: 5.25rem;
+  }
+  .mp-splash-rule {
+    height: 1.35rem;
+    margin-top: 0.65rem;
+    margin-bottom: 0.65rem;
+  }
+  .mp-splash-line {
+    margin-top: 1.15rem;
+  }
+  .mp-splash-tag {
+    margin-top: 0.9rem;
+  }
+  .mp-splash-bar {
+    margin-top: 1.35rem;
+  }
+  .mp-splash-partners {
+    bottom: max(0.85rem, env(safe-area-inset-bottom));
+    gap: 0.45rem;
+  }
 }
 
 /* Route enter */
@@ -1302,6 +1532,9 @@ html.mp-boot-splash body::before {
   .mp-splash-bar-fill,
   .mp-splash-rule,
   .mp-splash-caption,
+  .mp-featured-partners-kicker,
+  .mp-featured-partners-rule,
+  .mp-featured-partner,
   .mp-page-enter,
   .mp-skeleton::after,
   .mp-ambient {
@@ -1311,6 +1544,17 @@ html.mp-boot-splash body::before {
     transform: none !important;
     visibility: visible !important;
     filter: none !important;
+  }
+  .mp-featured-partner-link,
+  .mp-featured-partner-mark-wrap,
+  .mp-featured-partner-mark {
+    animation: none !important;
+    transition: none !important;
+  }
+  .mp-featured-partner-mark-wrap::before,
+  .mp-featured-partner-mark-wrap::after {
+    animation: none !important;
+    opacity: 0 !important;
   }
   /* Allow splash to actually dismiss under reduced motion */
   .mp-splash-out {
