@@ -62,8 +62,17 @@ test("splash shows featured partners inside the existing seal, not a longer wait
   assert.match(css, /splashPartnerMark/);
   assert.match(css, /#d4c4a8/);
   assert.match(css, /prefers-reduced-motion:\s*reduce/);
-  assert.match(css, /\.mp-featured-partner-plate::after/);
+  assert.match(css, /\.mp-featured-partner-mark-wrap::after/);
   assert.match(css, /\.mp-featured-partner-mark/);
+  assert.match(plate, /mp-featured-partner-link/);
+  assert.doesNotMatch(plate, /mp-featured-partner-plate|mp-press/);
+  assert.doesNotMatch(css, /mp-featured-partner-plate/);
+  const flash = css.slice(
+    css.indexOf("@keyframes splashPartnerFlash"),
+    css.indexOf("@keyframes splashPartnerSheen")
+  );
+  assert.doesNotMatch(flash, /inset|border/);
+  assert.match(css, /\.mp-featured-partner-link \{[\s\S]*?border:\s*0;/);
 
   assert.match(lockup, /Supported by/);
   assert.match(lockup, /https:\/\/bijuuflow\.com\/terminal/);

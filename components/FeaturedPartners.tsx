@@ -9,8 +9,8 @@ interface Props {
 }
 
 /**
- * Featured-partner plate for the loading seal.
- * The list is data-driven; the lead partner is BijuuFlow.
+ * Featured-partner credit on the loading seal.
+ * Logo and name sit open on the ink. The list is data-driven; BijuuFlow leads.
  */
 export default function FeaturedPartners({ revealed }: Props) {
   const partners = featuredPartnersInOrder();
@@ -27,14 +27,14 @@ export default function FeaturedPartners({ revealed }: Props) {
       </p>
       <ul className="mp-featured-partners-list">
         {partners.map((partner, index) => (
-          <PartnerPlate key={partner.id} partner={partner} index={index} />
+          <PartnerCredit key={partner.id} partner={partner} index={index} />
         ))}
       </ul>
     </section>
   );
 }
 
-function PartnerPlate({ partner, index }: { partner: FeaturedPartner; index: number }) {
+function PartnerCredit({ partner, index }: { partner: FeaturedPartner; index: number }) {
   const delay = `${index * 120}ms`;
   const style = {
     animationDelay: delay,
@@ -50,17 +50,19 @@ function PartnerPlate({ partner, index }: { partner: FeaturedPartner; index: num
         href={partner.href}
         target="_blank"
         rel="noopener noreferrer"
-        className="mp-featured-partner-plate mp-press"
+        className="mp-featured-partner-link"
         aria-label={`${partner.name} (opens in a new tab)`}
         onClick={(event) => event.stopPropagation()}
       >
-        <img
-          src={partner.logoSrc}
-          alt={partner.logoAlt}
-          width={partner.lead ? 38 : 28}
-          height={partner.lead ? 37 : 27}
-          className="mp-featured-partner-mark"
-        />
+        <span className="mp-featured-partner-mark-wrap">
+          <img
+            src={partner.logoSrc}
+            alt={partner.logoAlt}
+            width={partner.lead ? 38 : 28}
+            height={partner.lead ? 37 : 27}
+            className="mp-featured-partner-mark"
+          />
+        </span>
         <span className="mp-featured-partner-name">{partner.name}</span>
       </a>
     </li>
