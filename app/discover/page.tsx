@@ -87,8 +87,7 @@ export default function DiscoverPage() {
       setPeople(list);
       setDirectoryReady(true);
       if (remoteConnections) {
-        applyServerConnections(remoteConnections);
-        setConnections(remoteConnections);
+        setConnections(applyServerConnections(remoteConnections));
       }
     })();
 

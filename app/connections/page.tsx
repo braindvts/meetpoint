@@ -105,8 +105,7 @@ export default function ConnectionsPage() {
       ]);
       if (cancelled) return;
       if (remote) {
-        applyServerConnections(remote);
-        setConnections(remote);
+        setConnections(applyServerConnections(remote));
       }
       setTick((n) => n + 1);
     })();

@@ -151,6 +151,8 @@ NEXT_PUBLIC_ENABLE_DEMO=1
 NEXT_PUBLIC_ENABLE_DEMO_PROFILES=1
 ```
 
+When sample profiles are on, the room includes **Member**, **Verified**, and **BLACK** samples. A Member can connect with the Member samples. Those introductions stay in this browser — the server connection list does not erase them, and the samples accept on their own so chat can be tested without a second account.
+
 ---
 
 ## Tech & data
