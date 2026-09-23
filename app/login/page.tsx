@@ -51,15 +51,14 @@ function LoginContent() {
   }, [router, next]);
 
   return (
-    <main className="mp-app relative flex min-h-dvh flex-col items-center justify-center px-5 py-12">
-      <div
-        className="pointer-events-none absolute inset-0 overflow-hidden"
-        aria-hidden
-      >
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_30%,rgba(196,180,150,0.05),transparent_50%)]" />
+    <main className="mp-login-shell">
+      <div className="mp-login-photo" aria-hidden="true">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/events/hero-service.jpg" alt="" />
+        <p>The introduction ends when you sit down.</p>
       </div>
 
-      <div className="relative w-full max-w-[17.5rem] sm:max-w-[18.5rem]">
+      <div className="mp-login-form relative w-full max-w-[17.5rem] sm:max-w-[18.5rem]">
         <p className="text-center text-[0.7rem] font-semibold tracking-[0.28em] text-accent">
           INTERLINK
         </p>

@@ -48,7 +48,7 @@ export default function EventCard({
           <img
             src={event.image}
             alt=""
-            className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+            className="mp-card-photo h-full w-full object-cover"
           />
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#12110f] via-[#12110f]/35 to-transparent" />
           <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
@@ -125,7 +125,9 @@ export default function EventCard({
               onToggleInterested();
             }}
             aria-pressed={!!interested || going}
-            className={`mp-press rounded-xl border px-3 py-2.5 text-[11px] font-medium ${
+            className={`mp-press mp-rsvp rounded-xl border px-3 py-2.5 text-[11px] font-medium ${
+              going ? "is-going" : ""
+            } ${
               interested || going
                 ? "border-accent/50 bg-accent/10 text-accent"
                 : "border-accent/20 text-muted hover:border-accent/40 hover:text-ivory"

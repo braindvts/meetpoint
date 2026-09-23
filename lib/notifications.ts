@@ -21,6 +21,8 @@ export interface Notice {
   sortAt: string;
   read: boolean;
   dedupeKey: string;
+  /** Event rows carry a catalog photograph. Connection rows do not. */
+  image?: string;
 }
 
 export interface NoticeState {
@@ -49,6 +51,7 @@ export interface EventNoticeInput {
   endsAt: string;
   published?: boolean;
   dateLabel: string;
+  image?: string;
 }
 
 export interface NoticeRefreshInput {
@@ -292,6 +295,7 @@ function syncEvents(
       sortAt: event.startsAt,
       read: readKeys.has(key),
       dedupeKey: key,
+      image: event.image,
     });
   }
 

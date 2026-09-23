@@ -5,6 +5,7 @@ import DemoEnterButton from "@/components/DemoEnterButton";
 import SponsorLockup from "@/components/SponsorLockup";
 import TierBadge from "@/components/TierBadge";
 import { demoEntryEnabled } from "@/lib/demoFlag";
+import { EVENTS } from "@/lib/events";
 import { SITE_DESCRIPTION, SITE_TITLE } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -13,19 +14,19 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
 };
 
-const STEPS = [
+const COURSES = [
   {
-    n: "01",
+    course: "First",
     title: "Show up as yourself",
     copy: "Identity is enough to enter — photo, name, role, ambitions. Verification waits until you want it.",
   },
   {
-    n: "02",
+    course: "Second",
     title: "Get introduced with intent",
     copy: "Discover ranks people by overlap, not a feed. Nearby when you want it. Events when a room is the better match.",
   },
   {
-    n: "03",
+    course: "Third",
     title: "Settle it over dinner",
     copy: "Private chat, a proposed table, a real seat. The network is the introduction. The product is the meal.",
   },
@@ -49,14 +50,19 @@ const STANDING = [
   },
 ];
 
+const STRIP = EVENTS.filter((event) => event.published !== false).slice(0, 8);
+
 /**
  * Browser marketing site — website first.
- * Native app can wrap this same site later; do not shrink it back into a phone frame.
+ * A night-service layout: the photograph is the room, type sits beside it.
+ * Native app can wrap this same site later.
  */
 export default function Landing() {
+  const reel = [...STRIP, ...STRIP];
+
   return (
-    <main className="mp-site overflow-x-hidden">
-      <header className="relative z-10 mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
+    <main className="mp-site mp-night overflow-x-hidden">
+      <header className="mp-night-bar">
         <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-accent">
           Interlink
         </p>
@@ -70,110 +76,112 @@ export default function Landing() {
         </div>
       </header>
 
-      <section className="relative isolate flex min-h-[calc(100dvh-4.5rem)] flex-col justify-center px-6 pb-20 pt-6">
-        <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
-          <div className="mp-site-grid" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_38%_36%,rgba(196,180,150,0.07),transparent_52%)]" />
-          <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black to-transparent" />
+      <section className="mp-night-hero">
+        <div className="mp-night-stage">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/events/hero-service.jpg" alt="" />
+          <p className="mp-night-plate">
+            <strong>Service</strong>
+            <span>A private room. A real table.</span>
+          </p>
         </div>
 
-        <div className="relative mx-auto grid w-full max-w-6xl items-center gap-14 lg:grid-cols-[1.15fr_0.85fr] lg:gap-20">
-          <div>
-            <p className="mp-reveal text-[10px] font-semibold uppercase tracking-[0.28em] text-accent">
-              Private introductions
-            </p>
-            <h1 className="mp-reveal mp-reveal-delay-1 mt-5 text-[clamp(2.6rem,7vw,5.4rem)] font-semibold leading-[0.94] tracking-[-0.03em] text-ivory">
-              Ambition,
-              <span className="block text-accent">then a table.</span>
-            </h1>
-            <p className="mp-reveal mp-reveal-delay-2 mt-6 max-w-md text-[1.05rem] leading-relaxed text-ivory/70">
-              Interlink is a private network for professional introductions — people
-              matched by what they’re building, then a real meeting over dinner. A
-              room, not a feed.
-            </p>
-            <div className="mp-reveal mp-reveal-delay-3 mt-10 flex flex-col items-start gap-3 sm:flex-row sm:items-center">
-              <Link
-                href="/login"
-                className="mp-btn-lux inline-flex min-w-[11.5rem] items-center justify-center px-8 py-3.5 text-[12px] font-semibold tracking-wide"
-              >
-                Enter the room
-              </Link>
-              <Link
-                href="/login"
-                className="mp-press inline-flex min-w-[11.5rem] items-center justify-center border border-ivory/35 px-8 py-3.5 text-[12px] font-medium tracking-wide text-ivory hover:border-accent/55 hover:text-accent"
-              >
-                Sign in
-              </Link>
-            </div>
-            {demoEntryEnabled() && (
-              <div className="mp-reveal mp-reveal-delay-3 mt-5">
-                <DemoEnterButton label="Enter demo" className="text-[13px] text-accent" />
-              </div>
-            )}
-            <p className="mp-reveal mp-reveal-delay-4 mt-8 text-[11px] tracking-wide text-muted">
-              Website first · Native app when you’re ready
-            </p>
-            <SponsorLockup className="mp-reveal mp-reveal-delay-4 mt-8" />
+        <div className="mp-night-copy">
+          <p className="mp-reveal text-[10px] font-semibold uppercase tracking-[0.28em] text-accent">
+            Private introductions
+          </p>
+          <h1 className="mp-reveal mp-reveal-delay-1 mp-night-title mt-5 text-ivory">
+            Ambition,
+            <span>then a table.</span>
+          </h1>
+          <p className="mp-reveal mp-reveal-delay-2 mt-6 max-w-md text-[1.05rem] leading-relaxed text-ivory/75">
+            Interlink is a private network for professional introductions — people
+            matched by what they’re building, then a real meeting over dinner. A
+            room, not a feed.
+          </p>
+          <div className="mp-reveal mp-reveal-delay-3 mt-10 flex flex-col items-start gap-3 sm:flex-row sm:items-center">
+            <Link
+              href="/login"
+              className="mp-btn-lux inline-flex min-w-[11.5rem] items-center justify-center px-8 py-3.5 text-[12px] font-semibold tracking-wide"
+            >
+              Enter the room
+            </Link>
+            <Link
+              href="/events"
+              className="mp-press inline-flex min-w-[11.5rem] items-center justify-center border border-ivory/35 px-8 py-3.5 text-[12px] font-medium tracking-wide text-ivory hover:border-accent/55 hover:text-accent"
+            >
+              See the calendar
+            </Link>
           </div>
-
-          <aside className="mp-reveal mp-reveal-delay-2 mp-landing-frame hidden px-8 py-9 lg:block">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-muted">
-              The room
-            </p>
-            <ul className="mt-8 space-y-6">
-              {STANDING.map((level) => (
-                <li key={level.name} className="border-t border-white/[0.08] pt-5 first:border-t-0 first:pt-0">
-                  <div className="flex items-center gap-2.5">
-                    {level.tier === 3 ? (
-                      <>
-                        <BlackBadge size="sm" />
-                        <span className="mp-level mp-level--black">BLACK</span>
-                      </>
-                    ) : (
-                      <TierBadge tier={level.tier} size="sm" />
-                    )}
-                  </div>
-                  <p className="mt-2 text-[13px] leading-relaxed text-ivory/62">{level.copy}</p>
-                </li>
-              ))}
-            </ul>
-            <p className="mt-10 text-[12px] tracking-wide text-accent/80">
-              Introductions that end at dinner.
-            </p>
-          </aside>
+          {demoEntryEnabled() && (
+            <div className="mp-reveal mp-reveal-delay-3 mt-5">
+              <DemoEnterButton label="Enter demo" className="text-[13px] text-accent" />
+            </div>
+          )}
+          <p className="mp-reveal mp-reveal-delay-4 mt-8 text-[11px] tracking-wide text-muted">
+            Website first · Native app when you’re ready
+          </p>
+          <SponsorLockup className="mp-reveal mp-reveal-delay-4 mt-8" />
         </div>
       </section>
 
-      <section className="border-t border-line/60 px-6 py-20">
+      <section className="mp-film" aria-label="Gatherings on the calendar">
+        <div className="mp-film-track">
+          {reel.map((event, index) => (
+            <Link
+              key={`${event.id}-${index}`}
+              href={`/events/${event.slug}`}
+              className="mp-film-card"
+              tabIndex={index >= STRIP.length ? -1 : undefined}
+              aria-hidden={index >= STRIP.length ? true : undefined}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={event.image} alt="" />
+              <span>
+                <strong>{event.name}</strong>
+                <em>
+                  {event.city} · {event.venue}
+                </em>
+              </span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section className="px-6 py-16 sm:py-20">
         <div className="mx-auto max-w-6xl">
           <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-accent">
-            How it works
+            The service
           </p>
-          <h2 className="mt-4 max-w-xl text-2xl font-semibold tracking-tight text-ivory sm:text-3xl">
+          <h2 className="mt-4 max-w-xl text-2xl font-semibold tracking-tight text-ivory sm:text-4xl sm:leading-[1.05]">
             Match in the browser. Meet at dinner.
           </h2>
           <p className="mt-4 max-w-xl text-[15px] leading-relaxed text-muted">
             Interlink makes the introduction. The table is where the business happens.
           </p>
-          <div className="mt-12 grid gap-10 md:grid-cols-3 md:gap-8">
-            {STEPS.map((step) => (
-              <div key={step.n}>
-                <p className="text-[11px] font-semibold tracking-[0.22em] text-accent/80">
-                  {step.n}
-                </p>
-                <h3 className="mt-3 text-[1.15rem] font-semibold tracking-tight text-ivory">
-                  {step.title}
-                </h3>
-                <p className="mt-3 text-[14px] leading-relaxed text-muted">{step.copy}</p>
-              </div>
+          <div className="mp-courses mt-12">
+            {COURSES.map((step) => (
+              <article key={step.course} className="mp-course">
+                <p>{step.course}</p>
+                <h3>{step.title}</h3>
+                <p>{step.copy}</p>
+              </article>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="border-t border-line/60 px-6 py-20">
-        <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-2">
-          <div>
+      <section className="border-t border-white/[0.08] px-6 py-16 sm:py-20">
+        <div className="mx-auto grid max-w-6xl items-stretch gap-8 lg:grid-cols-[0.9fr_1.1fr]">
+          <div className="mp-night-feature">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/events/founders-table-midtown.jpg" alt="" />
+            <p>
+              <strong>Founders’ Table — Midtown</strong>
+              <span>Twelve seats. No decks. Serious operators only.</span>
+            </p>
+          </div>
+          <div className="flex flex-col justify-center">
             <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-accent">
               Events &amp; conventions
             </p>
@@ -185,30 +193,16 @@ export default function Landing() {
               across the world. Interlink shows who will be in the room before you walk in.
             </p>
             <Link
-              href="/login"
-              className="mp-press mt-8 inline-flex border border-accent/30 px-6 py-3 text-[12px] font-medium tracking-wide text-accent hover:bg-accent/5"
+              href="/events"
+              className="mp-press mt-8 inline-flex w-fit border border-accent/40 px-6 py-3 text-[12px] font-medium tracking-wide text-accent hover:bg-accent/10"
             >
-              Sign in to browse Events
+              Browse events
             </Link>
-          </div>
-          <div className="mp-landing-frame px-7 py-7">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted">
-              On the calendar
-            </p>
-            <p className="mt-4 text-xl font-semibold tracking-tight text-ivory">
-              Founders’ Table — Midtown
-            </p>
-            <p className="mt-2 text-[13px] text-ivory/65">
-              Twelve seats. No decks. Serious operators only.
-            </p>
-            <p className="mt-6 text-[12px] text-muted">
-              New York · The Modern · October
-            </p>
           </div>
         </div>
       </section>
 
-      <section className="border-t border-line/60 px-6 py-20">
+      <section className="border-t border-white/[0.08] px-6 py-16 sm:py-20">
         <div className="mx-auto max-w-6xl">
           <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-accent">
             Standing
@@ -216,9 +210,9 @@ export default function Landing() {
           <h2 className="mt-4 max-w-xl text-2xl font-semibold tracking-tight text-ivory sm:text-3xl">
             Three ways to be in the room on Interlink. Not a ladder.
           </h2>
-          <div className="mt-12 grid gap-8 sm:grid-cols-3">
+          <div className="mp-places mt-12">
             {STANDING.map((level) => (
-              <div key={level.name} className="border-t border-white/10 pt-6">
+              <article key={level.name} className="mp-place">
                 <div className="flex items-center gap-2.5">
                   {level.tier === 3 ? (
                     <>
@@ -229,17 +223,15 @@ export default function Landing() {
                     <TierBadge tier={level.tier} size="md" />
                   )}
                 </div>
-                <p className="mt-4 text-[15px] font-semibold tracking-tight text-ivory">
-                  {level.name}
-                </p>
-                <p className="mt-2 text-[14px] leading-relaxed text-muted">{level.copy}</p>
-              </div>
+                <h3>{level.name}</h3>
+                <p>{level.copy}</p>
+              </article>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="border-t border-line/60 px-6 py-16">
+      <section className="border-t border-white/[0.08] px-6 py-16">
         <div className="mx-auto flex max-w-3xl flex-col items-center gap-5 text-center">
           <h2 className="text-xl font-semibold text-ivory sm:text-2xl">
             Start on the website today
@@ -253,7 +245,7 @@ export default function Landing() {
         </div>
       </section>
 
-      <footer className="border-t border-line/50 px-6 py-10">
+      <footer className="border-t border-white/[0.08] px-6 py-10">
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-5 text-center">
           <SponsorLockup />
           <p className="text-[11px] text-muted">

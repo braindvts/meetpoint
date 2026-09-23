@@ -114,8 +114,7 @@ export const EVENTS: InterlinkEvent[] = [
     kind: "event",
     name: "Founders’ Table — Midtown",
     slug: "founders-table-midtown",
-    image:
-      "https://images.unsplash.com/photo-1511578314322-379afb476865?w=1200&q=80&auto=format&fit=crop",
+    image: "/events/founders-table-midtown.jpg",
     category: "dinner",
     industry: "Entrepreneurship",
     format: "in-person",
@@ -145,8 +144,7 @@ export const EVENTS: InterlinkEvent[] = [
     kind: "convention",
     name: "Pacific AI Summit",
     slug: "pacific-ai-summit",
-    image:
-      "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200&q=80&auto=format&fit=crop",
+    image: "/events/pacific-ai-summit.jpg",
     category: "convention",
     industry: "AI",
     format: "in-person",
@@ -178,8 +176,7 @@ export const EVENTS: InterlinkEvent[] = [
     kind: "event",
     name: "City Capital Forum",
     slug: "city-capital-forum",
-    image:
-      "https://images.unsplash.com/photo-1497366216548-37526070297c?w=1200&q=80&auto=format&fit=crop",
+    image: "/events/city-capital-forum.jpg",
     category: "conference",
     industry: "Finance",
     format: "in-person",
@@ -205,8 +202,7 @@ export const EVENTS: InterlinkEvent[] = [
     kind: "event",
     name: "Waterfront Deal Room",
     slug: "waterfront-deal-room",
-    image:
-      "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1200&q=80&auto=format&fit=crop",
+    image: "/events/waterfront-deal-room.jpg",
     category: "networking",
     industry: "Real Estate",
     format: "in-person",
@@ -229,8 +225,7 @@ export const EVENTS: InterlinkEvent[] = [
     kind: "event",
     name: "Beacon Health Innovation Day",
     slug: "beacon-health-innovation",
-    image:
-      "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1200&q=80&auto=format&fit=crop",
+    image: "/events/beacon-health-innovation.jpg",
     category: "conference",
     industry: "Healthcare",
     format: "hybrid",
@@ -253,8 +248,7 @@ export const EVENTS: InterlinkEvent[] = [
     kind: "event",
     name: "Brand Operators’ Circle",
     slug: "brand-operators-circle",
-    image:
-      "https://images.unsplash.com/photo-1556761175-b413da4baf72?w=1200&q=80&auto=format&fit=crop",
+    image: "/events/brand-operators-circle.jpg",
     category: "meetup",
     industry: "Marketing",
     format: "in-person",
@@ -277,8 +271,7 @@ export const EVENTS: InterlinkEvent[] = [
     kind: "event",
     name: "Private Markets Evening",
     slug: "private-markets-evening",
-    image:
-      "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&q=80&auto=format&fit=crop",
+    image: "/events/private-markets-evening.jpg",
     category: "exclusive",
     industry: "Investing",
     format: "in-person",
@@ -303,8 +296,7 @@ export const EVENTS: InterlinkEvent[] = [
     kind: "convention",
     name: "South Corridor Tech Week",
     slug: "south-corridor-tech-week",
-    image:
-      "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=1200&q=80&auto=format&fit=crop",
+    image: "/events/south-corridor-tech-week.jpg",
     category: "convention",
     industry: "Technology",
     format: "in-person",
@@ -331,8 +323,7 @@ export const EVENTS: InterlinkEvent[] = [
     kind: "event",
     name: "Maison Circle — Paris",
     slug: "maison-circle-paris",
-    image:
-      "https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=1200&q=80&auto=format&fit=crop",
+    image: "/events/maison-circle-paris.jpg",
     category: "exclusive",
     industry: "Luxury",
     format: "in-person",
@@ -356,8 +347,7 @@ export const EVENTS: InterlinkEvent[] = [
     kind: "event",
     name: "SaaS Operators Roundtable",
     slug: "saas-operators-roundtable",
-    image:
-      "https://images.unsplash.com/photo-1588196740938-8dcde5e0f3d4?w=1200&q=80&auto=format&fit=crop",
+    image: "/events/saas-operators-roundtable.jpg",
     category: "workshop",
     industry: "Business",
     format: "online",
@@ -380,8 +370,7 @@ export const EVENTS: InterlinkEvent[] = [
     kind: "event",
     name: "Capitol Advisors Breakfast",
     slug: "capitol-advisors-breakfast",
-    image:
-      "https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=1200&q=80&auto=format&fit=crop",
+    image: "/events/capitol-advisors-breakfast.jpg",
     category: "meetup",
     industry: "Professional Services",
     format: "in-person",
@@ -404,8 +393,7 @@ export const EVENTS: InterlinkEvent[] = [
     kind: "convention",
     name: "Gulf Commerce Convention",
     slug: "gulf-commerce-convention",
-    image:
-      "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=1200&q=80&auto=format&fit=crop",
+    image: "/events/gulf-commerce-convention.jpg",
     category: "convention",
     industry: "Business",
     format: "in-person",

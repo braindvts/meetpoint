@@ -20,7 +20,7 @@ export default function ConventionCard({ event }: Props) {
           <img
             src={event.image}
             alt=""
-            className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.02]"
+            className="mp-card-photo h-full w-full object-cover"
           />
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#12110f] via-[#12110f]/50 to-transparent" />
           <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6">

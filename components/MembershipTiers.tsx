@@ -42,8 +42,8 @@ export default function MembershipTiers({ input, missing, missingHint }: Props) 
           return (
             <div
               key={t.tier}
-              className={`flex min-h-[7.5rem] flex-col border px-3.5 py-3.5 ${TIER_CARD[t.tier].row} ${
-                active ? "border-ivory/25" : ""
+              className={`mp-place flex min-h-[7.5rem] flex-col border px-3.5 py-3.5 ${TIER_CARD[t.tier].row} ${
+                active ? "is-yours border-ivory/25" : ""
               }`}
             >
               <div className="flex items-center justify-between gap-2">

@@ -20,6 +20,7 @@ function toNoticeEvent(event: InterlinkEvent): EventNoticeInput {
     endsAt: event.endsAt,
     published: event.published,
     dateLabel: formatEventDate(event.startsAt),
+    image: event.image,
   };
 }
 

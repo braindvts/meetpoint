@@ -29,6 +29,7 @@ function toInput(id: string): EventNoticeInput {
     endsAt: event.endsAt,
     published: event.published,
     dateLabel: formatEventDate(event.startsAt),
+    image: event.image,
   };
 }
 
@@ -95,6 +96,8 @@ test("a profile city uses the catalog city string, and still includes a conventi
   assert.deepEqual(ids, ["event:evt-black-tie-ny", "event:evt-invest-nyc", "event:evt-tech-austin"]);
   assert.equal(events[0]?.eyebrow, "In New York");
   assert.match(events[0]?.body || "", /The Modern/);
+  assert.equal(events[0]?.image, "/events/founders-table-midtown.jpg");
+  assert.ok(events.every((item) => item.image?.startsWith("/events/")));
   assert.equal(events[2]?.eyebrow, "Upcoming convention");
   assert.match(events[2]?.body || "", /Austin/);
   for (const item of events) {
