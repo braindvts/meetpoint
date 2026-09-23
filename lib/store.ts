@@ -631,7 +631,7 @@ export function sendChatMessage(
   }
 
   // Demo mode: a sample member replies after a short pause.
-  if (demoProfilesEnabled() && chat.memberIds.length > 0 && Math.random() > 0.35) {
+  if (demoProfilesEnabled() && chat.memberIds.length > 0) {
     const peerId = chat.memberIds[Math.floor(Math.random() * chat.memberIds.length)];
     if (DEMO_PEOPLE.some((p) => p.id === peerId)) {
       const replies = [
