@@ -164,8 +164,7 @@ function ChatsInner() {
         setChats(merged);
       }
       if (remoteConnections) {
-        applyServerConnections(remoteConnections);
-        setConnections(remoteConnections);
+        setConnections(applyServerConnections(remoteConnections));
       }
       setDirectory(dir);
     })();

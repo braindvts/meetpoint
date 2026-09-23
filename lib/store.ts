@@ -3,6 +3,7 @@
 import { formatPhoneDisplay, isValidPhone, maskPhone } from "./phone";
 import { summarizeReputation } from "./reputation";
 import type { FoodSuggestion } from "./foodAi";
+import { mergeServerConnections } from "./connectionMerge";
 import { DEMO_PROFILE } from "./demoAccount";
 import { demoEntryEnabled, demoProfilesEnabled } from "./demoFlag";
 import { DEMO_PEOPLE } from "./demoPeople";
@@ -229,18 +230,20 @@ export function requestConnection(peerId: string): Connection[] {
     }
     void import("./apiClient").then(async ({ requestServerConnection }) => {
       const remote = await requestServerConnection(peerId);
-      if (remote) {
-        saveConnections(remote);
-        window.dispatchEvent(new CustomEvent("meetpoint:connections-changed"));
-      }
+      if (remote) applyServerConnections(remote);
     });
   }
   return connections;
 }
 
+const pendingDemoAccepts = new Set<string>();
+
 function scheduleDemoAccept(peerId: string) {
+  if (pendingDemoAccepts.has(peerId)) return;
+  pendingDemoAccepts.add(peerId);
   const delay = 4000 + Math.floor(Math.random() * 4000);
   setTimeout(() => {
+    pendingDemoAccepts.delete(peerId);
     const before = getConnection(peerId);
     if (!before || before.status !== "requested" || before.direction === "in") return;
     acceptConnection(peerId);
@@ -261,6 +264,16 @@ function scheduleDemoAccept(peerId: string) {
       )
     );
   }, delay);
+}
+
+/** Re-arm sample accepts after a refresh. The timer does not survive a reload. */
+function resumePendingDemoAccepts(): void {
+  if (typeof window === "undefined" || !demoProfilesEnabled()) return;
+  for (const conn of loadConnections()) {
+    if (conn.status !== "requested" || conn.direction === "in") continue;
+    if (!isDemoPeer(conn.peerId)) continue;
+    scheduleDemoAccept(conn.peerId);
+  }
 }
 
 /** Seed one inbound intro so Circle has Accept / Decline — demo mode only. */
@@ -364,10 +377,7 @@ export function acceptConnection(peerId: string): Connection[] {
   if (isDemoPeer(peerId)) return connections;
   void import("./apiClient").then(async ({ patchServerConnection }) => {
     const remote = await patchServerConnection(peerId, "accept");
-    if (remote) {
-      saveConnections(remote);
-      window.dispatchEvent(new CustomEvent("meetpoint:connections-changed"));
-    }
+    if (remote) applyServerConnections(remote);
   });
   return connections;
 }
@@ -421,12 +431,24 @@ function saveChats(chats: GroupChat[]): void {
   window.dispatchEvent(new CustomEvent("meetpoint:chats-changed"));
 }
 
-/** Replace local connections with the signed-in member’s server list. */
+/**
+ * Replace local connections with the signed-in member’s server list.
+ * Sample introductions stay in this browser — they are not database rows,
+ * and writing them back would be purged.
+ */
 export function applyServerConnections(remote: Connection[]): Connection[] {
-  if (isDemoProfile(loadProfile())) return loadConnections();
-  saveConnections(remote);
+  if (typeof window === "undefined") return remote;
+  if (isDemoProfile(loadProfile())) {
+    resumePendingDemoAccepts();
+    return loadConnections();
+  }
+  const next = demoProfilesEnabled()
+    ? mergeServerConnections(loadConnections(), remote, isDemoPeer)
+    : remote;
+  saveConnections(next);
   window.dispatchEvent(new CustomEvent("meetpoint:connections-changed"));
-  return remote;
+  resumePendingDemoAccepts();
+  return next;
 }
 
 /** Merge `/api/chats` into local inbox so a cookie session isn’t an empty rail. */

@@ -4,6 +4,8 @@ import { CITIES } from "./cities";
 /**
  * Sample members for local demos only. Never loaded unless
  * NEXT_PUBLIC_ENABLE_DEMO_PROFILES=1, so the live room stays real people.
+ * A subset is Member standing (see MEMBER_SAMPLE_IDS) so a Member account
+ * can complete Connect. The rest stay Verified or BLACK.
  */
 function city(name: string) {
   const c = CITIES.find((c) => c.name === name);
@@ -11,7 +13,7 @@ function city(name: string) {
   return c;
 }
 
-export const DEMO_PEOPLE: Person[] = [
+const SAMPLE_PEOPLE: Person[] = [
   {
     id: "p1",
     name: "Marcus Reid",
@@ -537,3 +539,23 @@ export const DEMO_PEOPLE: Person[] = [
     ],
   },
 ];
+
+/**
+ * Member accounts can only introduce to other Members. These samples have
+ * Identity only so that path can be tested. p11 and p18 stay BLACK; the
+ * rest of the list stays Verified.
+ */
+const MEMBER_SAMPLE_IDS = new Set([
+  "p1",
+  "p3",
+  "p5",
+  "p7",
+  "p9",
+  "p12",
+  "p14",
+  "p16",
+]);
+
+export const DEMO_PEOPLE: Person[] = SAMPLE_PEOPLE.map((person) =>
+  MEMBER_SAMPLE_IDS.has(person.id) ? { ...person, verifications: [] } : person
+);

@@ -83,7 +83,7 @@ export default function MatchCard({
     if (status === "connected") return onChat ? "Chat" : "Connected";
     if (connecting) return "Sent";
     if (status === "requested") return "Waiting";
-    if (!canConnect) return "Verified";
+    if (!canConnect) return "Get Verified";
     return "Connect";
   }
 
