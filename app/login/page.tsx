@@ -7,6 +7,7 @@ import DemoEnterButton from "@/components/DemoEnterButton";
 import EmailAuthForm from "@/components/EmailAuthForm";
 import { demoEntryEnabled } from "@/lib/demoFlag";
 import { safeAppPath } from "@/lib/appPath";
+import { isUsableProfile } from "@/lib/roomGate";
 import { loadProfile, saveProfile } from "@/lib/store";
 import type { MyProfile } from "@/lib/types";
 
@@ -34,17 +35,17 @@ function LoginContent() {
 
   useEffect(() => {
     const p = loadProfile();
-    if (p?.verifications?.length && p.name) {
+    if (isUsableProfile(p)) {
       router.replace(next);
       return;
     }
-    void fetch("/api/members/me")
+    void fetch("/api/members/me", { credentials: "include" })
       .then((r) => r.json())
       .then((data: { ok?: boolean; profile?: MyProfile | null }) => {
-        if (data.ok && data.profile?.name) {
-          saveProfile(data.profile);
-          if (data.profile.verifications?.length) router.replace(next);
-        }
+        if (!data.ok || !data.profile?.name) return;
+        saveProfile(data.profile);
+        if (isUsableProfile(data.profile)) router.replace(next);
+        else router.replace("/onboarding");
       })
       .catch(() => undefined);
   }, [router, next]);

@@ -3,6 +3,7 @@
 import { formatPhoneDisplay, isValidPhone, maskPhone } from "./phone";
 import { summarizeReputation } from "./reputation";
 import type { FoodSuggestion } from "./foodAi";
+import { resolveChatId, withChatAlias } from "./chatIdentity";
 import { mergeServerConnections } from "./connectionMerge";
 import { DEMO_PROFILE } from "./demoAccount";
 import { demoEntryEnabled, demoProfilesEnabled } from "./demoFlag";
@@ -36,6 +37,7 @@ const CONNECTIONS_KEY = "meetpoint.connections";
 const CHATS_KEY = "meetpoint.chats";
 const RATINGS_KEY = "meetpoint.ratings";
 const BLOCKS_KEY = "meetpoint.blocked";
+const CHAT_ALIAS_KEY = "meetpoint.chat.idAlias";
 
 /** The "Enter demo" account signs itself with this LinkedIn value. */
 const DEMO_PROFILE_MARKER = "linkedin.com/in/conclave-demo";
@@ -493,8 +495,60 @@ export function mergeServerChats(remote: GroupChat[]): GroupChat[] {
   return merged;
 }
 
+function readChatAliases(): Record<string, string> {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = sessionStorage.getItem(CHAT_ALIAS_KEY);
+    return raw ? (JSON.parse(raw) as Record<string, string>) : {};
+  } catch {
+    return {};
+  }
+}
+
+function rememberChatAlias(fromId: string, toId: string): void {
+  if (typeof window === "undefined" || fromId === toId) return;
+  try {
+    sessionStorage.setItem(
+      CHAT_ALIAS_KEY,
+      JSON.stringify(withChatAlias(readChatAliases(), fromId, toId))
+    );
+  } catch {
+    /* ignore */
+  }
+}
+
+/** Local id the inbox opened, or the server id after the create call returns. */
+export function resolveStoredChatId(id: string): string {
+  return resolveChatId(id, readChatAliases());
+}
+
+const awaitingServerChat = new Set<string>();
+const queuedChatTexts = new Map<string, string[]>();
+
+function postChatText(chatId: string, text: string): void {
+  void fetch(`/api/chats/${chatId}/messages`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ text }),
+  }).catch(() => undefined);
+}
+
+function queueChatText(localId: string, text: string): void {
+  const queued = queuedChatTexts.get(localId) || [];
+  queued.push(text);
+  queuedChatTexts.set(localId, queued);
+}
+
+function flushQueuedChatTexts(localId: string, serverId: string): void {
+  const queued = queuedChatTexts.get(localId) || [];
+  queuedChatTexts.delete(localId);
+  for (const text of queued) postChatText(serverId, text);
+}
+
 export function getChat(id: string): GroupChat | undefined {
-  return loadChats().find((c) => c.id === id);
+  const resolved = resolveStoredChatId(id);
+  return loadChats().find((c) => c.id === resolved || c.id === id);
 }
 
 /** Rename a chat and/or set a group photo. Stored with local chats (API-ready later). */
@@ -573,27 +627,50 @@ export function createChat(name: string, memberIds: string[]): GroupChat {
   // A chat with sample members stays in this browser.
   if (chat.memberIds.some(isDemoPeer)) return chat;
 
+  awaitingServerChat.add(chat.id);
   // Prefer server chat id when available (multi-device)
   void fetch("/api/chats", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    credentials: "include",
     body: JSON.stringify({ name: chat.name, memberIds: chat.memberIds }),
   })
     .then((r) => r.json())
     .then((data: { ok?: boolean; chat?: GroupChat }) => {
-      if (!data.ok || !data.chat?.id) return;
+      awaitingServerChat.delete(chat.id);
+      if (!data.ok || !data.chat?.id) {
+        queuedChatTexts.delete(chat.id);
+        return;
+      }
+      const serverId = data.chat.id;
+      if (serverId === chat.id) {
+        flushQueuedChatTexts(chat.id, serverId);
+        return;
+      }
+      rememberChatAlias(chat.id, serverId);
       const latest = loadChats();
-      const idx = latest.findIndex((c) => c.id === chat.id);
-      if (idx < 0) return;
-      latest[idx] = {
-        ...latest[idx],
-        id: data.chat.id,
-        createdAt: data.chat.createdAt || latest[idx].createdAt,
-        updatedAt: data.chat.updatedAt || latest[idx].updatedAt,
-      };
-      saveChats(latest);
+      const idx = latest.findIndex((c) => c.id === chat.id || c.id === serverId);
+      if (idx >= 0 && latest[idx].id !== serverId) {
+        latest[idx] = {
+          ...latest[idx],
+          id: serverId,
+          createdAt: data.chat.createdAt || latest[idx].createdAt,
+          updatedAt: data.chat.updatedAt || latest[idx].updatedAt,
+        };
+        saveChats(latest);
+      }
+      void import("./chatUnread").then(({ remapChatRead }) => remapChatRead(chat.id, serverId));
+      void import("./chatMute").then(({ remapChatMute }) => remapChatMute(chat.id, serverId));
+      flushQueuedChatTexts(chat.id, serverId);
+      window.dispatchEvent(
+        new CustomEvent("meetpoint:chat-id-remapped", {
+          detail: { fromId: chat.id, toId: serverId },
+        })
+      );
     })
-    .catch(() => undefined);
+    .catch(() => {
+      awaitingServerChat.delete(chat.id);
+    });
 
   return chat;
 }
@@ -606,8 +683,9 @@ export function sendChatMessage(
   const trimmed = text.trim();
   if (!trimmed && !attachment) return getChat(chatId);
 
+  const resolvedId = resolveStoredChatId(chatId);
   const chats = loadChats();
-  const chat = chats.find((c) => c.id === chatId);
+  const chat = chats.find((c) => c.id === resolvedId || c.id === chatId);
   if (!chat) return undefined;
 
   const msg: ChatMessage = {
@@ -623,11 +701,13 @@ export function sendChatMessage(
 
   // Best-effort server sync (real multi-device); ignore failures for local-only chats
   if (trimmed && !chat.memberIds.some(isDemoPeer)) {
-    void fetch(`/api/chats/${chatId}/messages`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: trimmed }),
-    }).catch(() => undefined);
+    const queueKey = awaitingServerChat.has(chat.id)
+      ? chat.id
+      : awaitingServerChat.has(chatId)
+        ? chatId
+        : null;
+    if (queueKey) queueChatText(queueKey, trimmed);
+    else postChatText(chat.id, trimmed);
   }
 
   // Demo mode: a sample member replies after a short pause.
@@ -643,7 +723,8 @@ export function sendChatMessage(
       ];
       setTimeout(() => {
         const latest = loadChats();
-        const c = latest.find((x) => x.id === chatId);
+        const liveId = resolveStoredChatId(chat.id);
+        const c = latest.find((x) => x.id === liveId || x.id === chat.id);
         if (!c) return;
         const reply = {
           id: uid(),
@@ -657,7 +738,7 @@ export function sendChatMessage(
         const peer = DEMO_PEOPLE.find((p) => p.id === peerId);
         void import("./chatUnread").then(({ noteIncomingMessage }) =>
           noteIncomingMessage({
-            chatId,
+            chatId: c.id,
             messageId: reply.id,
             title: peer?.name || c.name || "New message",
             preview: reply.text,

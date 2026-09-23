@@ -13,6 +13,7 @@ import PersonProfileSheet from "@/components/PersonProfileSheet";
 import RateMeeting from "@/components/RateMeeting";
 import StarRating, { cuisineLine } from "@/components/StarRating";
 import { blackConnectionWith } from "@/lib/blackStore";
+import { preferConnection } from "@/lib/connectionSync";
 import { RESTAURANTS } from "@/lib/data";
 import { fetchServerConnections } from "@/lib/apiClient";
 import { gateRedirect, resolveSessionGate } from "@/lib/hydrateSession";
@@ -430,7 +431,13 @@ export default function ConnectionsPage() {
         onClose={() => setProfilePerson(null)}
         status={
           profilePerson
-            ? connections.find((c) => c.peerId === profilePerson.id)?.status
+            ? preferConnection(connections.filter((c) => c.peerId === profilePerson.id))?.status
+            : undefined
+        }
+        direction={
+          profilePerson
+            ? preferConnection(connections.filter((c) => c.peerId === profilePerson.id))
+                ?.direction
             : undefined
         }
         onChat={(peerId) => {

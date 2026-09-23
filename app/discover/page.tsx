@@ -8,7 +8,9 @@ import MatchCard from "@/components/MatchCard";
 import PersonProfileSheet from "@/components/PersonProfileSheet";
 import { filterByPreference, rankMatches } from "@/lib/match";
 import { canIntroduceToTier } from "@/lib/plans";
+import { preferConnection } from "@/lib/connectionSync";
 import {
+  acceptConnection,
   applyServerConnections,
   ensureSampleInboundRequest,
   getMeetingsAttended,
@@ -153,7 +155,16 @@ export default function DiscoverPage() {
     return tierForProfile(profile, getMeetingsAttended(profile));
   }, [profile]);
 
+  function connectionFor(peerId: string) {
+    return preferConnection(connections.filter((row) => row.peerId === peerId));
+  }
+
   function connect(peerId: string) {
+    const existing = connectionFor(peerId);
+    if (existing?.status === "requested" && existing.direction === "in") {
+      setConnections(acceptConnection(peerId));
+      return;
+    }
     setConnections(requestConnection(peerId));
   }
 
@@ -407,6 +418,7 @@ export default function DiscoverPage() {
               {filtered.map((m) => {
                 const allowed = canIntroduceToTier(myTier, m.tier);
                 const leaving = exiting === m.person.id;
+                const conn = connectionFor(m.person.id);
                 return (
                   <div
                     key={m.person.id}
@@ -414,7 +426,8 @@ export default function DiscoverPage() {
                   >
                     <MatchCard
                       match={m}
-                      status={connections.find((c) => c.peerId === m.person.id)?.status}
+                      status={conn?.status}
+                      direction={conn?.direction}
                       canConnect={allowed}
                       leaving={leaving}
                       onConnect={connect}
@@ -438,11 +451,8 @@ export default function DiscoverPage() {
         open={!!profilePerson}
         person={profilePerson}
         onClose={() => setProfilePerson(null)}
-        status={
-          profilePerson
-            ? connections.find((c) => c.peerId === profilePerson.id)?.status
-            : undefined
-        }
+        status={profilePerson ? connectionFor(profilePerson.id)?.status : undefined}
+        direction={profilePerson ? connectionFor(profilePerson.id)?.direction : undefined}
         canConnect={
           profilePerson
             ? canIntroduceToTier(

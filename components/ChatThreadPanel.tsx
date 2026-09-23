@@ -156,7 +156,8 @@ export default function ChatThreadPanel({ chatId, embedded = false, onBack }: Pr
 
     const poll = window.setInterval(async () => {
       try {
-        const res = await fetch(`/api/chats/${chatId}/messages`);
+        const liveId = getChat(chatId)?.id || chatId;
+        const res = await fetch(`/api/chats/${liveId}/messages`, { credentials: "include" });
         const data = (await res.json()) as {
           ok?: boolean;
           messages?: { id: string; senderId: string; text: string; createdAt: string }[];

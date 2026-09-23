@@ -7,11 +7,12 @@ import TierBadge from "@/components/TierBadge";
 import { blackConnectionWith } from "@/lib/blackStore";
 import type { MatchResult } from "@/lib/match";
 import { formatDistance } from "@/lib/match";
-import type { ConnectionStatus } from "@/lib/types";
+import type { ConnectionDirection, ConnectionStatus } from "@/lib/types";
 
 interface Props {
   match: MatchResult;
   status?: ConnectionStatus;
+  direction?: ConnectionDirection;
   canConnect?: boolean;
   onConnect?: (peerId: string) => void;
   /** When connected — user must press Chat to open a thread. */
@@ -31,6 +32,7 @@ interface Props {
 export default function MatchCard({
   match,
   status,
+  direction,
   canConnect = true,
   onConnect,
   onChat,
@@ -67,12 +69,14 @@ export default function MatchCard({
   if (isLocal) reasons.push("Nearby");
 
   const isNew = !preview && !status;
-  const connectLocked = preview || status === "connected" || status === "requested";
-  const showRequested = status === "requested" || connecting;
+  const inbound = status === "requested" && direction === "in";
+  const connectLocked = preview || status === "connected" || (status === "requested" && !inbound);
+  const showRequested = (status === "requested" && !inbound) || connecting;
 
   function connectAria() {
     if (preview) return "Your card";
     if (status === "connected") return onChat ? "Chat" : "Connected";
+    if (inbound) return "Accept introduction";
     if (showRequested) return "Waiting";
     if (!canConnect) return "Get Verified to connect";
     return "Connect";
@@ -82,6 +86,7 @@ export default function MatchCard({
     if (preview) return "Your card";
     if (status === "connected") return onChat ? "Chat" : "Connected";
     if (connecting) return "Sent";
+    if (inbound) return "Accept";
     if (status === "requested") return "Waiting";
     if (!canConnect) return "Get Verified";
     return "Connect";
@@ -92,6 +97,10 @@ export default function MatchCard({
     if (preview || connecting || leaving) return;
     if (status === "connected") {
       onChat?.(person.id);
+      return;
+    }
+    if (inbound) {
+      onConnect?.(person.id);
       return;
     }
     if (!canConnect) {
@@ -251,7 +260,7 @@ export default function MatchCard({
             preview ||
             leaving ||
             connecting ||
-            status === "requested" ||
+            (status === "requested" && !inbound) ||
             (status === "connected" && !onChat) ||
             (!status && !canConnect && !onNeedVerified)
           }

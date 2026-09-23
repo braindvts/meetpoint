@@ -9,13 +9,14 @@ import TierBadge from "@/components/TierBadge";
 import { getPeerReputation } from "@/lib/store";
 import { isOwner, ownedCompanies, otherWork, VERIFY_LABEL } from "@/lib/personFacts";
 import { tierDefinition, tierForPerson } from "@/lib/tiers";
-import type { ConnectionStatus, Person, PersonWork, WorkKind } from "@/lib/types";
+import type { ConnectionDirection, ConnectionStatus, Person, PersonWork, WorkKind } from "@/lib/types";
 
 interface Props {
   person: Person | null;
   open: boolean;
   onClose: () => void;
   status?: ConnectionStatus;
+  direction?: ConnectionDirection;
   canConnect?: boolean;
   onConnect?: (peerId: string) => void;
   /** When connected — open or create a DM only after the user presses Chat. */
@@ -77,6 +78,7 @@ export default function PersonProfileSheet({
   open,
   onClose,
   status,
+  direction,
   canConnect = true,
   onConnect,
   onChat,
@@ -449,6 +451,17 @@ export default function PersonProfileSheet({
                     Already connected
                   </p>
                 )
+              ) : status === "requested" && direction === "in" && onConnect ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onConnect(person.id);
+                    onClose();
+                  }}
+                  className="mp-btn-lux w-full rounded-lg bg-ivory py-3 text-[13px] font-semibold text-ink"
+                >
+                  Accept
+                </button>
               ) : status === "requested" ? (
                 <p className="py-2 text-center text-[13px] font-medium text-muted">
                   Waiting for them to accept

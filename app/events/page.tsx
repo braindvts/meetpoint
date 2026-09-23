@@ -212,7 +212,8 @@ export default function EventsPage() {
     const counts = displayCounts(event);
     const network = networkAttendingCount(event, connectedIds);
     const rsvp = getRsvp(event.id);
-    const interested = rsvp === "interested" || rsvp === "going";
+    const interested = rsvp === "interested";
+    const going = rsvp === "going";
     const match = rankedById.get(event.id);
     const matchReasons = match
       ? formatMatchReasons(match.reasons).split(" · ").filter(Boolean)
@@ -223,6 +224,7 @@ export default function EventsPage() {
       attendeeCount: counts.attendees,
       networkCount: network,
       interested,
+      going,
       matchReasons,
       onToggleInterested: () => {
         if (!profile) {
@@ -230,7 +232,11 @@ export default function EventsPage() {
           return;
         }
         const cur = getRsvp(event.id);
-        if (cur === "interested" || cur === "going") {
+        if (cur === "going") {
+          showToast("You’re marked attending. Change it on the event page.");
+          return;
+        }
+        if (cur === "interested") {
           setRsvp(event.id, null);
           showToast("Removed from saved events");
         } else {
