@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import FeaturedPartners from "@/components/FeaturedPartners";
 import { pickInterlinkLine } from "@/lib/lines";
 
 const BRAND = "INTERLINK";
@@ -10,6 +11,8 @@ const LEGACY_SESSION_KEY = "conclave.splash.seen";
 const LETTER_MS = 200;
 const START_MS = 480;
 const FINAL_HOLD_MS = 2200;
+/** Partner plate enters while the wordmark is still setting — no extra hold. */
+const PARTNERS_AT = START_MS + 4 * LETTER_MS;
 
 function alreadySeen(): boolean {
   try {
@@ -42,6 +45,7 @@ export default function SplashScreen() {
   const [shown, setShown] = useState(0);
   const [finale, setFinale] = useState(false);
   const [snap, setSnap] = useState(false);
+  const [partners, setPartners] = useState(false);
   const finished = useRef(false);
   const line = useMemo(() => pickInterlinkLine(), []);
 
@@ -80,6 +84,7 @@ export default function SplashScreen() {
     if (reduce) {
       setShown(LETTERS.length);
       setFinale(true);
+      setPartners(true);
       finish();
       return () => {
         if (hideTimer) window.clearTimeout(hideTimer);
@@ -96,6 +101,7 @@ export default function SplashScreen() {
     });
 
     const finaleAt = START_MS + LETTERS.length * LETTER_MS + 280;
+    timers.push(window.setTimeout(() => setPartners(true), PARTNERS_AT));
     timers.push(
       window.setTimeout(() => {
         setFinale(true);
@@ -197,6 +203,8 @@ export default function SplashScreen() {
           {finale ? "Connected" : "Linking in"}
         </p>
       </div>
+
+      <FeaturedPartners revealed={partners} />
     </div>
   );
 }
