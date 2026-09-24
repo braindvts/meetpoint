@@ -1376,6 +1376,12 @@ html.mp-boot-splash body::before {
     animation: none !important;
     transition: none !important;
   }
+  /* Splash is fully present, then leaves. No fade-in, pulse, or sheen. */
+  .mp-splash {
+    animation: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
   /* Allow splash to actually dismiss under reduced motion */
   .mp-splash-out {
     opacity: 0 !important;
