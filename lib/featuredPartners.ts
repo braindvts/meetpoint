@@ -10,7 +10,7 @@ export interface FeaturedPartner {
 }
 
 /**
- * Loading-screen credit. Append a partner to extend the plate —
+ * Loading-screen credit. Append a partner to extend the line —
  * order is lead first, then the list as written.
  * BijuuFlow uses the same destination and mark as the landing lockup.
  */

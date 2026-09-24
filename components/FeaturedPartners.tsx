@@ -9,8 +9,8 @@ interface Props {
 }
 
 /**
- * Featured-partner credit on the loading seal.
- * Logo and name sit open on the ink. The list is data-driven; BijuuFlow leads.
+ * Featured-partner credit on the loader.
+ * Logo and name sit open on the ink — no plate. BijuuFlow leads.
  */
 export default function FeaturedPartners({ revealed }: Props) {
   const partners = featuredPartnersInOrder();

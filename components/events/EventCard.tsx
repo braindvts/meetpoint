@@ -39,7 +39,7 @@ export default function EventCard({
   return (
     <article
       className={`mp-card-motion group relative overflow-hidden rounded-2xl border border-white/10 bg-[#0a0a0a] ${
-        compact ? "" : "mp-reveal"
+        compact ? "" : "mp-scroll-card"
       }`}
     >
       <Link href={`/events/${event.slug}`} className="block">

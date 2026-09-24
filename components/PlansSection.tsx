@@ -90,7 +90,7 @@ export default function PlansSection({
   }
 
   return (
-    <section className="mb-6 border border-line/50 bg-panel/40 p-3 sm:mb-10 sm:p-5">
+    <section className="mp-scroll-reveal mb-6 border border-line/50 bg-panel/40 p-3 sm:mb-10 sm:p-5">
       <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
         <p className="text-[9px] font-semibold uppercase tracking-[0.22em] text-accent sm:text-[11px]">
           Plans

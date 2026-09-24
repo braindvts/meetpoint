@@ -37,7 +37,7 @@ test("later partners follow the lead without a layout rewrite", () => {
   );
 });
 
-test("splash shows featured partners inside the existing seal, not a longer wait", () => {
+test("splash shows featured partners on a short minimal loader", () => {
   const splash = readFileSync(join(ROOT, "components/SplashScreen.tsx"), "utf8");
   const plate = readFileSync(join(ROOT, "components/FeaturedPartners.tsx"), "utf8");
   const css = readFileSync(join(ROOT, "app/globals.css"), "utf8");
@@ -48,7 +48,10 @@ test("splash shows featured partners inside the existing seal, not a longer wait
   assert.match(splash, /const PARTNERS_AT = START_MS \+ 4 \* LETTER_MS/);
   assert.match(splash, /setPartners\(true\)/);
   assert.match(splash, /INTERLINK/);
+  assert.match(splash, /mp-splash-geom/);
+  assert.match(splash, /onClick/);
   assert.doesNotMatch(splash, /Conclave/);
+  assert.doesNotMatch(splash, /Linking in|mp-splash-bar|mp-splash-snap/);
   assert.doesNotMatch(plate, /Conclave/);
 
   assert.match(plate, /Featured partners/);
@@ -57,22 +60,21 @@ test("splash shows featured partners inside the existing seal, not a longer wait
   assert.match(plate, /opens in a new tab/);
 
   assert.match(css, /mp-splash-partners--in/);
-  assert.match(css, /splashPartnerFlash/);
-  assert.match(css, /splashPartnerSheen/);
+  assert.match(css, /splashDraw/);
+  assert.match(css, /splashGeomPulse/);
   assert.match(css, /splashPartnerMark/);
+  assert.doesNotMatch(css, /splashPartnerFlash|splashPartnerSheen/);
   assert.match(css, /#d4c4a8/);
   assert.match(css, /prefers-reduced-motion:\s*reduce/);
-  assert.match(css, /\.mp-featured-partner-mark-wrap::after/);
   assert.match(css, /\.mp-featured-partner-mark/);
   assert.match(plate, /mp-featured-partner-link/);
   assert.doesNotMatch(plate, /mp-featured-partner-plate|mp-press/);
   assert.doesNotMatch(css, /mp-featured-partner-plate/);
-  const flash = css.slice(
-    css.indexOf("@keyframes splashPartnerFlash"),
-    css.indexOf("@keyframes splashPartnerSheen")
-  );
-  assert.doesNotMatch(flash, /inset|border/);
+  const markStart = css.indexOf("@keyframes splashPartnerMark");
+  const mark = css.slice(markStart, css.indexOf("}", css.indexOf("}", markStart) + 1) + 1);
+  assert.doesNotMatch(mark, /inset|border|scale\(/);
   assert.match(css, /\.mp-featured-partner-link \{[\s\S]*?border:\s*0;/);
+  assert.match(css, /stroke-dashoffset:\s*0/);
 
   assert.match(lockup, /Supported by/);
   assert.match(lockup, /https:\/\/bijuuflow\.com\/terminal/);

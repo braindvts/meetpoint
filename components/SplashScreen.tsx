@@ -1,17 +1,16 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import FeaturedPartners from "@/components/FeaturedPartners";
-import { pickInterlinkLine } from "@/lib/lines";
 
 const BRAND = "INTERLINK";
 const LETTERS = BRAND.split("");
 const SESSION_KEY = "interlink.splash.seen";
 const LEGACY_SESSION_KEY = "conclave.splash.seen";
-const LETTER_MS = 200;
-const START_MS = 480;
+const LETTER_MS = 170;
+const START_MS = 360;
 const FINAL_HOLD_MS = 2200;
-/** Partner plate enters while the wordmark is still setting — no extra hold. */
+/** Partner credit enters while the wordmark is still setting — no extra hold. */
 const PARTNERS_AT = START_MS + 4 * LETTER_MS;
 
 function alreadySeen(): boolean {
@@ -36,18 +35,16 @@ function markSeen() {
 }
 
 /**
- * Loading seal — smooth letter reveal, then one clean sharp snap at the end.
- * No sound. Replay with ?splash=1
+ * Minimal loader — one champagne mark, a wordmark type-in, open partner credit.
+ * No sound. Replay with ?splash=1. Click anywhere to skip.
  */
 export default function SplashScreen() {
   const [visible, setVisible] = useState(false);
   const [leaving, setLeaving] = useState(false);
   const [shown, setShown] = useState(0);
   const [finale, setFinale] = useState(false);
-  const [snap, setSnap] = useState(false);
   const [partners, setPartners] = useState(false);
   const finished = useRef(false);
-  const line = useMemo(() => pickInterlinkLine(), []);
 
   useEffect(() => {
     const force = window.location.search.includes("splash=1");
@@ -77,7 +74,7 @@ export default function SplashScreen() {
       hideTimer = window.setTimeout(() => {
         setVisible(false);
         document.documentElement.classList.remove("mp-boot-splash");
-      }, 900);
+      }, 640);
     };
 
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -85,8 +82,9 @@ export default function SplashScreen() {
       setShown(LETTERS.length);
       setFinale(true);
       setPartners(true);
-      finish();
+      const hold = window.setTimeout(finish, 900);
       return () => {
+        window.clearTimeout(hold);
         if (hideTimer) window.clearTimeout(hideTimer);
       };
     }
@@ -100,18 +98,11 @@ export default function SplashScreen() {
       );
     });
 
-    const finaleAt = START_MS + LETTERS.length * LETTER_MS + 280;
+    const finaleAt = START_MS + LETTERS.length * LETTER_MS + 180;
     timers.push(window.setTimeout(() => setPartners(true), PARTNERS_AT));
-    timers.push(
-      window.setTimeout(() => {
-        setFinale(true);
-        setSnap(true);
-      }, finaleAt)
-    );
-    timers.push(window.setTimeout(() => setSnap(false), finaleAt + 320));
-    timers.push(window.setTimeout(() => setLeaving(true), finaleAt + FINAL_HOLD_MS));
-    timers.push(window.setTimeout(finish, finaleAt + FINAL_HOLD_MS + 900));
-    timers.push(window.setTimeout(finish, 14000));
+    timers.push(window.setTimeout(() => setFinale(true), finaleAt));
+    timers.push(window.setTimeout(finish, finaleAt + FINAL_HOLD_MS));
+    timers.push(window.setTimeout(finish, 12000));
 
     return () => {
       timers.forEach((t) => window.clearTimeout(t));
@@ -125,7 +116,7 @@ export default function SplashScreen() {
     <div
       className={`mp-splash fixed inset-0 z-[200] flex flex-col items-center justify-center overflow-hidden bg-ink ${
         leaving ? "mp-splash-out" : ""
-      } ${finale ? "mp-splash-finale" : ""}`}
+      }`}
       role="status"
       aria-live="polite"
       aria-label="Loading Interlink"
@@ -137,32 +128,34 @@ export default function SplashScreen() {
         window.setTimeout(() => {
           setVisible(false);
           document.documentElement.classList.remove("mp-boot-splash");
-        }, 420);
+        }, 280);
       }}
     >
       <div className="pointer-events-none absolute inset-0" aria-hidden>
-        <div className="mp-splash-glow absolute inset-0 bg-[radial-gradient(ellipse_at_40%_35%,rgba(196,180,150,0.07),transparent_55%)]" />
-        <div className="mp-splash-glow mp-splash-glow--late absolute inset-0 bg-[radial-gradient(ellipse_at_70%_65%,rgba(196,180,150,0.04),transparent_50%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_10%,#050505_78%)]" />
-        <div className="mp-splash-grain absolute inset-0 opacity-[0.06]" />
-        <div className="mp-splash-vignette absolute inset-0" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(212,196,168,0.075),transparent_56%)]" />
       </div>
 
-      <div className="mp-splash-seal relative flex flex-col items-center px-6 text-center sm:px-8">
-        <span className="mp-splash-ring" aria-hidden />
-        <span className="mp-splash-ring mp-splash-ring--outer" aria-hidden />
+      <div className="mp-splash-seal relative flex flex-col items-center px-6 text-center">
+        <svg className="mp-splash-geom" viewBox="0 0 80 80" aria-hidden>
+          <polygon
+            className="mp-splash-diamond"
+            pathLength="1"
+            points="40,7 73,40 40,73 7,40"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="0.7"
+          />
+          <polygon
+            className="mp-splash-diamond mp-splash-diamond--inner"
+            pathLength="1"
+            points="40,24 56,40 40,56 24,40"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="0.45"
+          />
+        </svg>
 
-        <p className="mp-splash-mark text-[10px] font-semibold uppercase tracking-[0.48em] text-accent/75">
-          Private network
-        </p>
-
-        <div className="mp-splash-rule my-5 h-10 w-px bg-gradient-to-b from-transparent via-accent to-transparent" />
-
-        <h1
-          className={`mp-splash-type relative font-display text-[clamp(2.1rem,9vw,4.75rem)] font-semibold leading-[0.92] tracking-[0.14em] text-accent ${
-            snap ? "mp-splash-type--snap" : ""
-          }`}
-        >
+        <h1 className="mp-splash-type relative mt-8 font-display text-[clamp(1.65rem,6.4vw,3.15rem)] font-medium leading-none tracking-[0.28em] text-accent">
           {LETTERS.map((ch, i) => (
             <span
               key={`${ch}-${i}`}
@@ -173,35 +166,12 @@ export default function SplashScreen() {
             </span>
           ))}
           <span className="sr-only">{BRAND}</span>
-          {snap ? <span className="mp-splash-snap-ring" aria-hidden /> : null}
         </h1>
 
         <span
-          className={`mp-splash-line mt-8 h-px w-32 origin-center bg-gradient-to-r from-transparent via-accent/90 to-transparent ${
-            finale ? "mp-splash-line--show" : "opacity-0"
-          }`}
+          className={`mp-splash-line mt-6 ${finale ? "mp-splash-line--show" : ""}`}
+          aria-hidden
         />
-
-        <p
-          className={`mp-splash-tag mt-7 max-w-[19rem] text-[15px] leading-relaxed text-ivory/72 sm:max-w-md sm:text-base ${
-            finale ? "mp-splash-tag--show" : "opacity-0"
-          }`}
-        >
-          {line}
-        </p>
-
-        <div className="mp-splash-bar mt-12 h-px w-44 overflow-hidden bg-white/[0.1] sm:w-52">
-          <span
-            className="mp-splash-bar-fill block h-full bg-accent/70"
-            style={{
-              width: `${Math.min(100, (shown / LETTERS.length) * 100)}%`,
-              transition: "width 320ms cubic-bezier(0.22, 1, 0.36, 1)",
-            }}
-          />
-        </div>
-        <p className="mp-splash-caption mt-5 text-[10px] font-semibold uppercase tracking-[0.32em] text-muted">
-          {finale ? "Connected" : "Linking in"}
-        </p>
       </div>
 
       <FeaturedPartners revealed={partners} />

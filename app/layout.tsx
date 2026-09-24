@@ -49,7 +49,7 @@ export default function RootLayout({
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var q=location.search;if(/[?&]shot=1/.test(q)){document.documentElement.setAttribute('data-shot','1');return;}var s=sessionStorage;if(s.getItem('interlink.splash.seen')==='1'||s.getItem('conclave.splash.seen')==='1')return;if(location.pathname.indexOf('/story')===0)return;document.documentElement.classList.add('mp-boot-splash');}catch(e){}})();`,
+            __html: `(function(){try{var q=location.search;if(/[?&]shot=1/.test(q)){document.documentElement.setAttribute('data-shot','1');return;}var s=sessionStorage;if(s.getItem('interlink.splash.seen')==='1'||s.getItem('conclave.splash.seen')==='1')return;if(location.pathname.indexOf('/story')===0)return;document.documentElement.classList.add('mp-boot-splash');}catch(e){}})();(function(){try{if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;document.documentElement.classList.add('mp-motion');}catch(e){}})();`,
           }}
         />
       </head>
