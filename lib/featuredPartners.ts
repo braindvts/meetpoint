@@ -5,14 +5,20 @@ export interface FeaturedPartner {
   /** Public path of the approved mark. */
   logoSrc: string;
   logoAlt: string;
-  /** Shown first, larger, and with the champagne flash. */
+  /** Shown first and larger. */
   lead?: boolean;
+  /**
+   * Black artwork that should be inverted on the ink field.
+   * Marks drawn for a dark ground — Grounded's white tile — stay as authored.
+   */
+  invertOnInk?: boolean;
 }
 
 /**
  * Loading-screen credit. Append a partner to extend the line —
  * order is lead first, then the list as written.
- * BijuuFlow uses the same destination and mark as the landing lockup.
+ * BijuuFlow leads and uses the same destination and mark as the landing lockup.
+ * Later partners follow in list order.
  */
 export const FEATURED_PARTNERS: readonly FeaturedPartner[] = [
   {
@@ -22,6 +28,14 @@ export const FEATURED_PARTNERS: readonly FeaturedPartner[] = [
     logoSrc: "/bijuuflow-logo.svg",
     logoAlt: "BijuuFlow",
     lead: true,
+    invertOnInk: true,
+  },
+  {
+    id: "grounded",
+    name: "Grounded",
+    href: "https://groundedpeptides.com",
+    logoSrc: "/grounded-logo.svg",
+    logoAlt: "Grounded",
   },
 ];
 

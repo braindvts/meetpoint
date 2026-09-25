@@ -59,11 +59,11 @@ function PartnerCredit({ partner, index }: { partner: FeaturedPartner; index: nu
             src={partner.logoSrc}
             alt={partner.logoAlt}
             width={partner.lead ? 38 : 28}
-            height={partner.lead ? 37 : 27}
-            className="mp-featured-partner-mark"
+            height={partner.lead ? 37 : 28}
+            className={`mp-featured-partner-mark${partner.invertOnInk ? " mp-featured-partner-mark--invert" : ""}`}
           />
         </span>
-        <span className="mp-featured-partner-name">{partner.name}</span>
+        <span className="mp-featured-partner-name font-display">{partner.name}</span>
       </a>
     </li>
   );

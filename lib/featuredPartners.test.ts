@@ -18,6 +18,20 @@ test("BijuuFlow is the lead featured partner and uses the landing mark", () => {
   assert.equal(ordered.filter((partner) => partner.name === "BijuuFlow").length, 1);
 });
 
+test("Grounded follows BijuuFlow and keeps its own mark and link", () => {
+  const ordered = featuredPartnersInOrder();
+  const grounded = ordered.find((partner) => partner.id === "grounded");
+  assert.equal(ordered[0]?.id, "bijuuflow");
+  assert.equal(ordered[1]?.id, "grounded");
+  assert.equal(grounded?.name, "Grounded");
+  assert.equal(grounded?.lead, undefined);
+  assert.equal(grounded?.invertOnInk, undefined);
+  assert.equal(grounded?.href, "https://groundedpeptides.com");
+  assert.equal(grounded?.logoSrc, "/grounded-logo.svg");
+  assert.equal(grounded?.logoAlt, "Grounded");
+  assert.equal(ordered.filter((partner) => partner.name === "Grounded").length, 1);
+});
+
 test("later partners follow the lead without a layout rewrite", () => {
   const partners: FeaturedPartner[] = [
     { id: "second", name: "Second", href: "https://example.com/second", logoSrc: "/second.svg", logoAlt: "Second" },
@@ -58,6 +72,9 @@ test("splash shows featured partners on a short minimal loader", () => {
   assert.match(plate, /featuredPartnersInOrder/);
   assert.match(plate, /bijuuflow-logo\.svg|partner\.logoSrc/);
   assert.match(plate, /opens in a new tab/);
+  assert.match(plate, /stopPropagation/);
+  assert.match(plate, /target="_blank"/);
+  assert.match(plate, /noopener noreferrer/);
 
   assert.match(css, /mp-splash-partners--in/);
   assert.match(css, /splashDraw/);
@@ -77,7 +94,12 @@ test("splash shows featured partners on a short minimal loader", () => {
   assert.match(css, /stroke-dashoffset:\s*0/);
 
   assert.match(lockup, /Supported by/);
-  assert.match(lockup, /https:\/\/bijuuflow\.com\/terminal/);
-  assert.match(lockup, /bijuuflow-logo\.svg/);
+  assert.match(lockup, /featuredPartnersInOrder/);
+  assert.match(lockup, /target="_blank"/);
+  assert.match(lockup, /noopener noreferrer/);
+  assert.match(lockup, /partner\.href/);
+  assert.match(lockup, /partner\.logoSrc/);
   assert.doesNotMatch(lockup, /Featured partners/);
+  assert.match(css, /mp-sponsor-lockup-mark--native/);
+  assert.match(css, /mp-featured-partner-mark--invert/);
 });
