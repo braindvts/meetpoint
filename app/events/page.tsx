@@ -284,7 +284,7 @@ export default function EventsPage() {
         />
 
         {featured[0] ? (
-          <Link href={`/events/${featured[0].slug}`} className="mp-event-hero mp-card-motion group">
+          <Link href={`/events/${featured[0].slug}`} className="mp-event-hero mp-scroll-card mp-card-motion group">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={featured[0].image} alt="" className="mp-card-photo" />
             <span className="mp-event-hero-copy">

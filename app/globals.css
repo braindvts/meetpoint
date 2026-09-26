@@ -651,6 +651,68 @@ svg {
   animation: tabUnderline 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+
+/* Scroll reveals — hidden only after the motion boot class, so content stays visible without JS. */
+.mp-draw-rule,
+.mp-scroll-rule {
+  display: block;
+  width: 2.25rem;
+  height: 1px;
+  margin-top: 0.85rem;
+  background: linear-gradient(90deg, #d4c4a8, transparent);
+  transform-origin: left center;
+}
+.mp-draw-rule {
+  transform: scaleX(0);
+  animation: lineDraw 0.85s var(--ease-out) 0.28s both;
+}
+.mp-scroll-rule {
+  transform: scaleX(1);
+}
+html.mp-motion .mp-scroll-reveal,
+html.mp-motion .mp-scroll-stagger > *,
+html.mp-motion .mp-scroll-card {
+  transition:
+    opacity 0.7s var(--ease-out),
+    translate 0.7s var(--ease-out);
+}
+html.mp-motion .mp-scroll-reveal:not(.is-in),
+html.mp-motion .mp-scroll-stagger > *:not(.is-in) {
+  opacity: 0;
+  translate: 0 14px;
+}
+html.mp-motion .mp-scroll-card:not(.is-in) {
+  opacity: 0;
+}
+html.mp-motion .mp-scroll-reveal.is-in,
+html.mp-motion .mp-scroll-stagger > *.is-in,
+html.mp-motion .mp-scroll-card.is-in {
+  opacity: 1;
+  translate: 0 0;
+}
+html.mp-motion .mp-scroll-stagger > *:nth-child(2) {
+  transition-delay: 0.06s;
+}
+html.mp-motion .mp-scroll-stagger > *:nth-child(3) {
+  transition-delay: 0.12s;
+}
+html.mp-motion .mp-scroll-stagger > *:nth-child(4) {
+  transition-delay: 0.18s;
+}
+html.mp-motion .mp-scroll-stagger > *:nth-child(5) {
+  transition-delay: 0.24s;
+}
+html.mp-motion .mp-scroll-stagger > *:nth-child(n + 6) {
+  transition-delay: 0.28s;
+}
+html.mp-motion .mp-scroll-reveal:not(.is-in) .mp-scroll-rule {
+  transform: scaleX(0);
+}
+html.mp-motion .mp-scroll-reveal.is-in .mp-scroll-rule {
+  transform: scaleX(1);
+  transition: transform 0.85s var(--ease-out) 0.12s;
+}
+
 /* Shared press / hover — buttons, chips, ghost links */
 .mp-press {
   transition:
@@ -722,12 +784,46 @@ svg {
   transition-duration: 0.08s;
 }
 
-/* BijuuFlow sponsor — compact lockup, dark-field invert */
+/* Sponsor lockup — horizontal marquee, static row when motion is reduced */
 .mp-sponsor-lockup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  width: min(100%, 34rem);
+  max-width: 100%;
+  margin: 0;
+  color: var(--color-ivory);
+}
+.mp-sponsor-lockup-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem 0.55rem;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0;
+}
+.mp-sponsor-lockup-slot {
   display: inline-flex;
   align-items: center;
   gap: 0.55rem;
-  color: var(--color-ivory);
+  white-space: nowrap;
+}
+.mp-sponsor-lockup-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: inherit;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.mp-sponsor-lockup-dot {
+  color: #d4c4a8;
+  font-size: 13px;
+  line-height: 1;
+  opacity: 0.8;
 }
 .mp-sponsor-lockup-kicker {
   font-size: 10px;
@@ -744,6 +840,15 @@ svg {
   color: var(--color-ivory);
   transition: color 0.18s ease;
 }
+/* ONYX wordmark: ONYX plus a smaller tracked FUTURES, same as their header. */
+.mp-partner-onyx-sub {
+  margin-left: 0.42em;
+  font-size: 0.68em;
+  font-weight: 500;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  opacity: 0.72;
+}
 .mp-sponsor-lockup-mark {
   width: 1.75rem;
   height: 1.7rem;
@@ -755,14 +860,112 @@ svg {
     filter 0.22s var(--ease-out),
     opacity 0.18s ease;
 }
+.mp-sponsor-lockup-mark--native {
+  filter: none;
+  opacity: 1;
+  width: 1.65rem;
+  height: 1.65rem;
+}
+@media (max-width: 540px) {
+  .mp-sponsor-lockup {
+    gap: 0.35rem 0.45rem;
+  }
+  .mp-sponsor-lockup-mark,
+  .mp-sponsor-lockup-mark--native {
+    width: 1.4rem;
+    height: 1.4rem;
+  }
+  .mp-sponsor-lockup-name {
+    font-size: 12px;
+  }
+}
 @media (hover: hover) and (pointer: fine) {
-  .mp-sponsor-lockup:hover .mp-sponsor-lockup-kicker,
-  .mp-sponsor-lockup:hover .mp-sponsor-lockup-name {
+  .mp-sponsor-lockup-link:hover .mp-sponsor-lockup-name {
     color: var(--color-accent);
   }
-  .mp-sponsor-lockup:hover .mp-sponsor-lockup-mark {
+  .mp-sponsor-lockup-link:hover .mp-sponsor-lockup-mark:not(.mp-sponsor-lockup-mark--native) {
     filter: invert(1) sepia(0.32) saturate(0.7) hue-rotate(4deg) brightness(1.08);
     opacity: 1;
+  }
+}
+
+/* Horizontal partner marquee — translateX only, two equal halves. */
+.mp-marquee {
+  --mp-marquee-duration: 42s;
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent);
+}
+.mp-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: mpMarquee var(--mp-marquee-duration) linear infinite;
+  will-change: transform;
+}
+.mp-marquee-set {
+  display: flex;
+  align-items: center;
+  flex: none;
+  gap: 3.25rem;
+  padding-right: 3.25rem;
+}
+.mp-marquee-link {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  gap: 0.65rem;
+  color: #ece8e0;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.mp-marquee-link:focus-visible {
+  outline: 1px solid #d4c4a8;
+  outline-offset: 4px;
+}
+.mp-marquee-mark {
+  width: 1.7rem;
+  height: 1.7rem;
+  object-fit: contain;
+}
+.mp-marquee-mark--invert {
+  filter: invert(1) sepia(0.18) saturate(0.45) hue-rotate(6deg) brightness(1.02);
+}
+.mp-marquee-mark--native {
+  filter: none;
+}
+.mp-marquee-name {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: #ece8e0;
+}
+.mp-marquee-link--lead .mp-marquee-name {
+  color: #d4c4a8;
+  letter-spacing: 0.1em;
+}
+.mp-marquee-static {
+  display: none;
+}
+@keyframes mpMarquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+@media (max-width: 540px) {
+  .mp-marquee-set {
+    gap: 2.4rem;
+    padding-right: 2.4rem;
+  }
+}
+@media (hover: hover) and (pointer: fine) {
+  .mp-marquee-link:hover .mp-marquee-name {
+    color: #d4c4a8;
   }
 }
 
@@ -791,57 +994,7 @@ svg {
   transition: transform 0.7s var(--ease-out);
 }
 
-/* —— Splash / loading seal —— */
-@keyframes splashSealIn {
-  0% {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  55% {
-    opacity: 1;
-    transform: scale(1.015);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes splashRing {
-  0% {
-    opacity: 0;
-    transform: scale(0.72) rotate(-10deg);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) rotate(0deg);
-  }
-}
-
-@keyframes splashWord {
-  from {
-    opacity: 0;
-    letter-spacing: 0.42em;
-    transform: translateY(14px);
-  }
-  to {
-    opacity: 1;
-    letter-spacing: 0.14em;
-    transform: translateY(0);
-  }
-}
-
-@keyframes splashTag {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
+/* —— Splash / loading mark —— */
 @keyframes splashOut {
   to {
     opacity: 0;
@@ -860,60 +1013,41 @@ svg {
   }
 }
 
-@keyframes splashGlow {
+@keyframes splashDraw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes splashGeomPulse {
   0%,
   100% {
-    opacity: 0.55;
-    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.62;
   }
   50% {
-    opacity: 0.9;
-    transform: translate(-50%, -50%) scale(1.08);
+    opacity: 1;
   }
 }
 
-@keyframes splashBar {
-  0% {
-    transform: scaleX(0);
-  }
-  85% {
-    transform: scaleX(1);
-  }
-  100% {
-    transform: scaleX(1);
-  }
-}
-
-@keyframes splashMark {
+@keyframes splashLetterIn {
   from {
     opacity: 0;
-    letter-spacing: 0.7em;
-    transform: translateY(6px);
+    transform: translateY(0.42em);
   }
   to {
     opacity: 1;
-    letter-spacing: 0.48em;
     transform: translateY(0);
   }
 }
 
-@keyframes splashRule {
-  from {
-    opacity: 0;
-    transform: scaleY(0);
+/* One quiet brightness breath on the lead mark — no sheen, no halo. */
+@keyframes splashPartnerMark {
+  0%,
+  100% {
+    filter: invert(1) sepia(0.18) saturate(0.45) hue-rotate(6deg) brightness(1.02);
   }
-  to {
-    opacity: 1;
-    transform: scaleY(1);
-  }
-}
-
-@keyframes splashCaption {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
+  45% {
+    filter: invert(1) sepia(0.28) saturate(0.62) hue-rotate(5deg) brightness(1.12);
   }
 }
 
@@ -931,167 +1065,75 @@ html.mp-boot-splash body::before {
 }
 
 .mp-splash {
-  animation: fadeIn 0.3s ease-out both;
-  padding-bottom: 6.75rem;
+  animation: fadeIn 0.35s ease-out both;
+  padding-bottom: 8rem;
+  cursor: pointer;
 }
 .mp-splash-out {
-  animation: splashOut 0.9s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: splashOut 0.64s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   pointer-events: none;
 }
 .mp-splash-seal {
-  animation: splashSealIn 1.35s cubic-bezier(0.22, 1, 0.36, 1) both;
-  overflow: visible;
-}
-.mp-splash-glow {
-  animation: splashGlow 3.4s ease-in-out infinite;
-}
-.mp-splash-glow--late {
-  animation-delay: 0.9s;
-}
-.mp-splash-grain {
-  background-image: radial-gradient(rgba(255, 255, 255, 0.35) 0.5px, transparent 0.5px);
-  background-size: 3px 3px;
-}
-.mp-splash-vignette {
-  background: linear-gradient(
-    to bottom,
-    rgba(5, 5, 5, 0.55) 0%,
-    transparent 28%,
-    transparent 72%,
-    rgba(5, 5, 5, 0.7) 100%
-  );
-}
-.mp-splash-ring {
-  position: absolute;
-  inset: -38% -26%;
-  border-radius: 50%;
-  border: 1px solid rgba(212, 196, 168, 0.2);
-  animation: splashRing 1.45s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
-  pointer-events: none;
-}
-.mp-splash-ring--outer {
-  inset: -58% -42%;
-  border-color: rgba(212, 196, 168, 0.09);
-  animation-delay: 0.28s;
-}
-.mp-splash-ring::after {
-  content: "";
-  position: absolute;
-  inset: 14%;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.045);
-}
-.mp-splash-mark {
-  animation: splashMark 0.95s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
-}
-.mp-splash-rule {
-  transform-origin: center top;
-  animation: splashRule 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.35s both;
-}
-.mp-splash-word {
-  animation: splashWord 1.15s cubic-bezier(0.22, 1, 0.36, 1) 0.4s both;
+  animation: fadeIn 0.6s ease-out both;
 }
 
-/* Letter-by-letter Interlink type-in (smooth, no cursor/sound) */
+.mp-splash-geom {
+  width: 4.25rem;
+  height: 4.25rem;
+  color: #d4c4a8;
+  overflow: visible;
+  animation: splashGeomPulse 3.8s ease-in-out 1.15s infinite;
+}
+.mp-splash-diamond {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: splashDraw 1.25s var(--ease-out) 0.12s forwards;
+}
+.mp-splash-diamond--inner {
+  animation-duration: 1.05s;
+  animation-delay: 0.38s;
+}
+
 .mp-splash-type {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 0.02em;
+  gap: 0.01em;
   min-height: 1.05em;
-  overflow: visible;
 }
 .mp-splash-letter {
-  position: relative;
   display: inline-block;
   opacity: 0;
-  transform: translateY(0.28em);
-  filter: blur(3px);
-  will-change: transform, opacity, filter;
+  transform: translateY(0.42em);
 }
 .mp-splash-letter--in {
-  opacity: 1;
-  filter: blur(0);
-  animation: splashLetterIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-@keyframes splashLetterIn {
-  0% {
-    opacity: 0;
-    transform: translateY(0.28em);
-    filter: blur(3px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-    filter: blur(0);
-  }
+  animation: splashLetterIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-/* Final sharp snap — one clean punch + one thin ring */
-.mp-splash-type--snap {
-  animation: splashTypeSnap 0.28s cubic-bezier(0.2, 0.9, 0.2, 1) both;
-}
-@keyframes splashTypeSnap {
-  0% {
-    transform: scale(1);
-  }
-  35% {
-    transform: scale(0.94);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-.mp-splash-snap-ring {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 120%;
-  height: 160%;
-  margin: 0;
-  border-radius: 999px;
-  border: 1px solid rgba(239, 230, 214, 0.85);
-  transform: translate(-50%, -50%) scale(0.55);
-  animation: splashSnapRing 0.4s cubic-bezier(0.15, 0.9, 0.2, 1) both;
-  pointer-events: none;
-}
-@keyframes splashSnapRing {
-  0% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(0.55);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(1.35);
-  }
-}
-.mp-splash-finale .mp-splash-glow {
-  opacity: 0.85;
+.mp-splash-line {
+  display: block;
+  width: 5.5rem;
+  height: 1px;
+  transform: scaleX(0);
+  transform-origin: center;
+  opacity: 0;
+  background: linear-gradient(90deg, transparent, #d4c4a8, transparent);
 }
 .mp-splash-line--show {
-  animation: splashLine 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-.mp-splash-tag--show {
-  animation: splashTag 0.85s ease-out both;
-}
-.mp-splash-bar-fill {
-  transform-origin: left center;
-}
-.mp-splash-caption {
-  animation: splashCaption 0.8s ease-out 0.2s both;
+  animation: splashLine 0.8s var(--ease-out) both;
 }
 
-/* Featured partners — open credit on the ink. Flash stays on the mark, not a box. */
+/* Featured partners — open credit on the ink. */
 .mp-splash-partners {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: max(1.35rem, env(safe-area-inset-bottom));
+  bottom: max(1.5rem, env(safe-area-inset-bottom));
   z-index: 3;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.65rem;
+  gap: 0.7rem;
   padding-inline: 1.25rem;
   pointer-events: none;
 }
@@ -1100,7 +1142,7 @@ html.mp-boot-splash body::before {
 }
 .mp-featured-partners-rule {
   display: block;
-  width: 3.25rem;
+  width: 2.25rem;
   height: 1px;
   background: linear-gradient(90deg, transparent, #d4c4a8, transparent);
   opacity: 0;
@@ -1109,8 +1151,8 @@ html.mp-boot-splash body::before {
 .mp-featured-partners-kicker {
   margin: 0;
   font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.36em;
+  font-weight: 500;
+  letter-spacing: 0.34em;
   text-transform: uppercase;
   color: #d4c4a8;
   opacity: 0;
@@ -1120,8 +1162,8 @@ html.mp-boot-splash body::before {
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 0.65rem;
-  max-width: 38rem;
+  gap: 1.15rem 1.5rem;
+  max-width: 36rem;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -1133,69 +1175,49 @@ html.mp-boot-splash body::before {
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 0.7rem;
+  gap: 0.65rem;
   border: 0;
   background: transparent;
   box-shadow: none;
   padding: 0;
   color: #ece8e0;
   text-decoration: none;
+  white-space: nowrap;
 }
 .mp-featured-partner--lead .mp-featured-partner-link {
-  gap: 0.85rem;
+  gap: 0.75rem;
 }
 .mp-featured-partner-mark-wrap {
   position: relative;
-  z-index: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
-.mp-featured-partner-mark-wrap::before {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  inset: -55%;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(212, 196, 168, 0.55), transparent 68%);
-  opacity: 0;
-  pointer-events: none;
-}
-.mp-featured-partner-mark-wrap::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  pointer-events: none;
-  background: linear-gradient(
-    112deg,
-    transparent 30%,
-    rgba(212, 196, 168, 0.72) 50%,
-    transparent 70%
-  );
-  mix-blend-mode: screen;
-}
 .mp-featured-partner-mark {
-  width: 1.7rem;
-  height: 1.65rem;
+  width: 1.55rem;
+  height: 1.55rem;
   object-fit: contain;
-  /* Same dark-field treatment as the landing BijuuFlow lockup */
-  filter: invert(1) sepia(0.18) saturate(0.45) hue-rotate(6deg) brightness(1.02);
   opacity: 0.94;
 }
+.mp-featured-partner-mark--invert {
+  /* Same dark-field treatment as the landing BijuuFlow lockup */
+  filter: invert(1) sepia(0.18) saturate(0.45) hue-rotate(6deg) brightness(1.02);
+  opacity: 0.92;
+}
 .mp-featured-partner--lead .mp-featured-partner-mark {
-  width: 2.45rem;
-  height: 2.35rem;
+  width: 2.15rem;
+  height: 2.05rem;
 }
 .mp-featured-partner-name {
   font-size: 13px;
   font-weight: 500;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
 }
 .mp-featured-partner--lead .mp-featured-partner-name {
   font-size: 15px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  color: #d4c4a8;
 }
 .mp-featured-partner-link:focus-visible {
   outline: 1px solid #d4c4a8;
@@ -1206,109 +1228,68 @@ html.mp-boot-splash body::before {
     color: #d4c4a8;
   }
 }
-.mp-splash-partners--in .mp-featured-partners-rule {
-  animation: splashPartnerRule 0.7s var(--ease-out) both;
-}
-.mp-splash-partners--in .mp-featured-partners-kicker {
-  animation: splashPartnerIn 0.72s var(--ease-out) 0.06s both;
-}
-.mp-splash-partners--in .mp-featured-partner {
-  animation: splashPartnerIn 0.78s var(--ease-out) both;
-}
-.mp-splash-partners--in .mp-featured-partner--lead .mp-featured-partner-mark-wrap::before {
-  animation: splashPartnerFlash 0.9s var(--ease-out) calc(0.48s + var(--mp-partner-delay, 0ms)) both;
-}
-.mp-splash-partners--in .mp-featured-partner--lead .mp-featured-partner-mark-wrap::after {
-  animation: splashPartnerSheen 0.72s var(--ease-out) calc(0.46s + var(--mp-partner-delay, 0ms)) both;
-}
-.mp-splash-partners--in .mp-featured-partner--lead .mp-featured-partner-mark {
-  animation: splashPartnerMark 1.35s ease-in-out calc(0.86s + var(--mp-partner-delay, 0ms)) 1 both;
-}
-@keyframes splashPartnerRule {
+@keyframes mpPartnerPop {
   from {
     opacity: 0;
-    transform: scaleX(0);
+    transform: scale(0.94);
+    filter: blur(5px);
   }
   to {
     opacity: 1;
-    transform: scaleX(1);
-  }
-}
-@keyframes splashPartnerIn {
-  0% {
-    opacity: 0;
-    transform: translateY(12px) scale(0.9);
-  }
-  64% {
-    opacity: 1;
-    transform: translateY(0) scale(1.035);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-@keyframes splashPartnerFlash {
-  0% {
-    opacity: 0;
-    transform: scale(0.72);
-  }
-  38% {
-    opacity: 0.95;
     transform: scale(1);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(1.2);
+    filter: blur(0);
   }
 }
-@keyframes splashPartnerSheen {
-  0% {
-    opacity: 0;
-    transform: translateX(-130%);
-  }
-  18% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-    transform: translateX(130%);
-  }
+.mp-splash-partners--in .mp-featured-partners-rule,
+.mp-splash-partners--in .mp-featured-partners-kicker,
+.mp-splash-partners--in .mp-featured-partner {
+  animation: mpPartnerPop 0.78s var(--ease-spring) both;
+  animation-delay: var(--mp-partner-delay, 0ms);
 }
-@keyframes splashPartnerMark {
-  0%,
-  100% {
-    transform: scale(1);
-    filter: invert(1) sepia(0.18) saturate(0.45) hue-rotate(6deg) brightness(1.02);
-  }
-  42% {
-    transform: scale(1.08);
-    filter: invert(1) sepia(0.42) saturate(0.95) hue-rotate(4deg) brightness(1.16);
-  }
+.mp-splash-partners--in .mp-featured-partner--lead .mp-featured-partner-mark {
+  animation: splashPartnerMark 2.4s ease-in-out 0.55s 1 both;
 }
 @media (max-height: 720px) {
   .mp-splash {
-    padding-bottom: 5.25rem;
+    padding-bottom: 7.25rem;
   }
-  .mp-splash-rule {
-    height: 1.35rem;
-    margin-top: 0.65rem;
-    margin-bottom: 0.65rem;
-  }
-  .mp-splash-line {
-    margin-top: 1.15rem;
-  }
-  .mp-splash-tag {
-    margin-top: 0.9rem;
-  }
-  .mp-splash-bar {
-    margin-top: 1.35rem;
+  .mp-splash-geom {
+    width: 3.35rem;
+    height: 3.35rem;
   }
   .mp-splash-partners {
     bottom: max(0.85rem, env(safe-area-inset-bottom));
     gap: 0.45rem;
   }
 }
+@media (max-width: 540px) {
+  .mp-splash {
+    padding-bottom: 8.25rem;
+  }
+  .mp-featured-partners-list {
+    gap: 0.45rem 0.65rem;
+    max-width: 100%;
+  }
+  .mp-featured-partner-link {
+    gap: 0.45rem;
+  }
+  .mp-featured-partner-mark {
+    width: 1.35rem;
+    height: 1.35rem;
+  }
+  .mp-featured-partner--lead .mp-featured-partner-mark {
+    width: 1.75rem;
+    height: 1.7rem;
+  }
+  .mp-featured-partner-name {
+    font-size: 12px;
+    letter-spacing: 0.06em;
+  }
+  .mp-featured-partner--lead .mp-featured-partner-name {
+    font-size: 13px;
+  }
+}
+
 
 /* Route enter */
 /* Opacity only — transform on this wrapper breaks position:fixed nav */
@@ -1509,6 +1490,12 @@ html.mp-boot-splash body::before {
 @media (prefers-reduced-motion: reduce) {
   .mp-reveal,
   .mp-stagger > *,
+  .mp-scroll-reveal,
+  .mp-scroll-stagger > *,
+  .mp-scroll-card,
+  .mp-draw-rule,
+  .mp-scroll-rule,
+  .mp-title-rule,
   .mp-backdrop-in,
   .mp-modal-in,
   .mp-toast-in,
@@ -1517,21 +1504,11 @@ html.mp-boot-splash body::before {
   .mp-tab-active,
   .mp-btn-lux::after,
   .mp-splash-seal,
-  .mp-splash-ring,
-  .mp-splash-word,
+  .mp-splash-geom,
   .mp-splash-letter,
   .mp-splash-letter--in,
-  .mp-splash-type--snap,
-  .mp-splash-snap-ring,
-  .mp-splash-tag,
-  .mp-splash-tag--show,
   .mp-splash-line,
   .mp-splash-line--show,
-  .mp-splash-mark,
-  .mp-splash-glow,
-  .mp-splash-bar-fill,
-  .mp-splash-rule,
-  .mp-splash-caption,
   .mp-featured-partners-kicker,
   .mp-featured-partners-rule,
   .mp-featured-partner,
@@ -1542,8 +1519,14 @@ html.mp-boot-splash body::before {
     transition: none !important;
     opacity: 1 !important;
     transform: none !important;
+    translate: none !important;
     visibility: visible !important;
     filter: none !important;
+  }
+  .mp-splash-diamond {
+    animation: none !important;
+    stroke-dashoffset: 0 !important;
+    opacity: 1 !important;
   }
   .mp-featured-partner-link,
   .mp-featured-partner-mark-wrap,
@@ -1551,10 +1534,20 @@ html.mp-boot-splash body::before {
     animation: none !important;
     transition: none !important;
   }
-  .mp-featured-partner-mark-wrap::before,
-  .mp-featured-partner-mark-wrap::after {
+  .mp-marquee-motion {
+    display: none !important;
+  }
+  .mp-marquee-static {
+    display: flex !important;
+  }
+  .mp-marquee-track {
     animation: none !important;
-    opacity: 0 !important;
+  }
+  /* Splash is fully present, then leaves. No fade-in, pulse, or sheen. */
+  .mp-splash {
+    animation: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
   }
   /* Allow splash to actually dismiss under reduced motion */
   .mp-splash-out {
@@ -1931,6 +1924,13 @@ html.mp-boot-splash body::before {
 .mp-course {
   padding: 1.6rem 0 0.2rem;
   border-top: 1px solid rgba(212, 196, 168, 0.35);
+  transition: background-color 0.4s ease, border-color 0.4s ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .mp-course:hover {
+    border-top-color: #d4c4a8;
+    background: linear-gradient(180deg, rgba(212, 196, 168, 0.07), transparent 72%);
+  }
 }
 
 @media (min-width: 800px) {
@@ -1984,16 +1984,16 @@ html.mp-boot-splash body::before {
     linear-gradient(165deg, rgba(212, 196, 168, 0.09), transparent 46%),
     #0a0a0a;
   transition:
-    transform 0.4s var(--ease-spring),
+    transform 0.4s var(--ease-out),
     border-color 0.3s ease,
     box-shadow 0.4s var(--ease-out);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .mp-place:hover {
-    transform: translateY(-4px);
+    transform: translateY(-3px);
     border-color: rgba(212, 196, 168, 0.45);
-    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.42);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4);
   }
 }
 
@@ -2128,11 +2128,15 @@ html.mp-boot-splash body::before {
   height: 1px;
   margin: 0.35rem auto 0;
   background: #d4c4a8;
+  transform: scaleX(0);
+  transform-origin: center;
+  animation: lineDraw 0.7s var(--ease-out) 0.12s both;
 }
 
 @media (min-width: 768px) {
   .mp-title-rule {
     margin-left: 0;
+    transform-origin: left center;
   }
 }
 
@@ -2279,6 +2283,7 @@ html.mp-boot-splash body::before {
   height: 100%;
   object-fit: cover;
   object-position: center 40%;
+  animation: kenburns 34s var(--ease-out) alternate infinite;
 }
 
 .mp-login-photo::after {
@@ -2315,6 +2320,7 @@ html.mp-boot-splash body::before {
 
 @media (prefers-reduced-motion: reduce) {
   .mp-night-stage img,
+  .mp-login-photo img,
   .mp-film-track,
   .mp-notice-panel,
   .mp-notice-panel.is-closing,

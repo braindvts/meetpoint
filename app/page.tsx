@@ -89,6 +89,7 @@ export default function Landing() {
         <div className="mp-night-copy">
           <p className="mp-reveal text-[10px] font-semibold uppercase tracking-[0.28em] text-accent">
             Private introductions
+            <span className="mp-draw-rule" aria-hidden />
           </p>
           <h1 className="mp-reveal mp-reveal-delay-1 mp-night-title mt-5 text-ivory">
             Ambition,
@@ -121,7 +122,7 @@ export default function Landing() {
           <p className="mp-reveal mp-reveal-delay-4 mt-8 text-[11px] tracking-wide text-muted">
             Website first · Native app when you’re ready
           </p>
-          <SponsorLockup className="mp-reveal mp-reveal-delay-4 mt-8" />
+          <SponsorLockup className="mt-8" />
         </div>
       </section>
 
@@ -150,16 +151,19 @@ export default function Landing() {
 
       <section className="px-6 py-16 sm:py-20">
         <div className="mx-auto max-w-6xl">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-accent">
-            The service
-          </p>
-          <h2 className="mt-4 max-w-xl text-2xl font-semibold tracking-tight text-ivory sm:text-4xl sm:leading-[1.05]">
-            Match in the browser. Meet at dinner.
-          </h2>
-          <p className="mt-4 max-w-xl text-[15px] leading-relaxed text-muted">
-            Interlink makes the introduction. The table is where the business happens.
-          </p>
-          <div className="mp-courses mt-12">
+          <div className="mp-scroll-reveal">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-accent">
+              The service
+            </p>
+            <h2 className="mt-4 max-w-xl text-2xl font-semibold tracking-tight text-ivory sm:text-4xl sm:leading-[1.05]">
+              Match in the browser. Meet at dinner.
+            </h2>
+            <p className="mt-4 max-w-xl text-[15px] leading-relaxed text-muted">
+              Interlink makes the introduction. The table is where the business happens.
+            </p>
+            <span className="mp-scroll-rule" aria-hidden />
+          </div>
+          <div className="mp-courses mp-scroll-stagger mt-12">
             {COURSES.map((step) => (
               <article key={step.course} className="mp-course">
                 <p>{step.course}</p>
@@ -173,7 +177,7 @@ export default function Landing() {
 
       <section className="border-t border-white/[0.08] px-6 py-16 sm:py-20">
         <div className="mx-auto grid max-w-6xl items-stretch gap-8 lg:grid-cols-[0.9fr_1.1fr]">
-          <div className="mp-night-feature">
+          <div className="mp-night-feature mp-scroll-card">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/events/founders-table-midtown.jpg" alt="" />
             <p>
@@ -181,7 +185,7 @@ export default function Landing() {
               <span>Twelve seats. No decks. Serious operators only.</span>
             </p>
           </div>
-          <div className="flex flex-col justify-center">
+          <div className="mp-scroll-reveal flex flex-col justify-center">
             <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-accent">
               Events &amp; conventions
             </p>
@@ -204,13 +208,16 @@ export default function Landing() {
 
       <section className="border-t border-white/[0.08] px-6 py-16 sm:py-20">
         <div className="mx-auto max-w-6xl">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-accent">
-            Standing
-          </p>
-          <h2 className="mt-4 max-w-xl text-2xl font-semibold tracking-tight text-ivory sm:text-3xl">
-            Three ways to be in the room on Interlink. Not a ladder.
-          </h2>
-          <div className="mp-places mt-12">
+          <div className="mp-scroll-reveal">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-accent">
+              Standing
+            </p>
+            <h2 className="mt-4 max-w-xl text-2xl font-semibold tracking-tight text-ivory sm:text-3xl">
+              Three ways to be in the room on Interlink. Not a ladder.
+            </h2>
+            <span className="mp-scroll-rule" aria-hidden />
+          </div>
+          <div className="mp-places mp-scroll-stagger mt-12">
             {STANDING.map((level) => (
               <article key={level.name} className="mp-place">
                 <div className="flex items-center gap-2.5">
@@ -231,7 +238,7 @@ export default function Landing() {
         </div>
       </section>
 
-      <section className="border-t border-white/[0.08] px-6 py-16">
+      <section className="mp-scroll-reveal border-t border-white/[0.08] px-6 py-16">
         <div className="mx-auto flex max-w-3xl flex-col items-center gap-5 text-center">
           <h2 className="text-xl font-semibold text-ivory sm:text-2xl">
             Start on the website today

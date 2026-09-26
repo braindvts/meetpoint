@@ -296,7 +296,10 @@ function ChatsInner() {
           <div className="shrink-0 border-b border-line/50 px-4 py-4">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <h1 className="font-display text-2xl font-semibold text-ivory">Chats</h1>
+                <h1 className="font-display text-2xl font-semibold text-ivory">
+                  Chats
+                  <span className="mp-draw-rule" aria-hidden />
+                </h1>
                 <p className="mt-1 text-[13px] text-muted">
                   Threads you open · groups you start
                 </p>
