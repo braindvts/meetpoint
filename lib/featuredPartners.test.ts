@@ -5,7 +5,7 @@ import { test } from "node:test";
 import {
   FEATURED_PARTNERS,
   featuredPartnersInOrder,
-  partnerOrbitAngle,
+  partnerMarqueeRepeat,
   type FeaturedPartner,
 } from "./featuredPartners";
 
@@ -53,12 +53,11 @@ test("ONYX Futures follows Grounded and keeps its own mark and link", () => {
   assert.equal(ordered.filter((partner) => partner.name === "ONYX Futures").length, 1);
 });
 
-test("orbit stations are even and the lead stays at the front", () => {
-  assert.equal(partnerOrbitAngle(0, 3), 0);
-  assert.equal(partnerOrbitAngle(1, 3), 120);
-  assert.equal(partnerOrbitAngle(2, 3), 240);
-  assert.equal(partnerOrbitAngle(0, 1), 0);
-  assert.equal(partnerOrbitAngle(1, 4), 90);
+test("marquee repeats the list enough to loop without a gap", () => {
+  assert.equal(partnerMarqueeRepeat(0), 0);
+  assert.equal(partnerMarqueeRepeat(3), 4);
+  assert.ok(partnerMarqueeRepeat(1) >= 4);
+  assert.ok(partnerMarqueeRepeat(6) >= 4);
 });
 
 test("later partners follow the lead without a layout rewrite", () => {
@@ -136,24 +135,28 @@ test("splash shows featured partners on a short minimal loader", () => {
   assert.match(css, /mp-sponsor-lockup-mark--native/);
   assert.match(css, /mp-featured-partner-mark--invert/);
 
-  const revolve = readFileSync(join(ROOT, "components/PartnerRevolve.tsx"), "utf8");
-  assert.match(revolve, /partnerOrbitAngle/);
-  assert.match(revolve, /target="_blank"/);
-  assert.match(revolve, /noopener noreferrer/);
-  assert.match(revolve, /partner\.href/);
-  assert.match(revolve, /partner\.logoSrc/);
-  assert.match(plate, /PartnerRevolve/);
-  assert.match(lockup, /PartnerRevolve/);
-  assert.match(css, /@keyframes mpRevolveSpin/);
-  assert.match(css, /@keyframes mpRevolveFace/);
-  assert.match(css, /rotateY\(360deg\)/);
+  const marquee = readFileSync(join(ROOT, "components/PartnerMarquee.tsx"), "utf8");
+  assert.match(marquee, /partnerMarqueeRepeat/);
+  assert.match(marquee, /target="_blank"/);
+  assert.match(marquee, /noopener noreferrer/);
+  assert.match(marquee, /partner\.href/);
+  assert.match(marquee, /partner\.logoSrc/);
+  assert.match(marquee, /aria-hidden/);
+  assert.match(marquee, /tabIndex=\{copy \? -1 : undefined\}/);
+  assert.doesNotMatch(marquee, /ellipse|rotateY|translateZ/);
+  assert.match(plate, /PartnerMarquee/);
+  assert.match(lockup, /PartnerMarquee/);
+  assert.match(css, /@keyframes mpMarquee/);
+  assert.match(css, /translateX\(-50%\)/);
   assert.match(css, /linear infinite/);
+  assert.match(css, /mask-image/);
   assert.match(css, /animation-play-state:\s*paused/);
-  assert.match(css, /\.mp-revolve-motion:hover[\s\S]*?animation-play-state:\s*paused/);
-  assert.match(css, /\.mp-revolve-motion:focus-within[\s\S]*?animation-play-state:\s*paused/);
-  assert.match(css, /prefers-reduced-motion:\s*reduce[\s\S]*\.mp-revolve-static\s*\{[^}]*display:\s*flex/);
-  assert.match(revolve, /translateZ\(var\(--mp-revolve-z\)\)/);
-  const spinStart = css.indexOf("@keyframes mpRevolveSpin");
-  const spin = css.slice(spinStart, css.indexOf("}", css.indexOf("}", spinStart) + 1) + 1);
-  assert.doesNotMatch(spin, /width|height|left|top|margin/);
+  assert.match(css, /\.mp-marquee:hover[\s\S]*?animation-play-state:\s*paused/);
+  assert.match(css, /\.mp-marquee:focus-within[\s\S]*?animation-play-state:\s*paused/);
+  assert.match(css, /prefers-reduced-motion:\s*reduce[\s\S]*\.mp-marquee-static\s*\{[^}]*display:\s*flex/);
+  assert.doesNotMatch(css, /mp-revolve-ellipse|mpRevolveSpin|rotateY\(360deg\)/);
+  const slideStart = css.indexOf("@keyframes mpMarquee");
+  const slide = css.slice(slideStart, css.indexOf("}", css.indexOf("}", slideStart) + 1) + 1);
+  assert.match(slide, /translateX/);
+  assert.doesNotMatch(slide, /width|height|left|top|margin|rotate/);
 });

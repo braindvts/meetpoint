@@ -1,7 +1,7 @@
 "use client";
 
 import { featuredPartnersInOrder, type FeaturedPartner } from "@/lib/featuredPartners";
-import PartnerRevolve from "@/components/PartnerRevolve";
+import PartnerMarquee from "@/components/PartnerMarquee";
 import type { CSSProperties } from "react";
 
 interface Props {
@@ -26,12 +26,12 @@ export default function FeaturedPartners({ revealed }: Props) {
       <p className="mp-featured-partners-kicker" aria-hidden>
         Featured partners
       </p>
-      <PartnerRevolve
+      <PartnerMarquee
         partners={partners}
         variant="splash"
         onLinkClick={(event) => event.stopPropagation()}
       />
-      <ul className="mp-featured-partners-list mp-revolve-static">
+      <ul className="mp-featured-partners-list mp-marquee-static">
         {partners.map((partner, index) => (
           <PartnerCredit key={partner.id} partner={partner} index={index} />
         ))}

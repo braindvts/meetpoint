@@ -784,7 +784,7 @@ html.mp-motion .mp-scroll-reveal.is-in .mp-scroll-rule {
   transition-duration: 0.08s;
 }
 
-/* Sponsor lockup — revolving ring, static row when motion is reduced */
+/* Sponsor lockup — horizontal marquee, static row when motion is reduced */
 .mp-sponsor-lockup {
   display: flex;
   flex-direction: column;
@@ -889,153 +889,89 @@ html.mp-motion .mp-scroll-reveal.is-in .mp-scroll-rule {
   }
 }
 
-/* Revolving partners — transform/opacity only, one shared list. */
-.mp-revolve-motion {
-  --mp-revolve-z: 7.35rem;
-  --mp-revolve-tilt: 22deg;
-  --mp-revolve-duration: 28s;
-  --mp-revolve-h: 10.25rem;
-  width: 100%;
-  max-width: 100%;
-}
-.mp-revolve-motion--splash {
-  --mp-revolve-z: 5.35rem;
-  --mp-revolve-tilt: 24deg;
-  --mp-revolve-duration: 12s;
-  --mp-revolve-h: 7.35rem;
-}
-.mp-revolve-stage {
+/* Horizontal partner marquee — translateX only, two equal halves. */
+.mp-marquee {
+  --mp-marquee-duration: 42s;
   position: relative;
   width: 100%;
-  height: var(--mp-revolve-h);
-  perspective: 900px;
+  max-width: 100%;
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent);
 }
-.mp-revolve-tilt,
-.mp-revolve-ring,
-.mp-revolve-slot,
-.mp-revolve-hanger {
-  position: absolute;
-  transform-style: preserve-3d;
+.mp-marquee--splash {
+  --mp-marquee-duration: 32s;
 }
-.mp-revolve-tilt {
-  left: 50%;
-  top: 54%;
-  width: 0;
-  height: 0;
-  transform: rotateX(var(--mp-revolve-tilt));
-}
-.mp-revolve-ellipse {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: calc(var(--mp-revolve-z) * 2);
-  height: calc(var(--mp-revolve-z) * 2);
-  margin-left: calc(var(--mp-revolve-z) * -1);
-  margin-top: calc(var(--mp-revolve-z) * -1);
-  border: 1px solid rgba(212, 196, 168, 0.72);
-  border-radius: 50%;
-  pointer-events: none;
-}
-.mp-revolve-ring,
-.mp-revolve-slot,
-.mp-revolve-hanger {
-  left: 0;
-  top: 0;
-  width: 0;
-  height: 0;
-}
-.mp-revolve-ring {
-  animation: mpRevolveSpin var(--mp-revolve-duration) linear infinite;
-  will-change: transform;
-}
-.mp-revolve-hanger {
-  animation: mpRevolveFace var(--mp-revolve-duration) linear infinite;
-  will-change: transform;
-}
-.mp-revolve-face {
-  position: absolute;
-  left: 0;
-  top: 0;
+.mp-marquee-track {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.28rem;
   width: max-content;
-  max-width: 6.5rem;
+  animation: mpMarquee var(--mp-marquee-duration) linear infinite;
+  will-change: transform;
+}
+.mp-marquee-set {
+  display: flex;
+  align-items: center;
+  flex: none;
+  gap: 3.25rem;
+  padding-right: 3.25rem;
+}
+.mp-marquee-link {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  gap: 0.65rem;
   color: #ece8e0;
   text-decoration: none;
   white-space: nowrap;
-  transform: translate(-50%, -50%);
 }
-.mp-revolve-face:focus-visible {
+.mp-marquee-link:focus-visible {
   outline: 1px solid #d4c4a8;
   outline-offset: 4px;
 }
-.mp-revolve-mark {
+.mp-marquee-mark {
   width: 1.7rem;
   height: 1.7rem;
   object-fit: contain;
 }
-.mp-revolve-mark--invert {
+.mp-marquee-mark--invert {
   filter: invert(1) sepia(0.18) saturate(0.45) hue-rotate(6deg) brightness(1.02);
 }
-.mp-revolve-mark--native {
+.mp-marquee-mark--native {
   filter: none;
 }
-.mp-revolve-name {
-  font-size: 11px;
+.mp-marquee-name {
+  font-size: 13px;
   font-weight: 500;
   letter-spacing: 0.08em;
   color: #ece8e0;
 }
-.mp-revolve-face--lead .mp-revolve-name {
+.mp-marquee-link--lead .mp-marquee-name {
   color: #d4c4a8;
+  letter-spacing: 0.1em;
 }
-.mp-revolve-motion:hover .mp-revolve-ring,
-.mp-revolve-motion:hover .mp-revolve-hanger,
-.mp-revolve-motion:focus-within .mp-revolve-ring,
-.mp-revolve-motion:focus-within .mp-revolve-hanger {
+.mp-marquee:hover .mp-marquee-track,
+.mp-marquee:focus-within .mp-marquee-track {
   animation-play-state: paused;
 }
-.mp-revolve-static {
+.mp-marquee-static {
   display: none;
 }
-@keyframes mpRevolveSpin {
+@keyframes mpMarquee {
   from {
-    transform: rotateY(0deg);
+    transform: translateX(0);
   }
   to {
-    transform: rotateY(360deg);
-  }
-}
-@keyframes mpRevolveFace {
-  from {
-    transform: rotateY(0deg) rotateX(calc(var(--mp-revolve-tilt) * -1));
-  }
-  to {
-    transform: rotateY(-360deg) rotateX(calc(var(--mp-revolve-tilt) * -1));
+    transform: translateX(-50%);
   }
 }
 @media (max-width: 540px) {
-  .mp-revolve-motion {
-    --mp-revolve-z: 5.15rem;
-    --mp-revolve-h: 8.75rem;
-  }
-  .mp-revolve-motion--splash {
-    --mp-revolve-z: 4.35rem;
-    --mp-revolve-h: 6.6rem;
-  }
-  .mp-revolve-name {
-    font-size: 10px;
-    letter-spacing: 0.06em;
-  }
-  .mp-revolve-mark {
-    width: 1.45rem;
-    height: 1.45rem;
+  .mp-marquee-set {
+    gap: 2.4rem;
+    padding-right: 2.4rem;
   }
 }
 @media (hover: hover) and (pointer: fine) {
-  .mp-revolve-face:hover .mp-revolve-name {
+  .mp-marquee-link:hover .mp-marquee-name {
     color: #d4c4a8;
   }
 }
@@ -1159,7 +1095,7 @@ html.mp-boot-splash body::before {
 
 .mp-splash {
   animation: fadeIn 0.35s ease-out both;
-  padding-bottom: 12rem;
+  padding-bottom: 8rem;
   cursor: pointer;
 }
 .mp-splash-out {
@@ -1261,7 +1197,7 @@ html.mp-boot-splash body::before {
   padding: 0;
   list-style: none;
 }
-.mp-featured-partners-list.mp-revolve-static {
+.mp-featured-partners-list.mp-marquee-static {
   display: none;
 }
 .mp-featured-partner {
@@ -1339,7 +1275,7 @@ html.mp-boot-splash body::before {
 }
 @media (max-height: 720px) {
   .mp-splash {
-    padding-bottom: 10.5rem;
+    padding-bottom: 7.25rem;
   }
   .mp-splash-geom {
     width: 3.35rem;
@@ -1352,7 +1288,7 @@ html.mp-boot-splash body::before {
 }
 @media (max-width: 540px) {
   .mp-splash {
-    padding-bottom: 11.5rem;
+    padding-bottom: 8.25rem;
   }
   .mp-featured-partners-list {
     gap: 0.7rem 0.95rem;
@@ -1622,14 +1558,13 @@ html.mp-boot-splash body::before {
     animation: none !important;
     transition: none !important;
   }
-  .mp-revolve-motion {
+  .mp-marquee-motion {
     display: none !important;
   }
-  .mp-revolve-static {
+  .mp-marquee-static {
     display: flex !important;
   }
-  .mp-revolve-ring,
-  .mp-revolve-hanger {
+  .mp-marquee-track {
     animation: none !important;
   }
   /* Splash is fully present, then leaves. No fade-in, pulse, or sheen. */

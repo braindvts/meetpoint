@@ -1,5 +1,5 @@
 import { featuredPartnersInOrder } from "@/lib/featuredPartners";
-import PartnerRevolve from "@/components/PartnerRevolve";
+import PartnerMarquee from "@/components/PartnerMarquee";
 
 interface Props {
   className?: string;
@@ -27,8 +27,8 @@ export default function SponsorLockup({ className = "" }: Props) {
   return (
     <div className={`mp-sponsor-lockup ${className}`.trim()}>
       <span className="mp-sponsor-lockup-kicker">Supported by</span>
-      <PartnerRevolve partners={partners} variant="lockup" />
-      <p className="mp-sponsor-lockup-row mp-revolve-static">
+      <PartnerMarquee partners={partners} variant="lockup" />
+      <p className="mp-sponsor-lockup-row mp-marquee-static">
       {partners.map((partner, index) => (
         <span key={partner.id} className="mp-sponsor-lockup-slot">
           {index > 0 ? (

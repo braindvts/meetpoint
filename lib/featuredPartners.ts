@@ -52,8 +52,11 @@ export function featuredPartnersInOrder(
   return [...partners].sort((a, b) => Number(b.lead === true) - Number(a.lead === true));
 }
 
-/** Even stations on the revolving ring. Lead stays at 0° when the list is ordered. */
-export function partnerOrbitAngle(index: number, count: number): number {
-  if (count <= 1) return 0;
-  return (360 / count) * index;
+/**
+ * How many times to repeat the list inside one marquee half.
+ * Enough copies that the half is wider than a desktop viewport, so the loop has no gap.
+ */
+export function partnerMarqueeRepeat(count: number): number {
+  if (count <= 0) return 0;
+  return Math.max(4, Math.ceil(12 / count));
 }
