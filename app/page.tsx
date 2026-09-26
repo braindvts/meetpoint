@@ -122,7 +122,7 @@ export default function Landing() {
           <p className="mp-reveal mp-reveal-delay-4 mt-8 text-[11px] tracking-wide text-muted">
             Website first · Native app when you’re ready
           </p>
-          <SponsorLockup className="mp-reveal mp-reveal-delay-4 mt-8" />
+          <SponsorLockup className="mt-8" />
         </div>
       </section>
 

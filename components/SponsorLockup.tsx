@@ -1,4 +1,5 @@
 import { featuredPartnersInOrder } from "@/lib/featuredPartners";
+import PartnerRevolve from "@/components/PartnerRevolve";
 
 interface Props {
   className?: string;
@@ -24,8 +25,10 @@ export default function SponsorLockup({ className = "" }: Props) {
   const partners = featuredPartnersInOrder();
 
   return (
-    <p className={`mp-sponsor-lockup ${className}`.trim()}>
+    <div className={`mp-sponsor-lockup ${className}`.trim()}>
       <span className="mp-sponsor-lockup-kicker">Supported by</span>
+      <PartnerRevolve partners={partners} variant="lockup" />
+      <p className="mp-sponsor-lockup-row mp-revolve-static">
       {partners.map((partner, index) => (
         <span key={partner.id} className="mp-sponsor-lockup-slot">
           {index > 0 ? (
@@ -51,6 +54,7 @@ export default function SponsorLockup({ className = "" }: Props) {
           </a>
         </span>
       ))}
-    </p>
+      </p>
+    </div>
   );
 }

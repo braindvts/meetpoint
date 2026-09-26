@@ -2,7 +2,12 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
-import { FEATURED_PARTNERS, featuredPartnersInOrder, type FeaturedPartner } from "./featuredPartners";
+import {
+  FEATURED_PARTNERS,
+  featuredPartnersInOrder,
+  partnerOrbitAngle,
+  type FeaturedPartner,
+} from "./featuredPartners";
 
 const ROOT = join(import.meta.dirname, "..");
 
@@ -46,6 +51,14 @@ test("ONYX Futures follows Grounded and keeps its own mark and link", () => {
   assert.equal(onyx?.logoSrc, "/onyx-logo.svg");
   assert.equal(onyx?.logoAlt, "ONYX Futures");
   assert.equal(ordered.filter((partner) => partner.name === "ONYX Futures").length, 1);
+});
+
+test("orbit stations are even and the lead stays at the front", () => {
+  assert.equal(partnerOrbitAngle(0, 3), 0);
+  assert.equal(partnerOrbitAngle(1, 3), 120);
+  assert.equal(partnerOrbitAngle(2, 3), 240);
+  assert.equal(partnerOrbitAngle(0, 1), 0);
+  assert.equal(partnerOrbitAngle(1, 4), 90);
 });
 
 test("later partners follow the lead without a layout rewrite", () => {
@@ -122,4 +135,25 @@ test("splash shows featured partners on a short minimal loader", () => {
   assert.doesNotMatch(lockup, /Featured partners/);
   assert.match(css, /mp-sponsor-lockup-mark--native/);
   assert.match(css, /mp-featured-partner-mark--invert/);
+
+  const revolve = readFileSync(join(ROOT, "components/PartnerRevolve.tsx"), "utf8");
+  assert.match(revolve, /partnerOrbitAngle/);
+  assert.match(revolve, /target="_blank"/);
+  assert.match(revolve, /noopener noreferrer/);
+  assert.match(revolve, /partner\.href/);
+  assert.match(revolve, /partner\.logoSrc/);
+  assert.match(plate, /PartnerRevolve/);
+  assert.match(lockup, /PartnerRevolve/);
+  assert.match(css, /@keyframes mpRevolveSpin/);
+  assert.match(css, /@keyframes mpRevolveFace/);
+  assert.match(css, /rotateY\(360deg\)/);
+  assert.match(css, /linear infinite/);
+  assert.match(css, /animation-play-state:\s*paused/);
+  assert.match(css, /\.mp-revolve-motion:hover[\s\S]*?animation-play-state:\s*paused/);
+  assert.match(css, /\.mp-revolve-motion:focus-within[\s\S]*?animation-play-state:\s*paused/);
+  assert.match(css, /prefers-reduced-motion:\s*reduce[\s\S]*\.mp-revolve-static\s*\{[^}]*display:\s*flex/);
+  assert.match(revolve, /translateZ\(var\(--mp-revolve-z\)\)/);
+  const spinStart = css.indexOf("@keyframes mpRevolveSpin");
+  const spin = css.slice(spinStart, css.indexOf("}", css.indexOf("}", spinStart) + 1) + 1);
+  assert.doesNotMatch(spin, /width|height|left|top|margin/);
 });

@@ -51,3 +51,9 @@ export function featuredPartnersInOrder(
 ): FeaturedPartner[] {
   return [...partners].sort((a, b) => Number(b.lead === true) - Number(a.lead === true));
 }
+
+/** Even stations on the revolving ring. Lead stays at 0° when the list is ordered. */
+export function partnerOrbitAngle(index: number, count: number): number {
+  if (count <= 1) return 0;
+  return (360 / count) * index;
+}

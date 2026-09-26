@@ -784,20 +784,26 @@ html.mp-motion .mp-scroll-reveal.is-in .mp-scroll-rule {
   transition-duration: 0.08s;
 }
 
-/* Sponsor lockup — compact credits, open on the ink */
+/* Sponsor lockup — revolving ring, static row when motion is reduced */
 .mp-sponsor-lockup {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
-  gap: 0.4rem 0.55rem;
-  width: fit-content;
+  gap: 0.75rem;
+  width: min(100%, 34rem);
   max-width: 100%;
   margin: 0;
   color: var(--color-ivory);
 }
-footer .mp-sponsor-lockup {
+.mp-sponsor-lockup-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   justify-content: center;
+  gap: 0.4rem 0.55rem;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0;
 }
 .mp-sponsor-lockup-slot {
   display: inline-flex;
@@ -880,6 +886,157 @@ footer .mp-sponsor-lockup {
   .mp-sponsor-lockup-link:hover .mp-sponsor-lockup-mark:not(.mp-sponsor-lockup-mark--native) {
     filter: invert(1) sepia(0.32) saturate(0.7) hue-rotate(4deg) brightness(1.08);
     opacity: 1;
+  }
+}
+
+/* Revolving partners — transform/opacity only, one shared list. */
+.mp-revolve-motion {
+  --mp-revolve-z: 7.35rem;
+  --mp-revolve-tilt: 22deg;
+  --mp-revolve-duration: 28s;
+  --mp-revolve-h: 10.25rem;
+  width: 100%;
+  max-width: 100%;
+}
+.mp-revolve-motion--splash {
+  --mp-revolve-z: 5.35rem;
+  --mp-revolve-tilt: 24deg;
+  --mp-revolve-duration: 12s;
+  --mp-revolve-h: 7.35rem;
+}
+.mp-revolve-stage {
+  position: relative;
+  width: 100%;
+  height: var(--mp-revolve-h);
+  perspective: 900px;
+}
+.mp-revolve-tilt,
+.mp-revolve-ring,
+.mp-revolve-slot,
+.mp-revolve-hanger {
+  position: absolute;
+  transform-style: preserve-3d;
+}
+.mp-revolve-tilt {
+  left: 50%;
+  top: 54%;
+  width: 0;
+  height: 0;
+  transform: rotateX(var(--mp-revolve-tilt));
+}
+.mp-revolve-ellipse {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: calc(var(--mp-revolve-z) * 2);
+  height: calc(var(--mp-revolve-z) * 2);
+  margin-left: calc(var(--mp-revolve-z) * -1);
+  margin-top: calc(var(--mp-revolve-z) * -1);
+  border: 1px solid rgba(212, 196, 168, 0.72);
+  border-radius: 50%;
+  pointer-events: none;
+}
+.mp-revolve-ring,
+.mp-revolve-slot,
+.mp-revolve-hanger {
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+}
+.mp-revolve-ring {
+  animation: mpRevolveSpin var(--mp-revolve-duration) linear infinite;
+  will-change: transform;
+}
+.mp-revolve-hanger {
+  animation: mpRevolveFace var(--mp-revolve-duration) linear infinite;
+  will-change: transform;
+}
+.mp-revolve-face {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.28rem;
+  width: max-content;
+  max-width: 6.5rem;
+  color: #ece8e0;
+  text-decoration: none;
+  white-space: nowrap;
+  transform: translate(-50%, -50%);
+}
+.mp-revolve-face:focus-visible {
+  outline: 1px solid #d4c4a8;
+  outline-offset: 4px;
+}
+.mp-revolve-mark {
+  width: 1.7rem;
+  height: 1.7rem;
+  object-fit: contain;
+}
+.mp-revolve-mark--invert {
+  filter: invert(1) sepia(0.18) saturate(0.45) hue-rotate(6deg) brightness(1.02);
+}
+.mp-revolve-mark--native {
+  filter: none;
+}
+.mp-revolve-name {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: #ece8e0;
+}
+.mp-revolve-face--lead .mp-revolve-name {
+  color: #d4c4a8;
+}
+.mp-revolve-motion:hover .mp-revolve-ring,
+.mp-revolve-motion:hover .mp-revolve-hanger,
+.mp-revolve-motion:focus-within .mp-revolve-ring,
+.mp-revolve-motion:focus-within .mp-revolve-hanger {
+  animation-play-state: paused;
+}
+.mp-revolve-static {
+  display: none;
+}
+@keyframes mpRevolveSpin {
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(360deg);
+  }
+}
+@keyframes mpRevolveFace {
+  from {
+    transform: rotateY(0deg) rotateX(calc(var(--mp-revolve-tilt) * -1));
+  }
+  to {
+    transform: rotateY(-360deg) rotateX(calc(var(--mp-revolve-tilt) * -1));
+  }
+}
+@media (max-width: 540px) {
+  .mp-revolve-motion {
+    --mp-revolve-z: 5.15rem;
+    --mp-revolve-h: 8.75rem;
+  }
+  .mp-revolve-motion--splash {
+    --mp-revolve-z: 4.35rem;
+    --mp-revolve-h: 6.6rem;
+  }
+  .mp-revolve-name {
+    font-size: 10px;
+    letter-spacing: 0.06em;
+  }
+  .mp-revolve-mark {
+    width: 1.45rem;
+    height: 1.45rem;
+  }
+}
+@media (hover: hover) and (pointer: fine) {
+  .mp-revolve-face:hover .mp-revolve-name {
+    color: #d4c4a8;
   }
 }
 
@@ -1002,7 +1159,7 @@ html.mp-boot-splash body::before {
 
 .mp-splash {
   animation: fadeIn 0.35s ease-out both;
-  padding-bottom: 5.5rem;
+  padding-bottom: 12rem;
   cursor: pointer;
 }
 .mp-splash-out {
@@ -1104,6 +1261,9 @@ html.mp-boot-splash body::before {
   padding: 0;
   list-style: none;
 }
+.mp-featured-partners-list.mp-revolve-static {
+  display: none;
+}
 .mp-featured-partner {
   opacity: 0;
 }
@@ -1179,7 +1339,7 @@ html.mp-boot-splash body::before {
 }
 @media (max-height: 720px) {
   .mp-splash {
-    padding-bottom: 4.5rem;
+    padding-bottom: 10.5rem;
   }
   .mp-splash-geom {
     width: 3.35rem;
@@ -1192,7 +1352,7 @@ html.mp-boot-splash body::before {
 }
 @media (max-width: 540px) {
   .mp-splash {
-    padding-bottom: 8rem;
+    padding-bottom: 11.5rem;
   }
   .mp-featured-partners-list {
     gap: 0.7rem 0.95rem;
@@ -1461,6 +1621,16 @@ html.mp-boot-splash body::before {
   .mp-featured-partner-mark {
     animation: none !important;
     transition: none !important;
+  }
+  .mp-revolve-motion {
+    display: none !important;
+  }
+  .mp-revolve-static {
+    display: flex !important;
+  }
+  .mp-revolve-ring,
+  .mp-revolve-hanger {
+    animation: none !important;
   }
   /* Splash is fully present, then leaves. No fade-in, pulse, or sheen. */
   .mp-splash {
