@@ -899,9 +899,6 @@ html.mp-motion .mp-scroll-reveal.is-in .mp-scroll-rule {
   mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent);
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent);
 }
-.mp-marquee--splash {
-  --mp-marquee-duration: 32s;
-}
 .mp-marquee-track {
   display: flex;
   width: max-content;
@@ -948,10 +945,6 @@ html.mp-motion .mp-scroll-reveal.is-in .mp-scroll-rule {
 .mp-marquee-link--lead .mp-marquee-name {
   color: #d4c4a8;
   letter-spacing: 0.1em;
-}
-.mp-marquee:hover .mp-marquee-track,
-.mp-marquee:focus-within .mp-marquee-track {
-  animation-play-state: paused;
 }
 .mp-marquee-static {
   display: none;
@@ -1040,28 +1033,6 @@ html.mp-motion .mp-scroll-reveal.is-in .mp-scroll-rule {
   from {
     opacity: 0;
     transform: translateY(0.42em);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes splashPartnerRule {
-  from {
-    opacity: 0;
-    transform: scaleX(0);
-  }
-  to {
-    opacity: 0.85;
-    transform: scaleX(1);
-  }
-}
-
-@keyframes splashPartnerIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -1197,9 +1168,6 @@ html.mp-boot-splash body::before {
   padding: 0;
   list-style: none;
 }
-.mp-featured-partners-list.mp-marquee-static {
-  display: none;
-}
 .mp-featured-partner {
   opacity: 0;
 }
@@ -1260,14 +1228,22 @@ html.mp-boot-splash body::before {
     color: #d4c4a8;
   }
 }
-.mp-splash-partners--in .mp-featured-partners-rule {
-  animation: splashPartnerRule 0.7s var(--ease-out) both;
+@keyframes mpPartnerPop {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+    filter: blur(5px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
 }
-.mp-splash-partners--in .mp-featured-partners-kicker {
-  animation: splashPartnerIn 0.7s var(--ease-out) 0.08s both;
-}
+.mp-splash-partners--in .mp-featured-partners-rule,
+.mp-splash-partners--in .mp-featured-partners-kicker,
 .mp-splash-partners--in .mp-featured-partner {
-  animation: splashPartnerIn 0.7s var(--ease-out) both;
+  animation: mpPartnerPop 0.78s var(--ease-spring) both;
   animation-delay: var(--mp-partner-delay, 0ms);
 }
 .mp-splash-partners--in .mp-featured-partner--lead .mp-featured-partner-mark {

@@ -9,9 +9,9 @@ const SESSION_KEY = "interlink.splash.seen";
 const LEGACY_SESSION_KEY = "conclave.splash.seen";
 const LETTER_MS = 170;
 const START_MS = 360;
-const FINAL_HOLD_MS = 2200;
-/** Partner credit enters while the wordmark is still setting — no extra hold. */
-const PARTNERS_AT = START_MS + 4 * LETTER_MS;
+const FINAL_HOLD_MS = 3000;
+/** Partner row pops in only after the wordmark has finished. */
+const PARTNERS_AT = START_MS + LETTERS.length * LETTER_MS + 180;
 
 function alreadySeen(): boolean {
   try {

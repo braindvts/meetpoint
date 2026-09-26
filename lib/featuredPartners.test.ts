@@ -86,8 +86,8 @@ test("splash shows featured partners on a short minimal loader", () => {
   const lockup = readFileSync(join(ROOT, "components/SponsorLockup.tsx"), "utf8");
 
   assert.match(splash, /FEATURED_PARTNERS|FeaturedPartners/);
-  assert.match(splash, /const FINAL_HOLD_MS = 2200/);
-  assert.match(splash, /const PARTNERS_AT = START_MS \+ 4 \* LETTER_MS/);
+  assert.match(splash, /const FINAL_HOLD_MS = 3000/);
+  assert.match(splash, /const PARTNERS_AT = START_MS \+ LETTERS\.length \* LETTER_MS \+ 180/);
   assert.match(splash, /setPartners\(true\)/);
   assert.match(splash, /INTERLINK/);
   assert.match(splash, /mp-splash-geom/);
@@ -96,7 +96,8 @@ test("splash shows featured partners on a short minimal loader", () => {
   assert.doesNotMatch(splash, /Linking in|mp-splash-bar|mp-splash-snap/);
   assert.doesNotMatch(plate, /Conclave/);
 
-  assert.match(plate, /Featured partners/);
+  assert.match(plate, /Supported by our partners/);
+  assert.doesNotMatch(plate, /PartnerMarquee|mp-marquee/);
   assert.match(plate, /featuredPartnersInOrder/);
   assert.match(plate, /bijuuflow-logo\.svg|partner\.logoSrc/);
   assert.match(plate, /opens in a new tab/);
@@ -144,15 +145,17 @@ test("splash shows featured partners on a short minimal loader", () => {
   assert.match(marquee, /aria-hidden/);
   assert.match(marquee, /tabIndex=\{copy \? -1 : undefined\}/);
   assert.doesNotMatch(marquee, /ellipse|rotateY|translateZ/);
-  assert.match(plate, /PartnerMarquee/);
   assert.match(lockup, /PartnerMarquee/);
   assert.match(css, /@keyframes mpMarquee/);
   assert.match(css, /translateX\(-50%\)/);
   assert.match(css, /linear infinite/);
   assert.match(css, /mask-image/);
-  assert.match(css, /animation-play-state:\s*paused/);
-  assert.match(css, /\.mp-marquee:hover[\s\S]*?animation-play-state:\s*paused/);
-  assert.match(css, /\.mp-marquee:focus-within[\s\S]*?animation-play-state:\s*paused/);
+  assert.doesNotMatch(css, /\.mp-marquee:hover[\s\S]{0,200}animation-play-state:\s*paused/);
+  assert.doesNotMatch(css, /\.mp-marquee:focus-within[\s\S]{0,200}animation-play-state:\s*paused/);
+  assert.match(css, /@keyframes mpPartnerPop/);
+  assert.match(css, /scale\(0\.94\)/);
+  assert.match(css, /blur\(5px\)/);
+  assert.match(css, /mpPartnerPop[\s\S]*var\(--ease-spring\)/);
   assert.match(css, /prefers-reduced-motion:\s*reduce[\s\S]*\.mp-marquee-static\s*\{[^}]*display:\s*flex/);
   assert.doesNotMatch(css, /mp-revolve-ellipse|mpRevolveSpin|rotateY\(360deg\)/);
   const slideStart = css.indexOf("@keyframes mpMarquee");

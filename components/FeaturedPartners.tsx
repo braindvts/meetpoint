@@ -1,7 +1,6 @@
 "use client";
 
 import { featuredPartnersInOrder, type FeaturedPartner } from "@/lib/featuredPartners";
-import PartnerMarquee from "@/components/PartnerMarquee";
 import type { CSSProperties } from "react";
 
 interface Props {
@@ -10,7 +9,7 @@ interface Props {
 }
 
 /**
- * Featured-partner credit on the loader.
+ * Static partner credit on the loader. Pops in after the wordmark.
  * Logo and name sit open on the ink — no plate. BijuuFlow leads.
  */
 export default function FeaturedPartners({ revealed }: Props) {
@@ -20,18 +19,11 @@ export default function FeaturedPartners({ revealed }: Props) {
   return (
     <section
       className={`mp-splash-partners ${revealed ? "mp-splash-partners--in" : ""}`}
-      aria-label="Featured partners"
+      aria-label="Supported by our partners"
     >
       <span className="mp-featured-partners-rule" aria-hidden />
-      <p className="mp-featured-partners-kicker" aria-hidden>
-        Featured partners
-      </p>
-      <PartnerMarquee
-        partners={partners}
-        variant="splash"
-        onLinkClick={(event) => event.stopPropagation()}
-      />
-      <ul className="mp-featured-partners-list mp-marquee-static">
+      <p className="mp-featured-partners-kicker">Supported by our partners</p>
+      <ul className="mp-featured-partners-list">
         {partners.map((partner, index) => (
           <PartnerCredit key={partner.id} partner={partner} index={index} />
         ))}
@@ -53,7 +45,7 @@ function PartnerName({ name }: { name: string }) {
 }
 
 function PartnerCredit({ partner, index }: { partner: FeaturedPartner; index: number }) {
-  const delay = `${index * 120}ms`;
+  const delay = `${90 + index * 85}ms`;
   const style = {
     animationDelay: delay,
     "--mp-partner-delay": delay,
