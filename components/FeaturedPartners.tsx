@@ -34,6 +34,18 @@ export default function FeaturedPartners({ revealed }: Props) {
   );
 }
 
+function PartnerName({ name }: { name: string }) {
+  if (name === "ONYX Futures") {
+    return (
+      <span className="mp-featured-partner-name font-display">
+        <span className="mp-partner-onyx">ONYX</span>
+        <span className="mp-partner-onyx-sub">Futures</span>
+      </span>
+    );
+  }
+  return <span className="mp-featured-partner-name font-display">{name}</span>;
+}
+
 function PartnerCredit({ partner, index }: { partner: FeaturedPartner; index: number }) {
   const delay = `${index * 120}ms`;
   const style = {
@@ -63,7 +75,7 @@ function PartnerCredit({ partner, index }: { partner: FeaturedPartner; index: nu
             className={`mp-featured-partner-mark${partner.invertOnInk ? " mp-featured-partner-mark--invert" : ""}`}
           />
         </span>
-        <span className="mp-featured-partner-name font-display">{partner.name}</span>
+        <PartnerName name={partner.name} />
       </a>
     </li>
   );

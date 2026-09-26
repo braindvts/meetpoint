@@ -37,6 +37,13 @@ export const FEATURED_PARTNERS: readonly FeaturedPartner[] = [
     logoSrc: "/grounded-logo.svg",
     logoAlt: "Grounded",
   },
+  {
+    id: "onyx",
+    name: "ONYX Futures",
+    href: "https://onyx-futures.com",
+    logoSrc: "/onyx-logo.svg",
+    logoAlt: "ONYX Futures",
+  },
 ];
 
 export function featuredPartnersInOrder(

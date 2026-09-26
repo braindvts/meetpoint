@@ -8,6 +8,18 @@ interface Props {
  * Compact sponsor credit — never a replacement for the Interlink wordmark.
  * BijuuFlow leads; later partners follow, each with its own link.
  */
+function PartnerName({ name }: { name: string }) {
+  if (name === "ONYX Futures") {
+    return (
+      <span className="mp-sponsor-lockup-name font-display">
+        <span className="mp-partner-onyx">ONYX</span>
+        <span className="mp-partner-onyx-sub">Futures</span>
+      </span>
+    );
+  }
+  return <span className="mp-sponsor-lockup-name font-display">{name}</span>;
+}
+
 export default function SponsorLockup({ className = "" }: Props) {
   const partners = featuredPartnersInOrder();
 
@@ -35,7 +47,7 @@ export default function SponsorLockup({ className = "" }: Props) {
               height={28}
               className={`mp-sponsor-lockup-mark${partner.invertOnInk ? "" : " mp-sponsor-lockup-mark--native"}`}
             />
-            <span className="mp-sponsor-lockup-name font-display">{partner.name}</span>
+            <PartnerName name={partner.name} />
           </a>
         </span>
       ))}

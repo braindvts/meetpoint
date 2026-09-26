@@ -32,6 +32,22 @@ test("Grounded follows BijuuFlow and keeps its own mark and link", () => {
   assert.equal(ordered.filter((partner) => partner.name === "Grounded").length, 1);
 });
 
+test("ONYX Futures follows Grounded and keeps its own mark and link", () => {
+  const ordered = featuredPartnersInOrder();
+  const onyx = ordered.find((partner) => partner.id === "onyx");
+  assert.deepEqual(
+    ordered.map((partner) => partner.id),
+    ["bijuuflow", "grounded", "onyx"]
+  );
+  assert.equal(onyx?.name, "ONYX Futures");
+  assert.equal(onyx?.lead, undefined);
+  assert.equal(onyx?.invertOnInk, undefined);
+  assert.equal(onyx?.href, "https://onyx-futures.com");
+  assert.equal(onyx?.logoSrc, "/onyx-logo.svg");
+  assert.equal(onyx?.logoAlt, "ONYX Futures");
+  assert.equal(ordered.filter((partner) => partner.name === "ONYX Futures").length, 1);
+});
+
 test("later partners follow the lead without a layout rewrite", () => {
   const partners: FeaturedPartner[] = [
     { id: "second", name: "Second", href: "https://example.com/second", logoSrc: "/second.svg", logoAlt: "Second" },
@@ -75,6 +91,8 @@ test("splash shows featured partners on a short minimal loader", () => {
   assert.match(plate, /stopPropagation/);
   assert.match(plate, /target="_blank"/);
   assert.match(plate, /noopener noreferrer/);
+  assert.match(plate, /mp-partner-onyx/);
+  assert.match(plate, /ONYX Futures/);
 
   assert.match(css, /mp-splash-partners--in/);
   assert.match(css, /splashDraw/);
@@ -91,6 +109,8 @@ test("splash shows featured partners on a short minimal loader", () => {
   const mark = css.slice(markStart, css.indexOf("}", css.indexOf("}", markStart) + 1) + 1);
   assert.doesNotMatch(mark, /inset|border|scale\(/);
   assert.match(css, /\.mp-featured-partner-link \{[\s\S]*?border:\s*0;/);
+  assert.match(css, /\.mp-featured-partner-link \{[\s\S]*?white-space:\s*nowrap;/);
+  assert.match(css, /\.mp-partner-onyx-sub/);
   assert.match(css, /stroke-dashoffset:\s*0/);
 
   assert.match(lockup, /Supported by/);

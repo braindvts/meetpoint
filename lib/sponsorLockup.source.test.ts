@@ -23,6 +23,11 @@ test("landing credits BijuuFlow as a sponsor, not a replacement brand", () => {
   assert.match(partners, /https:\/\/groundedpeptides\.com/);
   assert.match(partners, /grounded-logo\.svg/);
   assert.match(partners, /name: "Grounded"/);
+  assert.match(partners, /https:\/\/onyx-futures\.com/);
+  assert.match(partners, /onyx-logo\.svg/);
+  assert.match(partners, /name: "ONYX Futures"/);
+  assert.match(lockup, /mp-partner-onyx/);
+  assert.match(lockup, /Futures/);
   assert.doesNotMatch(lockup, /Conclave/);
   assert.doesNotMatch(partners, /Conclave/);
 });
@@ -34,6 +39,17 @@ test("BijuuFlow mark is committed under public/ as a compact SVG", () => {
   assert.match(svg, /<svg/);
   assert.match(svg, /<path/);
   assert.ok(Buffer.byteLength(svg) < 100_000);
+});
+
+test("ONYX Futures mark is the gold eclipse, committed under public/", () => {
+  const svgPath = join(ROOT, "public/onyx-logo.svg");
+  assert.equal(existsSync(svgPath), true);
+  const svg = readFileSync(svgPath, "utf8");
+  assert.match(svg, /<svg/);
+  assert.match(svg, /#E2B03D|#D49A1F/);
+  assert.match(svg, /#0B0B0B/);
+  assert.doesNotMatch(svg, /<rect/);
+  assert.ok(Buffer.byteLength(svg) < 20_000);
 });
 
 test("Grounded mark is the header tile, committed under public/", () => {
