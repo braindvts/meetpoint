@@ -42,7 +42,7 @@ test("ONYX Futures follows Grounded and keeps its own mark and link", () => {
   const onyx = ordered.find((partner) => partner.id === "onyx");
   assert.deepEqual(
     ordered.map((partner) => partner.id),
-    ["bijuuflow", "grounded", "onyx"]
+    ["bijuuflow", "grounded", "onyx", "edgeable"]
   );
   assert.equal(onyx?.name, "ONYX Futures");
   assert.equal(onyx?.lead, undefined);
@@ -51,6 +51,19 @@ test("ONYX Futures follows Grounded and keeps its own mark and link", () => {
   assert.equal(onyx?.logoSrc, "/onyx-logo.svg");
   assert.equal(onyx?.logoAlt, "ONYX Futures");
   assert.equal(ordered.filter((partner) => partner.name === "ONYX Futures").length, 1);
+});
+
+test("Edgeable follows ONYX Futures and keeps its own mark and link", () => {
+  const ordered = featuredPartnersInOrder();
+  const edgeable = ordered.find((partner) => partner.id === "edgeable");
+  assert.equal(ordered[3]?.id, "edgeable");
+  assert.equal(edgeable?.name, "Edgeable");
+  assert.equal(edgeable?.lead, undefined);
+  assert.equal(edgeable?.invertOnInk, undefined);
+  assert.equal(edgeable?.href, "https://edgeable.app");
+  assert.equal(edgeable?.logoSrc, "/edgeable-logo.png");
+  assert.equal(edgeable?.logoAlt, "Edgeable");
+  assert.equal(ordered.filter((partner) => partner.name === "Edgeable").length, 1);
 });
 
 test("marquee repeats the list enough to loop without a gap", () => {

@@ -44,6 +44,13 @@ export const FEATURED_PARTNERS: readonly FeaturedPartner[] = [
     logoSrc: "/onyx-logo.svg",
     logoAlt: "ONYX Futures",
   },
+  {
+    id: "edgeable",
+    name: "Edgeable",
+    href: "https://edgeable.app",
+    logoSrc: "/edgeable-logo.png",
+    logoAlt: "Edgeable",
+  },
 ];
 
 export function featuredPartnersInOrder(

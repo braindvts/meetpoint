@@ -26,6 +26,9 @@ test("landing credits BijuuFlow as a sponsor, not a replacement brand", () => {
   assert.match(partners, /https:\/\/onyx-futures\.com/);
   assert.match(partners, /onyx-logo\.svg/);
   assert.match(partners, /name: "ONYX Futures"/);
+  assert.match(partners, /https:\/\/edgeable\.app/);
+  assert.match(partners, /edgeable-logo\.png/);
+  assert.match(partners, /name: "Edgeable"/);
   assert.match(lockup, /mp-partner-onyx/);
   assert.match(lockup, /Futures/);
   assert.doesNotMatch(lockup, /Conclave/);
@@ -50,6 +53,16 @@ test("ONYX Futures mark is the gold eclipse, committed under public/", () => {
   assert.match(svg, /#0B0B0B/);
   assert.doesNotMatch(svg, /<rect/);
   assert.ok(Buffer.byteLength(svg) < 20_000);
+});
+
+test("Edgeable mark is the gold speed bars, committed under public/", () => {
+  const pngPath = join(ROOT, "public/edgeable-logo.png");
+  assert.equal(existsSync(pngPath), true);
+  const png = readFileSync(pngPath);
+  assert.ok(png.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])));
+  assert.equal(png.subarray(12, 16).toString("ascii"), "IHDR");
+  assert.equal(png[25], 6);
+  assert.ok(png.byteLength < 80_000);
 });
 
 test("Grounded mark is the header tile, committed under public/", () => {

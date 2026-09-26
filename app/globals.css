@@ -1163,7 +1163,7 @@ html.mp-boot-splash body::before {
   align-items: center;
   justify-content: center;
   gap: 1.15rem 1.5rem;
-  max-width: 36rem;
+  max-width: 48rem;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -1264,10 +1264,14 @@ html.mp-boot-splash body::before {
 }
 @media (max-width: 540px) {
   .mp-splash {
-    padding-bottom: 8.25rem;
+    padding-bottom: 11.5rem;
   }
   .mp-featured-partners-list {
-    gap: 0.45rem 0.65rem;
+    display: grid;
+    grid-template-columns: max-content max-content;
+    justify-content: center;
+    column-gap: 1.15rem;
+    row-gap: 0.7rem;
     max-width: 100%;
   }
   .mp-featured-partner-link {
