@@ -112,7 +112,7 @@ test("splash shows featured partners on a short minimal loader", () => {
   assert.match(plate, /Supported by our partners/);
   assert.doesNotMatch(plate, /PartnerMarquee|mp-marquee/);
   assert.match(plate, /featuredPartnersInOrder/);
-  assert.match(plate, /bijuuflow-logo\.svg|partner\.logoSrc/);
+  assert.match(plate, /PartnerMark/);
   assert.match(plate, /opens in a new tab/);
   assert.match(plate, /stopPropagation/);
   assert.match(plate, /target="_blank"/);
@@ -144,17 +144,19 @@ test("splash shows featured partners on a short minimal loader", () => {
   assert.match(lockup, /target="_blank"/);
   assert.match(lockup, /noopener noreferrer/);
   assert.match(lockup, /partner\.href/);
-  assert.match(lockup, /partner\.logoSrc/);
+  assert.match(lockup, /PartnerMark/);
   assert.doesNotMatch(lockup, /Featured partners/);
   assert.match(css, /mp-sponsor-lockup-mark--native/);
   assert.match(css, /mp-featured-partner-mark--invert/);
 
   const marquee = readFileSync(join(ROOT, "components/PartnerMarquee.tsx"), "utf8");
+  const partnerMark = readFileSync(join(ROOT, "components/PartnerMark.tsx"), "utf8");
   assert.match(marquee, /partnerMarqueeRepeat/);
   assert.match(marquee, /target="_blank"/);
   assert.match(marquee, /noopener noreferrer/);
   assert.match(marquee, /partner\.href/);
-  assert.match(marquee, /partner\.logoSrc/);
+  assert.match(marquee, /PartnerMark/);
+  assert.match(partnerMark, /partner\.logoSrc/);
   assert.match(marquee, /aria-hidden/);
   assert.match(marquee, /tabIndex=\{copy \? -1 : undefined\}/);
   assert.doesNotMatch(marquee, /ellipse|rotateY|translateZ/);
@@ -170,6 +172,10 @@ test("splash shows featured partners on a short minimal loader", () => {
   assert.match(css, /blur\(5px\)/);
   assert.match(css, /mpPartnerPop[\s\S]*var\(--ease-spring\)/);
   assert.match(css, /prefers-reduced-motion:\s*reduce[\s\S]*\.mp-marquee-static\s*\{[^}]*display:\s*flex/);
+  assert.match(css, /@keyframes mpEdgeableBreathe/);
+  assert.match(css, /drop-shadow\(0 0 5px rgba\(255, 190, 51/);
+  assert.match(css, /mpEdgeableSweep/);
+  assert.match(css, /prefers-reduced-motion:\s*reduce[\s\S]*\.mp-edgeable-glow[\s\S]{0,180}animation:\s*none/);
   assert.doesNotMatch(css, /mp-revolve-ellipse|mpRevolveSpin|rotateY\(360deg\)/);
   const slideStart = css.indexOf("@keyframes mpMarquee");
   const slide = css.slice(slideStart, css.indexOf("}", css.indexOf("}", slideStart) + 1) + 1);

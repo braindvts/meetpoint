@@ -1,5 +1,6 @@
 import { featuredPartnersInOrder } from "@/lib/featuredPartners";
 import PartnerMarquee from "@/components/PartnerMarquee";
+import PartnerMark from "@/components/PartnerMark";
 
 interface Props {
   className?: string;
@@ -40,13 +41,15 @@ export default function SponsorLockup({ className = "" }: Props) {
             href={partner.href}
             target="_blank"
             rel="noopener noreferrer"
-            className="mp-sponsor-lockup-link mp-press"
+            className={`mp-sponsor-lockup-link mp-press${
+              partner.id === "edgeable" ? " mp-partner-edgeable" : ""
+            }`}
             aria-label={`${partner.name} (opens in a new tab)`}
           >
-            <img
-              src={partner.logoSrc}
+            <PartnerMark
+              partner={partner}
               alt={partner.logoAlt}
-              width={28}
+              width={partner.id === "edgeable" ? 48 : 28}
               height={28}
               className={`mp-sponsor-lockup-mark${partner.invertOnInk ? "" : " mp-sponsor-lockup-mark--native"}`}
             />

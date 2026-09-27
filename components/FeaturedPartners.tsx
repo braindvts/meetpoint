@@ -1,5 +1,6 @@
 "use client";
 
+import PartnerMark from "@/components/PartnerMark";
 import { featuredPartnersInOrder, type FeaturedPartner } from "@/lib/featuredPartners";
 import type { CSSProperties } from "react";
 
@@ -53,7 +54,9 @@ function PartnerCredit({ partner, index }: { partner: FeaturedPartner; index: nu
 
   return (
     <li
-      className={`mp-featured-partner${partner.lead ? " mp-featured-partner--lead" : ""}`}
+      className={`mp-featured-partner${partner.lead ? " mp-featured-partner--lead" : ""}${
+        partner.id === "edgeable" ? " mp-partner-edgeable" : ""
+      }`}
       style={style}
     >
       <a
@@ -65,10 +68,10 @@ function PartnerCredit({ partner, index }: { partner: FeaturedPartner; index: nu
         onClick={(event) => event.stopPropagation()}
       >
         <span className="mp-featured-partner-mark-wrap">
-          <img
-            src={partner.logoSrc}
+          <PartnerMark
+            partner={partner}
             alt={partner.logoAlt}
-            width={partner.lead ? 38 : 28}
+            width={partner.lead ? 38 : partner.id === "edgeable" ? 48 : 28}
             height={partner.lead ? 37 : 28}
             className={`mp-featured-partner-mark${partner.invertOnInk ? " mp-featured-partner-mark--invert" : ""}`}
           />

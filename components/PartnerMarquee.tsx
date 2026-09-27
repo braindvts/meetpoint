@@ -1,4 +1,5 @@
 import type { MouseEvent } from "react";
+import PartnerMark from "@/components/PartnerMark";
 import { partnerMarqueeRepeat, type FeaturedPartner } from "@/lib/featuredPartners";
 
 interface Props {
@@ -49,16 +50,18 @@ function MarqueeHalf({
             href={partner.href}
             target="_blank"
             rel="noopener noreferrer"
-            className={`mp-marquee-link${partner.lead ? " mp-marquee-link--lead" : ""}`}
+            className={`mp-marquee-link${partner.lead ? " mp-marquee-link--lead" : ""}${
+              partner.id === "edgeable" ? " mp-partner-edgeable" : ""
+            }`}
             aria-label={copy ? undefined : `${partner.name} (opens in a new tab)`}
             aria-hidden={copy ? true : undefined}
             tabIndex={copy ? -1 : undefined}
             onClick={onLinkClick}
           >
-            <img
-              src={partner.logoSrc}
+            <PartnerMark
+              partner={partner}
               alt=""
-              width={28}
+              width={partner.id === "edgeable" ? 48 : 28}
               height={28}
               className={`mp-marquee-mark${
                 partner.invertOnInk ? " mp-marquee-mark--invert" : " mp-marquee-mark--native"

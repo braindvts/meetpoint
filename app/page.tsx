@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import BlackBadge from "@/components/BlackBadge";
 import DemoEnterButton from "@/components/DemoEnterButton";
+import EdgeableSpotlight from "@/components/EdgeableSpotlight";
 import SponsorLockup from "@/components/SponsorLockup";
 import TierBadge from "@/components/TierBadge";
 import { demoEntryEnabled } from "@/lib/demoFlag";
@@ -123,6 +124,7 @@ export default function Landing() {
             Website first · Native app when you’re ready
           </p>
           <SponsorLockup className="mt-8" />
+          <EdgeableSpotlight className="mt-5" />
         </div>
       </section>
 

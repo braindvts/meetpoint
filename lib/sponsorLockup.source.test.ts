@@ -62,7 +62,25 @@ test("Edgeable mark is the gold speed bars, committed under public/", () => {
   assert.ok(png.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])));
   assert.equal(png.subarray(12, 16).toString("ascii"), "IHDR");
   assert.equal(png[25], 6);
-  assert.ok(png.byteLength < 80_000);
+  assert.ok(png.readUInt32BE(16) >= 640);
+  assert.ok(png.readUInt32BE(20) >= 400);
+  assert.ok(png.byteLength < 300_000);
+});
+
+test("landing spotlight credits Edgeable with an outbound visit link", () => {
+  const page = readFileSync(join(ROOT, "app/page.tsx"), "utf8");
+  const spot = readFileSync(join(ROOT, "components/EdgeableSpotlight.tsx"), "utf8");
+  assert.match(page, /<SponsorLockup[\s\S]*<EdgeableSpotlight/);
+  assert.match(spot, /Featured partner/);
+  assert.match(spot, /Cloud-first, multi-broker futures trade copier for prop-firm traders\./);
+  assert.match(spot, /Visit Edgeable/);
+  assert.match(spot, /href="https:\/\/edgeable\.app"/);
+  assert.match(spot, /target="_blank"/);
+  assert.match(spot, /rel="noopener noreferrer"/);
+  assert.match(spot, /edgeable-logo\.png/);
+  assert.match(spot, /mp-scroll-reveal/);
+  assert.doesNotMatch(spot, /investment advice/);
+  assert.doesNotMatch(spot, /https:\/\/edgeable\.app\//);
 });
 
 test("Grounded mark is the header tile, committed under public/", () => {

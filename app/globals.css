@@ -866,6 +866,10 @@ html.mp-motion .mp-scroll-reveal.is-in .mp-scroll-rule {
   width: 1.65rem;
   height: 1.65rem;
 }
+.mp-partner-edgeable .mp-sponsor-lockup-mark {
+  width: 2.25rem;
+  height: 1.65rem;
+}
 @media (max-width: 540px) {
   .mp-sponsor-lockup {
     gap: 0.35rem 0.45rem;
@@ -935,6 +939,10 @@ html.mp-motion .mp-scroll-reveal.is-in .mp-scroll-rule {
 }
 .mp-marquee-mark--native {
   filter: none;
+}
+.mp-partner-edgeable .mp-marquee-mark {
+  width: 2.35rem;
+  height: 1.7rem;
 }
 .mp-marquee-name {
   font-size: 13px;
@@ -1203,6 +1211,10 @@ html.mp-boot-splash body::before {
   /* Same dark-field treatment as the landing BijuuFlow lockup */
   filter: invert(1) sepia(0.18) saturate(0.45) hue-rotate(6deg) brightness(1.02);
   opacity: 0.92;
+}
+.mp-partner-edgeable .mp-featured-partner-mark {
+  width: 2.15rem;
+  height: 1.55rem;
 }
 .mp-featured-partner--lead .mp-featured-partner-mark {
   width: 2.15rem;
@@ -1491,6 +1503,152 @@ html.mp-boot-splash body::before {
   letter-spacing: 0.08em;
 }
 
+/* Edgeable — official mark, drop-shadow only. The artwork is not recolored. */
+.mp-edgeable-glow {
+  position: relative;
+  display: inline-flex;
+  animation: mpEdgeableBreathe 3.8s ease-in-out infinite;
+}
+.mp-edgeable-clip {
+  position: relative;
+  display: inline-flex;
+  overflow: hidden;
+}
+.mp-edgeable-sheen {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 32%,
+    rgba(251, 247, 239, 0.55) 50%,
+    transparent 68%
+  );
+  transform: translateX(-130%);
+  pointer-events: none;
+}
+.mp-splash-partners .mp-edgeable-glow {
+  animation: none;
+}
+.mp-splash-partners--in .mp-edgeable-glow {
+  animation: mpEdgeableArrive 1.5s ease-out both;
+  animation-delay: var(--mp-partner-delay, 0ms);
+}
+@keyframes mpEdgeableBreathe {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 0 rgba(255, 190, 51, 0));
+  }
+  50% {
+    filter: drop-shadow(0 0 5px rgba(255, 190, 51, 0.55));
+  }
+}
+@keyframes mpEdgeableArrive {
+  0% {
+    filter: drop-shadow(0 0 0 rgba(255, 190, 51, 0));
+  }
+  42% {
+    filter: drop-shadow(0 0 7px rgba(255, 190, 51, 0.48));
+  }
+  100% {
+    filter: drop-shadow(0 0 2px rgba(255, 190, 51, 0.2));
+  }
+}
+@keyframes mpEdgeableSweep {
+  from {
+    transform: translateX(-130%);
+  }
+  to {
+    transform: translateX(130%);
+  }
+}
+@media (hover: hover) and (pointer: fine) {
+  .mp-marquee-link.mp-partner-edgeable:hover .mp-edgeable-sheen {
+    animation: mpEdgeableSweep 0.85s ease;
+  }
+}
+
+.mp-edgeable-spot {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  width: min(100%, 34rem);
+  max-width: 100%;
+  margin: 0;
+  padding: 0.75rem 0.9rem;
+  background: #030304;
+  border: 1px solid rgba(212, 196, 168, 0.16);
+}
+.mp-edgeable-spot-mark {
+  width: 3.4rem;
+  height: 2.45rem;
+  object-fit: contain;
+  flex: none;
+}
+.mp-edgeable-spot-copy {
+  min-width: 0;
+}
+.mp-edgeable-spot-kicker {
+  margin: 0;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: #d4c4a8;
+}
+.mp-edgeable-spot-name {
+  margin: 0.2rem 0 0;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: #f4efe6;
+}
+.mp-edgeable-spot-line {
+  margin: 0.28rem 0 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: rgba(244, 239, 230, 0.72);
+}
+.mp-edgeable-spot-link {
+  display: inline-flex;
+  margin-top: 0.45rem;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: #d4c4a8;
+}
+.mp-edgeable-spot-link:focus-visible {
+  outline: 1px solid #d4c4a8;
+  outline-offset: 3px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .mp-edgeable-spot-link:hover {
+    color: #f4efe6;
+  }
+}
+@media (max-width: 540px) {
+  .mp-partner-edgeable .mp-featured-partner-mark {
+    width: 1.85rem;
+    height: 1.35rem;
+  }
+  .mp-partner-edgeable .mp-marquee-mark,
+  .mp-partner-edgeable .mp-sponsor-lockup-mark {
+    width: 1.95rem;
+    height: 1.4rem;
+  }
+  .mp-edgeable-spot {
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.7rem 0.75rem;
+  }
+  .mp-edgeable-spot-mark {
+    width: 2.8rem;
+    height: 2rem;
+    margin-top: 0.15rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .mp-reveal,
   .mp-stagger > *,
@@ -1546,6 +1704,11 @@ html.mp-boot-splash body::before {
   }
   .mp-marquee-track {
     animation: none !important;
+  }
+  .mp-edgeable-glow,
+  .mp-edgeable-sheen {
+    animation: none !important;
+    filter: none !important;
   }
   /* Splash is fully present, then leaves. No fade-in, pulse, or sheen. */
   .mp-splash {
