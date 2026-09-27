@@ -1504,70 +1504,7 @@ html.mp-boot-splash body::before {
   letter-spacing: 0.08em;
 }
 
-/* Edgeable — official mark, drop-shadow only. The artwork is not recolored. */
-.mp-edgeable-glow {
-  position: relative;
-  display: inline-flex;
-  animation: mpEdgeableBreathe 3.8s ease-in-out infinite;
-}
-.mp-edgeable-clip {
-  position: relative;
-  display: inline-flex;
-  overflow: hidden;
-}
-.mp-edgeable-sheen {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    100deg,
-    transparent 32%,
-    rgba(251, 247, 239, 0.55) 50%,
-    transparent 68%
-  );
-  transform: translateX(-130%);
-  pointer-events: none;
-}
-.mp-splash-partners .mp-edgeable-glow {
-  animation: none;
-}
-.mp-splash-partners--in .mp-edgeable-glow {
-  animation: mpEdgeableArrive 1.5s ease-out both;
-  animation-delay: var(--mp-partner-delay, 0ms);
-}
-@keyframes mpEdgeableBreathe {
-  0%,
-  100% {
-    filter: drop-shadow(0 0 0 rgba(255, 190, 51, 0));
-  }
-  50% {
-    filter: drop-shadow(0 0 5px rgba(255, 190, 51, 0.55));
-  }
-}
-@keyframes mpEdgeableArrive {
-  0% {
-    filter: drop-shadow(0 0 0 rgba(255, 190, 51, 0));
-  }
-  42% {
-    filter: drop-shadow(0 0 7px rgba(255, 190, 51, 0.48));
-  }
-  100% {
-    filter: drop-shadow(0 0 2px rgba(255, 190, 51, 0.2));
-  }
-}
-@keyframes mpEdgeableSweep {
-  from {
-    transform: translateX(-130%);
-  }
-  to {
-    transform: translateX(130%);
-  }
-}
-@media (hover: hover) and (pointer: fine) {
-  .mp-marquee-link.mp-partner-edgeable:hover .mp-edgeable-sheen {
-    animation: mpEdgeableSweep 0.85s ease;
-  }
-}
-
+/* Edgeable spotlight — flat charcoal card, champagne hairline, Outfit via the site font. */
 .mp-edgeable-spot {
   display: flex;
   align-items: center;
@@ -1707,11 +1644,6 @@ html.mp-boot-splash body::before {
   }
   .mp-marquee-track {
     animation: none !important;
-  }
-  .mp-edgeable-glow,
-  .mp-edgeable-sheen {
-    animation: none !important;
-    filter: none !important;
   }
   /* Splash is fully present, then leaves. No fade-in, pulse, or sheen. */
   .mp-splash {

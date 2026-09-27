@@ -1,9 +1,6 @@
 import type { FeaturedPartner } from "@/lib/featuredPartners";
 
-/**
- * Partner mark. Edgeable keeps the official speed-bar artwork untouched
- * and only adds a drop-shadow glow plus a hover sweep in the marquee.
- */
+/** Partner mark, shown as supplied. No glow, plate, or filter on the artwork. */
 export default function PartnerMark({
   partner,
   className,
@@ -17,17 +14,8 @@ export default function PartnerMark({
   height: number;
   alt: string;
 }) {
-  const img = (
+  return (
     // eslint-disable-next-line @next/next/no-img-element
     <img src={partner.logoSrc} alt={alt} width={width} height={height} className={className} />
-  );
-  if (partner.id !== "edgeable") return img;
-  return (
-    <span className="mp-edgeable-glow">
-      <span className="mp-edgeable-clip">
-        {img}
-        <span className="mp-edgeable-sheen" aria-hidden />
-      </span>
-    </span>
   );
 }

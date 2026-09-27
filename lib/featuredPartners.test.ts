@@ -172,10 +172,8 @@ test("splash shows featured partners on a short minimal loader", () => {
   assert.match(css, /blur\(5px\)/);
   assert.match(css, /mpPartnerPop[\s\S]*var\(--ease-spring\)/);
   assert.match(css, /prefers-reduced-motion:\s*reduce[\s\S]*\.mp-marquee-static\s*\{[^}]*display:\s*flex/);
-  assert.match(css, /@keyframes mpEdgeableBreathe/);
-  assert.match(css, /drop-shadow\(0 0 5px rgba\(255, 190, 51/);
-  assert.match(css, /mpEdgeableSweep/);
-  assert.match(css, /prefers-reduced-motion:\s*reduce[\s\S]*\.mp-edgeable-glow[\s\S]{0,180}animation:\s*none/);
+  assert.doesNotMatch(css, /mpEdgeableBreathe|mpEdgeableArrive|mpEdgeableSweep|mp-edgeable-glow|mp-edgeable-sheen/);
+  assert.doesNotMatch(partnerMark, /mp-edgeable-glow|drop-shadow|sheen/);
   assert.doesNotMatch(css, /mp-revolve-ellipse|mpRevolveSpin|rotateY\(360deg\)/);
   const slideStart = css.indexOf("@keyframes mpMarquee");
   const slide = css.slice(slideStart, css.indexOf("}", css.indexOf("}", slideStart) + 1) + 1);
