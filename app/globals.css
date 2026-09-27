@@ -792,6 +792,7 @@ html.mp-motion .mp-scroll-reveal.is-in .mp-scroll-rule {
   gap: 0.75rem;
   width: min(100%, 34rem);
   max-width: 100%;
+  min-width: 0;
   margin: 0;
   color: var(--color-ivory);
 }
@@ -1571,8 +1572,10 @@ html.mp-boot-splash body::before {
   display: flex;
   align-items: center;
   gap: 0.9rem;
+  box-sizing: border-box;
   width: min(100%, 34rem);
   max-width: 100%;
+  min-width: 0;
   margin: 0;
   padding: 0.75rem 0.9rem;
   background: #030304;
@@ -1981,6 +1984,8 @@ html.mp-boot-splash body::before {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  min-width: 0;
+  max-width: 100%;
   padding: 2.25rem 1.5rem 3rem;
 }
 
