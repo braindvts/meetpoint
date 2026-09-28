@@ -6,6 +6,7 @@ import { OAUTH_REAUTH_RETURN } from "@/lib/oauthReauth";
 import {
   appUrl,
   applyOAuthStateCookie,
+  applyReauthBindCookie,
   createOAuthState,
   linkedInConfigured,
 } from "@/lib/session";
@@ -30,7 +31,7 @@ export async function GET(req: NextRequest) {
     next = OAUTH_REAUTH_RETURN;
     intent = { memberId: me.id, provider: "linkedin" };
   }
-  const { state, cookieValue } = await createOAuthState(next, intent);
+  const { state, nonce, cookieValue } = await createOAuthState(next, intent);
   const params = new URLSearchParams({
     response_type: "code",
     client_id: process.env.LINKEDIN_CLIENT_ID!.trim(),
@@ -42,5 +43,7 @@ export async function GET(req: NextRequest) {
   const res = NextResponse.redirect(
     `https://www.linkedin.com/oauth/v2/authorization?${params.toString()}`
   );
-  return applyOAuthStateCookie(res, cookieValue);
+  applyOAuthStateCookie(res, cookieValue);
+  if (intent) applyReauthBindCookie(res, intent.memberId, nonce);
+  return res;
 }

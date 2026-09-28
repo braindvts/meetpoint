@@ -93,6 +93,7 @@ export async function GET(req: NextRequest) {
       intent: challenge.reauth,
       provider: "google",
       providerSubject: user.sub,
+      stateNonce: challenge.nonce,
     });
     if (reauthRes) return reauthRes;
 

@@ -6,6 +6,7 @@ import { OAUTH_REAUTH_RETURN } from "@/lib/oauthReauth";
 import {
   appUrl,
   applyOAuthStateCookie,
+  applyReauthBindCookie,
   createOAuthState,
   googleConfigured,
 } from "@/lib/session";
@@ -30,7 +31,7 @@ export async function GET(req: NextRequest) {
     next = OAUTH_REAUTH_RETURN;
     intent = { memberId: me.id, provider: "google" };
   }
-  const { state, cookieValue } = await createOAuthState(next, intent);
+  const { state, nonce, cookieValue } = await createOAuthState(next, intent);
   const params = new URLSearchParams({
     client_id: process.env.GOOGLE_CLIENT_ID!.trim(),
     redirect_uri: appUrl("/api/auth/google/callback"),
@@ -44,5 +45,7 @@ export async function GET(req: NextRequest) {
   const res = NextResponse.redirect(
     `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`
   );
-  return applyOAuthStateCookie(res, cookieValue);
+  applyOAuthStateCookie(res, cookieValue);
+  if (intent) applyReauthBindCookie(res, intent.memberId, nonce);
+  return res;
 }

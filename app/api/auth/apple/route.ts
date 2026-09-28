@@ -6,6 +6,7 @@ import { OAUTH_REAUTH_RETURN } from "@/lib/oauthReauth";
 import {
   appUrl,
   applyOAuthStateCookie,
+  applyReauthBindCookie,
   appleConfigured,
   createOAuthState,
 } from "@/lib/session";
@@ -42,5 +43,7 @@ export async function GET(req: NextRequest) {
   });
 
   const res = NextResponse.redirect(`https://appleid.apple.com/auth/authorize?${params.toString()}`);
-  return applyOAuthStateCookie(res, cookieValue);
+  applyOAuthStateCookie(res, cookieValue);
+  if (intent) applyReauthBindCookie(res, intent.memberId, nonce);
+  return res;
 }

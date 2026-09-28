@@ -2,7 +2,13 @@ import { createHmac, randomBytes, timingSafeEqual } from "crypto";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { safeAppPath } from "./appPath";
-import { evaluateOAuthState, type OAuthReauthIntent, type OAuthStatePayload } from "./oauthReauth";
+import { claimOAuthNonceStored } from "./oauthNonceStore";
+import {
+  evaluateOAuthState,
+  type OAuthReauthBind,
+  type OAuthReauthIntent,
+  type OAuthStatePayload,
+} from "./oauthReauth";
 
 export type AuthProvider = "linkedin" | "google" | "apple" | "email";
 
@@ -21,6 +27,7 @@ export interface AuthSession {
 const COOKIE = "meetpoint_session";
 const STATE_COOKIE = "meetpoint_oauth_state";
 const REAUTH_COOKIE = "conclave_reauth";
+const REAUTH_BIND_COOKIE = "meetpoint_reauth_bind";
 
 /** Session lifetime — short-term credentials (7 days). */
 export const SESSION_TTL_SEC = 60 * 60 * 24 * 7;
@@ -91,6 +98,22 @@ function cookieOpts(maxAge: number) {
   };
 }
 
+/**
+ * Apple’s callback is a cross-site form POST, which does not include Lax cookies.
+ * The OAuth state and the reauth bind cookie use SameSite=None in production
+ * so that POST can present them. The session cookie stays Lax.
+ */
+export function oauthStateCookieOptions(maxAge: number) {
+  const crossSite = process.env.NODE_ENV === "production";
+  return {
+    httpOnly: true,
+    sameSite: crossSite ? ("none" as const) : ("lax" as const),
+    secure: crossSite,
+    path: "/",
+    maxAge,
+  };
+}
+
 export async function getSession(): Promise<AuthSession | null> {
   const jar = await cookies();
   const raw = jar.get(COOKIE)?.value;
@@ -148,7 +171,63 @@ export async function createOAuthState(
 }
 
 export function applyOAuthStateCookie(res: NextResponse, cookieValue: string): NextResponse {
-  res.cookies.set(STATE_COOKIE, cookieValue, cookieOpts(60 * 10));
+  res.cookies.set(STATE_COOKIE, cookieValue, oauthStateCookieOptions(60 * 10));
+  return res;
+}
+
+export function buildReauthBindToken(
+  bind: OAuthReauthBind,
+  nowSec = Math.floor(Date.now() / 1000)
+): string {
+  const payload = Buffer.from(
+    JSON.stringify({ purpose: "reauth-bind", ...bind, iat: nowSec })
+  ).toString("base64url");
+  return signValue(payload);
+}
+
+export function readReauthBindToken(
+  token: string,
+  nowSec = Math.floor(Date.now() / 1000)
+): OAuthReauthBind | null {
+  const payload = verifyValue(token);
+  if (!payload) return null;
+  try {
+    const data = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as {
+      purpose?: string;
+      memberId?: string;
+      nonce?: string;
+      exp?: number;
+    };
+    if (data.purpose !== "reauth-bind") return null;
+    if (!data.memberId || !data.nonce || typeof data.exp !== "number") return null;
+    if (nowSec > data.exp) return null;
+    return { memberId: data.memberId, nonce: data.nonce, exp: data.exp };
+  } catch {
+    return null;
+  }
+}
+
+/** Bind the deletion flow to the member who is signed in when it starts. */
+export function applyReauthBindCookie(
+  res: NextResponse,
+  memberId: string,
+  nonce: string
+): NextResponse {
+  const nowSec = Math.floor(Date.now() / 1000);
+  const token = buildReauthBindToken({ memberId, nonce, exp: nowSec + REAUTH_TTL_SEC }, nowSec);
+  res.cookies.set(REAUTH_BIND_COOKIE, token, oauthStateCookieOptions(REAUTH_TTL_SEC));
+  return res;
+}
+
+export async function readReauthBindCookie(): Promise<OAuthReauthBind | null> {
+  const jar = await cookies();
+  const raw = jar.get(REAUTH_BIND_COOKIE)?.value;
+  if (!raw) return null;
+  return readReauthBindToken(raw);
+}
+
+export function clearReauthBindCookie(res: NextResponse): NextResponse {
+  res.cookies.set(REAUTH_BIND_COOKIE, "", { ...oauthStateCookieOptions(0), maxAge: 0 });
   return res;
 }
 
@@ -198,6 +277,8 @@ export async function consumeOAuthChallenge(presentedState: string): Promise<OAu
     nowSec: Math.floor(Date.now() / 1000),
   });
   if (!decision.ok) return null;
+  const stored = await claimOAuthNonceStored(decision.payload.nonce, decision.payload.exp);
+  if (!stored) return null;
   return decision.payload;
 }
 
@@ -207,7 +288,7 @@ export async function consumeOAuthState(state: string): Promise<boolean> {
 }
 
 export function clearOAuthStateCookie(res: NextResponse): NextResponse {
-  res.cookies.set(STATE_COOKIE, "", { ...cookieOpts(0), maxAge: 0 });
+  res.cookies.set(STATE_COOKIE, "", { ...oauthStateCookieOptions(0), maxAge: 0 });
   return res;
 }
 

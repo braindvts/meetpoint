@@ -70,14 +70,10 @@ export type OAuthReauthDecision =
   | { action: "deny"; error: "expired" | "mismatch" };
 
 /**
- * No intent: continue the normal sign-in.
- * A reauth intent never creates or switches accounts. The provider subject
- * must already be stored on the same signed-in member.
- */
-/**
- * Absent session: the signed intent still names who started reauth (Apple’s
- * form POST does not send the Lax session cookie). A different signed-in
- * member is a switch and must not get the cookie.
+ * Absent session: Apple’s form POST does not send the Lax session cookie.
+ * The short-lived bind cookie, set from the current member when deletion
+ * started, is what identifies that member. A different signed-in member is
+ * a switch and must not get the reauth cookie.
  */
 export function oauthReauthSessionGate(
   sessionMemberId: string | null,
@@ -88,6 +84,51 @@ export function oauthReauthSessionGate(
   return "switch";
 }
 
+export type OAuthReauthBind = {
+  memberId: string;
+  nonce: string;
+  exp: number;
+};
+
+/**
+ * The member who may receive the reauth cookie.
+ * A live session for someone else is a mismatch.
+ * No live session is accepted only when the flow-start bind cookie names
+ * the same member and the same one-time state nonce.
+ */
+export function resolveReauthMember(input: {
+  sessionMemberId: string | null;
+  intentMemberId: string;
+  stateNonce: string;
+  bind: OAuthReauthBind | null;
+  nowSec: number;
+}): { ok: true; memberId: string } | { ok: false; error: "mismatch" | "expired" } {
+  const gate = oauthReauthSessionGate(input.sessionMemberId, input.intentMemberId);
+  if (gate === "switch") return { ok: false, error: "mismatch" };
+  const bind = input.bind;
+  if (!bind || bind.memberId !== input.intentMemberId || bind.nonce !== input.stateNonce) {
+    return { ok: false, error: "mismatch" };
+  }
+  if (!bind.exp || input.nowSec > bind.exp) return { ok: false, error: "expired" };
+  if (!input.intentMemberId) return { ok: false, error: "mismatch" };
+  return { ok: true, memberId: input.intentMemberId };
+}
+
+/** Stored provider account id. Email is not an account id. */
+export function providerAccountId(
+  member: { googleId: string | null; appleId: string | null; linkedInId: string | null },
+  provider: OAuthProviderName
+): string | null {
+  if (provider === "google") return member.googleId;
+  if (provider === "apple") return member.appleId;
+  return member.linkedInId;
+}
+
+/**
+ * No intent: continue the normal sign-in.
+ * A reauth intent never creates or switches accounts. The provider subject
+ * must equal the stored provider account id. Email is not compared.
+ */
 export function decideOAuthReauth(input: {
   intent: OAuthReauthIntent | undefined;
   nowSec: number;

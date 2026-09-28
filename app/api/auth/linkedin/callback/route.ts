@@ -89,6 +89,7 @@ export async function GET(req: NextRequest) {
       intent: challenge.reauth,
       provider: "linkedin",
       providerSubject: user.sub,
+      stateNonce: challenge.nonce,
     });
     if (reauthRes) return reauthRes;
 

@@ -91,6 +91,7 @@ export async function POST(req: NextRequest) {
       intent: challenge.reauth,
       provider: "apple",
       providerSubject: sub,
+      stateNonce: challenge.nonce,
     });
     if (reauthRes) return reauthRes;
 
