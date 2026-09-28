@@ -15,7 +15,15 @@ import {
   validateBasics,
   validateInterests,
 } from "./onboardingDraft.ts";
-import { onboardingResumeApplies } from "./onboardingSession.ts";
+import { readFileSync } from "node:fs";
+import {
+  clearOnboardingStep,
+  onboardingResumeApplies,
+  readOnboardingStep,
+  signOutStepScript,
+  writeOnboardingStep,
+} from "./onboardingSession.ts";
+import { clearProfile } from "./store.ts";
 import type { MyProfile } from "./types.ts";
 
 function filled(): MyProfile {
@@ -118,14 +126,80 @@ test("onboarding steps stay in the published order", () => {
   );
 });
 
-test("resume redirect skips marketing, login, and the wizard itself", () => {
+test("resume redirect skips marketing, login, legal pages, and the account page", () => {
   assert.equal(onboardingResumeApplies("/"), false);
   assert.equal(onboardingResumeApplies("/login"), false);
   assert.equal(onboardingResumeApplies("/onboarding"), false);
   assert.equal(onboardingResumeApplies("/story"), false);
+  assert.equal(onboardingResumeApplies("/admin"), false);
+  assert.equal(onboardingResumeApplies("/admin/reports"), false);
   assert.equal(onboardingResumeApplies("/discover"), true);
   assert.equal(onboardingResumeApplies("/events"), true);
   assert.equal(onboardingResumeApplies("/circle"), true);
   assert.equal(onboardingResumeApplies("/chats"), true);
-  assert.equal(onboardingResumeApplies("/profile"), true);
+
+  for (const path of [
+    "/verify-email",
+    "/verify-email/token",
+    "/terms",
+    "/terms/use",
+    "/privacy",
+    "/privacy/notice",
+    "/profile",
+    "/profile/delete",
+    "/contact",
+    "/contact/press",
+  ]) {
+    assert.equal(onboardingResumeApplies(path), false, path);
+  }
+
+  assert.equal(onboardingResumeApplies("/profiles"), true);
+  assert.equal(onboardingResumeApplies("/verify-email-help"), true);
+  assert.equal(onboardingResumeApplies("/terms-extra"), true);
+});
+
+test("sign-out drops the saved setup step and leaves the next person alone", () => {
+  const store = new Map<string, string>();
+  const g = globalThis as typeof globalThis & {
+    window?: { dispatchEvent: (event: Event) => boolean };
+    localStorage?: Storage;
+  };
+  const previousWindow = g.window;
+  const previousStorage = g.localStorage;
+  g.window = { dispatchEvent: () => true };
+  g.localStorage = {
+    getItem: (key: string) => (store.has(key) ? store.get(key)! : null),
+    setItem: (key: string, value: string) => {
+      store.set(key, value);
+    },
+    removeItem: (key: string) => {
+      store.delete(key);
+    },
+    clear: () => store.clear(),
+    key: () => null,
+    length: 0,
+  } as Storage;
+  try {
+    writeOnboardingStep(2);
+    assert.equal(readOnboardingStep(), 2);
+    clearOnboardingStep();
+    assert.equal(readOnboardingStep(), null);
+    assert.equal(store.has("interlink.onboarding.step"), false);
+
+    writeOnboardingStep("done");
+    store.set("meetpoint.profile", "{}");
+    clearProfile();
+    assert.equal(store.has("interlink.onboarding.step"), false);
+    assert.equal(readOnboardingStep(), null);
+  } finally {
+    if (previousWindow === undefined) delete g.window;
+    else g.window = previousWindow;
+    if (previousStorage === undefined) delete g.localStorage;
+    else g.localStorage = previousStorage;
+  }
+
+  const script = signOutStepScript();
+  assert.match(script, /localStorage\.removeItem\("interlink\.onboarding\.step"\)/);
+  const logout = readFileSync(new URL("../app/api/auth/logout/route.ts", import.meta.url), "utf8");
+  assert.match(logout, /signOutStepScript/);
 });

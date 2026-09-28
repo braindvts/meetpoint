@@ -1,6 +1,7 @@
 import { ONBOARDING_STEPS } from "./onboardingDraft";
 
-const KEY = "interlink.onboarding.step";
+export const ONBOARDING_STEP_KEY = "interlink.onboarding.step";
+const KEY = ONBOARDING_STEP_KEY;
 
 export type StoredOnboardingStep = number | "done" | null;
 
@@ -23,6 +24,21 @@ export function writeOnboardingStep(step: number | "done"): void {
   localStorage.setItem(KEY, step === "done" ? "done" : String(step));
 }
 
+/** Drop saved setup progress. Sign-out must call this so the next person on the device starts clean. */
+export function clearOnboardingStep(): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.removeItem(KEY);
+  } catch {
+    /* private mode */
+  }
+}
+
+/** Runs in the sign-out response, before the next page can resume someone else's step. */
+export function signOutStepScript(): string {
+  return `try{localStorage.removeItem(${JSON.stringify(KEY)})}catch(e){}`;
+}
+
 const SKIP_RESUME = [
   /^\/$/,
   /^\/login(?:\/|$)/,
@@ -31,6 +47,11 @@ const SKIP_RESUME = [
   /^\/demo(?:\/|$)/,
   /^\/admin(?:\/|$)/,
   /^\/plan(?:\/|$)/,
+  /^\/verify-email(?:\/|$)/,
+  /^\/terms(?:\/|$)/,
+  /^\/privacy(?:\/|$)/,
+  /^\/profile(?:\/|$)/,
+  /^\/contact(?:\/|$)/,
 ];
 
 /** App screens that should send an unfinished member back to setup. */
