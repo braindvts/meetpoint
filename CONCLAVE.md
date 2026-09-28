@@ -141,6 +141,13 @@ Discover ranks people by shared ambitions, complementary “looking for,” same
 
 ---
 
+## Safety
+
+- Members report another member from their profile or chat (`harassment`, `spam`, `fake_profile`, `inappropriate`, `scam`, `other`) and can block at the same time.
+- A block is both ways for visibility: those two people do not appear to each other in Discover, For you, connection requests, chats, or event attendee lists. Either person can unblock only the block they created.
+- **Auto-hide:** 3 distinct members with a report still `open` or `reviewing` hides that member from Discover and For you until an admin marks the reports `resolved` or `dismissed`. The cutoff is `OPEN_REPORT_HIDE_THRESHOLD` in `lib/safetyRules.ts`.
+- Admins review the queue at `/admin/reports` with `ADMIN_SECRET` (Bearer). There is no owner password in the repo.
+
 ## Demo / walkthrough login
 
 There is **no committed owner mailbox or password**. Sign-in never recreates a privileged owner on an arbitrary database.
@@ -169,7 +176,7 @@ When sample profiles are on, the room includes **Member**, **Verified**, and **B
 ## Tech & data
 
 - **Frontend:** Next.js App Router, TypeScript, Tailwind  
-- **DB:** Postgres via Prisma (`Member`, connections, chats, BLACK tables, `Report`)
+- **DB:** Postgres via Prisma (`Member`, connections, chats, BLACK tables, `Report`, `Block`, `RateLimitBucket`)
 - **Vercel build:** `prisma generate && node scripts/prisma-migrate-deploy.mjs && next build` (`migrate deploy` only). Never `prisma db push` on Production (that tried to DROP live `Report` columns). Never `--accept-data-loss`. Details: [prisma/README.md](./prisma/README.md).
 - **Auth:** email/password + Google / LinkedIn / Apple (when keyed)  
 - **Payments:** Stripe Checkout (`black_month`, `black_year`, table fee)  

@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getCurrentMember } from "@/lib/memberAuth";
+import { blockedPeerIdSet, pairIsBlocked } from "@/lib/moderation";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
 import { rateLimit } from "@/lib/rateLimit";
+import { chatInvolvesBlock } from "@/lib/safetyRules";
 import { publicError } from "@/lib/safeError";
 import { sanitizeText } from "@/lib/sanitize";
 import { parseBody } from "@/lib/validation/parse";
@@ -14,34 +16,41 @@ export async function GET() {
     const me = await getCurrentMember();
     if (!me) return NextResponse.json({ ok: true, chats: [] });
 
-    const memberships = await prisma.chatMember.findMany({
-      where: { memberId: me.id },
-      include: {
-        chat: {
-          include: {
-            members: true,
-            messages: { orderBy: { createdAt: "asc" }, take: 200 },
+    const [memberships, blocked] = await Promise.all([
+      prisma.chatMember.findMany({
+        where: { memberId: me.id },
+        include: {
+          chat: {
+            include: {
+              members: true,
+              messages: { orderBy: { createdAt: "asc" }, take: 200 },
+            },
           },
         },
-      },
-      orderBy: { chat: { updatedAt: "desc" } },
-    });
+        orderBy: { chat: { updatedAt: "desc" } },
+      }),
+      blockedPeerIdSet(me.id),
+    ]);
 
-    const chats = memberships.map((m) => {
+    const chats = memberships.flatMap((m) => {
       const c = m.chat;
-      return {
-        id: c.id,
-        name: c.name,
-        memberIds: c.members.filter((x) => x.memberId !== me.id).map((x) => x.memberId),
-        createdAt: c.createdAt.toISOString(),
-        updatedAt: c.updatedAt.toISOString(),
-        messages: c.messages.map((msg) => ({
-          id: msg.id,
-          senderId: msg.senderId === me.id ? "me" : msg.senderId,
-          text: msg.text,
-          createdAt: msg.createdAt.toISOString(),
-        })),
-      };
+      const memberIds = c.members.filter((x) => x.memberId !== me.id).map((x) => x.memberId);
+      if (chatInvolvesBlock(memberIds, blocked)) return [];
+      return [
+        {
+          id: c.id,
+          name: c.name,
+          memberIds,
+          createdAt: c.createdAt.toISOString(),
+          updatedAt: c.updatedAt.toISOString(),
+          messages: c.messages.map((msg) => ({
+            id: msg.id,
+            senderId: msg.senderId === me.id ? "me" : msg.senderId,
+            text: msg.text,
+            createdAt: msg.createdAt.toISOString(),
+          })),
+        },
+      ];
     });
 
     return NextResponse.json({ ok: true, chats, meId: me.id });
@@ -52,7 +61,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const limited = rateLimit(req, { name: "chat-create", limit: 30, windowMs: 60_000 });
+    const limited = await rateLimit(req, { name: "chat-create", limit: 30, windowMs: 60_000 });
     if (!limited.ok) return limited.response;
 
     await purgeDemoResidue();
@@ -81,6 +90,12 @@ export async function POST(req: Request) {
       if (!connection) {
         return NextResponse.json(
           { ok: false, error: "You can only chat with connected members." },
+          { status: 403 }
+        );
+      }
+      if (await pairIsBlocked(me.id, peerId)) {
+        return NextResponse.json(
+          { ok: false, error: "This member isn’t available." },
           { status: 403 }
         );
       }

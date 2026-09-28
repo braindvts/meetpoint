@@ -11,11 +11,14 @@ import {
 type MemberBrief = {
   id: string;
   name: string;
-  email?: string | null;
   jobTitle?: string;
   cityName?: string;
   black?: boolean;
   photo?: string;
+  filedCount?: number;
+  reportCount?: number;
+  openReporterCount?: number;
+  hiddenFromDiscover?: boolean;
 };
 
 type ReportRow = {
@@ -33,6 +36,7 @@ type ReportRow = {
 
 const STATUS_FILTERS = [
   { value: "open", label: "Open" },
+  { value: "reviewing", label: "Reviewing" },
   { value: "resolved", label: "Resolved" },
   { value: "dismissed", label: "Dismissed" },
   { value: "all", label: "All" },
@@ -226,6 +230,18 @@ export default function ReportsAdminPage() {
                     <br />
                     <span className="text-ivory">{r.peer.name}</span>
                     {r.peer.jobTitle ? ` · ${r.peer.jobTitle}` : ""}
+                    {r.peer.cityName ? ` · ${r.peer.cityName}` : ""}
+                    <br />
+                    <span className="text-white/50">
+                      {r.peer.reportCount ?? 0} reports · {r.peer.openReporterCount ?? 0} open
+                      reporters
+                    </span>
+                    {r.peer.hiddenFromDiscover ? (
+                      <>
+                        <br />
+                        <span className="text-accent">Hidden from Discover</span>
+                      </>
+                    ) : null}
                     <br />
                     <span className="break-all font-mono text-[10px] text-white/30">
                       {r.peer.id}
@@ -235,12 +251,11 @@ export default function ReportsAdminPage() {
                     <span className="text-white/40">Reporter</span>
                     <br />
                     <span className="text-ivory">{r.reporter.name}</span>
-                    {r.reporter.email ? (
-                      <>
-                        <br />
-                        <span className="text-white/50">{r.reporter.email}</span>
-                      </>
-                    ) : null}
+                    {r.reporter.jobTitle ? ` · ${r.reporter.jobTitle}` : ""}
+                    <br />
+                    <span className="text-white/50">
+                      Filed {r.reporter.filedCount ?? 0}
+                    </span>
                     <br />
                     <span className="break-all font-mono text-[10px] text-white/30">
                       {r.reporter.id}
@@ -263,6 +278,14 @@ export default function ReportsAdminPage() {
                   />
                 </label>
                 <div className="mt-3 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => void setStatus(r.id, "open")}
+                    className="border border-line px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted hover:text-ivory disabled:opacity-40"
+                  >
+                    Open
+                  </button>
                   <button
                     type="button"
                     disabled={busy}

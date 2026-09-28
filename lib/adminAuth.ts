@@ -1,15 +1,5 @@
-import { timingSafeEqual } from "crypto";
 import { NextResponse } from "next/server";
-
-function secretsMatch(got: string, expected: string): boolean {
-  try {
-    const a = Buffer.from(got);
-    const b = Buffer.from(expected);
-    return a.length === b.length && timingSafeEqual(a, b);
-  } catch {
-    return false;
-  }
-}
+import { secretsMatch } from "@/lib/secretCompare";
 
 /** Require Authorization: Bearer <ADMIN_SECRET> (or x-admin-secret). */
 export function requireAdmin(req: Request):

@@ -156,7 +156,9 @@ export default function ProfileForm({
   });
   const [travel, setTravel] = useState<TravelRange>(initial?.travel ?? "worldwide");
   const [lookingFor, setLookingFor] = useState<LookingFor[]>(initial?.lookingFor ?? []);
-  const [ideaTags, setIdeaTags] = useState<string[]>(initial?.ideaTags ?? []);
+  const [ideaTags, setIdeaTags] = useState<string[]>(
+    (initial?.ideaTags ?? []).filter((tag) => (IDEA_TAGS as readonly string[]).includes(tag))
+  );
   const [verifyValues, setVerifyValues] = useState<Partial<Record<VerificationMethod, string>>>(
     () => {
       const next: Partial<Record<VerificationMethod, string>> = {};
@@ -205,9 +207,12 @@ export default function ProfileForm({
   }
 
   function toggleTag(tag: string) {
-    setIdeaTags((tags) =>
-      tags.includes(tag) ? tags.filter((t) => t !== tag) : [...tags, tag]
-    );
+    if (!(IDEA_TAGS as readonly string[]).includes(tag)) return;
+    setIdeaTags((tags) => {
+      if (tags.includes(tag)) return tags.filter((t) => t !== tag);
+      if (tags.length >= 12) return tags;
+      return [...tags, tag];
+    });
     clearFieldError("ideaTags");
   }
 
@@ -218,7 +223,6 @@ export default function ProfileForm({
     clearFieldError("lookingFor");
   }
 
-  const customTags = ideaTags.filter((t) => !IDEA_TAGS.includes(t));
   const query = tagSearch.trim();
 
   const searchResults = useMemo(() => {
@@ -228,15 +232,7 @@ export default function ProfileForm({
   }, [query]);
 
   const exactExists =
-    !!query &&
-    [...IDEA_TAGS, ...customTags].some((t) => t.toLowerCase() === query.toLowerCase());
-
-  function addCustomTag() {
-    if (!query || exactExists) return;
-    setIdeaTags((tags) => [...tags, query]);
-    setTagSearch("");
-    clearFieldError("ideaTags");
-  }
+    !!query && IDEA_TAGS.some((t) => t.toLowerCase() === query.toLowerCase());
 
   async function onPhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -544,7 +540,7 @@ export default function ProfileForm({
         id="section-ambitions"
         num="02"
         title="Ambitions"
-        subtitle="What you’re building — pick all that fit, or search your own."
+        subtitle="What you’re building — pick from the list. Up to 12."
         missing={!!fieldErrors.ideaTags}
         missingLabel={fieldErrors.ideaTags}
       >
@@ -559,12 +555,10 @@ export default function ProfileForm({
                 if (searchResults.length === 1) {
                   toggleTag(searchResults[0]);
                   setTagSearch("");
-                } else if (!exactExists) {
-                  addCustomTag();
                 }
               }
             }}
-            placeholder="Search ideas… or type your own"
+            placeholder="Search ideas…"
           />
         </div>
 
@@ -574,17 +568,6 @@ export default function ProfileForm({
             <div className="flex flex-wrap gap-1.5">
               {ideaTags.map((tag) => (
                 <TagChip key={tag} tag={tag} selected onClick={() => toggleTag(tag)} remove />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {customTags.length > 0 && (
-          <div className="mb-3">
-            <p className={`mb-1.5 ${labelCls}`}>Your own ideas</p>
-            <div className="flex flex-wrap gap-1.5">
-              {customTags.map((tag) => (
-                <TagChip key={tag} tag={tag} remove onClick={() => toggleTag(tag)} />
               ))}
             </div>
           </div>
@@ -600,17 +583,10 @@ export default function ProfileForm({
                 onClick={() => toggleTag(tag)}
               />
             ))}
-            {!exactExists && (
-              <button
-                type="button"
-                onClick={addCustomTag}
-                className="rounded-lg border border-dashed border-accent/45 px-2 py-1 text-[11px] text-accent-2 transition hover:bg-accent/10 sm:px-3 sm:py-1.5 sm:text-sm"
-              >
-                + Add “{query}”
-              </button>
-            )}
-            {searchResults.length === 0 && exactExists && (
-              <p className="text-xs text-muted">Already selected</p>
+            {searchResults.length === 0 && (
+              <p className="text-xs text-muted">
+                {exactExists ? "Already selected" : "Choose an idea from the list."}
+              </p>
             )}
           </div>
         ) : (

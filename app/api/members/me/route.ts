@@ -28,7 +28,7 @@ export async function GET() {
 /** Upsert the signed-in member — privileged fields are stripped by schema. */
 export async function PUT(req: Request) {
   try {
-    const limited = rateLimit(req, { name: "members-me", limit: 60, windowMs: 60_000 });
+    const limited = await rateLimit(req, { name: "members-me", limit: 60, windowMs: 60_000 });
     if (!limited.ok) return limited.response;
 
     await purgeDemoResidue();

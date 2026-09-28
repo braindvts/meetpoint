@@ -2,7 +2,8 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import type { Member } from "@prisma/client";
 import { prisma } from "./db";
-import { getSession, signValue, verifyValue } from "./session";
+import { memberAuthSource } from "./safetyRules";
+import { getSession, signValue, verifyValue, type AuthSession } from "./session";
 
 const MEMBER_COOKIE = "conclave_member";
 
@@ -33,33 +34,41 @@ export async function clearMemberCookie(): Promise<void> {
   jar.delete(MEMBER_COOKIE);
 }
 
-/** Resolve the signed-in Interlink member (OAuth session and/or member cookie). */
-export async function getCurrentMember(): Promise<Member | null> {
-  const session = await getSession();
-  if (session?.id) {
-    if (session.provider === "linkedin") {
-      const byLi = await prisma.member.findFirst({ where: { linkedInId: session.id } });
-      if (byLi) return byLi;
-    }
-    if (session.provider === "google") {
-      const byG = await prisma.member.findFirst({ where: { googleId: session.id } });
-      if (byG) return byG;
-    }
-    if (session.provider === "apple") {
-      const byA = await prisma.member.findFirst({ where: { appleId: session.id } });
-      if (byA) return byA;
-    }
-    if (session.email) {
-      const byEmail = await prisma.member.findFirst({ where: { email: session.email } });
-      if (byEmail) return byEmail;
-    }
-  }
-
-  const cookieId = await getMemberIdFromCookie();
-  if (cookieId) {
-    const byId = await prisma.member.findUnique({ where: { id: cookieId } });
+async function memberFromSession(session: AuthSession): Promise<Member | null> {
+  if (session.provider === "linkedin" && session.id) {
+    const byLi = await prisma.member.findFirst({ where: { linkedInId: session.id } });
+    if (byLi) return byLi;
+  } else if (session.provider === "google" && session.id) {
+    const byG = await prisma.member.findFirst({ where: { googleId: session.id } });
+    if (byG) return byG;
+  } else if (session.provider === "apple" && session.id) {
+    const byA = await prisma.member.findFirst({ where: { appleId: session.id } });
+    if (byA) return byA;
+  } else if (session.provider === "email" && session.id) {
+    const byId = await prisma.member.findUnique({ where: { id: session.id } });
     if (byId) return byId;
   }
 
+  if (session.email) {
+    const byEmail = await prisma.member.findFirst({ where: { email: session.email } });
+    if (byEmail) return byEmail;
+  }
+  return null;
+}
+
+/**
+ * Resolve the signed-in member.
+ * A live session that does not match a member returns null — it does not
+ * fall through to a leftover member cookie from another account.
+ */
+export async function getCurrentMember(): Promise<Member | null> {
+  const session = await getSession();
+  const cookieId = session ? null : await getMemberIdFromCookie();
+  const sessionMember = session ? await memberFromSession(session) : null;
+  const source = memberAuthSource(!!session, !!sessionMember, !!cookieId);
+  if (source === "session") return sessionMember;
+  if (source === "cookie" && cookieId) {
+    return prisma.member.findUnique({ where: { id: cookieId } });
+  }
   return null;
 }

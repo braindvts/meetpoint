@@ -41,6 +41,7 @@ export default function EventDetailPage() {
     id ? getEventById(id) ?? undefined : undefined
   );
   const [connectedIds, setConnectedIds] = useState<string[]>([]);
+  const [serverAttendees, setServerAttendees] = useState<string[] | null>(null);
   const [tick, setTick] = useState(0);
 
   const refresh = useCallback(() => {
@@ -69,6 +70,21 @@ export default function EventDetailPage() {
     };
   }, [refresh]);
 
+  useEffect(() => {
+    let cancelled = false;
+    void fetch("/api/events", { credentials: "include" })
+      .then((res) => res.json())
+      .then((data: { ok?: boolean; events?: { id: string; slug?: string; attendeeIds?: string[] }[] }) => {
+        if (cancelled || !data.ok || !Array.isArray(data.events)) return;
+        const match = data.events.find((row) => row.id === id || row.slug === id);
+        if (match && Array.isArray(match.attendeeIds)) setServerAttendees(match.attendeeIds);
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [id, tick]);
+
   const related = useMemo(() => {
     if (!event) return [];
     return getUpcomingSorted(listPublishedEvents())
@@ -93,10 +109,11 @@ export default function EventDetailPage() {
 
   const attendees = useMemo(() => {
     if (!event) return [] as Person[];
-    return event.attendeeIds
+    const ids = serverAttendees ?? event.attendeeIds;
+    return ids
       .map((pid) => findPerson(pid))
       .filter((p): p is Person => !!p);
-  }, [event]);
+  }, [event, serverAttendees]);
 
   if (event === undefined) {
     return (

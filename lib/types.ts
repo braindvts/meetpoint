@@ -135,8 +135,10 @@ export interface Person {
   city: City;
   travel: TravelRange;
   photoUrl: string;
-  /** How they verified — at least one. */
+  /** How they verified — omitted on public API payloads. */
   verifications: VerificationMethod[];
+  /** Standing signal for other members. Does not include credential values. */
+  verified?: boolean;
   /** Public LinkedIn profile. */
   linkedInUrl?: string;
   /** Main company / personal site. */

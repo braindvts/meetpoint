@@ -1,4 +1,7 @@
 import type { Member } from "@prisma/client";
+import { IDEA_TAGS } from "./data";
+import { sanitizeName, sanitizeText } from "./sanitize";
+import { hasRequiredVerifications } from "./tiers";
 import type {
   LookingFor,
   MeetPreference,
@@ -8,7 +11,7 @@ import type {
   TravelRange,
   Verification,
 } from "./types";
-import { sanitizeName, sanitizeText } from "./sanitize";
+import { LOOKING_FOR_OPTIONS } from "./types";
 
 export function memberToProfile(m: Member): MyProfile {
   return {
@@ -48,14 +51,43 @@ export function memberToProfile(m: Member): MyProfile {
   };
 }
 
+function publicPhoto(photo: string): string {
+  if (!photo) return "";
+  if (photo.startsWith("https://") && photo.length <= 2_000 && /^https:\/\/\S+$/i.test(photo)) {
+    return photo;
+  }
+  if (/^data:image\/(jpeg|jpg|png|webp);base64,[a-z0-9+/=\r\n]+$/i.test(photo)) return photo;
+  return "";
+}
+
+function publicHttps(url: string | undefined): string | undefined {
+  if (!url) return undefined;
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol !== "https:") return undefined;
+    return parsed.toString();
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * What other members are allowed to see.
+ * Email, phone, passwordHash, OAuth ids, and verification values stay off this object.
+ * `verified` is enough for the standing badge.
+ */
 export function memberToPerson(m: Member): Person {
   const vers = safeJson<Verification[]>(m.verificationsJson, []);
+  const work = safeJson<PersonWork[]>(
+    "workJson" in m ? String((m as { workJson?: string }).workJson || "[]") : "[]",
+    []
+  );
   return {
     id: m.id,
     name: m.name,
     jobTitle: m.jobTitle,
-    bio: m.bio,
-    photoUrl: m.photo,
+    bio: sanitizeText(m.bio || "", 800),
+    photoUrl: publicPhoto(m.photo),
     city: {
       name: m.cityName,
       country: m.cityCountry,
@@ -65,16 +97,14 @@ export function memberToPerson(m: Member): Person {
     travel: (m.travel as TravelRange) || "worldwide",
     lookingFor: safeJson<LookingFor[]>(m.lookingForJson, []),
     ideaTags: safeJson<string[]>(m.ideaTagsJson, []),
-    verifications: vers.map((v) => v.method),
-    linkedInUrl:
-      vers.find((v) => v.method === "linkedin" && v.value.startsWith("http"))?.value ||
-      (m.linkedInId ? `https://www.linkedin.com/in/${m.linkedInId}` : undefined),
-    websiteUrl: vers.find((v) => v.method === "website")?.value,
-    portfolioUrl: vers.find((v) => v.method === "portfolio")?.value,
-    work: safeJson<PersonWork[]>(
-      "workJson" in m ? String((m as { workJson?: string }).workJson || "[]") : "[]",
-      []
-    ),
+    verifications: [],
+    verified: hasRequiredVerifications(vers),
+    work: work.map((item) => ({
+      title: sanitizeText(item.title || "", 120),
+      kind: item.kind,
+      description: sanitizeText(item.description || "", 400),
+      url: publicHttps(item.url),
+    })),
     black: m.black || undefined,
   };
 }
@@ -88,7 +118,7 @@ export function profileToMemberData(profile: MyProfile) {
   return {
     name: sanitizeName(profile.name || "Member") || "Member",
     jobTitle: sanitizeText(profile.jobTitle || "", 120),
-    bio: sanitizeText(profile.bio || "", 2000),
+    bio: sanitizeText(profile.bio || "", 800),
     photo: profile.photo || "",
     cityName: sanitizeText(profile.city.name, 80),
     cityCountry: sanitizeText(profile.city.country, 80),
@@ -96,9 +126,24 @@ export function profileToMemberData(profile: MyProfile) {
     cityLng: profile.city.lng,
     travel: profile.travel,
     meetPreference: profile.meetPreference || "open",
-    lookingForJson: JSON.stringify(profile.lookingFor || []),
-    ideaTagsJson: JSON.stringify(profile.ideaTags || []),
-    workJson: JSON.stringify(profile.work || []),
+    lookingForJson: JSON.stringify(
+      (profile.lookingFor || [])
+        .filter((tag) => (LOOKING_FOR_OPTIONS as readonly string[]).includes(tag))
+        .slice(0, LOOKING_FOR_OPTIONS.length)
+    ),
+    ideaTagsJson: JSON.stringify(
+      (profile.ideaTags || [])
+        .filter((tag) => (IDEA_TAGS as readonly string[]).includes(tag))
+        .slice(0, 12)
+    ),
+    workJson: JSON.stringify(
+      (profile.work || []).slice(0, 12).map((item) => ({
+        title: sanitizeText(item.title || "", 120),
+        kind: item.kind,
+        description: sanitizeText(item.description || "", 400),
+        url: publicHttps(item.url) || "",
+      }))
+    ),
     phone: profile.phone || null,
   };
 }

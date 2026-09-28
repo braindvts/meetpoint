@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { AppleIdTokenError, verifyAppleIdToken } from "@/lib/appleIdToken";
+import { rateLimit } from "@/lib/rateLimit";
 import { prisma } from "@/lib/db";
 import { sendWelcomeEmail } from "@/lib/email";
 import { withMemberCookie } from "@/lib/memberAuth";
@@ -14,6 +15,9 @@ import {
 } from "@/lib/session";
 
 export async function POST(req: NextRequest) {
+  const limited = await rateLimit(req, { name: "auth-oauth-cb", limit: 40, windowMs: 60 * 60_000 });
+  if (!limited.ok) return NextResponse.redirect(appUrl("/login?error=rate_limited"));
+
   const form = await req.formData();
   const code = String(form.get("code") || "");
   const state = String(form.get("state") || "");

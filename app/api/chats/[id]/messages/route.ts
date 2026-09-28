@@ -1,12 +1,23 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getCurrentMember } from "@/lib/memberAuth";
+import { blockedPeerIdSet } from "@/lib/moderation";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
 import { rateLimit } from "@/lib/rateLimit";
+import { chatInvolvesBlock } from "@/lib/safetyRules";
 import { publicError } from "@/lib/safeError";
 import { sanitizeText } from "@/lib/sanitize";
 import { parseBody } from "@/lib/validation/parse";
 import { chatMessageSchema } from "@/lib/validation/safety";
+
+async function chatBlockedFor(memberId: string, chatId: string): Promise<boolean> {
+  const [members, blocked] = await Promise.all([
+    prisma.chatMember.findMany({ where: { chatId }, select: { memberId: true } }),
+    blockedPeerIdSet(memberId),
+  ]);
+  const others = members.map((m) => m.memberId).filter((id) => id !== memberId);
+  return chatInvolvesBlock(others, blocked);
+}
 
 export async function GET(
   _req: Request,
@@ -22,6 +33,13 @@ export async function GET(
       where: { chatId_memberId: { chatId: id, memberId: me.id } },
     });
     if (!membership) return NextResponse.json({ ok: false, error: "Not found" }, { status: 404 });
+
+    if (await chatBlockedFor(me.id, id)) {
+      return NextResponse.json(
+        { ok: false, error: "This conversation is unavailable." },
+        { status: 403 }
+      );
+    }
 
     const since = new URL(_req.url).searchParams.get("since");
     const messages = await prisma.message.findMany({
@@ -52,7 +70,7 @@ export async function POST(
   ctx: { params: Promise<{ id: string }> }
 ) {
   try {
-    const limited = rateLimit(req, { name: "chat-msg", limit: 90, windowMs: 60_000 });
+    const limited = await rateLimit(req, { name: "chat-msg", limit: 90, windowMs: 60_000 });
     if (!limited.ok) return limited.response;
 
     await purgeDemoResidue();
@@ -67,6 +85,13 @@ export async function POST(
       where: { chatId_memberId: { chatId: id, memberId: me.id } },
     });
     if (!membership) return NextResponse.json({ ok: false, error: "Not found" }, { status: 404 });
+
+    if (await chatBlockedFor(me.id, id)) {
+      return NextResponse.json(
+        { ok: false, error: "This conversation is unavailable." },
+        { status: 403 }
+      );
+    }
 
     const text = sanitizeText(parsed.data.text, 4000);
     if (!text) return NextResponse.json({ ok: false, error: "Empty" }, { status: 400 });
