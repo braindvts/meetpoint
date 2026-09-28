@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
 import { readdirSync, readFileSync } from "node:fs";
 import { describe, it } from "node:test";
+import { dbPushBlockReason } from "../scripts/prisma-db-push.mjs";
 import {
   isExplicitMigrate,
   migrateSkipLog,
@@ -84,5 +86,68 @@ describe("Vercel / npm build uses migrate deploy only", () => {
       assert.doesNotMatch(statements, /DROP\s+COLUMN/i, name);
       assert.doesNotMatch(statements, /accept-data-loss/i, name);
     }
+  });
+
+  it("schema includes EventInterest from the existing migration", () => {
+    const schema = readFileSync(new URL("../prisma/schema.prisma", import.meta.url), "utf8");
+    assert.match(schema, /model EventInterest \{/);
+    assert.match(schema, /@@unique\(\[memberId, eventId\]\)/);
+    assert.match(schema, /@@index\(\[memberId\]\)/);
+    assert.match(schema, /onDelete: Cascade/);
+    const dirs = readdirSync(new URL("../prisma/migrations/", import.meta.url)).filter((name) =>
+      name.includes("event_interest")
+    );
+    assert.ok(dirs.includes("20260913040000_event_interest"));
+    assert.ok(dirs.includes("20260928180000_event_interest_baseline"));
+  });
+});
+
+describe("db:push refuses production", () => {
+  it("package script is the guard, not raw prisma db push", () => {
+    const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")) as {
+      scripts?: { "db:push"?: string };
+    };
+    assert.equal(pkg.scripts?.["db:push"], "node scripts/prisma-db-push.mjs");
+  });
+
+  it("blocks production-like targets and allows a local database", () => {
+    const local = { DATABASE_URL: "postgresql://interlink:interlink@127.0.0.1:5432/interlink" };
+    assert.equal(dbPushBlockReason(local, ["node", "script"]), null);
+    assert.match(
+      dbPushBlockReason({ ...local, VERCEL_ENV: "production" }, ["node", "script"]) || "",
+      /VERCEL_ENV=production/
+    );
+    assert.match(
+      dbPushBlockReason(
+        { DATABASE_URL: "postgresql://u:p@ep-cool.us-east-2.aws.neon.tech/neondb?sslmode=require" },
+        ["node", "script"]
+      ) || "",
+      /looks like production/
+    );
+    assert.equal(
+      dbPushBlockReason(
+        { DATABASE_URL: "postgresql://u:p@ep-dev.us-east-2.aws.neon.tech/interlink_dev" },
+        ["node", "script"]
+      ),
+      null
+    );
+    assert.match(
+      dbPushBlockReason(local, ["node", "script", "--accept-data-loss"]) || "",
+      /accept-data-loss/
+    );
+  });
+
+  it("the script exits before touching a production-like database", () => {
+    const result = spawnSync("node", ["scripts/prisma-db-push.mjs"], {
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        VERCEL_ENV: "production",
+        DATABASE_URL: "postgresql://interlink:interlink@127.0.0.1:5432/interlink",
+      },
+    });
+    assert.notEqual(result.status, 0);
+    assert.match(`${result.stdout || ""}${result.stderr || ""}`, /DROP live columns/);
+    assert.match(`${result.stderr || ""}`, /VERCEL_ENV=production/);
   });
 });

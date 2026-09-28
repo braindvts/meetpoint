@@ -13,7 +13,7 @@
     "db:deploy": "node scripts/prisma-migrate-deploy.mjs",
     "samples:cleanup": "tsx scripts/cleanup-sample-accounts.ts",
     "interests:backfill": "tsx scripts/backfill-member-interests.ts",
-    "db:push": "prisma db push",
+    "db:push": "node scripts/prisma-db-push.mjs",
     "apple:secret": "node scripts/apple-client-secret.mjs"
   },
   "dependencies": {

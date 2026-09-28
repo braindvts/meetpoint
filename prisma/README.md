@@ -44,8 +44,9 @@ The oldest migration was SQLite-shaped (`DATETIME`, `REAL`). It is rewritten as 
 | **Local `npm run build`** | `prisma generate` and `next build`. Migrations are skipped (no `VERCEL_ENV=production`, no `MIGRATE_ON_PREVIEW=1`). |
 | **Local migrations** | `npm run db:deploy` — same script, always applies `migrate deploy`. Use this on a laptop or a dev database. `npm run db:migrate` is `prisma migrate dev` when you are authoring a new migration. |
 | Confirm live column types | `npx prisma db pull` (read-only). Review. Never push a DROP. |
+| `npm run db:push` | Guarded local script. Refuses `VERCEL_ENV=production`, `--accept-data-loss`, and a `DATABASE_URL` that looks like production. Still do not point it at Production. |
 
-Do not point local `db:deploy` at Production. Never pass `--accept-data-loss`. Never put `prisma db push` in the Vercel build.
+Do not point local `db:deploy` at Production. Never pass `--accept-data-loss`. Never put `prisma db push` in the Vercel build. `npm run db:push` is `scripts/prisma-db-push.mjs`, not a raw `prisma db push`.
 
 ## If schema and production drift again
 
