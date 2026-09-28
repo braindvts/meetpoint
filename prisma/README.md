@@ -23,9 +23,11 @@ Those fields were added on the live database (Studio, SQL, or an uncommitted sch
 
 1. `Report` in `schema.prisma` includes the four columns so nothing wants them gone.
 2. Migrations are **additive and idempotent** (`IF NOT EXISTS`, no `DROP`). A later additive migration adds `Report.reviewedAt` and status indexes used by the current report queue. `20260928150000_rate_limit_bucket` adds only the `RateLimitBucket` table.
-3. Vercel / `npm run build` is `prisma generate && node scripts/prisma-migrate-deploy.mjs && next build`.
+3. Vercel / `npm run build` is `prisma generate && node scripts/prisma-migrate-deploy.mjs && next build`. `prisma generate` runs on every build.
 
-That script runs **`prisma migrate deploy` only**. It never calls `db push` and never passes `--accept-data-loss`.
+That script runs **`prisma migrate deploy` only**, and only when `VERCEL_ENV` is `production`, or when `MIGRATE_ON_PREVIEW=1`. It never calls `db push` and never passes `--accept-data-loss`. If neither condition is set, it logs why and exits 0 so the build continues. It does not fall back to `db push`.
+
+Set `MIGRATE_ON_PREVIEW=1` only on Vercel Preview, and only after Preview is confirmed to use a different database from Production. Leave it unset on Production (Production already migrates because `VERCEL_ENV=production`). Do not set it on a Preview that shares the production database.
 
 `migrate deploy` applies pending SQL only. It does **not** diff the schema and drop extra columns. Events, Tables, chats, and the waitlist are unchanged.
 
@@ -35,12 +37,13 @@ The oldest migration was SQLite-shaped (`DATETIME`, `REAL`). It is rewritten as 
 
 | Where | Command |
 |-------|---------|
-| **Vercel Production / Preview** | `prisma generate && node scripts/prisma-migrate-deploy.mjs && next build` |
-| Apply migrations only | `npm run db:deploy` (same script) |
+| **Vercel Production** (`VERCEL_ENV=production`) | `prisma generate && node scripts/prisma-migrate-deploy.mjs && next build` — generate, then `migrate deploy` |
+| **Vercel Preview** | Same build. Migrations run only if `MIGRATE_ON_PREVIEW=1`. Otherwise the script skips them and logs why. |
+| **Local `npm run build`** | `prisma generate` and `next build`. Migrations are skipped (no `VERCEL_ENV=production`, no `MIGRATE_ON_PREVIEW=1`). |
+| **Local migrations** | `npm run db:deploy` — same script, always applies `migrate deploy`. Use this on a laptop or a dev database. `npm run db:migrate` is `prisma migrate dev` when you are authoring a new migration. |
 | Confirm live column types | `npx prisma db pull` (read-only). Review. Never push a DROP. |
-| Local empty DB (dev only) | `npx prisma migrate deploy` — **not** `db push` on anything shared with Production |
 
-Never pass `--accept-data-loss`. Never put `prisma db push` in the Vercel build.
+Do not point local `db:deploy` at Production. Never pass `--accept-data-loss`. Never put `prisma db push` in the Vercel build.
 
 ## If schema and production drift again
 

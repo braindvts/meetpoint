@@ -203,7 +203,7 @@ When sample profiles are on, the room includes **Member**, **Verified**, and **B
 
 - **Frontend:** Next.js App Router, TypeScript, Tailwind  
 - **DB:** Postgres via Prisma (`Member`, connections, chats, BLACK tables, `Report`, `Block`, `RateLimitBucket`)
-- **Vercel build:** `prisma generate && node scripts/prisma-migrate-deploy.mjs && next build` (`migrate deploy` only). Never `prisma db push` on Production (that tried to DROP live `Report` columns). Never `--accept-data-loss`. Details: [prisma/README.md](./prisma/README.md).
+- **Vercel build:** `prisma generate && node scripts/prisma-migrate-deploy.mjs && next build`. `prisma generate` always runs. `migrate deploy` runs when `VERCEL_ENV` is `production`, or when `MIGRATE_ON_PREVIEW=1` (Preview only, after that database is confirmed separate). Otherwise the script skips migrations and logs why. Never `prisma db push` on Production (that tried to DROP live `Report` columns). Never `--accept-data-loss`. Locally, apply migrations with `npm run db:deploy`. Details: [prisma/README.md](./prisma/README.md).
 - **Auth:** email/password + Google / LinkedIn / Apple (when keyed)  
 - **Payments:** Stripe Checkout (`black_month`, `black_year`, table fee)  
 - **Email:** Resend welcome on sign-up  
