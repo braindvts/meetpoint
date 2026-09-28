@@ -1,5 +1,6 @@
 "use client";
 
+import PartnerMark from "@/components/PartnerMark";
 import { featuredPartnersInOrder, type FeaturedPartner } from "@/lib/featuredPartners";
 import type { CSSProperties } from "react";
 
@@ -9,8 +10,8 @@ interface Props {
 }
 
 /**
- * Featured-partner credit on the loading seal.
- * Logo and name sit open on the ink. The list is data-driven; BijuuFlow leads.
+ * Static partner credit on the loader. Pops in after the wordmark.
+ * Logo and name sit open on the ink — no plate. BijuuFlow leads.
  */
 export default function FeaturedPartners({ revealed }: Props) {
   const partners = featuredPartnersInOrder();
@@ -19,12 +20,10 @@ export default function FeaturedPartners({ revealed }: Props) {
   return (
     <section
       className={`mp-splash-partners ${revealed ? "mp-splash-partners--in" : ""}`}
-      aria-label="Featured partners"
+      aria-label="Supported by our partners"
     >
       <span className="mp-featured-partners-rule" aria-hidden />
-      <p className="mp-featured-partners-kicker" aria-hidden>
-        Featured partners
-      </p>
+      <p className="mp-featured-partners-kicker">Supported by our partners</p>
       <ul className="mp-featured-partners-list">
         {partners.map((partner, index) => (
           <PartnerCredit key={partner.id} partner={partner} index={index} />
@@ -34,8 +33,20 @@ export default function FeaturedPartners({ revealed }: Props) {
   );
 }
 
+function PartnerName({ name }: { name: string }) {
+  if (name === "ONYX Futures") {
+    return (
+      <span className="mp-featured-partner-name font-display">
+        <span className="mp-partner-onyx">ONYX</span>
+        <span className="mp-partner-onyx-sub">Futures</span>
+      </span>
+    );
+  }
+  return <span className="mp-featured-partner-name font-display">{name}</span>;
+}
+
 function PartnerCredit({ partner, index }: { partner: FeaturedPartner; index: number }) {
-  const delay = `${index * 120}ms`;
+  const delay = `${90 + index * 85}ms`;
   const style = {
     animationDelay: delay,
     "--mp-partner-delay": delay,
@@ -43,7 +54,9 @@ function PartnerCredit({ partner, index }: { partner: FeaturedPartner; index: nu
 
   return (
     <li
-      className={`mp-featured-partner${partner.lead ? " mp-featured-partner--lead" : ""}`}
+      className={`mp-featured-partner${partner.lead ? " mp-featured-partner--lead" : ""}${
+        partner.id === "edgeable" ? " mp-partner-edgeable" : ""
+      }`}
       style={style}
     >
       <a
@@ -55,15 +68,15 @@ function PartnerCredit({ partner, index }: { partner: FeaturedPartner; index: nu
         onClick={(event) => event.stopPropagation()}
       >
         <span className="mp-featured-partner-mark-wrap">
-          <img
-            src={partner.logoSrc}
+          <PartnerMark
+            partner={partner}
             alt={partner.logoAlt}
-            width={partner.lead ? 38 : 28}
-            height={partner.lead ? 37 : 27}
-            className="mp-featured-partner-mark"
+            width={partner.lead ? 38 : partner.id === "edgeable" ? 48 : 28}
+            height={partner.lead ? 37 : 28}
+            className={`mp-featured-partner-mark${partner.invertOnInk ? " mp-featured-partner-mark--invert" : ""}`}
           />
         </span>
-        <span className="mp-featured-partner-name">{partner.name}</span>
+        <PartnerName name={partner.name} />
       </a>
     </li>
   );

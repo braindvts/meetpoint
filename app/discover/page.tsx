@@ -214,6 +214,7 @@ export default function DiscoverPage() {
             </p>
             <h1 className="hidden text-[1.85rem] font-semibold tracking-tight text-ivory md:block">
               Discover
+              <span className="mp-draw-rule" aria-hidden />
             </h1>
             <button
               type="button"
@@ -229,6 +230,7 @@ export default function DiscoverPage() {
           </div>
           <h1 className="mt-2 text-[1.85rem] font-semibold tracking-tight text-ivory md:hidden">
             Discover
+            <span className="mp-draw-rule" aria-hidden />
           </h1>
           <p className="mt-1 text-[13px] leading-snug text-ivory/60 md:mt-2">
             Curated professionals. Meaningful connections.{" "}
@@ -414,7 +416,7 @@ export default function DiscoverPage() {
               }}
             />
           ) : (
-            <div key={filter} className="mp-stagger grid gap-3 md:grid-cols-2 md:gap-4">
+            <div key={filter} className="mp-scroll-stagger grid gap-3 md:grid-cols-2 md:gap-4">
               {filtered.map((m) => {
                 const allowed = canIntroduceToTier(myTier, m.tier);
                 const leaving = exiting === m.person.id;

@@ -14,7 +14,7 @@ export default function MembershipTiers({ input, missing, missingHint }: Props) 
   const progress = nextTierProgress(input);
 
   return (
-    <section className="mb-5 border border-line/50 bg-panel/40 p-3 sm:mb-10 sm:p-5">
+    <section className="mp-scroll-reveal mb-5 border border-line/50 bg-panel/40 p-3 sm:mb-10 sm:p-5">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="text-[9px] font-semibold uppercase tracking-[0.22em] text-accent sm:text-[11px] sm:tracking-[0.32em]">
@@ -35,7 +35,7 @@ export default function MembershipTiers({ input, missing, missingHint }: Props) 
         </div>
       </div>
 
-      <div className="mt-4 grid gap-2.5 sm:grid-cols-3">
+      <div className="mp-scroll-stagger mt-4 grid gap-2.5 sm:grid-cols-3">
         {TIER_DEFINITIONS.map((t) => {
           const active = progress.current === t.tier;
           const black = t.tier === 3;

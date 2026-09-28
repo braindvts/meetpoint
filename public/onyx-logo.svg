@@ -1,0 +1,15 @@
+<svg width="48" height="48" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ONYX">
+  <defs>
+    <radialGradient id="onyxGlow" gradientUnits="userSpaceOnUse" cx="92" cy="40" r="82">
+      <stop offset="0" stop-color="#FFE8B5"/>
+      <stop offset="0.14" stop-color="#E2B03D"/>
+      <stop offset="0.34" stop-color="#D49A1F"/>
+      <stop offset="0.66" stop-color="#D49A1F" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#D49A1F" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <circle cx="60" cy="60" r="60" fill="url(#onyxGlow)"/>
+  <circle cx="60" cy="60" r="44" fill="#0B0B0B"/>
+  <path d="M37.72 22.06 A44 44 0 1 1 70.04 102.84 A46 46 0 0 0 37.72 22.06 Z" fill="url(#onyxGlow)"/>
+  <circle cx="60" cy="60" r="44" fill="none" stroke="#FFF" stroke-opacity="0.14" stroke-width="2.5"/>
+</svg>
