@@ -10,6 +10,7 @@ export const PROFILE_LIMITS = {
   headline: 120,
   company: 120,
   bio: 800,
+  photo: 1_200_000,
   tags: IDEA_TAG_LIMIT,
   lookingFor: 8,
 } as const;
@@ -219,6 +220,14 @@ export function draftToProfile(draft: OnboardingDraft, base: MyProfile | null): 
   };
 }
 
+/** What to show when a profile save does not land on the account. */
+export function profileSaveError(code?: string | null): string {
+  if (code === "legal_consent_required") {
+    return "Accept the Terms to save your profile.";
+  }
+  return "Couldn’t save to your account. Check your connection and try again.";
+}
+
 function tooLong(value: string, max: number, label: string): string | undefined {
   if (value.trim().length > max) return `${label} can be up to ${max} characters.`;
   return undefined;
@@ -233,7 +242,7 @@ export function validateBasics(draft: OnboardingDraft): FieldErrors {
     if (over) errors.name = over;
   }
   if (!draft.photo) errors.photo = "Add a photo.";
-  else if (draft.photo.length > 2_000_000) errors.photo = "That photo is too large. Try a smaller image.";
+  else if (draft.photo.length > PROFILE_LIMITS.photo) errors.photo = "That photo is too large. Try a smaller image.";
   const title = draft.jobTitle.trim();
   if (!title) errors.jobTitle = "Enter your headline.";
   else {

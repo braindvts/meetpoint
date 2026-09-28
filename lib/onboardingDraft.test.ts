@@ -10,6 +10,7 @@ import {
   firstIncompleteStep,
   interestGroupCoverage,
   matchingProgress,
+  profileSaveError,
   resumeStep,
   validateAll,
   validateBasics,
@@ -20,7 +21,6 @@ import {
   clearOnboardingStep,
   onboardingResumeApplies,
   readOnboardingStep,
-  signOutStepScript,
   writeOnboardingStep,
 } from "./onboardingSession.ts";
 import { clearProfile } from "./store.ts";
@@ -134,7 +134,8 @@ test("resume redirect skips marketing, login, legal pages, and the account page"
   assert.equal(onboardingResumeApplies("/admin"), false);
   assert.equal(onboardingResumeApplies("/admin/reports"), false);
   assert.equal(onboardingResumeApplies("/discover"), true);
-  assert.equal(onboardingResumeApplies("/events"), true);
+  assert.equal(onboardingResumeApplies("/events"), false);
+  assert.equal(onboardingResumeApplies("/events/founders-table"), false);
   assert.equal(onboardingResumeApplies("/circle"), true);
   assert.equal(onboardingResumeApplies("/chats"), true);
 
@@ -198,8 +199,20 @@ test("sign-out drops the saved setup step and leaves the next person alone", () 
     else g.localStorage = previousStorage;
   }
 
-  const script = signOutStepScript();
-  assert.match(script, /localStorage\.removeItem\("interlink\.onboarding\.step"\)/);
+  const storeSrc = readFileSync(new URL("./store.ts", import.meta.url), "utf8");
+  const profilePage = readFileSync(new URL("../app/profile/page.tsx", import.meta.url), "utf8");
   const logout = readFileSync(new URL("../app/api/auth/logout/route.ts", import.meta.url), "utf8");
-  assert.match(logout, /signOutStepScript/);
+  assert.match(storeSrc, /clearOnboardingStep\(\)/);
+  assert.match(profilePage, /clearOnboardingStep\(\)/);
+  assert.equal(logout.includes("onboarding"), false);
+});
+
+test("a photo over the server limit is rejected and terms consent is named", () => {
+  const draft = emptyDraft(filled());
+  draft.photo = "x".repeat(PROFILE_LIMITS.photo + 1);
+  assert.match(validateBasics(draft).photo || "", /too large/);
+  draft.photo = "x".repeat(PROFILE_LIMITS.photo);
+  assert.equal(validateBasics(draft).photo, undefined);
+  assert.match(profileSaveError("legal_consent_required"), /Accept the Terms/);
+  assert.match(profileSaveError(null), /connection/);
 });

@@ -12,6 +12,7 @@ import ProfileEditor from "@/components/onboarding/ProfileEditor";
 import ProfileForm from "@/components/ProfileForm";
 import MembershipTiers from "@/components/MembershipTiers";
 import { ensureNotifyPermission } from "@/lib/notify";
+import { clearOnboardingStep } from "@/lib/onboardingSession";
 import { clearProfile, getMeetingsAttended, loadProfile } from "@/lib/store";
 import { gateRedirect, resolveSessionGate } from "@/lib/hydrateSession";
 import {
@@ -85,6 +86,7 @@ function ProfileContent() {
       window.alert("Couldn’t reset your profile on the server. Try again.");
       return;
     }
+    clearOnboardingStep();
     clearProfile();
     router.push("/");
   }

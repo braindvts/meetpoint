@@ -24,7 +24,7 @@ export function writeOnboardingStep(step: number | "done"): void {
   localStorage.setItem(KEY, step === "done" ? "done" : String(step));
 }
 
-/** Drop saved setup progress. Sign-out must call this so the next person on the device starts clean. */
+/** Drop saved setup progress so the next person on this device does not inherit it. */
 export function clearOnboardingStep(): void {
   if (typeof window === "undefined") return;
   try {
@@ -32,11 +32,6 @@ export function clearOnboardingStep(): void {
   } catch {
     /* private mode */
   }
-}
-
-/** Runs in the sign-out response, before the next page can resume someone else's step. */
-export function signOutStepScript(): string {
-  return `try{localStorage.removeItem(${JSON.stringify(KEY)})}catch(e){}`;
 }
 
 const SKIP_RESUME = [
@@ -52,6 +47,7 @@ const SKIP_RESUME = [
   /^\/privacy(?:\/|$)/,
   /^\/profile(?:\/|$)/,
   /^\/contact(?:\/|$)/,
+  /^\/events(?:\/|$)/,
 ];
 
 /** App screens that should send an unfinished member back to setup. */

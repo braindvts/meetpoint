@@ -87,6 +87,7 @@ export default function OnboardingWizard({
     const timer = window.setTimeout(() => {
       void persistDraft(draft, baseRef.current).then((result) => {
         if (result.ok) baseRef.current = result.profile;
+        else if (result.code === "legal_consent_required" && result.message) setSaveError(result.message);
       });
     }, 700);
     return () => window.clearTimeout(timer);
@@ -116,7 +117,7 @@ export default function OnboardingWizard({
     const result = await persistDraft(draft, baseRef.current);
     setSaving(false);
     if (signedIn && !result.ok) {
-      setSaveError("Couldn’t save to your account. Check your connection and try again.");
+      setSaveError(result.message || "Couldn’t save to your account. Check your connection and try again.");
       return;
     }
     if (result.ok) baseRef.current = result.profile;

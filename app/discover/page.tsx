@@ -92,12 +92,14 @@ export default function DiscoverPage() {
   const [exiting, setExiting] = useState<string | null>(null);
   const [profilePerson, setProfilePerson] = useState<Person | null>(null);
   const [directoryReady, setDirectoryReady] = useState(false);
+  const [discoverError, setDiscoverError] = useState(false);
   const [gateReady, setGateReady] = useState(false);
 
   const refreshConnections = useCallback(() => setConnections(loadConnections()), []);
 
   const loadRanked = useCallback(async (p: MyProfile) => {
     let rows: MatchResult[] = [];
+    let failed = false;
     try {
       const res = await fetch("/api/discover", { credentials: "include" });
       const data = (await res.json()) as {
@@ -113,8 +115,10 @@ export default function DiscoverPage() {
           isLocal: boolean;
         }[];
       };
-      if (data.ok && data.matches) rows = data.matches.map(toMatchResult);
+      if (!res.ok || !data.ok || !data.matches) failed = true;
+      else rows = data.matches.map(toMatchResult);
     } catch {
+      failed = true;
       rows = [];
     }
 
@@ -138,6 +142,7 @@ export default function DiscoverPage() {
       ];
     }
 
+    setDiscoverError(failed);
     setRanked(rows);
     setPeople(rows.map((row) => row.person));
     setDirectoryReady(true);
@@ -453,6 +458,17 @@ export default function DiscoverPage() {
               <SkeletonCard />
               <SkeletonCard />
             </div>
+          ) : discoverError && visiblePeople.length === 0 ? (
+            <EmptyState
+              title="Couldn’t load the room"
+              body={<>Something went wrong loading people. Try again in a moment.</>}
+              actionLabel="Try again"
+              onAction={() => {
+                setDiscoverError(false);
+                setDirectoryReady(false);
+                void loadRanked(profile);
+              }}
+            />
           ) : visiblePeople.length === 0 ? (
             <EmptyState
               title="The room is quiet"

@@ -65,7 +65,7 @@ export default function ProfileEditor({ initial }: { initial: MyProfile }) {
     const result = await persistDraft(draft, baseRef.current);
     setSaving(false);
     if (!result.ok) {
-      setFormError("Couldn’t save to your account. Check your connection and try again.");
+      setFormError(result.message || "Couldn’t save to your account. Check your connection and try again.");
       return;
     }
     baseRef.current = result.profile;

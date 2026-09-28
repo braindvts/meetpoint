@@ -120,7 +120,7 @@ The bell in the top nav opens the feed. The same list is at `/notifications`.
 |-------|---------|
 | `/` | Landing |
 | `/login` | Email + OAuth sign-in |
-| `/onboarding` | Multi-step setup after sign-up: Basics, Work, Goals, Interests, Bio. Saved on the account. If they leave an app screen, they return to the step they stopped on. `/verify-email`, `/terms`, `/privacy`, `/profile`, and `/contact` stay reachable. Sign-out clears the saved step in this browser. |
+| `/onboarding` | Multi-step setup after sign-up: Basics, Work, Goals, Interests, Bio. Saved on the account. If they leave an app screen, they return to the step they stopped on. `/verify-email`, `/terms`, `/privacy`, `/profile`, `/contact`, and `/events` stay reachable. Reset and sign-out clear the saved step in this browser. |
 | `/discover` | The Room — For you / Nearby match cards |
 | `/events` | Events & conventions — public catalog (RSVP needs an account) |
 | `/events/[id]` | Event detail, RSVP, related rooms, people attending |
