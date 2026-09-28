@@ -9,6 +9,7 @@ import Avatar from "@/components/Avatar";
 import EventCard from "@/components/events/EventCard";
 import {
   CATEGORY_LABEL,
+  formatCount,
   formatEventRange,
   getEventById,
   getUpcomingSorted,
@@ -16,6 +17,7 @@ import {
 } from "@/lib/events";
 import {
   displayCounts,
+  fetchPublishedEvents,
   findEvent,
   getRsvp,
   listPublishedEvents,
@@ -40,7 +42,9 @@ export default function EventDetailPage() {
     id ? getEventById(id) ?? undefined : undefined
   );
   const [connectedIds, setConnectedIds] = useState<string[]>([]);
+  const [serverAttendees, setServerAttendees] = useState<string[] | null>(null);
   const [tick, setTick] = useState(0);
+  const [rsvpReady, setRsvpReady] = useState(false);
 
   const refresh = useCallback(() => {
     setEvent(findEvent(id) ?? null);
@@ -54,11 +58,20 @@ export default function EventDetailPage() {
 
   useEffect(() => {
     let cancelled = false;
-    refresh();
     void (async () => {
+      const remote = await fetchPublishedEvents();
+      if (cancelled) return;
+      setEvent(remote.find((item) => item.id === id || item.slug === id) ?? findEvent(id) ?? null);
+      setRsvpReady(true);
+      setTick((n) => n + 1);
       const p = await hydrateLocalProfile();
       if (cancelled) return;
       setProfile(p);
+      setConnectedIds(
+        loadConnections()
+          .filter((c) => c.status === "connected")
+          .map((c) => c.peerId)
+      );
     })();
     const onEvt = () => refresh();
     window.addEventListener("meetpoint:events", onEvt);
@@ -67,6 +80,21 @@ export default function EventDetailPage() {
       window.removeEventListener("meetpoint:events", onEvt);
     };
   }, [refresh]);
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetch("/api/events", { credentials: "include" })
+      .then((res) => res.json())
+      .then((data: { ok?: boolean; events?: { id: string; slug?: string; attendeeIds?: string[] }[] }) => {
+        if (cancelled || !data.ok || !Array.isArray(data.events)) return;
+        const match = data.events.find((row) => row.id === id || row.slug === id);
+        if (match && Array.isArray(match.attendeeIds)) setServerAttendees(match.attendeeIds);
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [id, tick]);
 
   const related = useMemo(() => {
     if (!event) return [];
@@ -92,10 +120,11 @@ export default function EventDetailPage() {
 
   const attendees = useMemo(() => {
     if (!event) return [] as Person[];
-    return event.attendeeIds
+    const ids = serverAttendees ?? event.attendeeIds;
+    return ids
       .map((pid) => findPerson(pid))
       .filter((p): p is Person => !!p);
-  }, [event]);
+  }, [event, serverAttendees]);
 
   if (event === undefined) {
     return (
@@ -124,9 +153,9 @@ export default function EventDetailPage() {
     );
   }
 
-  const counts = displayCounts(event);
+  const counts = displayCounts(event, { local: rsvpReady });
   const network = networkAttendingCount(event, connectedIds);
-  const myRsvp = getRsvp(event.id);
+  const myRsvp = rsvpReady ? getRsvp(event.id) : null;
   const mapsQuery = encodeURIComponent(
     event.address || `${event.venue}, ${event.city}, ${event.country}`
   );
@@ -206,8 +235,8 @@ export default function EventDetailPage() {
             </div>
 
             <div className="flex flex-wrap gap-x-4 gap-y-1 text-[13px] text-muted">
-              <span>{counts.attendees.toLocaleString()} attending</span>
-              <span>{counts.interested.toLocaleString()} professionals interested</span>
+              <span>{formatCount(counts.attendees)} attending</span>
+              <span>{formatCount(counts.interested)} professionals interested</span>
               {network > 0 ? (
                 <span className="text-accent">
                   {network} {network === 1 ? "person" : "people"} in your network attending
@@ -227,14 +256,14 @@ export default function EventDetailPage() {
                     router.push(loginUrl(`/events/${event.slug}`));
                     return;
                   }
-                  if (myRsvp === "going") {
-                    setRsvp(event.id, null);
-                    showToast("Registration cleared");
-                  } else {
-                    setRsvp(event.id, "going");
-                    showToast("You’re marked as attending");
-                  }
-                  refresh();
+                  const next = myRsvp === "going" ? null : "going";
+                  void setRsvp(event.id, next).then((saved) => {
+                    if (!saved.ok) {
+                      showToast(saved.error || "Could not save your RSVP");
+                      return;
+                    }
+                    showToast(next ? "You’re marked as attending" : "Registration cleared");
+                  });
                 }}
                 className={`mp-btn-lux mp-rsvp inline-flex flex-1 items-center justify-center rounded-lg bg-ivory px-5 py-3.5 text-[12px] font-semibold text-ink ${
                   myRsvp === "going" ? "is-going" : ""
@@ -249,17 +278,20 @@ export default function EventDetailPage() {
                     router.push(loginUrl(`/events/${event.slug}`));
                     return;
                   }
-                  if (myRsvp === "interested") {
-                    setRsvp(event.id, null);
-                    showToast("Removed from saved");
-                  } else if (myRsvp === "going") {
-                    setRsvp(event.id, "interested");
-                    showToast("Moved to interested");
-                  } else {
-                    setRsvp(event.id, "interested");
-                    showToast("Saved as interested");
-                  }
-                  refresh();
+                  const next = myRsvp === "interested" ? null : "interested";
+                  void setRsvp(event.id, next).then((saved) => {
+                    if (!saved.ok) {
+                      showToast(saved.error || "Could not save your RSVP");
+                      return;
+                    }
+                    showToast(
+                      next
+                        ? myRsvp === "going"
+                          ? "Moved to interested"
+                          : "Saved as interested"
+                        : "Removed from saved"
+                    );
+                  });
                 }}
                 className={`inline-flex flex-1 items-center justify-center rounded-xl border px-5 py-3.5 text-[12px] font-medium transition sm:flex-none sm:min-w-[140px] ${
                   myRsvp === "interested" || myRsvp === "going"
@@ -322,7 +354,7 @@ export default function EventDetailPage() {
             ) : null}
             {event.expectedAttendance ? (
               <p className="text-sm text-muted">
-                Expected attendance · {event.expectedAttendance.toLocaleString()}
+                Expected attendance · {formatCount(event.expectedAttendance)}
               </p>
             ) : null}
           </section>
@@ -417,11 +449,10 @@ export default function EventDetailPage() {
                       return;
                     }
                     const cur = getRsvp(e.id);
-                    setRsvp(
-                      e.id,
-                      cur === "interested" || cur === "going" ? null : "interested"
-                    );
-                    refresh();
+                    const next = cur === "interested" || cur === "going" ? null : "interested";
+                    void setRsvp(e.id, next).then((saved) => {
+                      if (!saved.ok) showToast(saved.error || "Could not save your RSVP");
+                    });
                   }}
                 />
               ))}

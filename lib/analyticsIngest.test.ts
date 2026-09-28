@@ -3,6 +3,8 @@ import { test } from "node:test";
 import {
   ANALYTICS_RATE_LIMIT,
   handleAnalyticsPost,
+  isVerifyEmailPath,
+  pathnameOnly,
   type AnalyticsRow,
 } from "./analyticsIngest.ts";
 
@@ -103,6 +105,58 @@ test("page views are accepted and extra junk is refused", async () => {
     { create: async () => undefined }
   );
   assert.equal(bad.status, 400);
+});
+
+test("page views store the pathname only and never record verify-email", async () => {
+  const rows: AnalyticsRow[] = [];
+  const create = async (row: AnalyticsRow) => {
+    rows.push(row);
+  };
+
+  assert.equal(pathnameOnly("/discover?token=secret#frag"), "/discover");
+  assert.equal(pathnameOnly("/events#invite"), "/events");
+  assert.equal(isVerifyEmailPath("/verify-email"), true);
+  assert.equal(isVerifyEmailPath("/verify-email/tok_abc"), true);
+  assert.equal(isVerifyEmailPath("/verify-email-help"), false);
+
+  const stripped = await handleAnalyticsPost(
+    request("203.0.113.70", { name: "pageview", path: "/discover?token=secret#frag" }),
+    { create }
+  );
+  assert.equal(stripped.status, 200);
+  assert.equal(rows[0]?.path, "/discover");
+  assert.equal(JSON.stringify(rows).includes("secret"), false);
+  assert.equal(JSON.stringify(rows).includes("frag"), false);
+
+  const hashed = await handleAnalyticsPost(
+    request("203.0.113.71", { name: "pageview", path: "/events#invite" }),
+    { create }
+  );
+  assert.equal(hashed.status, 200);
+  assert.equal(rows.at(-1)?.path, "/events");
+
+  for (const [index, path] of [
+    "/verify-email",
+    "/verify-email/tok_abc",
+    "/verify-email/tok_abc?token=secret",
+    "/verify-email?token=secret",
+  ].entries()) {
+    const before = rows.length;
+    const result = await handleAnalyticsPost(request(`203.0.113.${80 + index}`, { name: "pageview", path }), {
+      create,
+    });
+    assert.equal(result.status, 400, path);
+    assert.equal(rows.length, before);
+  }
+  assert.equal(JSON.stringify(rows).includes("tok_abc"), false);
+  assert.equal(JSON.stringify(rows).includes("secret"), false);
+
+  const adjacent = await handleAnalyticsPost(
+    request("203.0.113.90", { name: "pageview", path: "/verify-email-help" }),
+    { create }
+  );
+  assert.equal(adjacent.status, 200);
+  assert.equal(rows.at(-1)?.path, "/verify-email-help");
 });
 
 test("ingest rate limit drops spam before it is stored", async () => {

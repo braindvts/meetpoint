@@ -8,6 +8,9 @@ interface Props {
   actionHref?: string;
   actionLabel?: string;
   onAction?: () => void;
+  secondaryLabel?: string;
+  onSecondary?: () => void;
+  compact?: boolean;
 }
 
 export default function EmptyState({
@@ -16,17 +19,24 @@ export default function EmptyState({
   actionHref,
   actionLabel,
   onAction,
+  secondaryLabel,
+  onSecondary,
+  compact = false,
 }: Props) {
   return (
-    <div className="mp-reveal mp-empty relative rounded-xl border border-white/[0.08] bg-[#0a0a0a] px-6 py-16 text-center">
+    <div
+      className={`mp-reveal mp-empty relative rounded-xl border border-white/[0.08] bg-[#0a0a0a] text-center ${
+        compact ? "px-4 py-8" : "px-6 py-16"
+      }`}
+    >
       <div className="relative">
         <span className="mp-empty-mark mx-auto mb-6" aria-hidden="true" />
-        <p className="text-2xl font-medium tracking-tight text-ivory sm:text-3xl">
+        <p className={`font-medium tracking-tight text-ivory ${compact ? "text-xl" : "text-2xl sm:text-3xl"}`}>
           {title}
         </p>
         <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-muted">{body}</p>
         {(actionHref || onAction) && actionLabel && (
-          <div className="mt-9">
+          <div className={compact ? "mt-6" : "mt-9"}>
             {actionHref ? (
               <Link
                 href={actionHref}
@@ -45,6 +55,15 @@ export default function EmptyState({
             )}
           </div>
         )}
+        {secondaryLabel && onSecondary ? (
+          <button
+            type="button"
+            onClick={onSecondary}
+            className="mt-4 text-[12px] font-medium text-muted underline decoration-white/15 underline-offset-4 hover:text-ivory"
+          >
+            {secondaryLabel}
+          </button>
+        ) : null}
       </div>
     </div>
   );

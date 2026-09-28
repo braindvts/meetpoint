@@ -120,7 +120,7 @@ The bell in the top nav opens the feed. The same list is at `/notifications`.
 |-------|---------|
 | `/` | Landing |
 | `/login` | Email + OAuth sign-in |
-| `/onboarding` | Profile setup (highlights missing fields) |
+| `/onboarding` | Multi-step setup after sign-up: Basics, Work, Goals, Interests, Bio. Saved on the account. If they leave an app screen, they return to the step they stopped on. `/verify-email`, `/terms`, `/privacy`, `/profile`, `/contact`, and `/events` stay reachable. Reset and sign-out clear the saved step in this browser. |
 | `/discover` | The Room — For you / Nearby match cards |
 | `/events` | Events & conventions — public catalog (RSVP needs an account) |
 | `/events/[id]` | Event detail, RSVP, related rooms, people attending |
@@ -131,17 +131,44 @@ The bell in the top nav opens the feed. The same list is at `/notifications`.
 | `/notifications` | Acceptances and upcoming gatherings (also the bell in the top nav) |
 | `/chats` | People list (left) + open thread (right) |
 | `/profile` | Your card, Plans (BLACK · Free), levels |
-| `/demo` | Demo bypass (only if `NEXT_PUBLIC_ENABLE_DEMO=1`) |
+| `/demo` | Demo bypass (only if server-only `ENABLE_DEMO_PROFILES=1`) |
 
 ---
+
+## Profile fields (real members)
+
+Saved on the server in `Member`, not only in this browser. Reset clears the same fields in the database.
+
+| Field | Stored as | Notes |
+|-------|-----------|--------|
+| Name | `Member.name` | Required for Identity |
+| Headline / job title | `Member.jobTitle` | Required for Identity |
+| Company | `Member.company` | Optional |
+| Industry | `Member.industry` | Optional. One label from the industry list in `lib/interests.ts` |
+| City | `cityName`, `cityCountry`, `cityLat`, `cityLng` | |
+| Bio | `Member.bio` | Max 800 characters |
+| Looking for | `lookingForJson` | Co-founder, Investor, Mentor, Clients, Hiring, Partnership, Networking |
+| Interests | `MemberInterest` rows plus `ideaTagsJson` | Up to 24. Catalog labels become rows and are the only matching signal. Custom tags stay in `ideaTagsJson` if they are short plain text (no URLs, links, or control characters). |
+| Photo | `Member.photo` | Required for Identity. https or a JPEG/PNG/WebP upload. randomuser.me URLs are rejected. |
+
+Setup (`/onboarding`) and Edit profile use these same limits. Interests are a searchable, grouped picker (up to 24, including custom tags). A quiet “complete your profile” prompt appears when industry, interests, looking-for, or bio would improve matching.
+
+Email and phone stay on the account. They are never sent to other members.
 
 ## How matching works (short)
 
-Discover ranks people by shared ambitions, complementary “looking for,” same profession, and distance. Nearby narrows by city/geo. The filter also lets you narrow by **standing** (Member / Verified / BLACK). **Members** only introduce to other Members. **Verified** and **BLACK** can meet anyone. Looking-for preferences can be edited from Discover’s filter anytime.
+Discover asks the server to rank **real** members. Shared interests rank first, then complementary “looking for,” industry, role, and city. Anyone left is still shown, newest first, with the reason “Recently joined”. The Discover empty state appears only when no other members are left to show. Ranking still reads the full real-member pool on the server, selecting only the fields the rank and the public card need (not email, password hash, phone, or OAuth ids). The Discover response is the top 100. `GET /api/members` stays paged (default 50, never more than 100); clients follow `nextCursor`. Cards show a reason such as “3 shared interests: SaaS, AI / Machine Learning, Fintech”. Sample, guest, and bot accounts are excluded. Other members’ cards omit LinkedIn, website, portfolio, and verification badges. So is anyone blocked in either direction, and anyone auto-hidden after open reports from three trusted reporters (`discoverExcludedIds` in `lib/moderation.ts`: verified email, a finished profile, or an account at least a few days old). Brand-new accounts do not count. Nearby narrows by city. The filter also lets you narrow by **standing** (Member / Verified / BLACK). **Members** only introduce to other Members. **Verified** and **BLACK** can meet anyone. Looking-for preferences can be edited from Discover’s filter anytime.
 
-**Events** (`/events`) ranks gatherings the same way: interests/tags, job/role, looking-for, and bio intent phrases, against title, description, topics, audience, and host. Hybrid score (canonical tags + related clusters + TF-IDF + intent heuristics). Short match reasons on cards. Precision over dumping the catalog. Sparse profiles fall back to job and looking-for. Local RSVP (interested / going / pass) nudges similar rooms.
+**Events** (`/events`) ranks gatherings with those same saved interest labels, plus job/role, looking-for, industry, and bio intent phrases, against title, description, topics, audience, and host. Hybrid score (canonical tags + related clusters + TF-IDF + intent heuristics). Short match reasons on cards. Precision over dumping the catalog. Sparse profiles fall back to job and looking-for. A signed-in RSVP (interested / going / pass) is stored in `EventInterest` and nudges similar rooms. Attending and interested counts are the rows in that table.
 
 ---
+
+## Safety
+
+- Members report another member from their profile or chat (`harassment`, `spam`, `fake_profile`, `inappropriate`, `scam`, `other`) and can block at the same time.
+- A block is both ways for visibility: those two people do not appear to each other in Discover, For you, connection requests, chats, or event attendee lists. Either person can unblock only the block they created.
+- **Auto-hide:** 3 distinct qualifying reporters with a report still `open` or `reviewing` hides that member from Discover and For you until an admin marks the reports `resolved` or `dismissed`. A report counts when the reporter has a verified email (`emailVerifiedAt` or an OAuth account), a completed Identity profile, or an account at least 3 days old (`AUTO_HIDE_MIN_ACCOUNT_AGE_DAYS`). The cutoff is `OPEN_REPORT_HIDE_THRESHOLD` in `lib/safetyRules.ts`. Crossing into auto-hide lists the member at the top of `/admin/reports` and emails `ADMIN_EMAILS` when mail is configured.
+- Admins review the queue at `/admin/reports` with `ADMIN_SECRET` (Bearer). There is no owner password in the repo.
 
 ## Demo / walkthrough login
 
@@ -157,7 +184,15 @@ WALKTHROUGH_OWNER_PASSWORD=
 
 If the gate is off (the production default), email sign-in uses the stored password hash only. Existing members are never overwritten.
 
-Local UI demo flags (do **not** set on production unless you want demo entry). These are not a login and do not create an account:
+Walkthrough owner login also requires the server-only `ENABLE_DEMO_PROFILES` gate below. `NEXT_PUBLIC_ENABLE_DEMO`, `NEXT_PUBLIC_ENABLE_DEMO_PROFILES`, and a flag saved in the browser do not enable it.
+
+The public marketing home does not offer Enter demo, a sample-profile login, or a link to `/demo`. Sign in and Enter go to `/login`. `/demo` stays a direct route for capture scripts and local checks; it is not linked from the home page, nav, or footer, and it returns 404 unless `ENABLE_DEMO_PROFILES` is set on the server. The login page shows sample entry only after that same server check. A preview can set the variable for testing. When it is unset, `GET` and `POST /api/auth/demo` return 404. The route does not create a database member. The browser ignores `NEXT_PUBLIC_` demo flags and any saved walkthrough flag while the server gate is off.
+
+```
+ENABLE_DEMO_PROFILES=1
+```
+
+These public flags do not enable sample profiles, sample login, or the walkthrough owner. Leave them unset.
 
 ```
 NEXT_PUBLIC_ENABLE_DEMO=1
@@ -171,10 +206,10 @@ When sample profiles are on, the room includes **Member**, **Verified**, and **B
 ## Tech & data
 
 - **Frontend:** Next.js App Router, TypeScript, Tailwind  
-- **DB:** Postgres via Prisma (`Member`, connections, chats, BLACK tables, `Report`, `AnalyticsEvent`, `EventInterest`)
-- **Admin analytics:** `/admin/analytics` returns 404 unless this sign-in is Google or Apple, the member's `googleId` or `appleId` matches that session, and the provider email on the session is in `ADMIN_EMAILS` — or the browser has an admin cookie from `/admin/enter` (`ADMIN_SECRET`, same secret as reports and BLACK grant). `Member.email` and `emailVerifiedAt` do not grant access. Secret guesses are capped at 5 per 15 minutes per IP. The report queue and the Admin nav link use `canViewAdminDashboard` in `lib/adminGate.ts`. The link is omitted entirely for everyone else. `adminEmailIsVerified` is the only place that decides a listed email is proven; today that is Google or Apple only. `emailVerifiedAt` counts there again after the confirmation-link change, and nowhere else. Clicks and page views are first-party and start at deploy. Accounts and BLACK are historical rows on `Member`. Sample ids `p1`–`p18`, the demo profile, and the shared Mohammed sample login are left out of account counts and shown separately. Chart days are Eastern Time. Event RSVPs come from `EventInterest`; choices that lived only in the browser before that table are not counted.
-- **Levels in the database:** there is no memberships table. **Member** and **Verified** are derived (Verified = business email and LinkedIn on `verificationsJson`). **BLACK** is `Member.black`, with `blackSince` and `blackSource` (`paid` | `earned` | `granted`). Paid BLACK is confirmed after Stripe Checkout. `premierActive` is a leftover column and is not a current plan. Event RSVPs that were saved on the server live in `EventInterest`; the events UI also keeps a browser copy.
-- **Vercel build:** `prisma generate && node scripts/prisma-migrate-deploy.mjs && next build` (`migrate deploy` only). Never `prisma db push` on Production (that tried to DROP live `Report` columns). Never `--accept-data-loss`. Details: [prisma/README.md](./prisma/README.md).
+- **DB:** Postgres via Prisma (`Member`, connections, chats, BLACK tables, `Report`, `Block`, `RateLimitBucket`, `AnalyticsEvent`, `EventInterest`)
+- **Admin analytics:** `/admin/analytics` returns 404 unless this sign-in is Google or Apple, the member's `googleId` or `appleId` matches that session, and the provider email on the session is in `ADMIN_EMAILS` — or the browser has an admin cookie from `/admin/enter` (`ADMIN_SECRET`, same secret as reports and BLACK grant, 12 hours). `Member.email` and `emailVerifiedAt` do not grant access. Secret guesses are capped at 5 per 15 minutes per IP. The report queue and the Admin nav link use `canViewAdminDashboard` in `lib/adminGate.ts`. The link is omitted entirely for everyone else. `adminEmailIsVerified` is the only place that decides a listed email is proven; today that is Google or Apple only. `emailVerifiedAt` counts there again after the confirmation-link change, and nowhere else. Clicks and page views are first-party and start at deploy. A page view stores the pathname only; `/verify-email` and its subpaths are not recorded. Accounts and BLACK are historical rows on `Member`. Sample accounts are left out of those counts via `isSample` and `sampleMemberWhere` in `lib/sampleAccounts`, and shown separately. Chart days are Eastern Time. Event RSVPs are the rows in `EventInterest`.
+- **Levels in the database:** there is no memberships table. **Member** and **Verified** are derived (Verified = business email and LinkedIn on `verificationsJson`). **BLACK** is `Member.black`, with `blackSince` and `blackSource` (`paid` | `earned` | `granted`). Paid BLACK is confirmed after Stripe Checkout. `premierActive` is a leftover column and is not a current plan. A signed-in RSVP is stored in `EventInterest`.
+- **Vercel build:** `prisma generate && node scripts/prisma-migrate-deploy.mjs && next build`. `prisma generate` always runs. `migrate deploy` runs when `VERCEL_ENV` is `production`, or when `MIGRATE_ON_PREVIEW=1` (Preview only, after that database is confirmed separate). Otherwise the script skips migrations and logs why. Never `prisma db push` on Production (that tried to DROP live `Report` columns). Never `--accept-data-loss`. Locally, apply migrations with `npm run db:deploy`. Details: [prisma/README.md](./prisma/README.md).
 - **Auth:** email/password + Google / LinkedIn / Apple (when keyed)  
 - **Payments:** Stripe Checkout (`black_month`, `black_year`, table fee)  
 - **Email:** Resend welcome on sign-up  

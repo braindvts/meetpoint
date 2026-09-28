@@ -2,6 +2,8 @@
 
 interface Props {
   className?: string;
+  /** Same-site path to return to after OAuth. */
+  next?: string | null;
 }
 
 const shell =
@@ -56,25 +58,26 @@ function AppleIcon({ className = "h-[18px] w-[18px]" }: { className?: string }) 
 }
 
 /** OAuth entry — brand colors + official logo marks. */
-export default function AuthButtons({ className = "" }: Props) {
+export default function AuthButtons({ className = "", next }: Props) {
+  const q = next ? `?next=${encodeURIComponent(next)}` : "";
   return (
     <div className={`grid gap-2 ${className}`}>
       <a
-        href="/api/auth/linkedin"
+        href={`/api/auth/linkedin${q}`}
         className={`${shell} bg-[#0A66C2] text-white hover:bg-[#004182]`}
       >
         <LinkedInIcon />
         LinkedIn
       </a>
       <a
-        href="/api/auth/google"
+        href={`/api/auth/google${q}`}
         className={`${shell} border border-[#dadce0] bg-white text-[#3c4043] hover:bg-[#f8f9fa]`}
       >
         <GoogleIcon />
         Google
       </a>
       <a
-        href="/api/auth/apple"
+        href={`/api/auth/apple${q}`}
         className={`${shell} bg-black text-white ring-1 ring-white/25 hover:bg-[#111]`}
       >
         <AppleIcon />

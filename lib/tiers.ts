@@ -241,7 +241,7 @@ export function tierForPerson(
     ideaTags: person.ideaTags,
     lookingFor: person.lookingFor,
   }).score;
-  const verified = hasRequiredVerifications(vers);
+  const verified = person.verified === true || hasRequiredVerifications(vers);
   return computeMemberTier({
     verified,
     profileComplete: true,

@@ -1,8 +1,12 @@
 import { NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/adminAuth";
+import { requireReportAdmin } from "@/lib/adminAuth";
 import { prisma } from "@/lib/db";
+import { sendAutoHideAlert } from "@/lib/email";
 import { getCurrentMember } from "@/lib/memberAuth";
-import { rateLimit } from "@/lib/rateLimit";
+import { autoHiddenMemberIds, reportStatsFor } from "@/lib/moderation";
+import { accountKey, rateLimit } from "@/lib/rateLimit";
+import { REPORT_ACCOUNT, REPORT_IP } from "@/lib/rateCaps";
+import { REPORT_STATUSES } from "@/lib/reportLabels";
 import { publicError } from "@/lib/safeError";
 import { sanitizeText } from "@/lib/sanitize";
 import { parseBody } from "@/lib/validation/parse";
@@ -14,7 +18,7 @@ import {
 /** Member submits a report. Optional alsoBlock removes the peer from their room. */
 export async function POST(req: Request) {
   try {
-    const limited = rateLimit(req, { name: "report", limit: 10, windowMs: 60_000 });
+    const limited = await rateLimit(req, REPORT_IP);
     if (!limited.ok) return limited.response;
 
     const me = await getCurrentMember();
@@ -24,6 +28,12 @@ export async function POST(req: Request) {
         { status: 401 }
       );
     }
+
+    const accountLimited = await rateLimit(req, {
+      ...REPORT_ACCOUNT,
+      keyExtra: accountKey(me.id),
+    });
+    if (!accountLimited.ok) return accountLimited.response;
 
     const parsed = await parseBody(req, reportSchema);
     if (!parsed.ok) return parsed.response;
@@ -108,6 +118,9 @@ export async function POST(req: Request) {
       });
     }
 
+    const hiddenBefore = await autoHiddenMemberIds();
+    const wasHidden = hiddenBefore.has(peerId);
+
     const report = await prisma.report.create({
       data: {
         reporterId: me.id,
@@ -118,6 +131,13 @@ export async function POST(req: Request) {
         status: "open",
       },
     });
+
+    if (!wasHidden) {
+      const hiddenAfter = await autoHiddenMemberIds();
+      if (hiddenAfter.has(peerId)) {
+        void sendAutoHideAlert({ id: peer.id, name: peer.name });
+      }
+    }
 
     return NextResponse.json({
       ok: true,
@@ -135,18 +155,18 @@ export async function POST(req: Request) {
 /** Operator queue — requires ADMIN_SECRET. */
 export async function GET(req: Request) {
   try {
-    const auth = requireAdmin(req);
+    const auth = requireReportAdmin(req);
     if (!auth.ok) return auth.response;
 
-    const limited = rateLimit(req, { name: "report-admin-get", limit: 60, windowMs: 60_000 });
+    const limited = await rateLimit(req, { name: "report-admin-get", limit: 60, windowMs: 60_000 });
     if (!limited.ok) return limited.response;
 
     const { searchParams } = new URL(req.url);
     const status = searchParams.get("status") || "open";
-    const where =
-      status === "all"
-        ? {}
-        : { status: status === "open" ? { in: ["open", "reviewing"] } : status };
+    if (status !== "all" && !(REPORT_STATUSES as readonly string[]).includes(status)) {
+      return NextResponse.json({ ok: false, error: "Unknown status" }, { status: 400 });
+    }
+    const where = status === "all" ? {} : { status };
 
     const rows = await prisma.report.findMany({
       where,
@@ -160,7 +180,6 @@ export async function GET(req: Request) {
       select: {
         id: true,
         name: true,
-        email: true,
         jobTitle: true,
         cityName: true,
         black: true,
@@ -168,21 +187,51 @@ export async function GET(req: Request) {
       },
     });
     const byId = Object.fromEntries(members.map((m) => [m.id, m]));
+    const stats = await reportStatsFor(ids);
+    const hiddenIds = [...(await autoHiddenMemberIds())];
+    const hiddenMembers = hiddenIds.length
+      ? await prisma.member.findMany({
+          where: { id: { in: hiddenIds } },
+          select: { id: true, name: true, jobTitle: true, cityName: true },
+        })
+      : [];
+    const hiddenById = Object.fromEntries(hiddenMembers.map((m) => [m.id, m]));
+    const hiddenStats = await reportStatsFor(hiddenIds.filter((id) => !stats[id]));
 
     return NextResponse.json({
       ok: true,
-      reports: rows.map((r) => ({
-        id: r.id,
-        category: r.category,
-        reason: r.reason,
-        status: r.status,
-        notes: r.notes,
-        alsoBlocked: r.alsoBlocked,
-        createdAt: r.createdAt.toISOString(),
-        reviewedAt: r.reviewedAt?.toISOString() || null,
-        reporter: byId[r.reporterId] || { id: r.reporterId, name: "Unknown" },
-        peer: byId[r.peerId] || { id: r.peerId, name: "Unknown" },
-      })),
+      autoHidden: hiddenIds.map((id) => {
+        const counts = stats[id] || hiddenStats[id];
+        return {
+          ...(hiddenById[id] || { id, name: "Unknown" }),
+          openReporterCount: counts?.openReporterCount || 0,
+          hiddenFromDiscover: true,
+        };
+      }),
+      reports: rows.map((r) => {
+        const reporterStats = stats[r.reporterId];
+        const peerStats = stats[r.peerId];
+        return {
+          id: r.id,
+          category: r.category,
+          reason: r.reason,
+          status: r.status,
+          notes: r.notes,
+          alsoBlocked: r.alsoBlocked,
+          createdAt: r.createdAt.toISOString(),
+          reviewedAt: r.reviewedAt?.toISOString() || null,
+          reporter: {
+            ...(byId[r.reporterId] || { id: r.reporterId, name: "Unknown" }),
+            filedCount: reporterStats?.filedCount || 0,
+          },
+          peer: {
+            ...(byId[r.peerId] || { id: r.peerId, name: "Unknown" }),
+            reportCount: peerStats?.reportCount || 0,
+            openReporterCount: peerStats?.openReporterCount || 0,
+            hiddenFromDiscover: peerStats?.hiddenFromDiscover || false,
+          },
+        };
+      }),
     });
   } catch (e) {
     return publicError(e, "Failed to load reports");
@@ -192,10 +241,10 @@ export async function GET(req: Request) {
 /** Update report status / notes — requires ADMIN_SECRET. */
 export async function PATCH(req: Request) {
   try {
-    const auth = requireAdmin(req);
+    const auth = requireReportAdmin(req);
     if (!auth.ok) return auth.response;
 
-    const limited = rateLimit(req, { name: "report-admin-patch", limit: 40, windowMs: 60_000 });
+    const limited = await rateLimit(req, { name: "report-admin-patch", limit: 40, windowMs: 60_000 });
     if (!limited.ok) return limited.response;
 
     const parsed = await parseBody(req, reportAdminPatchSchema);

@@ -1,19 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { rateLimit } from "@/lib/rateLimit";
+import { OAUTH_CALLBACK_IP } from "@/lib/rateCaps";
 import { sendWelcomeEmail } from "@/lib/email";
 import { verifyGoogleIdToken } from "@/lib/googleAuth";
 import { withMemberCookie } from "@/lib/memberAuth";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
 import { recordSignup } from "@/lib/recordSignup";
 import { sanitizeName } from "@/lib/sanitize";
+import { postAuthPath } from "@/lib/appPath";
 import {
   appUrl,
   clearOAuthStateCookie,
-  consumeOAuthState,
+  consumeOAuthChallenge,
   withSession,
 } from "@/lib/session";
 
 export async function GET(req: NextRequest) {
+  const limited = await rateLimit(req, OAUTH_CALLBACK_IP);
+  if (!limited.ok) return NextResponse.redirect(appUrl("/login?error=rate_limited"));
+
   const url = req.nextUrl;
   const code = url.searchParams.get("code");
   const state = url.searchParams.get("state");
@@ -25,8 +31,10 @@ export async function GET(req: NextRequest) {
   if (!code || !state) {
     return NextResponse.redirect(appUrl("/login?error=missing_code"));
   }
-  const ok = await consumeOAuthState(state);
-  if (!ok) return NextResponse.redirect(appUrl("/login?error=invalid_state"));
+  const challenge = await consumeOAuthChallenge();
+  if (!challenge || challenge.state !== state) {
+    return NextResponse.redirect(appUrl("/login?error=invalid_state"));
+  }
 
   try {
     await purgeDemoResidue();
@@ -61,15 +69,22 @@ export async function GET(req: NextRequest) {
       if (!profileRes.ok) {
         return NextResponse.redirect(appUrl("/login?error=profile_failed"));
       }
-      user = (await profileRes.json()) as {
-        sub: string;
+      const raw = (await profileRes.json()) as {
+        sub?: string;
         name?: string;
         email?: string;
+        email_verified?: boolean;
         picture?: string;
       };
-      if (!user.sub) {
+      if (!raw.sub) {
         return NextResponse.redirect(appUrl("/login?error=profile_failed"));
       }
+      user = {
+        sub: raw.sub,
+        name: raw.name,
+        picture: raw.picture,
+        email: raw.email_verified === true ? raw.email : undefined,
+      };
     } else {
       return NextResponse.redirect(appUrl("/login?error=token_failed"));
     }
@@ -103,7 +118,11 @@ export async function GET(req: NextRequest) {
       await recordSignup(member.id, "google");
     }
 
-    const next = member.jobTitle && member.photo ? "/discover" : "/onboarding?google=1";
+    const next = postAuthPath({
+      requested: challenge.next,
+      hasIdentity: !!(member.name?.trim() && member.jobTitle?.trim()),
+      incomplete: "/onboarding?google=1",
+    });
     const res = NextResponse.redirect(appUrl(next));
     clearOAuthStateCookie(res);
     withSession(res, {

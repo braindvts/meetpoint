@@ -3,6 +3,7 @@
 import type { KeyboardEvent, MouseEvent } from "react";
 import { useState } from "react";
 import NameMarks from "@/components/NameMarks";
+import SafetyMenu from "@/components/SafetyMenu";
 import TierBadge from "@/components/TierBadge";
 import { blackConnectionWith } from "@/lib/blackStore";
 import type { MatchResult } from "@/lib/match";
@@ -62,11 +63,18 @@ export default function MatchCard({
   const looking = person.lookingFor.slice(0, 3);
 
   const reasons: string[] = [];
-  if (sharedIdeas.length) reasons.push(`${sharedIdeas.length} shared interests`);
-  if (helpReasons.length) reasons.push(`Can help`);
-  if (sharedLookingFor.length) reasons.push(`Both want ${sharedLookingFor[0]}`);
-  if (sameJob) reasons.push("Same profession");
-  if (isLocal) reasons.push("Nearby");
+  if (match.reasonLine) reasons.push(match.reasonLine);
+  else {
+    if (sharedIdeas.length) {
+      const shown = sharedIdeas.slice(0, 3).join(", ");
+      const noun = sharedIdeas.length === 1 ? "shared interest" : "shared interests";
+      reasons.push(`${sharedIdeas.length} ${noun}: ${shown}`);
+    }
+    if (helpReasons.length) reasons.push(`Can help`);
+    if (sharedLookingFor.length) reasons.push(`Both want ${sharedLookingFor[0]}`);
+    if (sameJob) reasons.push("Same profession");
+    if (isLocal) reasons.push("Nearby");
+  }
 
   const isNew = !preview && !status;
   const inbound = status === "requested" && direction === "in";
@@ -172,13 +180,21 @@ export default function MatchCard({
                 size="sm"
               />
             </h3>
-            {isNew && !showRequested ? (
-              <span className="shrink-0 border border-white/15 px-2 py-0.5 text-[9.5px] font-semibold uppercase tracking-[0.14em] text-muted">
-                New
-              </span>
-            ) : null}
+            <div className="flex shrink-0 items-center gap-1.5">
+              {isNew && !showRequested ? (
+                <span className="border border-white/15 px-2 py-0.5 text-[9.5px] font-semibold uppercase tracking-[0.14em] text-muted">
+                  New
+                </span>
+              ) : null}
+              {!preview ? (
+                <SafetyMenu peerId={person.id} peerName={person.name} compact />
+              ) : null}
+            </div>
           </div>
-          <p className="mt-0.5 truncate text-[13px] font-medium text-ivory/70">{person.jobTitle}</p>
+          <p className="mt-0.5 truncate text-[13px] font-medium text-ivory/70">
+            {person.jobTitle}
+            {person.company ? ` · ${person.company}` : ""}
+          </p>
           <p className="mt-0.5 truncate text-[12px] text-ivory/55">
             {person.city.name}, {person.city.country}
             {distance > 0 ? ` · ${formatDistance(distance)}` : ""}

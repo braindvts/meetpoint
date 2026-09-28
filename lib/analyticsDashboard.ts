@@ -2,14 +2,7 @@ import type { Prisma } from "@prisma/client";
 import { prisma } from "./db";
 import { FEATURED_PARTNERS } from "./featuredPartners";
 import { PARTNER_PLACEMENTS, type PartnerPlacement } from "./analyticsIngest";
-import {
-  SAMPLE_LOGIN_BIO,
-  SAMPLE_LOGIN_EMAIL,
-  SAMPLE_LOGIN_NAME,
-  SAMPLE_LOGIN_PHONE,
-  SAMPLE_LOGIN_PHOTO_ID,
-} from "./demoAccount";
-import { DEMO_PROFILE_MARKER, LEGACY_SEED_IDS } from "./purgeDemo";
+import { sampleMemberWhere } from "./sampleAccounts";
 
 export type RangeKey = "7d" | "30d" | "all";
 export type Standing = "Member" | "Verified" | "BLACK";
@@ -104,29 +97,9 @@ export function standingFromMember(member: {
   return "Member";
 }
 
+/** Sample, guest, seed, and bot rows. Same filter Discover uses. */
 export function seededMemberWhere(): Prisma.MemberWhereInput {
-  return {
-    OR: [
-      { id: { in: [...LEGACY_SEED_IDS] } },
-      { verificationsJson: { contains: DEMO_PROFILE_MARKER } },
-      { email: SAMPLE_LOGIN_EMAIL },
-      { verificationsJson: { contains: SAMPLE_LOGIN_EMAIL } },
-      {
-        // The shared guest can be stored without the demo email or LinkedIn marker.
-        // Name plus phone, photo, or bio keeps a real Mohammed who is none of those.
-        AND: [
-          { name: { equals: SAMPLE_LOGIN_NAME, mode: "insensitive" } },
-          {
-            OR: [
-              { phone: SAMPLE_LOGIN_PHONE },
-              { photo: { contains: SAMPLE_LOGIN_PHOTO_ID } },
-              { bio: SAMPLE_LOGIN_BIO },
-            ],
-          },
-        ],
-      },
-    ],
-  };
+  return sampleMemberWhere();
 }
 
 export function realMemberWhere(): Prisma.MemberWhereInput {

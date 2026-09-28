@@ -1,15 +1,5 @@
-import { timingSafeEqual } from "crypto";
 import { NextResponse } from "next/server";
-
-function secretsMatch(got: string, expected: string): boolean {
-  try {
-    const a = Buffer.from(got);
-    const b = Buffer.from(expected);
-    return a.length === b.length && timingSafeEqual(a, b);
-  } catch {
-    return false;
-  }
-}
+import { secretsMatch } from "@/lib/secretCompare";
 
 /** Require Authorization: Bearer <ADMIN_SECRET> (or x-admin-secret). */
 export function requireAdmin(req: Request):
@@ -36,4 +26,15 @@ export function requireAdmin(req: Request):
     };
   }
   return { ok: true };
+}
+
+/**
+ * Gate for the report queue (/api/report GET and PATCH, /admin/reports).
+ * Today this is ADMIN_SECRET via requireAdmin.
+ * When lib/adminGate.ts from PR #25 is on this branch, switch this body to
+ * canViewAdminDashboard and leave every caller on requireReportAdmin.
+ * Do not reimplement ADMIN_EMAILS verification here.
+ */
+export function requireReportAdmin(req: Request) {
+  return requireAdmin(req);
 }

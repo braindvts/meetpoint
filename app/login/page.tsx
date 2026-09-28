@@ -1,11 +1,10 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useEffect } from "react";
+import { Suspense, useEffect, useState } from "react";
 import AuthButtons from "@/components/AuthButtons";
 import DemoEnterButton from "@/components/DemoEnterButton";
 import EmailAuthForm from "@/components/EmailAuthForm";
-import { demoEntryEnabled } from "@/lib/demoFlag";
 import { safeAppPath } from "@/lib/appPath";
 import { isUsableProfile } from "@/lib/roomGate";
 import { loadProfile, saveProfile } from "@/lib/store";
@@ -32,6 +31,19 @@ function LoginContent() {
   const errorKey = params.get("error") || "";
   const error = ERRORS[errorKey] || (errorKey ? "Entry failed. Please try again." : "");
   const next = safeAppPath(params.get("next")) || "/discover";
+  const [demoEntry, setDemoEntry] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetch("/api/auth/demo", { credentials: "include" })
+      .then((res) => {
+        if (!cancelled && res.ok) setDemoEntry(true);
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     const p = loadProfile();
@@ -77,16 +89,16 @@ function LoginContent() {
         )}
 
         <div className="mt-6 space-y-4">
-          <AuthButtons />
+          <AuthButtons next={next} />
           <div className="lux-divider">
             <span className="text-[9px] font-semibold uppercase tracking-[0.24em] text-muted">
               or email
             </span>
           </div>
-          <EmailAuthForm />
-          {demoEntryEnabled() && (
+          <EmailAuthForm next={next} />
+          {demoEntry && (
             <div className="pt-1 text-center">
-              <DemoEnterButton />
+              <DemoEnterButton next={next} />
             </div>
           )}
         </div>

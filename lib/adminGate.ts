@@ -1,20 +1,13 @@
-import { createHmac, timingSafeEqual } from "crypto";
+import { createHmac } from "crypto";
+import { secretsMatch } from "./secretCompare";
+
+export { secretsMatch };
 
 /** HttpOnly cookie set after ADMIN_SECRET is checked. Path is /admin only. */
 export const ADMIN_COOKIE = "interlink_admin";
 
 /** How long an operator session from ADMIN_SECRET stays valid. */
 export const ADMIN_SESSION_MS = 12 * 60 * 60 * 1000;
-
-export function secretsMatch(got: string, expected: string): boolean {
-  try {
-    const a = Buffer.from(got);
-    const b = Buffer.from(expected);
-    return a.length === b.length && timingSafeEqual(a, b);
-  } catch {
-    return false;
-  }
-}
 
 export function parseAdminEmails(raw: string | null | undefined): Set<string> {
   const out = new Set<string>();

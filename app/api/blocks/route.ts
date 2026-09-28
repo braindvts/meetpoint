@@ -7,19 +7,35 @@ import { publicError } from "@/lib/safeError";
 import { parseBody } from "@/lib/validation/parse";
 import { blockSchema } from "@/lib/validation/safety";
 
+/** Members I blocked. Does not include people who blocked me. */
 export async function GET() {
   try {
     await purgeDemoResidue();
     const me = await getCurrentMember();
-    if (!me) return NextResponse.json({ ok: true, blockedIds: [] });
+    if (!me) return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
 
     const rows = await prisma.block.findMany({
       where: { blockerId: me.id },
-      select: { blockedId: true },
+      orderBy: { createdAt: "desc" },
+      select: {
+        blockedId: true,
+        createdAt: true,
+        blocked: {
+          select: { id: true, name: true, jobTitle: true, photo: true, cityName: true },
+        },
+      },
     });
     return NextResponse.json({
       ok: true,
       blockedIds: rows.map((r) => r.blockedId),
+      blocked: rows.map((r) => ({
+        id: r.blocked.id,
+        name: r.blocked.name,
+        jobTitle: r.blocked.jobTitle,
+        photo: r.blocked.photo,
+        cityName: r.blocked.cityName,
+        blockedAt: r.createdAt.toISOString(),
+      })),
     });
   } catch (e) {
     return publicError(e, "Failed");
@@ -28,7 +44,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const limited = rateLimit(req, { name: "blocks", limit: 40, windowMs: 60_000 });
+    const limited = await rateLimit(req, { name: "blocks", limit: 40, windowMs: 60_000 });
     if (!limited.ok) return limited.response;
 
     await purgeDemoResidue();
@@ -46,6 +62,13 @@ export async function POST(req: Request) {
     if (parsed.data.action === "unblock") {
       await prisma.block.deleteMany({ where: { blockerId: me.id, blockedId: peerId } });
     } else {
+      const peer = await prisma.member.findUnique({
+        where: { id: peerId },
+        select: { id: true },
+      });
+      if (!peer) {
+        return NextResponse.json({ ok: false, error: "Member not found" }, { status: 404 });
+      }
       await prisma.block.upsert({
         where: { blockerId_blockedId: { blockerId: me.id, blockedId: peerId } },
         create: { blockerId: me.id, blockedId: peerId },

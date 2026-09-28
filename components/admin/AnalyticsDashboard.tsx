@@ -180,8 +180,7 @@ export default function AnalyticsDashboard({
         <div className="min-w-0 border border-line bg-panel p-4 sm:p-6">
           <Stat value={data.accounts.total} label="Accounts created" />
           <p className="mt-3 text-[12px] leading-relaxed text-muted">
-            Real member rows in this range. Sample ids p1–p18, the demo profile, and the
-            shared Mohammed sample login are excluded
+            Real member rows in this range. Sample accounts are excluded
             {data.accounts.seededInRange > 0
               ? ` (${data.accounts.seededInRange} in range, ${data.accounts.seededAllTime} all time)`
               : data.accounts.seededAllTime > 0
@@ -270,8 +269,7 @@ export default function AnalyticsDashboard({
             <p className="mt-4 text-sm text-muted">The RSVP table could not be read.</p>
           )}
           <p className="mt-4 text-[12px] leading-relaxed text-muted">
-            Read from EventInterest, one row per member. RSVPs saved only in the browser
-            before that change are not counted.
+            Read from EventInterest, one row per member.
           </p>
         </div>
 

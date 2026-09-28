@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { rangeStart, seededMemberWhere, seriesFromDates, standingFromMember } from "./analyticsDashboard.ts";
+import { isSampleAccount, sampleMemberWhere } from "./sampleAccounts.ts";
 
 test("standing follows Member, Verified, and BLACK storage", () => {
   assert.equal(standingFromMember({ black: false, verificationsJson: "[]" }), "Member");
@@ -63,13 +64,14 @@ test("a UTC morning that is still the previous evening in ET is not today", () =
   assert.equal(series[series.length - 2]?.count, 1);
 });
 
-test("sample login is excluded with the seed ids and the demo profile", () => {
+test("sample accounts are excluded with the shared isSample filter", () => {
+  assert.deepEqual(seededMemberWhere(), sampleMemberWhere());
   const where = JSON.stringify(seededMemberWhere());
-  assert.match(where, /"p1"/);
-  assert.match(where, /"p18"/);
-  assert.match(where, /linkedin.com\/in\/conclave-demo/);
-  assert.match(where, /demo@conclave.app/);
-  assert.match(where, /Mohammed/);
-  assert.match(where, /555\) 010-2026/);
-  assert.match(where, /1507003211169/);
+  assert.match(where, /isSample/);
+  assert.match(where, /sampleKind/);
+  assert.equal(isSampleAccount({ id: "real-1", isSample: true }), true);
+  assert.equal(isSampleAccount({ id: "p1" }), true);
+  assert.equal(isSampleAccount({ id: "real-2", email: "demo@conclave.app" }), true);
+  assert.equal(isSampleAccount({ id: "real-3", sampleKind: "bot" }), true);
+  assert.equal(isSampleAccount({ id: "real-4", email: "member@company.test" }), false);
 });

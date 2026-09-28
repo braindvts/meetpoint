@@ -50,5 +50,8 @@ export function track(name: string, meta?: Record<string, unknown>): void {
 }
 
 export function trackPageview(): void {
+  if (typeof window === "undefined") return;
+  const path = window.location.pathname;
+  if (path === "/verify-email" || path.startsWith("/verify-email/")) return;
   sendFirstParty("pageview");
 }

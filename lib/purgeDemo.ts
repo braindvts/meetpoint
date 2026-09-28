@@ -1,57 +1,49 @@
 import { prisma } from "./db";
-import { demoEntryEnabled } from "./demoFlag";
+import { classifySample, sampleMemberWhere, type SampleKind } from "./sampleAccounts";
 
 let done: Promise<void> | null = null;
 
-/** Ids of the fake members this app used to ship with. */
-export const LEGACY_SEED_IDS = Array.from({ length: 18 }, (_, i) => `p${i + 1}`);
-
-/** The old "Enter demo" account signed itself with this LinkedIn value. */
-export const DEMO_PROFILE_MARKER = "linkedin.com/in/conclave-demo";
-
-async function removeMembers(ids: string[]): Promise<void> {
-  if (!ids.length) return;
-  await prisma.message.deleteMany({ where: { senderId: { in: ids } } });
-  await prisma.chatMember.deleteMany({ where: { memberId: { in: ids } } });
-  await prisma.connection.deleteMany({
-    where: { OR: [{ fromId: { in: ids } }, { toId: { in: ids } }] },
+/**
+ * Flag sample, guest, and bot rows so Discover and member counts skip them.
+ * Does not delete anything. Removal is scripts/cleanup-sample-accounts.ts,
+ * dry-run unless an operator passes --apply after a backup.
+ */
+export async function markSampleAccounts(): Promise<number> {
+  const rows = await prisma.member.findMany({
+    where: sampleMemberWhere(),
+    select: {
+      id: true,
+      email: true,
+      photo: true,
+      verificationsJson: true,
+      linkedInId: true,
+      isSample: true,
+      sampleKind: true,
+    },
   });
-  await prisma.block
-    .deleteMany({
-      where: { OR: [{ blockerId: { in: ids } }, { blockedId: { in: ids } }] },
-    })
-    .catch(() => undefined);
-  await prisma.member.deleteMany({ where: { id: { in: ids } } });
+
+  let marked = 0;
+  for (const row of rows) {
+    const kind: SampleKind | null = classifySample(row);
+    if (!kind) continue;
+    if (row.isSample && row.sampleKind === kind) continue;
+    await prisma.member.update({
+      where: { id: row.id },
+      data: { isSample: true, sampleKind: kind },
+    });
+    marked += 1;
+  }
+  return marked;
 }
 
-/**
- * Interlink only shows real members. Older builds seeded fake profiles and shipped
- * an "Enter demo" account that synced itself to the server, so clear both (and
- * their graph edges) once per server process.
- */
 export function purgeDemoResidue(): Promise<void> {
   if (!done) {
-    done = (async () => {
-      // Demo mode is deliberately on — leave its member alone.
-      if (demoEntryEnabled()) return;
-
-      const seeds = await prisma.member.findMany({
-        where: { id: { in: LEGACY_SEED_IDS } },
-        select: { id: true },
+    done = markSampleAccounts()
+      .then(() => undefined)
+      .catch((err) => {
+        done = null;
+        throw err;
       });
-      await removeMembers(seeds.map((s) => s.id));
-
-      const demoAccounts = await prisma.member.findMany({
-        where: {
-          verificationsJson: { contains: DEMO_PROFILE_MARKER },
-        },
-        select: { id: true },
-      });
-      await removeMembers(demoAccounts.map((m) => m.id));
-    })().catch((err) => {
-      done = null;
-      throw err;
-    });
   }
   return done;
 }

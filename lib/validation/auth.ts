@@ -7,6 +7,8 @@ export const emailAuthSchema = z
     password: zPassword,
     name: zShortText(80).optional(),
     mode: z.enum(["signin", "signup"]).optional(),
+    /** Same-site path to return to. Ignored when it is not a relative path. */
+    next: z.string().max(512).optional(),
   })
   .strict();
 

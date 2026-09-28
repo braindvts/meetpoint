@@ -1,7 +1,7 @@
 import { FEATURED_PARTNERS } from "./featuredPartners";
 import { rateLimit } from "./rateLimit";
 
-/** Per-IP cap for the public ingest route. Counted in memory only — never stored. */
+/** Per-IP cap for the public ingest route. The limiter stores a hashed key, never the IP. */
 export const ANALYTICS_RATE_LIMIT = 60;
 export const ANALYTICS_RATE_WINDOW_MS = 60_000;
 
@@ -71,6 +71,7 @@ export function parseAnalyticsEvent(
   if (name === "pageview") {
     const path = readPath(rec.path, true);
     if (!path.ok) return path;
+    if (isVerifyEmailPath(path.path)) return { ok: false, error: "Invalid request" };
     if (rec.meta !== undefined) return { ok: false, error: "Invalid request" };
     return { ok: true, event: { name, path: path.path, meta: {} } };
   }
@@ -116,6 +117,26 @@ function parsePartnerClick(
   };
 }
 
+/** Confirmation links live here. Never store the path or a token on it. */
+export function isVerifyEmailPath(path: string): boolean {
+  return path === "/verify-email" || path.startsWith("/verify-email/");
+}
+
+/**
+ * Pathname only. A query string or hash is dropped before anything is stored.
+ */
+export function pathnameOnly(value: string): string | null {
+  const trimmed = value.trim();
+  const cut = trimmed.search(/[?#]/);
+  const path = cut >= 0 ? trimmed.slice(0, cut) : trimmed;
+  if (!path.startsWith("/") || path.length > 200) return null;
+  if (path.includes("://") || path.includes("@") || path.includes("\\") || /\s/.test(path)) {
+    return null;
+  }
+  if (path.includes("?") || path.includes("#")) return null;
+  return path;
+}
+
 function readPath(
   value: unknown,
   required: boolean
@@ -125,18 +146,8 @@ function readPath(
     return { ok: true, path: "" };
   }
   if (typeof value !== "string") return { ok: false, error: "Invalid request" };
-  const path = value.trim();
-  if (!path.startsWith("/") || path.length > 200) return { ok: false, error: "Invalid request" };
-  if (
-    path.includes("://") ||
-    path.includes("@") ||
-    path.includes("?") ||
-    path.includes("#") ||
-    path.includes("\\") ||
-    /\s/.test(path)
-  ) {
-    return { ok: false, error: "Invalid request" };
-  }
+  const path = pathnameOnly(value);
+  if (!path) return { ok: false, error: "Invalid request" };
   return { ok: true, path };
 }
 
@@ -151,7 +162,7 @@ export async function handleAnalyticsPost(
     create: (row: AnalyticsRow) => Promise<void>;
   }
 ): Promise<{ status: number; body: { ok: boolean; ignored?: boolean; error?: string } }> {
-  const limited = rateLimit(req, {
+  const limited = await rateLimit(req, {
     name: "analytics",
     limit: ANALYTICS_RATE_LIMIT,
     windowMs: ANALYTICS_RATE_WINDOW_MS,
