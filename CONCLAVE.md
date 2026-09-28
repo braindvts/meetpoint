@@ -155,6 +155,8 @@ WALKTHROUGH_OWNER_PASSWORD=
 
 If the gate is off (the production default), email sign-in uses the stored password hash only. Existing members are never overwritten.
 
+The public marketing home does not offer Enter demo, a sample-profile login, or a link to `/demo`. Sign in and Enter go to `/login`. The login page can still show the sample entry when the flag below is on. `/demo` stays a direct route (capture scripts and local checks); it is not linked from the home page, nav, or footer.
+
 Local UI demo flags (do **not** set on production unless you want demo entry). These are not a login and do not create an account:
 
 ```

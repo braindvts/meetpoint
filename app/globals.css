@@ -1927,6 +1927,14 @@ html.mp-boot-splash body::before {
   }
 }
 
+/* Stacked hero: the lockup's margin reset was swallowing mt-8, so
+   "Website first" sat flush against "Supported by" on phones. */
+@media (max-width: 959px) {
+  .mp-night-copy > .mp-sponsor-lockup {
+    margin-top: 2rem;
+  }
+}
+
 .mp-night-title {
   font-size: clamp(3.2rem, 7.4vw, 6.4rem);
   font-weight: 600;
