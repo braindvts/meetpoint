@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
 import { accountDeletionDecision, anonymizedMemberData } from "./accountDeletion";
@@ -164,7 +164,7 @@ test("legal migration stays after the report and profile migrations and does not
   assert.doesNotMatch(sql, /RateLimitBucket|CREATE TABLE|model Report|ALTER TABLE "Report"/i);
 });
 
-test("report categories extend PR #24 slugs and do not add an admin gate", () => {
+test("report categories extend PR #24 slugs and reuse PR #25's admin gate", () => {
   for (const slug of [
     "harassment",
     "spam",
@@ -186,8 +186,10 @@ test("report categories extend PR #24 slugs and do not add an admin gate", () =>
     "inappropriate",
     "suspicious_account",
   ]);
-  assert.equal(existsSync(join(ROOT, "lib/adminGate.ts")), false);
-  assert.equal(existsSync(join(ROOT, "lib/adminAccess.ts")), false);
+  const gate = readFileSync(join(ROOT, "lib/adminGate.ts"), "utf8");
+  assert.match(gate, /confirmedByLink = false/);
+  assert.match(readFileSync(join(ROOT, "lib/adminAccess.ts"), "utf8"), /canViewAdminDashboard/);
+  assert.match(readFileSync(join(ROOT, "lib/reportLabels.ts"), "utf8"), /does not add another admin check/);
 });
 
 test("consent, deletion, and admin authorization are enforced in server routes", () => {
