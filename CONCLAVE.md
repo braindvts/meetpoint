@@ -182,7 +182,7 @@ If the gate is off (the production default), email sign-in uses the stored passw
 
 Walkthrough owner login also requires the server-only `ENABLE_DEMO_PROFILES` gate below. `NEXT_PUBLIC_ENABLE_DEMO`, `NEXT_PUBLIC_ENABLE_DEMO_PROFILES`, and a flag saved in the browser do not enable it.
 
-The public marketing home does not offer Enter demo, a sample-profile login, or a link to `/demo`. Sign in and Enter go to `/login`. `/demo` is not linked from the home page, nav, or footer. Sample entry on the login page and `/demo` stay off unless `ENABLE_DEMO_PROFILES` is set on the server. A preview can set it for testing. When it is unset, `GET` and `POST /api/auth/demo` return 404 and `/demo` returns 404. The route does not create a database member. The browser ignores `NEXT_PUBLIC_` demo flags and any saved walkthrough flag while the server gate is off.
+The public marketing home does not offer Enter demo, a sample-profile login, or a link to `/demo`. Sign in and Enter go to `/login`. `/demo` stays a direct route for capture scripts and local checks; it is not linked from the home page, nav, or footer, and it returns 404 unless `ENABLE_DEMO_PROFILES` is set on the server. The login page shows sample entry only after that same server check. A preview can set the variable for testing. When it is unset, `GET` and `POST /api/auth/demo` return 404. The route does not create a database member. The browser ignores `NEXT_PUBLIC_` demo flags and any saved walkthrough flag while the server gate is off.
 
 ```
 ENABLE_DEMO_PROFILES=1
