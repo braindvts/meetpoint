@@ -4,6 +4,7 @@ import {
   LEGAL_CONTACT_PLACEHOLDER,
   LEGAL_ENTITY_PLACEHOLDER,
   LEGAL_JURISDICTION_PLACEHOLDER,
+  LEGAL_SAFETY_CONTACT_PLACEHOLDER,
 } from "@/lib/legal";
 
 export const metadata: Metadata = {
@@ -23,6 +24,8 @@ export default function ContactPage() {
         Operator: {LEGAL_ENTITY_PLACEHOLDER}
         <br />
         Email: {LEGAL_CONTACT_PLACEHOLDER}
+        <br />
+        Safety and abuse: {LEGAL_SAFETY_CONTACT_PLACEHOLDER}
         <br />
         Jurisdiction: {LEGAL_JURISDICTION_PLACEHOLDER}
       </p>

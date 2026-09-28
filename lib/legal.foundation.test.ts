@@ -176,3 +176,23 @@ test("consent, deletion, and admin authorization are enforced in server routes",
   assert.match(meeting, /paidBookingMatches/);
   assert.match(meeting, /rateLimit/);
 });
+
+test("privacy policy discloses first-party analytics and optional regional sections", () => {
+  const privacy = readFileSync(join(ROOT, "app/privacy/page.tsx"), "utf8");
+  const contact = readFileSync(join(ROOT, "app/contact/page.tsx"), "utf8");
+  const licenses = readFileSync(join(ROOT, "THIRD_PARTY_LICENSES.md"), "utf8");
+  assert.match(privacy, /pageview/);
+  assert.match(privacy, /partner_click/);
+  assert.match(privacy, /scrolling partner row/);
+  assert.match(privacy, /loading screen/);
+  assert.match(privacy, /Edgeable featured card/);
+  assert.match(privacy, /LEGAL_SAFETY_CONTACT_PLACEHOLDER/);
+  assert.match(privacy, /NEXT_PUBLIC_PLAUSIBLE_DOMAIN/);
+  assert.doesNotMatch(privacy, /no third-party analytics trackers/i);
+  assert.equal(
+    (privacy.match(/\[INCLUDE IF SERVING THIS REGION, pending owner decision\]/g) || []).length,
+    2
+  );
+  assert.match(contact, /LEGAL_SAFETY_CONTACT_PLACEHOLDER/);
+  assert.match(licenses, /no external package/);
+});

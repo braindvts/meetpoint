@@ -3,7 +3,7 @@
 Use this before pointing a public audience at Interlink. Checked boxes require a person, not this repository, to confirm them.
 
 - [ ] **Terms reviewed.** `/terms` is a draft (`2026-09-28-draft`). A lawyer has replaced the placeholders and approved the text. The version constant in `lib/legal.ts` was bumped if the meaning changed, so members are asked again.
-- [ ] **Privacy reviewed.** `/privacy` matches what Production actually stores, including Stripe, Resend, Twilio, Google Places, and optional Plausible. A lawyer has approved it.
+- [ ] **Privacy reviewed.** `/privacy` is a draft (`2026-09-28-draft-2`). It matches what Production stores, including Stripe, Resend, Twilio, Google Places, first-party page visits and partner-link clicks (no IP or email on those rows), and optional Plausible only when `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` is set. No third-party ad tracker is loaded. EU/UK and California sections stay marked `[INCLUDE IF SERVING THIS REGION, pending owner decision]` until the owner decides. A lawyer has approved it, and `[SAFETY CONTACT EMAIL]` has been replaced alongside `[CONTACT EMAIL]`.
 - [ ] **Trademark checked.** “Interlink” was searched and a decision was recorded. See `LEGAL_REVIEW.md`.
 - [ ] **Partner permissions obtained.** BijuuFlow, Grounded Peptides, ONYX Futures, and Edgeable have written permission on file, or their `permission` field is no longer `approved`. The current `approved` value is a display holdover with an explicit TODO.
 - [ ] **Third-party licenses checked.** `THIRD_PARTY_LICENSES.md` was re-read against `package-lock.json`. No GPL / AGPL / SSPL / non-commercial dependency is shipping unnoticed. Outfit, Unsplash, and brand icons were accepted or replaced.

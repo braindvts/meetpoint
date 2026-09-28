@@ -3,12 +3,13 @@
  * in a way that needs a fresh acceptance. Existing members are prompted again.
  */
 export const TERMS_VERSION = "2026-09-28-draft";
-export const PRIVACY_VERSION = "2026-09-28-draft";
+export const PRIVACY_VERSION = "2026-09-28-draft-2";
 
 /** Facts the repo does not establish. Do not replace these with invented values. */
 export const LEGAL_ENTITY_PLACEHOLDER = "[LEGAL ENTITY NAME]";
 export const LEGAL_JURISDICTION_PLACEHOLDER = "[JURISDICTION]";
 export const LEGAL_CONTACT_PLACEHOLDER = "[CONTACT EMAIL]";
+export const LEGAL_SAFETY_CONTACT_PLACEHOLDER = "[SAFETY CONTACT EMAIL]";
 
 export interface LegalConsentRecord {
   termsAcceptedAt: Date | null;

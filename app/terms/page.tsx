@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import LegalDocument from "@/components/LegalDocument";
 import {
   LEGAL_CONTACT_PLACEHOLDER,
+  LEGAL_SAFETY_CONTACT_PLACEHOLDER,
   LEGAL_ENTITY_PLACEHOLDER,
   LEGAL_JURISDICTION_PLACEHOLDER,
   TERMS_VERSION,
@@ -78,7 +79,8 @@ export default function TermsPage() {
           categories that include harassment, spam, fraud, impersonation, inappropriate content,
           and suspicious account, along with older labels that may already exist on stored reports.
           Operators review reports with an admin credential that is not available to ordinary
-          members. We may remove content, refuse an introduction, or suspend an account when we
+          members. You can also write to {LEGAL_SAFETY_CONTACT_PLACEHOLDER}. We may remove content,
+          refuse an introduction, or suspend an account when we
           believe these Terms were broken. That review is a product operation, not a promise that
           harmful content will be found or removed.
         </p>
@@ -222,6 +224,8 @@ export default function TermsPage() {
           {LEGAL_ENTITY_PLACEHOLDER}
           <br />
           {LEGAL_CONTACT_PLACEHOLDER}
+          <br />
+          Safety and abuse: {LEGAL_SAFETY_CONTACT_PLACEHOLDER}
           <br />
           {LEGAL_JURISDICTION_PLACEHOLDER}
         </p>

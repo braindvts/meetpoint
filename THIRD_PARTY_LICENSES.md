@@ -61,7 +61,7 @@ Transitive packages are pulled in by those dependencies (Next.js, Prisma engines
 | Resend | Welcome email when `RESEND_API_KEY` is set | Resend’s terms | Mail is skipped when the key is absent. The recipient address is not written to logs by the current sender |
 | Twilio | Booking SMS when Twilio env vars are set | Twilio terms | Members can send only to their own profile phone unless `NOTIFY_SECRET` authenticates a service call |
 | Plausible | Optional page analytics when `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` is set | Plausible’s terms | The script URL can be overridden with `NEXT_PUBLIC_PLAUSIBLE_SRC`. Off when unset |
-| First-party `AnalyticsEvent` | Page and product events in Postgres | n/a (our table) | Stores a path, event name, optional member id, and a small JSON blob. No email column |
+| First-party `AnalyticsEvent` | Page visits (`pageview`: path) and partner-link clicks (`partner_click`: partner id and surface — scrolling row `landing`, loading screen `loading`, Edgeable card `featured`) in Postgres | n/a — our table, no external package | Optional member id. No IP address and no email column. The request IP is only an in-memory rate-limit key. Not a third-party service. Optional Plausible, in the row above, is separate and off unless configured |
 | Vercel | Hosting for https://interlinkgobal.com | Vercel terms | Domain spelling is `gobal`, as deployed |
 
 ## What this file does not prove

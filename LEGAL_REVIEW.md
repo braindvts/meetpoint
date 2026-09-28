@@ -2,7 +2,9 @@
 
 Working notes for counsel. Nothing in this file is a claim that Interlink already owns the items below. The repository does not establish a legal entity, a registered office, or an assignment of IP.
 
-Placeholders used in the product copy: `[LEGAL ENTITY NAME]`, `[JURISDICTION]`, `[CONTACT EMAIL]`.
+Placeholders used in the product copy: `[LEGAL ENTITY NAME]`, `[JURISDICTION]`, `[CONTACT EMAIL]`, `[SAFETY CONTACT EMAIL]`.
+
+Privacy also includes optional EU/UK and California sections, each marked `[INCLUDE IF SERVING THIS REGION, pending owner decision]`. Those sections do not claim the GDPR, UK GDPR, CCPA, or CPRA already applies.
 
 ## Trademark — “Interlink”
 
@@ -55,7 +57,7 @@ Placeholders used in the product copy: `[LEGAL ENTITY NAME]`, `[JURISDICTION]`, 
 - [ ] LinkedIn app review if the API terms require it.
 - [ ] Resend domain authentication for the from-address.
 - [ ] Twilio account and a registered sender if SMS stays on.
-- [ ] Plausible site, only if `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` is set in production.
+- [ ] Plausible site, only if `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` is set in production. First-party page visits and partner-click counts do not use an external package. No advertising pixel is loaded.
 - [ ] Vercel team ownership.
 
 ## Copyright in the product
