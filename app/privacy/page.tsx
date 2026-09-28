@@ -200,9 +200,10 @@ export default function PrivacyPage() {
       <section>
         <h2>6. Deletion</h2>
         <p className="mt-2">
-          Profile includes a delete-account control. You must type DELETE. If the account has a
-          password, you must confirm it again through a fresh sign-in check. A stale session is
-          not enough. We then clear sign-in identifiers, contact details, profile text, company,
+          Profile includes a delete-account control. You must type DELETE. You then confirm a
+          fresh sign-in: the account password, or the same Google, Apple, or LinkedIn account
+          already linked to this member. A stale session is not enough. A different provider
+          account does not confirm deletion. We then clear sign-in identifiers, contact details, profile text, company,
           industry, photo, phone, and verification values; delete selected interests and event
           RSVPs; delete introductions and BLACK invitation or connection rows; blank your
           messages; drop you from chats; and clear the member id on analytics events. The

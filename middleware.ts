@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { csrfOriginAllowed } from "@/lib/csrfOrigin";
 
 const MUTATING = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
@@ -16,10 +17,9 @@ function appOrigin(): string | null {
 }
 
 function isAllowedOrigin(origin: string, allowed: string): boolean {
-  if (origin === allowed) return true;
+  if (csrfOriginAllowed(origin, allowed)) return true;
   try {
     const host = new URL(origin).hostname;
-    if (host.endsWith(".vercel.app")) return true;
     if (host === "localhost" || host === "127.0.0.1") return process.env.NODE_ENV !== "production";
   } catch {
     return false;

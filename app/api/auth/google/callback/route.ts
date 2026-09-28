@@ -8,6 +8,7 @@ import { withMemberCookie } from "@/lib/memberAuth";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
 import { sanitizeName } from "@/lib/sanitize";
 import { postAuthPath } from "@/lib/appPath";
+import { oauthReauthResponse } from "@/lib/oauthReauthRoute";
 import {
   appUrl,
   clearOAuthStateCookie,
@@ -30,7 +31,7 @@ export async function GET(req: NextRequest) {
   if (!code || !state) {
     return NextResponse.redirect(appUrl("/login?error=missing_code"));
   }
-  const challenge = await consumeOAuthChallenge();
+  const challenge = await consumeOAuthChallenge(state);
   if (!challenge || challenge.state !== state) {
     return NextResponse.redirect(appUrl("/login?error=invalid_state"));
   }
@@ -87,6 +88,13 @@ export async function GET(req: NextRequest) {
     } else {
       return NextResponse.redirect(appUrl("/login?error=token_failed"));
     }
+
+    const reauthRes = await oauthReauthResponse({
+      intent: challenge.reauth,
+      provider: "google",
+      providerSubject: user.sub,
+    });
+    if (reauthRes) return reauthRes;
 
     const email = user.email?.toLowerCase() || null;
     const displayName = sanitizeName(user.name || "Member") || "Member";

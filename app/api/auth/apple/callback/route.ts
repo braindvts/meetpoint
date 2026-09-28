@@ -8,6 +8,7 @@ import { withMemberCookie } from "@/lib/memberAuth";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
 import { sanitizeName } from "@/lib/sanitize";
 import { postAuthPath } from "@/lib/appPath";
+import { oauthReauthResponse } from "@/lib/oauthReauthRoute";
 import {
   appUrl,
   appleConfigured,
@@ -32,7 +33,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.redirect(appUrl("/login?error=apple_not_configured"));
   }
 
-  const challenge = await consumeOAuthChallenge();
+  const challenge = await consumeOAuthChallenge(state);
   if (!challenge || challenge.state !== state || !challenge.nonce) {
     return NextResponse.redirect(appUrl("/login?error=invalid_state"));
   }
@@ -85,6 +86,13 @@ export async function POST(req: NextRequest) {
         /* ignore */
       }
     }
+
+    const reauthRes = await oauthReauthResponse({
+      intent: challenge.reauth,
+      provider: "apple",
+      providerSubject: sub,
+    });
+    if (reauthRes) return reauthRes;
 
     const email = claims.email || null;
     let member = await prisma.member.findFirst({ where: { appleId: sub } });

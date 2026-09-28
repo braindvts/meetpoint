@@ -27,9 +27,9 @@ Interlink hardens the API so secrets stay on the server and user input is strict
 | **Rate limits** | Per-IP limits on auth, billing, Places, SMS, reports, analytics, connections, chats, invites, account deletion, legal consent, and BLACK meeting awards |
 | **Login lockout** | After 8 failed password attempts per email+IP, 15-minute cooldown |
 | **Sessions** | Signed cookies `iat`/`exp`; **7-day**; `HttpOnly` + `SameSite=Lax` (+ `Secure` in prod). Logout is POST only |
-| **CSRF** | Mutating `/api/*` needs matching Origin/Referer in production. A random Authorization header does not skip the check; the admin or notify secret must match |
+| **CSRF** | Mutating `/api/*` needs a matching Origin/Referer in production. Allowed hosts are the configured app origin, `interlinkgobal.com`, `meetpoint-flax.vercel.app`, and preview hosts `meetpoint-*-braindvts-projects.vercel.app`. Other `*.vercel.app` origins are rejected. A random Authorization header does not skip the check; the admin or notify secret must match |
 | **Legal consent** | Email signup stores Terms and Privacy versions only when both boxes are true. Other signed-in product APIs return 403 until the current versions are on the member |
-| **Account deletion** | `DELETE /api/members/me` requires the word DELETE and a recent password re-auth when the account has a password. Personal fields are anonymized; reports and payment flags stay |
+| **Account deletion** | `DELETE /api/members/me` requires the word DELETE and a fresh re-auth cookie. Password accounts get it from `POST /api/auth/reauth`. Google, Apple, and LinkedIn accounts get it by signing in again with the provider id already stored on that member. The OAuth state carries a signed, 10-minute, one-time reauth intent bound to the current member. A mismatch does not set the cookie and does not create or switch accounts. Personal fields are anonymized; reports and blocks stay |
 | **Intro standing** | Connection create and accept use the same Verified / BLACK rules as the product, on the server |
 | **SMS** | A member can text only the phone saved on their profile. Service calls need `NOTIFY_SECRET` |
 | **Live bookings** | Production does not confirm a table without Stripe checkout. BLACK CONNECTION from a meeting requires a paid booking session when the site is live |
@@ -67,6 +67,12 @@ Never prefix secrets with `NEXT_PUBLIC_`.
 - Sync profile with only writable fields (`lib/apiClient.syncProfileToServer`)
 - Walkthrough login is never published to the client; the server confirms `demoOwner` only after env-gated credentials match
 - Sensitive purchases may prompt `ReauthDialog` when the API returns `needsReauth`
+
+## Limits counsel should see
+
+- The email confirmation link puts the raw token in the URL. The page stashes it and strips the query before Plausible or first-party pageviews can record it. Only the hash is stored, and the token is single-use. Vercel’s request logs can still show the first request URL.
+- `NEXT_PUBLIC_PLAUSIBLE_SRC`, when set, replaces the default exclusions script. A replacement script may ignore `data-exclude="/verify-email"`.
+- Google and Apple create the member during the OAuth callback, then the consent gate blocks product APIs until the member accepts the current Terms. LinkedIn creates the row on the first profile save. Email signup stores acceptance at signup.
 
 ## Optional next steps
 

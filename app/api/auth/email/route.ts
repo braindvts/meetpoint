@@ -60,7 +60,9 @@ export async function POST(req: Request) {
       );
     }
 
-    const existing = await prisma.member.findFirst({ where: { email } });
+    const existing = await prisma.member.findFirst({
+      where: { email: { equals: email, mode: "insensitive" } },
+    });
 
     if (mode === "signup") {
       // Never attach a password to an existing row. An OAuth account with this

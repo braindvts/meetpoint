@@ -47,6 +47,12 @@ export async function GET() {
       memberId: full.id,
       legalConsent: hasCurrentLegalConsent(full),
       hasPassword: !!full.passwordHash,
+      signIn: {
+        password: !!full.passwordHash,
+        google: !!full.googleId,
+        apple: !!full.appleId,
+        linkedin: !!full.linkedInId,
+      },
       accountEmail: full.email,
       emailVerified: !!full.emailVerifiedAt,
     });

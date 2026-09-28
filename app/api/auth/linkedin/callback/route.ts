@@ -4,6 +4,7 @@ import { postAuthPath } from "@/lib/appPath";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
 import { rateLimit } from "@/lib/rateLimit";
 import { OAUTH_CALLBACK_IP } from "@/lib/rateCaps";
+import { oauthReauthResponse } from "@/lib/oauthReauthRoute";
 import {
   appUrl,
   clearOAuthStateCookie,
@@ -43,7 +44,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(appUrl("/login?error=missing_code"));
   }
 
-  const challenge = await consumeOAuthChallenge();
+  const challenge = await consumeOAuthChallenge(state);
   if (!challenge || challenge.state !== state) {
     return NextResponse.redirect(appUrl("/login?error=invalid_state"));
   }
@@ -83,6 +84,13 @@ export async function GET(req: NextRequest) {
       user.name ||
       [user.given_name, user.family_name].filter(Boolean).join(" ") ||
       "LinkedIn Member";
+
+    const reauthRes = await oauthReauthResponse({
+      intent: challenge.reauth,
+      provider: "linkedin",
+      providerSubject: user.sub,
+    });
+    if (reauthRes) return reauthRes;
 
     await purgeDemoResidue();
     const email = user.email?.toLowerCase() || null;
