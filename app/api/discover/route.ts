@@ -5,7 +5,12 @@ import { getCurrentMember } from "@/lib/memberAuth";
 import { memberToPerson } from "@/lib/memberMap";
 import { blackConnectionCounts } from "@/lib/blackServer";
 import { discoverExcludedIds } from "@/lib/moderation";
-import { DISCOVER_RESULT_CAP, discoverMemberSelect, type DiscoverMember } from "@/lib/discoverSelect";
+import {
+  DISCOVER_RESULT_CAP,
+  discoverCandidates,
+  discoverMemberSelect,
+  type DiscoverMember,
+} from "@/lib/discoverSelect";
 import { rankPeople } from "@/lib/peopleMatch";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
 import { rateLimit } from "@/lib/rateLimit";
@@ -63,7 +68,7 @@ export async function GET(req: Request) {
       if (!batchCursor) break;
     }
 
-    const visible = people.filter((row) => row.name.trim());
+    const visible = discoverCandidates(people);
     const viewerCard = memberToPerson(viewer);
 
     const ranked = rankPeople(

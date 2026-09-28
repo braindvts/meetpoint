@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { accountDeletionDecision, anonymizedMemberData } from "@/lib/accountDeletion";
+import { accountDeletionDecision, anonymizeDeletedAccount } from "@/lib/accountDeletion";
 import { publicError } from "@/lib/safeError";
 import { prisma } from "@/lib/db";
 import { partitionIdeaTags } from "@/lib/interests";
@@ -189,8 +189,8 @@ export async function PUT(req: Request) {
 }
 
 /**
- * Anonymize the signed-in account. Password accounts need a recent re-auth.
- * Reports and payment flags stay attached to the anonymized id.
+ * Anonymize the signed-in account. Requires a fresh /api/auth/reauth cookie.
+ * Does not require the current Terms. Reports and blocks stay on the anonymized id.
  * Profile interests and event RSVPs are removed with the public profile.
  */
 export async function DELETE(req: Request) {
@@ -217,50 +217,7 @@ export async function DELETE(req: Request) {
     }
 
     const id = me.id;
-    await prisma.$transaction(async (tx) => {
-      await tx.message.updateMany({ where: { senderId: id }, data: { text: "" } });
-      const memberships = await tx.chatMember.findMany({
-        where: { memberId: id },
-        select: { chatId: true },
-      });
-      const chatIds = memberships.map((row) => row.chatId);
-      await tx.chatMember.deleteMany({ where: { memberId: id } });
-      if (chatIds.length) {
-        const remaining = await tx.chatMember.groupBy({
-          by: ["chatId"],
-          where: { chatId: { in: chatIds } },
-          _count: { _all: true },
-        });
-        const still = new Set(remaining.map((row) => row.chatId));
-        const empty = chatIds.filter((chatId) => !still.has(chatId));
-        if (empty.length) {
-          await tx.chat.deleteMany({ where: { id: { in: empty } } });
-        }
-      }
-      await tx.connection.deleteMany({
-        where: { OR: [{ fromId: id }, { toId: id }] },
-      });
-      await tx.block.deleteMany({
-        where: { OR: [{ blockerId: id }, { blockedId: id }] },
-      });
-      await tx.blackInvite.deleteMany({
-        where: { OR: [{ fromId: id }, { toId: id }] },
-      });
-      await tx.blackConnection.deleteMany({
-        where: { OR: [{ blackMemberId: id }, { peerId: id }] },
-      });
-      await tx.memberInterest.deleteMany({ where: { memberId: id } });
-      await tx.eventInterest.deleteMany({ where: { memberId: id } });
-      await tx.analyticsEvent.updateMany({
-        where: { memberId: id },
-        data: { memberId: null },
-      });
-      await tx.emailVerificationToken.deleteMany({ where: { memberId: id } });
-      await tx.member.update({
-        where: { id },
-        data: anonymizedMemberData(),
-      });
-    });
+    await prisma.$transaction((tx) => anonymizeDeletedAccount(tx, id));
 
     await clearSession();
     await clearMemberCookie();

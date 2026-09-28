@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { requireReportAdmin } from "@/lib/adminAuth";
 import { prisma } from "@/lib/db";
 import { sendAutoHideAlert } from "@/lib/email";
-import { legalConsentDenied } from "@/lib/legalGuard";
 import { getCurrentMember } from "@/lib/memberAuth";
 import { autoHiddenMemberIds, reportStatsFor } from "@/lib/moderation";
 import { accountKey, rateLimit } from "@/lib/rateLimit";
@@ -29,9 +28,6 @@ export async function POST(req: Request) {
         { status: 401 }
       );
     }
-    const denied = legalConsentDenied(me);
-    if (denied) return denied;
-
     const accountLimited = await rateLimit(req, {
       ...REPORT_ACCOUNT,
       keyExtra: accountKey(me.id),

@@ -79,10 +79,20 @@ test("account deletion requires the phrase and re-auth for passwords", () => {
     accountDeletionDecision({ confirm: "DELETE", hasPassword: true, recentReauth: true }).ok,
     true
   );
-  assert.equal(
-    accountDeletionDecision({ confirm: "DELETE", hasPassword: false, recentReauth: false }).ok,
-    true
-  );
+  const stale = accountDeletionDecision({
+    confirm: "DELETE",
+    hasPassword: false,
+    recentReauth: false,
+  });
+  assert.equal(stale.ok, false);
+  if (!stale.ok) assert.equal(stale.needsReauth, true);
+  const stalePassword = accountDeletionDecision({
+    confirm: "DELETE",
+    hasPassword: true,
+    recentReauth: false,
+  });
+  assert.equal(stalePassword.ok, false);
+  if (!stalePassword.ok) assert.equal(stalePassword.needsReauth, true);
 });
 
 test("anonymized accounts drop personal fields and keep an id-shaped record", () => {
@@ -145,6 +155,12 @@ test("legal migration stays after the report and profile migrations and does not
   const sql = readFileSync(join(root, `${legal}/migration.sql`), "utf8");
   assert.match(sql, /termsAcceptedAt/);
   assert.match(sql, /deletedAt/);
+  const schema = readFileSync(join(ROOT, "prisma/schema.prisma"), "utf8");
+  const block = schema.slice(schema.indexOf("model Block {"), schema.indexOf("model AnalyticsEvent"));
+  assert.match(block, /onDelete: Restrict/);
+  assert.doesNotMatch(block, /onDelete: Cascade/);
+  const reportModel = schema.slice(schema.indexOf("model Report {"), schema.indexOf("model EmailVerificationToken"));
+  assert.doesNotMatch(reportModel, /onDelete/);
   assert.doesNotMatch(sql, /RateLimitBucket|CREATE TABLE|model Report|ALTER TABLE "Report"/i);
 });
 
@@ -183,10 +199,21 @@ test("consent, deletion, and admin authorization are enforced in server routes",
   const meeting = readFileSync(join(ROOT, "app/api/black/meeting/route.ts"), "utf8");
   assert.match(email, /legalConsentStamp/);
   assert.match(email, /acceptTerms !== true/);
+  const deleteHandler = deletion.slice(deletion.indexOf("export async function DELETE"));
   assert.match(deletion, /accountDeletionDecision/);
   assert.match(deletion, /hasRecentReauth/);
-  assert.match(deletion, /anonymizedMemberData/);
-  assert.doesNotMatch(deletion, /report\.delete/);
+  assert.match(deletion, /anonymizeDeletedAccount/);
+  assert.doesNotMatch(deleteHandler, /legalConsentDenied/);
+  assert.doesNotMatch(deleteHandler, /report\.delete/);
+  assert.doesNotMatch(deleteHandler, /block\.delete/);
+  const helper = readFileSync(join(ROOT, "lib/accountDeletion.ts"), "utf8");
+  assert.doesNotMatch(helper, /block\.delete/);
+  assert.doesNotMatch(helper, /report\.delete/);
+  const blocks = readFileSync(join(ROOT, "app/api/blocks/route.ts"), "utf8");
+  const gate = readFileSync(join(ROOT, "components/LegalConsentGate.tsx"), "utf8");
+  assert.doesNotMatch(report, /legalConsentDenied/);
+  assert.doesNotMatch(blocks, /legalConsentDenied/);
+  assert.match(gate, /Report, block, or delete your account/);
   assert.match(connections, /canIntroduceToTier/);
   assert.match(connections, /legalConsentDenied/);
   assert.match(report, /requireReportAdmin/);

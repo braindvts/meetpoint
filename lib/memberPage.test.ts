@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
-import { DISCOVER_RESULT_CAP, discoverMemberSelect } from "./discoverSelect.ts";
+import { DISCOVER_RESULT_CAP, discoverCandidates, discoverMemberSelect } from "./discoverSelect.ts";
+import { rankPeople } from "./peopleMatch.ts";
 import {
   MEMBER_PAGE_DEFAULT,
   MEMBER_PAGE_MAX,
@@ -80,6 +81,31 @@ test("ranked pages stay within the cap and advance by id", () => {
   assert.equal(tail.nextCursor, null);
 });
 
+test("deleted members never reach ranking or the recently joined fallback", () => {
+  const selected = discoverCandidates([
+    {
+      id: "gone",
+      name: "Deleted member",
+      deletedAt: new Date("2026-09-28T00:00:00.000Z"),
+      updatedAt: "2026-09-28T00:00:00.000Z",
+    },
+    { id: "blank", name: "   ", deletedAt: null, updatedAt: "2026-09-27T00:00:00.000Z" },
+    {
+      id: "newer",
+      name: "New Person",
+      deletedAt: null,
+      jobTitle: "Driver",
+      updatedAt: "2026-09-20T00:00:00.000Z",
+    },
+  ]);
+  const ranked = rankPeople({ id: "me", interests: ["Artificial Intelligence"] }, selected);
+  assert.deepEqual(
+    ranked.map((row) => row.person.id),
+    ["newer"]
+  );
+  assert.equal(ranked[0]?.reasons[0], "Recently joined");
+});
+
 test("discover loads ranking fields only and returns the top 100", () => {
   assert.equal(DISCOVER_RESULT_CAP, 100);
   const keys = Object.keys(discoverMemberSelect);
@@ -121,6 +147,13 @@ test("member and discover routes page the response and keep exclusions", () => {
   assert.match(discover, /rankPeople/);
   assert.match(discover, /discoverExcludedIds/);
   assert.match(discover, /sampleMemberWhere/);
+  assert.match(discover, /deletedAt: null/);
+  assert.match(discover, /discoverCandidates/);
+  assert.match(members, /deletedAt: null/);
+  const rsvp = readFileSync(new URL("../app/api/events/rsvp/route.ts", import.meta.url), "utf8");
+  const events = readFileSync(new URL("../app/api/events/route.ts", import.meta.url), "utf8");
+  assert.match(rsvp, /deletedAt: null/);
+  assert.match(events, /deletedAt: null/);
   assert.match(discover, /memberToPerson/);
   assert.doesNotMatch(discover, /email:\s*true/);
   assert.doesNotMatch(discover, /passwordHash:\s*true/);

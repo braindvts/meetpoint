@@ -26,7 +26,19 @@ export const discoverMemberSelect = {
   workJson: true,
   black: true,
   updatedAt: true,
+  deletedAt: true,
   interests: { select: { slug: true } },
 } as const satisfies Prisma.MemberSelect;
+
+/**
+ * Selection step before ranking. Shared-interest matches and the
+ * "Recently joined" fallback both come from this list. A later photo load
+ * of the top results must not read members who were dropped here.
+ */
+export function discoverCandidates<T extends { name?: string | null; deletedAt?: Date | string | null }>(
+  rows: readonly T[]
+): T[] {
+  return rows.filter((row) => !row.deletedAt && !!(row.name || "").trim());
+}
 
 export type DiscoverMember = Prisma.MemberGetPayload<{ select: typeof discoverMemberSelect }>;

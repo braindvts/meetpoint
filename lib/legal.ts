@@ -3,7 +3,7 @@
  * in a way that needs a fresh acceptance. Existing members are prompted again.
  */
 export const TERMS_VERSION = "2026-09-28-draft";
-export const PRIVACY_VERSION = "2026-09-28-draft-4";
+export const PRIVACY_VERSION = "2026-09-28-draft-5";
 
 /** Facts the repo does not establish. Do not replace these with invented values. */
 export const LEGAL_ENTITY_PLACEHOLDER = "[LEGAL ENTITY NAME]";

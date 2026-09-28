@@ -201,12 +201,13 @@ export default function PrivacyPage() {
         <h2>6. Deletion</h2>
         <p className="mt-2">
           Profile includes a delete-account control. You must type DELETE. If the account has a
-          password, you must enter it again first. We then clear sign-in identifiers, contact
-          details, profile text, company, industry, photo, phone, and verification values; delete
-          selected interests and event RSVPs; delete introductions,
-          blocks, and BLACK invitation or connection rows; blank your messages; drop you from
-          chats; and clear the member id on analytics events. The anonymized row can keep
-          non-identifying payment flags (such as whether BLACK was paid). Reports stay, attributed
+          password, you must confirm it again through a fresh sign-in check. A stale session is
+          not enough. We then clear sign-in identifiers, contact details, profile text, company,
+          industry, photo, phone, and verification values; delete selected interests and event
+          RSVPs; delete introductions and BLACK invitation or connection rows; blank your
+          messages; drop you from chats; and clear the member id on analytics events. The
+          anonymized row can keep non-identifying payment flags (such as whether BLACK was paid).
+          Safety reports and blocks stay, whether you filed them or were named in them, attributed
           to that anonymized id. Your browser copy is cleared after the server finishes. A demo
           that never created a server account can only be cleared from this browser.
         </p>

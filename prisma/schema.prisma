@@ -148,8 +148,9 @@ model Block {
   blockerId String
   blockedId String
   createdAt DateTime @default(now())
-  blocker   Member   @relation("blocker", fields: [blockerId], references: [id], onDelete: Cascade)
-  blocked   Member   @relation("blocked", fields: [blockedId], references: [id], onDelete: Cascade)
+  /// Restrict: anonymized accounts keep the row, and deleting a member must not erase a block.
+  blocker   Member   @relation("blocker", fields: [blockerId], references: [id], onDelete: Restrict)
+  blocked   Member   @relation("blocked", fields: [blockedId], references: [id], onDelete: Restrict)
 
   @@unique([blockerId, blockedId])
   @@index([blockedId])
@@ -226,6 +227,7 @@ model Message {
 
 /// Safety report. Production already stores alsoBlocked, category, notes,
 /// and status — keep them on the model so schema sync never DROP them.
+/// reporterId and peerId are not foreign keys, so a member delete cannot cascade these rows away.
 model Report {
   id          String   @id @default(cuid())
   reporterId  String

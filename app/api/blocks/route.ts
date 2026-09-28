@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { legalConsentDenied } from "@/lib/legalGuard";
 import { getCurrentMember } from "@/lib/memberAuth";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
 import { rateLimit } from "@/lib/rateLimit";
@@ -14,8 +13,6 @@ export async function GET() {
     await purgeDemoResidue();
     const me = await getCurrentMember();
     if (!me) return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
-    const denied = legalConsentDenied(me);
-    if (denied) return denied;
 
     const rows = await prisma.block.findMany({
       where: { blockerId: me.id },
@@ -53,8 +50,6 @@ export async function POST(req: Request) {
     await purgeDemoResidue();
     const me = await getCurrentMember();
     if (!me) return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
-    const denied = legalConsentDenied(me);
-    if (denied) return denied;
 
     const parsed = await parseBody(req, blockSchema);
     if (!parsed.ok) return parsed.response;

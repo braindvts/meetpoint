@@ -13,6 +13,7 @@ const OPEN_PATHS = ["/terms", "/privacy", "/contact", "/login", "/verify-email"]
 export default function LegalConsentGate() {
   const path = usePathname() || "/";
   const [required, setRequired] = useState(false);
+  const [safetyAccess, setSafetyAccess] = useState(false);
   const [checked, setChecked] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -34,7 +35,11 @@ export default function LegalConsentGate() {
     };
   }, [path]);
 
-  if (!required || OPEN_PATHS.some((item) => path === item || path.startsWith(`${item}/`))) {
+  if (
+    !required ||
+    safetyAccess ||
+    OPEN_PATHS.some((item) => path === item || path.startsWith(`${item}/`))
+  ) {
     return null;
   }
 
@@ -112,6 +117,13 @@ export default function LegalConsentGate() {
           className="mp-btn-lux mt-5 w-full bg-ivory py-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-ink disabled:opacity-40"
         >
           {busy ? "Saving…" : "Continue"}
+        </button>
+        <button
+          type="button"
+          onClick={() => setSafetyAccess(true)}
+          className="mt-3 w-full py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted"
+        >
+          Report, block, or delete your account
         </button>
       </form>
     </div>

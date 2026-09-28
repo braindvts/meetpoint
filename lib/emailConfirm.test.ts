@@ -54,10 +54,12 @@ test("confirmation mail prints a dev link only when Resend is unset outside prod
 test("account email confirmation is separate from profile business email", () => {
   const verify = readFileSync(join(ROOT, "app/api/verify/route.ts"), "utf8");
   const signup = readFileSync(join(ROOT, "app/api/auth/email/route.ts"), "utf8");
-  const deletion = readFileSync(join(ROOT, "app/api/members/me/route.ts"), "utf8");
+  const deletion = readFileSync(join(ROOT, "lib/accountDeletion.ts"), "utf8");
+  const route = readFileSync(join(ROOT, "app/api/members/me/route.ts"), "utf8");
   const schema = readFileSync(join(ROOT, "prisma/schema.prisma"), "utf8");
   assert.doesNotMatch(verify, /emailVerifiedAt/);
   assert.match(signup, /issueEmailConfirmation/);
+  assert.match(route, /anonymizeDeletedAccount/);
   assert.match(deletion, /emailVerificationToken\.deleteMany/);
   assert.match(schema, /model EmailVerificationToken/);
   assert.match(schema, /model EventInterest \{/);

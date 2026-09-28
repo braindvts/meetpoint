@@ -10,7 +10,6 @@ import { clearProfile } from "@/lib/store";
  */
 export default function AccountDeletion() {
   const [confirm, setConfirm] = useState("");
-  const [hasPassword, setHasPassword] = useState(false);
   const [hasServerAccount, setHasServerAccount] = useState(false);
   const [reauthOpen, setReauthOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -19,9 +18,8 @@ export default function AccountDeletion() {
   useEffect(() => {
     void fetch("/api/members/me", { credentials: "include" })
       .then((res) => res.json())
-      .then((data: { memberId?: string | null; hasPassword?: boolean }) => {
+      .then((data: { memberId?: string | null }) => {
         setHasServerAccount(!!data.memberId);
-        setHasPassword(!!data.hasPassword);
       })
       .catch(() => undefined);
   }, []);
@@ -75,11 +73,7 @@ export default function AccountDeletion() {
       void finishLocal();
       return;
     }
-    if (hasPassword) {
-      setReauthOpen(true);
-      return;
-    }
-    void deleteServer();
+    setReauthOpen(true);
   }
 
   return (
@@ -95,17 +89,15 @@ export default function AccountDeletion() {
         <ul className="list-disc space-y-1 pl-5">
           <li>Name, email, phone, photo, bio, city, and verification details.</li>
           <li>Password and Google, Apple, or LinkedIn sign-in links.</li>
-          <li>Introductions, blocks, and BLACK invitation records tied to you.</li>
+          <li>Introductions and BLACK invitation records tied to you.</li>
           <li>Your chat messages are blanked and you are removed from those chats.</li>
         </ul>
         <p>
-          Safety reports stay, attached to an anonymized id. Payment flags on that same id can
-          stay so a charge still has a record. Stripe may keep its own receipt. Other members
-          keep their own messages.
+          Safety reports and blocks stay, attached to an anonymized id. Payment flags on that
+          same id can stay so a charge still has a record. Stripe may keep its own receipt.
+          Other members keep their own messages.
         </p>
-        {hasPassword && (
-          <p>Because this account has a password, you will enter it again before deletion.</p>
-        )}
+        <p>You will confirm your password again before deletion. A stale sign-in is not enough.</p>
       </div>
       <form onSubmit={start} className="mt-4 space-y-3">
         <label className="block text-[11px] uppercase tracking-[0.16em] text-muted">
