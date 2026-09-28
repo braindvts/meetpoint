@@ -1,5 +1,5 @@
 import type { Member } from "@prisma/client";
-import { IDEA_TAGS } from "./data";
+import { normalizeIdeaTags } from "./ideaTags";
 import { sanitizeName, sanitizeText } from "./sanitize";
 import { hasRequiredVerifications } from "./tiers";
 import type {
@@ -131,11 +131,7 @@ export function profileToMemberData(profile: MyProfile) {
         .filter((tag) => (LOOKING_FOR_OPTIONS as readonly string[]).includes(tag))
         .slice(0, LOOKING_FOR_OPTIONS.length)
     ),
-    ideaTagsJson: JSON.stringify(
-      (profile.ideaTags || [])
-        .filter((tag) => (IDEA_TAGS as readonly string[]).includes(tag))
-        .slice(0, 12)
-    ),
+    ideaTagsJson: JSON.stringify(normalizeIdeaTags(profile.ideaTags || [])),
     workJson: JSON.stringify(
       (profile.work || []).slice(0, 12).map((item) => ({
         title: sanitizeText(item.title || "", 120),

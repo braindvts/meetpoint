@@ -2,7 +2,9 @@ import { prisma } from "@/lib/db";
 import {
   OPEN_REPORT_STATUSES,
   autoHiddenFromRows,
+  reporterCountsTowardAutoHide,
   shouldAutoHide,
+  type ReporterTrust,
 } from "@/lib/safetyRules";
 
 const openStatuses = [...OPEN_REPORT_STATUSES];
@@ -35,13 +37,78 @@ export async function pairIsBlocked(a: string, b: string): Promise<boolean> {
   return !!row;
 }
 
-/** Members with open reports from OPEN_REPORT_HIDE_THRESHOLD distinct reporters. */
+function parseStringList(raw: string | null | undefined): string[] {
+  try {
+    const value = JSON.parse(raw || "[]");
+    return Array.isArray(value) ? value.filter((item) => typeof item === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
+const reporterTrustSelect = {
+  id: true,
+  emailVerifiedAt: true,
+  googleId: true,
+  appleId: true,
+  linkedInId: true,
+  createdAt: true,
+  name: true,
+  photo: true,
+  jobTitle: true,
+  lookingForJson: true,
+  ideaTagsJson: true,
+} as const;
+
+function trustFromMember(member: {
+  emailVerifiedAt: string | null;
+  googleId: string | null;
+  appleId: string | null;
+  linkedInId: string | null;
+  createdAt: Date;
+  name: string;
+  photo: string;
+  jobTitle: string;
+  lookingForJson: string;
+  ideaTagsJson: string;
+}): ReporterTrust {
+  return {
+    emailVerifiedAt: member.emailVerifiedAt,
+    googleId: member.googleId,
+    appleId: member.appleId,
+    linkedInId: member.linkedInId,
+    createdAt: member.createdAt,
+    name: member.name,
+    photo: member.photo,
+    jobTitle: member.jobTitle,
+    lookingFor: parseStringList(member.lookingForJson),
+    ideaTags: parseStringList(member.ideaTagsJson),
+  };
+}
+
+/** Reporter ids whose open reports count toward auto-hide. */
+export async function qualifyingReporterIds(reporterIds: string[]): Promise<Set<string>> {
+  const ids = [...new Set(reporterIds.filter(Boolean))];
+  if (!ids.length) return new Set();
+  const members = await prisma.member.findMany({
+    where: { id: { in: ids } },
+    select: reporterTrustSelect,
+  });
+  const trusted = new Set<string>();
+  for (const member of members) {
+    if (reporterCountsTowardAutoHide(trustFromMember(member))) trusted.add(member.id);
+  }
+  return trusted;
+}
+
+/** Members with open reports from OPEN_REPORT_HIDE_THRESHOLD distinct qualifying reporters. */
 export async function autoHiddenMemberIds(): Promise<Set<string>> {
   const rows = await prisma.report.groupBy({
     by: ["peerId", "reporterId"],
     where: { status: { in: openStatuses } },
   });
-  return autoHiddenFromRows(rows);
+  const trusted = await qualifyingReporterIds(rows.map((row) => row.reporterId));
+  return autoHiddenFromRows(rows.filter((row) => trusted.has(row.reporterId)));
 }
 
 /** Ids to drop from Discover and For you for this viewer. */
@@ -101,8 +168,10 @@ export async function reportStatsFor(
     const slot = stats[row.reporterId];
     if (slot) slot.filedCount = row._count._all;
   }
+  const trusted = await qualifyingReporterIds(openRows.map((row) => row.reporterId));
   const openCounts = new Map<string, Set<string>>();
   for (const row of openRows) {
+    if (!trusted.has(row.reporterId)) continue;
     let set = openCounts.get(row.peerId);
     if (!set) {
       set = new Set();

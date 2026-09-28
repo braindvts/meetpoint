@@ -27,3 +27,14 @@ export function requireAdmin(req: Request):
   }
   return { ok: true };
 }
+
+/**
+ * Gate for the report queue (/api/report GET and PATCH, /admin/reports).
+ * Today this is ADMIN_SECRET via requireAdmin.
+ * When lib/adminGate.ts from PR #25 is on this branch, switch this body to
+ * canViewAdminDashboard and leave every caller on requireReportAdmin.
+ * Do not reimplement ADMIN_EMAILS verification here.
+ */
+export function requireReportAdmin(req: Request) {
+  return requireAdmin(req);
+}

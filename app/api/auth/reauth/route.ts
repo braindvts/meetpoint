@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentMember } from "@/lib/memberAuth";
 import { accountKey, rateLimit } from "@/lib/rateLimit";
+import { REAUTH_IP } from "@/lib/rateCaps";
 import { hasRecentReauth, withReauth } from "@/lib/session";
 import { reauthSchema } from "@/lib/validation/auth";
 import { parseBody } from "@/lib/validation/parse";
@@ -11,7 +12,7 @@ import { verifyPassword } from "@/lib/password";
  * httpOnly reauth cookie for sensitive actions (billing, BLACK, grants).
  */
 export async function POST(req: Request) {
-  const limited = await rateLimit(req, { name: "reauth", limit: 10, windowMs: 15 * 60_000 });
+  const limited = await rateLimit(req, REAUTH_IP);
   if (!limited.ok) return limited.response;
 
   const me = await getCurrentMember();

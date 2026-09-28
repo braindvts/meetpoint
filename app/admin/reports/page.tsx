@@ -65,6 +65,7 @@ export default function ReportsAdminPage() {
   const [unlocked, setUnlocked] = useState(false);
   const [filter, setFilter] = useState<(typeof STATUS_FILTERS)[number]["value"]>("open");
   const [reports, setReports] = useState<ReportRow[]>([]);
+  const [autoHidden, setAutoHidden] = useState<MemberBrief[]>([]);
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
   const [notesDraft, setNotesDraft] = useState<Record<string, string>>({});
@@ -81,6 +82,7 @@ export default function ReportsAdminPage() {
           ok?: boolean;
           error?: string;
           reports?: ReportRow[];
+          autoHidden?: MemberBrief[];
         };
         if (!data.ok) {
           setMessage(data.error || "Could not load reports");
@@ -88,6 +90,7 @@ export default function ReportsAdminPage() {
           return;
         }
         setReports(data.reports || []);
+        setAutoHidden(data.autoHidden || []);
         setUnlocked(true);
         setNotesDraft(
           Object.fromEntries((data.reports || []).map((r) => [r.id, r.notes || ""]))
@@ -184,6 +187,24 @@ export default function ReportsAdminPage() {
         </form>
       ) : (
         <>
+          {autoHidden.length > 0 && (
+            <section className="mt-6 border border-accent/50 bg-panel/70 p-4">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-accent">
+                Auto-hidden from Discover
+              </p>
+              <ul className="mt-2 space-y-1 text-sm text-ivory">
+                {autoHidden.map((member) => (
+                  <li key={member.id}>
+                    {member.name}
+                    {member.jobTitle ? ` · ${member.jobTitle}` : ""}
+                    {" · "}
+                    {member.openReporterCount ?? 0} qualifying reports
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
           <div className="mt-6 flex flex-wrap gap-2">
             {STATUS_FILTERS.map((f) => (
               <button

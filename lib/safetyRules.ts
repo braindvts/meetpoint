@@ -2,8 +2,73 @@
  * Pure safety rules. Database lookups live in lib/moderation.ts.
  * OPEN_REPORT_HIDE_THRESHOLD is the only auto-hide cutoff.
  */
+import { isProfileComplete } from "./tiers";
+import type { LookingFor } from "./types";
 
 export const OPEN_REPORT_HIDE_THRESHOLD = 3;
+
+/**
+ * A report counts toward auto-hide when the reporter's account is at least
+ * this old, even without a verified email or a finished profile.
+ */
+export const AUTO_HIDE_MIN_ACCOUNT_AGE_DAYS = 3;
+export const AUTO_HIDE_MIN_ACCOUNT_AGE_MS =
+  AUTO_HIDE_MIN_ACCOUNT_AGE_DAYS * 24 * 60 * 60_000;
+
+export type ReporterTrust = {
+  emailVerifiedAt?: string | null;
+  googleId?: string | null;
+  appleId?: string | null;
+  linkedInId?: string | null;
+  createdAt?: Date | string | number | null;
+  name?: string | null;
+  photo?: string | null;
+  jobTitle?: string | null;
+  lookingFor?: string[] | null;
+  ideaTags?: string[] | null;
+};
+
+function filled(value: string | null | undefined): boolean {
+  return !!value?.trim();
+}
+
+function accountAgeMs(createdAt: ReporterTrust["createdAt"], now: number): number | null {
+  if (createdAt == null || createdAt === "") return null;
+  const created =
+    createdAt instanceof Date
+      ? createdAt.getTime()
+      : typeof createdAt === "number"
+        ? createdAt
+        : Date.parse(createdAt);
+  if (!Number.isFinite(created)) return null;
+  return now - created;
+}
+
+/**
+ * Fresh email signups do not count. A report counts when the reporter has a
+ * verified email, an OAuth account, a completed Identity profile, or an
+ * account at least AUTO_HIDE_MIN_ACCOUNT_AGE_DAYS old.
+ */
+export function reporterCountsTowardAutoHide(reporter: ReporterTrust, now = Date.now()): boolean {
+  if (filled(reporter.emailVerifiedAt)) return true;
+  if (filled(reporter.googleId) || filled(reporter.appleId) || filled(reporter.linkedInId)) {
+    return true;
+  }
+  if (
+    isProfileComplete({
+      name: reporter.name || "",
+      photo: reporter.photo || "",
+      jobTitle: reporter.jobTitle || "",
+      lookingFor: (reporter.lookingFor || []) as LookingFor[],
+      ideaTags: reporter.ideaTags || [],
+      verifications: [],
+    })
+  ) {
+    return true;
+  }
+  const age = accountAgeMs(reporter.createdAt, now);
+  return age != null && age >= AUTO_HIDE_MIN_ACCOUNT_AGE_MS;
+}
 
 /** Reports that still count toward auto-hide. Resolved and dismissed do not. */
 export const OPEN_REPORT_STATUSES = ["open", "reviewing"] as const;

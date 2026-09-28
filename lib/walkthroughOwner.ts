@@ -31,6 +31,13 @@ function safeEqual(a: string, b: string): boolean {
   return timingSafeEqual(left, right);
 }
 
+/** True when the server-only walkthrough mailbox is configured and this is that address. */
+export function isWalkthroughOwnerEmail(email: string, env: Env = process.env): boolean {
+  const creds = walkthroughOwnerCredentials(env);
+  if (!creds) return false;
+  return safeEqual(email.trim().toLowerCase(), creds.email);
+}
+
 /** True only when the server-only gate is on and env credentials match. */
 export function matchesWalkthroughOwner(
   email: string,

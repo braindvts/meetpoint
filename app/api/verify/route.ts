@@ -2,13 +2,14 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getCurrentMember } from "@/lib/memberAuth";
 import { accountKey, rateLimit } from "@/lib/rateLimit";
+import { VERIFY_IP } from "@/lib/rateCaps";
 import { makeVerification, validateVerification } from "@/lib/verifyRules";
 import type { Verification } from "@/lib/types";
 import { verifySchema } from "@/lib/validation/safety";
 import { parseBody } from "@/lib/validation/parse";
 
 export async function POST(req: Request) {
-  const limited = await rateLimit(req, { name: "verify", limit: 10, windowMs: 60 * 60_000 });
+  const limited = await rateLimit(req, VERIFY_IP);
   if (!limited.ok) return limited.response;
 
   const me = await getCurrentMember();

@@ -1,9 +1,7 @@
 import { z } from "zod";
-import { IDEA_TAGS } from "@/lib/data";
+import { isAllowedIdeaTag } from "@/lib/ideaTags";
 import { LOOKING_FOR_OPTIONS } from "@/lib/types";
 import { citySchema, lookingForEnum, meetPrefEnum, travelEnum, zShortText } from "./primitives";
-
-const ideaTagSet = new Set<string>(IDEA_TAGS);
 
 const httpsUrl = z
   .string()
@@ -68,7 +66,10 @@ export const profileUpdateSchema = z
           .string()
           .trim()
           .max(60)
-          .refine((tag) => ideaTagSet.has(tag), "Unknown interest")
+          .refine(
+            (tag) => isAllowedIdeaTag(tag),
+            "Use a listed idea or a short custom tag without links or markup"
+          )
       )
       .max(12),
     phone: phoneSchema.optional().or(z.literal("")),

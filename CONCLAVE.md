@@ -145,7 +145,7 @@ Discover ranks people by shared ambitions, complementary “looking for,” same
 
 - Members report another member from their profile or chat (`harassment`, `spam`, `fake_profile`, `inappropriate`, `scam`, `other`) and can block at the same time.
 - A block is both ways for visibility: those two people do not appear to each other in Discover, For you, connection requests, chats, or event attendee lists. Either person can unblock only the block they created.
-- **Auto-hide:** 3 distinct members with a report still `open` or `reviewing` hides that member from Discover and For you until an admin marks the reports `resolved` or `dismissed`. The cutoff is `OPEN_REPORT_HIDE_THRESHOLD` in `lib/safetyRules.ts`.
+- **Auto-hide:** 3 distinct qualifying reporters with a report still `open` or `reviewing` hides that member from Discover and For you until an admin marks the reports `resolved` or `dismissed`. A report counts when the reporter has a verified email (`emailVerifiedAt` or an OAuth account), a completed Identity profile, or an account at least 3 days old (`AUTO_HIDE_MIN_ACCOUNT_AGE_DAYS`). The cutoff is `OPEN_REPORT_HIDE_THRESHOLD` in `lib/safetyRules.ts`. Crossing into auto-hide lists the member at the top of `/admin/reports` and emails `ADMIN_EMAILS` when mail is configured.
 - Admins review the queue at `/admin/reports` with `ADMIN_SECRET` (Bearer). There is no owner password in the repo.
 
 ## Demo / walkthrough login

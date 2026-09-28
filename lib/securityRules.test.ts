@@ -3,18 +3,30 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
 import type { Member } from "@prisma/client";
-import { requireAdmin } from "./adminAuth.ts";
+import { requireAdmin, requireReportAdmin } from "./adminAuth.ts";
+import {
+  AUTH_LOCK_ACCOUNT_FAILS,
+  AUTH_LOCK_PAIR_FAILS,
+  clearAuthFailures,
+  isAuthLocked,
+  recordAuthFailure,
+  resetAuthLockoutForTests,
+} from "./authLockout.ts";
+import { adminNotifyEmails } from "./email.ts";
 import { googleProfileFromClaims } from "./googleAuth.ts";
-import { memberToPerson } from "./memberMap.ts";
-import { accountKey, rateLimitStorageKey } from "./rateLimit.ts";
+import { memberToPerson, profileToMemberData } from "./memberMap.ts";
+import { AUTH_SIGNUP_IP } from "./rateCaps.ts";
+import { accountKey, hashIp, rateLimitStorageKey } from "./rateLimit.ts";
 import { secretsMatch } from "./secretCompare.ts";
 import {
+  AUTO_HIDE_MIN_ACCOUNT_AGE_MS,
   OPEN_REPORT_HIDE_THRESHOLD,
   autoHiddenFromRows,
   chatInvolvesBlock,
   consumeBucket,
   filterAttendeeIds,
   memberAuthSource,
+  reporterCountsTowardAutoHide,
   shouldAutoHide,
   visibleInDiscover,
 } from "./safetyRules.ts";
@@ -176,10 +188,26 @@ test("account rate-limit keys are hashes, not raw emails", () => {
   });
   assert.equal(key.includes(email), false);
   assert.equal(key.includes("1.2.3.4"), false);
-  assert.equal(
-    rateLimitStorageKey("1.2.3.4", { name: "auth-email", limit: 1, windowMs: 1 }),
-    "auth-email:ip:1.2.3.4"
+  const ipKey = rateLimitStorageKey(
+    "203.0.113.9",
+    { name: "auth-email", limit: 1, windowMs: 1 },
+    "test-secret"
   );
+  assert.match(ipKey, /^auth-email:ip:[a-f0-9]{24}$/);
+  assert.equal(ipKey.includes("203.0.113.9"), false);
+  assert.equal(
+    ipKey,
+    rateLimitStorageKey("203.0.113.9", { name: "auth-email", limit: 1, windowMs: 1 }, "test-secret")
+  );
+  assert.notEqual(
+    ipKey,
+    rateLimitStorageKey("203.0.113.10", { name: "auth-email", limit: 1, windowMs: 1 }, "test-secret")
+  );
+  assert.notEqual(
+    ipKey,
+    rateLimitStorageKey("203.0.113.9", { name: "auth-email", limit: 1, windowMs: 1 }, "other-secret")
+  );
+  assert.equal(hashIp("203.0.113.9", "test-secret"), hashIp("203.0.113.9", "test-secret"));
 });
 
 test("fixed window blocks the request after the limit", () => {
@@ -255,9 +283,30 @@ test("profile writes reject secrets, free-text tags, and unsafe photos", () => {
     false
   );
   assert.equal(
-    profileUpdateSchema.safeParse({ ...base, ideaTags: ["Not a listed idea"] }).success,
+    profileUpdateSchema.safeParse({ ...base, ideaTags: ["Neighborhood supper clubs"] }).success,
+    true
+  );
+  assert.equal(
+    profileUpdateSchema.safeParse({ ...base, ideaTags: ["https://spam.test/offer"] }).success,
     false
   );
+  assert.equal(
+    profileUpdateSchema.safeParse({ ...base, ideaTags: ["<script>alert(1)</script>"] }).success,
+    false
+  );
+  const stored = profileToMemberData({
+    name: "Ada",
+    jobTitle: "Founder",
+    ideaTags: ["SaaS", "Neighborhood supper clubs", "https://spam.test", "<b>no</b>"],
+    lookingFor: ["Co-founder"],
+    bio: "Building.",
+    city,
+    travel: "worldwide",
+    meetPreference: "open",
+    photo: "https://cdn.example/ada.jpg",
+    verifications: [],
+  });
+  assert.deepEqual(JSON.parse(stored.ideaTagsJson), ["SaaS", "Neighborhood supper clubs"]);
   assert.equal(
     profileUpdateSchema.safeParse({ ...base, bio: "x".repeat(801) }).success,
     false
@@ -314,7 +363,11 @@ test("google email is ignored unless Google verified it", () => {
 test("report, block, and member routes keep auth on the server", () => {
   const report = read("app/api/report/route.ts");
   assert.match(report, /getCurrentMember\(\)/);
-  assert.match(report, /requireAdmin\(req\)/);
+  assert.match(report, /requireReportAdmin\(req\)/);
+  assert.match(report, /sendAutoHideAlert/);
+  const adminAuth = read("lib/adminAuth.ts");
+  assert.match(adminAuth, /function requireReportAdmin/);
+  assert.match(adminAuth, /canViewAdminDashboard/);
   assert.match(report, /reporterId: me\.id/);
   assert.doesNotMatch(report, /reporterId:\s*parsed\.data/);
   assert.doesNotMatch(report, /email:\s*true/);
@@ -339,6 +392,8 @@ test("report, block, and member routes keep auth on the server", () => {
   const events = read("app/api/events/route.ts");
   assert.match(events, /filterAttendeeIds/);
   assert.match(events, /blockedPeerIdSet/);
+  assert.match(events, /catch/);
+  assert.match(events, /getPublishedEvents\(\)/);
 
   const sms = read("app/api/notify/sms/route.ts");
   assert.match(sms, /digitsOnly\(me\?\.phone/);
@@ -346,8 +401,138 @@ test("report, block, and member routes keep auth on the server", () => {
 
   const emailAuth = read("app/api/auth/email/route.ts");
   assert.match(emailAuth, /emailSignupTaken\(existing\)/);
-  assert.match(emailAuth, /auth-signup-acct/);
+  assert.match(emailAuth, /AUTH_SIGNUP_IP/);
+  assert.match(emailAuth, /auth-signup-acct|AUTH_SIGNUP_ACCOUNT/);
+  assert.doesNotMatch(emailAuth, /auth-signin-acct/);
+  assert.ok(AUTH_SIGNUP_IP.limit >= 80);
 
   const apple = read("app/api/auth/apple/callback/route.ts");
   assert.match(apple, /verifyAppleIdToken/);
+});
+
+test("only trusted reporters count toward auto-hide", () => {
+  const now = Date.parse("2026-09-28T00:00:00.000Z");
+  const fresh = { createdAt: new Date(now - 60_000), name: "New", photo: "", jobTitle: "" };
+  assert.equal(reporterCountsTowardAutoHide(fresh, now), false);
+  assert.equal(
+    reporterCountsTowardAutoHide({ ...fresh, emailVerifiedAt: "2026-09-01T00:00:00.000Z" }, now),
+    true
+  );
+  assert.equal(reporterCountsTowardAutoHide({ ...fresh, googleId: "g-1" }, now), true);
+  assert.equal(reporterCountsTowardAutoHide({ ...fresh, appleId: "a-1" }, now), true);
+  assert.equal(reporterCountsTowardAutoHide({ ...fresh, linkedInId: "li-1" }, now), true);
+  assert.equal(
+    reporterCountsTowardAutoHide(
+      {
+        ...fresh,
+        name: "Ada",
+        photo: "https://cdn.example/ada.jpg",
+        jobTitle: "Founder",
+        lookingFor: ["Co-founder"],
+        ideaTags: ["SaaS"],
+      },
+      now
+    ),
+    true
+  );
+  assert.equal(
+    reporterCountsTowardAutoHide(
+      { ...fresh, createdAt: new Date(now - AUTO_HIDE_MIN_ACCOUNT_AGE_MS + 60_000) },
+      now
+    ),
+    false
+  );
+  assert.equal(
+    reporterCountsTowardAutoHide(
+      { ...fresh, createdAt: new Date(now - AUTO_HIDE_MIN_ACCOUNT_AGE_MS) },
+      now
+    ),
+    true
+  );
+});
+
+test("failed login locks the IP pair before the account", () => {
+  resetAuthLockoutForTests();
+  const email = "member@example.com";
+  const previous = {
+    gate: process.env.ENABLE_WALKTHROUGH_OWNER,
+    mailbox: process.env.WALKTHROUGH_OWNER_EMAIL,
+    password: process.env.WALKTHROUGH_OWNER_PASSWORD,
+  };
+  delete process.env.ENABLE_WALKTHROUGH_OWNER;
+  delete process.env.WALKTHROUGH_OWNER_EMAIL;
+  delete process.env.WALKTHROUGH_OWNER_PASSWORD;
+  try {
+    for (let i = 0; i < AUTH_LOCK_PAIR_FAILS; i += 1) recordAuthFailure(email, "198.51.100.1");
+    assert.equal(isAuthLocked(email, "198.51.100.1"), true);
+    assert.equal(isAuthLocked(email, "198.51.100.2"), false);
+
+    clearAuthFailures(email, "198.51.100.1");
+    for (let i = 0; i < AUTH_LOCK_ACCOUNT_FAILS; i += 1) {
+      recordAuthFailure(email, `198.51.100.${i % 40}:${i}`);
+    }
+    assert.equal(isAuthLocked(email, "203.0.113.50"), true);
+  } finally {
+    resetAuthLockoutForTests();
+    if (previous.gate === undefined) delete process.env.ENABLE_WALKTHROUGH_OWNER;
+    else process.env.ENABLE_WALKTHROUGH_OWNER = previous.gate;
+    if (previous.mailbox === undefined) delete process.env.WALKTHROUGH_OWNER_EMAIL;
+    else process.env.WALKTHROUGH_OWNER_EMAIL = previous.mailbox;
+    if (previous.password === undefined) delete process.env.WALKTHROUGH_OWNER_PASSWORD;
+    else process.env.WALKTHROUGH_OWNER_PASSWORD = previous.password;
+  }
+});
+
+test("the walkthrough mailbox is exempt from the account-wide login lock", () => {
+  resetAuthLockoutForTests();
+  const previous = {
+    gate: process.env.ENABLE_WALKTHROUGH_OWNER,
+    mailbox: process.env.WALKTHROUGH_OWNER_EMAIL,
+    password: process.env.WALKTHROUGH_OWNER_PASSWORD,
+  };
+  process.env.ENABLE_WALKTHROUGH_OWNER = "1";
+  process.env.WALKTHROUGH_OWNER_EMAIL = "owner@walkthrough.test";
+  process.env.WALKTHROUGH_OWNER_PASSWORD = "sample-password";
+  const email = "owner@walkthrough.test";
+  try {
+    for (let i = 0; i < AUTH_LOCK_ACCOUNT_FAILS + 5; i += 1) {
+      recordAuthFailure(email, `198.51.100.${i}`);
+    }
+    assert.equal(isAuthLocked(email, "203.0.113.8"), false);
+    for (let i = 0; i < AUTH_LOCK_PAIR_FAILS; i += 1) recordAuthFailure(email, "203.0.113.8");
+    assert.equal(isAuthLocked(email, "203.0.113.8"), true);
+    assert.equal(isAuthLocked(email, "203.0.113.9"), false);
+  } finally {
+    resetAuthLockoutForTests();
+    if (previous.gate === undefined) delete process.env.ENABLE_WALKTHROUGH_OWNER;
+    else process.env.ENABLE_WALKTHROUGH_OWNER = previous.gate;
+    if (previous.mailbox === undefined) delete process.env.WALKTHROUGH_OWNER_EMAIL;
+    else process.env.WALKTHROUGH_OWNER_EMAIL = previous.mailbox;
+    if (previous.password === undefined) delete process.env.WALKTHROUGH_OWNER_PASSWORD;
+    else process.env.WALKTHROUGH_OWNER_PASSWORD = previous.password;
+  }
+});
+
+test("admin alert recipients come from ADMIN_EMAILS and the report gate stays swappable", () => {
+  const previous = process.env.ADMIN_EMAILS;
+  process.env.ADMIN_EMAILS = "ops@interlink.test, ops@interlink.test not-an-email";
+  try {
+    assert.deepEqual(adminNotifyEmails(), ["ops@interlink.test"]);
+  } finally {
+    if (previous === undefined) delete process.env.ADMIN_EMAILS;
+    else process.env.ADMIN_EMAILS = previous;
+  }
+  const previousSecret = process.env.ADMIN_SECRET;
+  process.env.ADMIN_SECRET = "queue-secret";
+  try {
+    const ok = requireReportAdmin(
+      new Request("https://interlink.test/api/report", {
+        headers: { authorization: "Bearer queue-secret" },
+      })
+    );
+    assert.equal(ok.ok, true);
+  } finally {
+    if (previousSecret === undefined) delete process.env.ADMIN_SECRET;
+    else process.env.ADMIN_SECRET = previousSecret;
+  }
 });

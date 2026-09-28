@@ -6,6 +6,7 @@ import { getCurrentMember } from "@/lib/memberAuth";
 import { blockedPeerIdSet, pairIsBlocked } from "@/lib/moderation";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
 import { accountKey, rateLimit } from "@/lib/rateLimit";
+import { CONNECTIONS_POST_IP } from "@/lib/rateCaps";
 import type { Connection as ClientConnection } from "@/lib/types";
 import {
   connectionPatchSchema,
@@ -57,11 +58,7 @@ export async function GET() {
 /** Request an introduction to peerId. An existing inbound request is accepted. */
 export async function POST(req: Request) {
   try {
-    const limited = await rateLimit(req, {
-      name: "connections-post",
-      limit: 30,
-      windowMs: 60 * 60_000,
-    });
+    const limited = await rateLimit(req, CONNECTIONS_POST_IP);
     if (!limited.ok) return limited.response;
 
     await purgeDemoResidue();

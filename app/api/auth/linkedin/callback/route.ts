@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { rateLimit } from "@/lib/rateLimit";
+import { OAUTH_CALLBACK_IP } from "@/lib/rateCaps";
 import {
   appUrl,
   clearOAuthStateCookie,
@@ -23,7 +24,7 @@ interface LinkedInUser {
 }
 
 export async function GET(req: NextRequest) {
-  const limited = await rateLimit(req, { name: "auth-oauth-cb", limit: 40, windowMs: 60 * 60_000 });
+  const limited = await rateLimit(req, OAUTH_CALLBACK_IP);
   if (!limited.ok) return NextResponse.redirect(appUrl("/login?error=rate_limited"));
 
   const url = req.nextUrl;

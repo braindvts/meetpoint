@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CITIES, cityKey, indexOfCity, nearestCity } from "@/lib/cities";
 import { IDEA_TAGS, POPULAR_TAGS } from "@/lib/data";
+import { canonicalIdeaTag, isAllowedIdeaTag, isCatalogIdeaTag } from "@/lib/ideaTags";
 import { showToast } from "@/lib/notify";
 import { formatPhoneDisplay, isValidPhone } from "@/lib/phone";
 import { saveProfile } from "@/lib/store";
@@ -156,9 +157,18 @@ export default function ProfileForm({
   });
   const [travel, setTravel] = useState<TravelRange>(initial?.travel ?? "worldwide");
   const [lookingFor, setLookingFor] = useState<LookingFor[]>(initial?.lookingFor ?? []);
-  const [ideaTags, setIdeaTags] = useState<string[]>(
-    (initial?.ideaTags ?? []).filter((tag) => (IDEA_TAGS as readonly string[]).includes(tag))
-  );
+  const [ideaTags, setIdeaTags] = useState<string[]>(() => {
+    const kept: string[] = [];
+    const seen = new Set<string>();
+    for (const raw of initial?.ideaTags ?? []) {
+      const tag = canonicalIdeaTag(raw);
+      if (!tag || seen.has(tag.toLowerCase())) continue;
+      seen.add(tag.toLowerCase());
+      kept.push(tag);
+      if (kept.length >= 12) break;
+    }
+    return kept;
+  });
   const [verifyValues, setVerifyValues] = useState<Partial<Record<VerificationMethod, string>>>(
     () => {
       const next: Partial<Record<VerificationMethod, string>> = {};
@@ -207,11 +217,13 @@ export default function ProfileForm({
   }
 
   function toggleTag(tag: string) {
-    if (!(IDEA_TAGS as readonly string[]).includes(tag)) return;
+    const canonical = canonicalIdeaTag(tag);
     setIdeaTags((tags) => {
-      if (tags.includes(tag)) return tags.filter((t) => t !== tag);
+      const existing = tags.find((item) => item.toLowerCase() === tag.trim().toLowerCase());
+      if (existing) return tags.filter((item) => item !== existing);
+      if (!canonical || !isAllowedIdeaTag(canonical)) return tags;
       if (tags.length >= 12) return tags;
-      return [...tags, tag];
+      return [...tags, canonical];
     });
     clearFieldError("ideaTags");
   }
@@ -233,6 +245,13 @@ export default function ProfileForm({
 
   const exactExists =
     !!query && IDEA_TAGS.some((t) => t.toLowerCase() === query.toLowerCase());
+  const customToAdd = (() => {
+    if (!query || exactExists) return "";
+    const tag = canonicalIdeaTag(query);
+    if (!tag || isCatalogIdeaTag(tag)) return "";
+    if (ideaTags.some((item) => item.toLowerCase() === tag.toLowerCase())) return "";
+    return tag;
+  })();
 
   async function onPhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -540,7 +559,7 @@ export default function ProfileForm({
         id="section-ambitions"
         num="02"
         title="Ambitions"
-        subtitle="What you’re building — pick from the list. Up to 12."
+        subtitle="What you’re building. Up to 12, including a tag of your own."
         missing={!!fieldErrors.ideaTags}
         missingLabel={fieldErrors.ideaTags}
       >
@@ -554,6 +573,9 @@ export default function ProfileForm({
                 e.preventDefault();
                 if (searchResults.length === 1) {
                   toggleTag(searchResults[0]);
+                  setTagSearch("");
+                } else if (customToAdd) {
+                  toggleTag(customToAdd);
                   setTagSearch("");
                 }
               }
@@ -583,9 +605,19 @@ export default function ProfileForm({
                 onClick={() => toggleTag(tag)}
               />
             ))}
-            {searchResults.length === 0 && (
+            {customToAdd && (
+              <TagChip
+                tag={`Add “${customToAdd}”`}
+                selected={false}
+                onClick={() => {
+                  toggleTag(customToAdd);
+                  setTagSearch("");
+                }}
+              />
+            )}
+            {searchResults.length === 0 && !customToAdd && (
               <p className="text-xs text-muted">
-                {exactExists ? "Already selected" : "Choose an idea from the list."}
+                {exactExists ? "Already selected" : "Use a short tag — no links or markup."}
               </p>
             )}
           </div>

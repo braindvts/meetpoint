@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { rateLimit } from "@/lib/rateLimit";
+import { OAUTH_CALLBACK_IP } from "@/lib/rateCaps";
 import { sendWelcomeEmail } from "@/lib/email";
 import { verifyGoogleIdToken } from "@/lib/googleAuth";
 import { withMemberCookie } from "@/lib/memberAuth";
@@ -14,7 +15,7 @@ import {
 } from "@/lib/session";
 
 export async function GET(req: NextRequest) {
-  const limited = await rateLimit(req, { name: "auth-oauth-cb", limit: 40, windowMs: 60 * 60_000 });
+  const limited = await rateLimit(req, OAUTH_CALLBACK_IP);
   if (!limited.ok) return NextResponse.redirect(appUrl("/login?error=rate_limited"));
 
   const url = req.nextUrl;

@@ -1,4 +1,4 @@
-import { createHash } from "crypto";
+import { createHash, createHmac } from "crypto";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { consumeBucket } from "@/lib/safetyRules";
@@ -34,11 +34,26 @@ export function accountKey(value: string): string {
   return createHash("sha256").update(value.trim().toLowerCase()).digest("hex").slice(0, 24);
 }
 
-export function rateLimitStorageKey(ip: string, opts: RateLimitOptions): string {
+/** Server secret for IP key hashing. Tests pass a secret explicitly. */
+export function rateLimitSecret(): string {
+  return process.env.AUTH_SECRET?.trim() || "interlink-rate-limit-dev";
+}
+
+/** HMAC so RateLimitBucket keys never contain a raw IP. */
+export function hashIp(ip: string, secret = rateLimitSecret()): string {
+  const value = ip.trim() || "unknown";
+  return createHmac("sha256", secret).update(value).digest("hex").slice(0, 24);
+}
+
+export function rateLimitStorageKey(
+  ip: string,
+  opts: RateLimitOptions,
+  secret = rateLimitSecret()
+): string {
   if (opts.scope === "account") {
     return `${opts.name}:acct:${opts.keyExtra || "anon"}`;
   }
-  return `${opts.name}:ip:${ip}`;
+  return `${opts.name}:ip:${hashIp(ip, secret)}`;
 }
 
 async function hitDatabase(

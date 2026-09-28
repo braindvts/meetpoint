@@ -90,6 +90,54 @@ function welcomeHtml(firstName: string, link: string): string {
 </html>`;
 }
 
+/** Comma-separated ADMIN_EMAILS. Recipients only — not an access gate. */
+export function adminNotifyEmails(env: Record<string, string | undefined> = process.env): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const part of (env.ADMIN_EMAILS || "").split(/[,;\s]+/)) {
+    const email = part.trim().toLowerCase();
+    if (!email || seen.has(email)) continue;
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) continue;
+    seen.add(email);
+    out.push(email);
+  }
+  return out;
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+/**
+ * One note when a member crosses into auto-hide.
+ * Without RESEND_API_KEY or ADMIN_EMAILS this no-ops. The report still saves.
+ */
+export async function sendAutoHideAlert(member: { id: string; name: string }): Promise<void> {
+  try {
+    const recipients = adminNotifyEmails();
+    if (!recipients.length) return;
+    const link = appUrl("/admin/reports");
+    const name = (member.name || "Member").trim() || "Member";
+    const safeName = escapeHtml(name);
+    const subject = `Auto-hidden from Discover: ${name}`;
+    const text = [
+      `${name} (${member.id}) is hidden from Discover.`,
+      "Open reports from enough distinct trusted reporters crossed the auto-hide line.",
+      `Review the queue: ${link}`,
+    ].join("\n");
+    const html = `<p><strong>${safeName}</strong> (${escapeHtml(member.id)}) is hidden from Discover.</p><p>Open reports from enough distinct trusted reporters crossed the auto-hide line.</p><p><a href="${escapeHtml(link)}">Review the queue</a></p>`;
+    await Promise.all(
+      recipients.map((to) => sendEmail({ to, subject, html, text }))
+    );
+  } catch (err) {
+    console.error("[conclave auto-hide alert]", err);
+  }
+}
+
 /** Sent once, when a member account is first created. */
 export async function sendWelcomeEmail(to: string, name?: string): Promise<boolean> {
   const firstName = (name || "").trim().split(" ")[0] || "there";

@@ -17,6 +17,7 @@ import {
 } from "@/lib/password";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
 import { accountKey, rateLimit } from "@/lib/rateLimit";
+import { AUTH_EMAIL_IP, AUTH_SIGNUP_ACCOUNT, AUTH_SIGNUP_IP } from "@/lib/rateCaps";
 import { publicError } from "@/lib/safeError";
 import { sanitizeName } from "@/lib/sanitize";
 import { appUrl, withSession } from "@/lib/session";
@@ -26,11 +27,7 @@ import { matchesWalkthroughOwner } from "@/lib/walkthroughOwner";
 
 export async function POST(req: Request) {
   try {
-    const limited = await rateLimit(req, {
-      name: "auth-email",
-      limit: 20,
-      windowMs: 15 * 60_000,
-    });
+    const limited = await rateLimit(req, AUTH_EMAIL_IP);
     if (!limited.ok) return limited.response;
 
     await purgeDemoResidue();
@@ -44,29 +41,13 @@ export async function POST(req: Request) {
     const acct = accountKey(email);
 
     if (mode === "signup") {
-      const signupLimited = await rateLimit(req, {
-        name: "auth-signup",
-        limit: 5,
-        windowMs: 60 * 60_000,
-      });
+      const signupLimited = await rateLimit(req, AUTH_SIGNUP_IP);
       if (!signupLimited.ok) return signupLimited.response;
       const signupAccount = await rateLimit(req, {
-        name: "auth-signup-acct",
-        limit: 3,
-        windowMs: 60 * 60_000,
-        scope: "account",
+        ...AUTH_SIGNUP_ACCOUNT,
         keyExtra: acct,
       });
       if (!signupAccount.ok) return signupAccount.response;
-    } else {
-      const signinAccount = await rateLimit(req, {
-        name: "auth-signin-acct",
-        limit: 10,
-        windowMs: 15 * 60_000,
-        scope: "account",
-        keyExtra: acct,
-      });
-      if (!signinAccount.ok) return signinAccount.response;
     }
 
     if (isAuthLocked(email, ip)) {
