@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import Nav from "@/components/Nav";
 import PageHeader from "@/components/PageHeader";
 import Avatar from "@/components/Avatar";
 import BlackBadge from "@/components/BlackBadge";
@@ -183,7 +182,6 @@ export default function ConnectionsPage() {
   if (!profile) {
     return (
       <>
-        <Nav />
         <main className="mp-app px-5 pb-10 pt-6 md:px-6">
           <PageHeader title="Circle" />
           <p className="mt-3 text-sm text-muted">Loading your circle…</p>
@@ -196,7 +194,6 @@ export default function ConnectionsPage() {
 
   return (
     <>
-      <Nav />
       <main className="mp-app px-0 pb-10 md:px-6">
         <PageHeader title="Circle" />
         <div className="px-4 pt-2">

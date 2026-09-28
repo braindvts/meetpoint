@@ -6,7 +6,6 @@ import MemberStatusStrip from "@/components/MemberStatusStrip";
 import PlansSection from "@/components/PlansSection";
 import Avatar from "@/components/Avatar";
 import EditProfilePopup from "@/components/EditProfilePopup";
-import Nav from "@/components/Nav";
 import PageHeader from "@/components/PageHeader";
 import ProfileForm from "@/components/ProfileForm";
 import MembershipTiers from "@/components/MembershipTiers";
@@ -83,7 +82,6 @@ function ProfileContent() {
   if (!profile) {
     return (
       <>
-        <Nav />
         <main className="mp-app px-5 pb-10 pt-6 md:px-6">
           <PageHeader title="Profile" />
           <p className="mt-3 text-sm text-muted">Loading profile…</p>
@@ -105,7 +103,6 @@ function ProfileContent() {
 
   return (
     <>
-      <Nav />
       <main className="mp-app px-0 pb-10 md:px-6">
         <PageHeader title="Profile" />
         <div className="px-4 pb-6 pt-2">

@@ -3,7 +3,6 @@
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import Nav from "@/components/Nav";
 import Avatar from "@/components/Avatar";
 import NameMarks from "@/components/NameMarks";
 import ChatThreadPanel from "@/components/ChatThreadPanel";
@@ -267,7 +266,6 @@ function ChatsInner() {
   if (!profile) {
     return (
       <>
-        <Nav />
         <main className="mp-chats-layout">
           <aside className="mp-chats-rail flex border-r border-line/50">
             <div className="px-4 py-8">
@@ -286,7 +284,6 @@ function ChatsInner() {
 
   return (
     <>
-      <Nav />
       <main className="mp-chats-layout">
         <aside
           className={`mp-chats-rail border-r border-line/50 ${

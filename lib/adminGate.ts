@@ -62,6 +62,8 @@ export function adminCookieOptions(maxAgeSec: number) {
 }
 
 export type AdminOauthIdentity = {
+  email: string | null;
+  emailVerifiedAt: string | null;
   googleId: string | null;
   appleId: string | null;
   /** Email from the current Google sign-in. Never Member.email. */
@@ -80,14 +82,12 @@ export type AdminOauthIdentity = {
  * session provider is Google or Apple and session.id is that member's
  * googleId or appleId.
  *
- * Member.email and emailVerifiedAt are ignored. emailVerifiedAt is set by
- * POST /api/verify with no mailbox confirmation.
+ * Member.email is not the provider address. Whether it counts is decided only
+ * in adminEmailIsVerified.
  */
 export function adminIdentityFromAuth(
   member: {
-    /** Present on Member, and ignored. Account email is not provider proof. */
     email?: string | null;
-    /** Set by POST /api/verify. Ignored: that route does not confirm the mailbox. */
     emailVerifiedAt?: string | null;
     googleId?: string | null;
     appleId?: string | null;
@@ -103,6 +103,8 @@ export function adminIdentityFromAuth(
   const sessionId = session?.id?.trim() || "";
   const providerEmail = session?.email?.trim() || null;
   return {
+    email: member?.email?.trim() || null,
+    emailVerifiedAt: member?.emailVerifiedAt?.trim() || null,
     googleId,
     appleId,
     googleEmail:
@@ -110,6 +112,47 @@ export function adminIdentityFromAuth(
     appleEmail:
       session?.provider === "apple" && appleId && sessionId === appleId ? providerEmail : null,
   };
+}
+
+function listedAccountEmail(email: string | null | undefined, allow: Set<string>): boolean {
+  const normalized = email?.trim().toLowerCase() || "";
+  return Boolean(normalized && allow.has(normalized));
+}
+
+/**
+ * Whether an ADMIN_EMAILS address is proven for this member.
+ *
+ * OAuth: a Google or Apple id plus the email on that provider session.
+ *
+ * TODO: A teammate's legal/security PR adds a one-time expiring confirmation
+ * link and sets emailVerifiedAt only when that link is clicked. Until it
+ * merges, emailVerifiedAt is still written by POST /api/verify with no mailbox
+ * check, so it must not grant admin. When that PR merges, grant here — and
+ * only here — when emailVerifiedAt is set and input.email is listed.
+ */
+export function adminEmailIsVerified(input: {
+  email?: string | null;
+  emailVerifiedAt?: string | null;
+  googleId?: string | null;
+  appleId?: string | null;
+  googleEmail?: string | null;
+  appleEmail?: string | null;
+  adminEmails?: string | null;
+}): boolean {
+  const allow = parseAdminEmails(input.adminEmails);
+  const confirmedByLink = false;
+  if (confirmedByLink && input.emailVerifiedAt?.trim() && listedAccountEmail(input.email, allow)) {
+    return true;
+  }
+  if (listedProviderEmail(input.googleId?.trim() || null, input.googleEmail ?? null, allow)) return true;
+  if (listedProviderEmail(input.appleId?.trim() || null, input.appleEmail ?? null, allow)) return true;
+  return false;
+}
+
+/** Nav href for an admin. Null means the link is not rendered at all. */
+export function adminNavLinkFor(allowed: boolean): { href: "/admin/analytics"; label: "Admin" } | null {
+  if (!allowed) return null;
+  return { href: "/admin/analytics", label: "Admin" };
 }
 
 function listedProviderEmail(
@@ -125,14 +168,14 @@ function listedProviderEmail(
  * Page gate for /admin/analytics (and later the report review queue).
  *
  * Allowed when either:
- * - the member has a Google or Apple id, and the email from that provider on
- *   this sign-in is listed in ADMIN_EMAILS, or
+ * - adminEmailIsVerified matches an ADMIN_EMAILS address, or
  * - the browser holds a cookie signed with the existing ADMIN_SECRET.
  *
- * Anything else, including a listed Member.email or emailVerifiedAt, falls
- * through to the secret. Callers must 404 when this returns false.
+ * Callers must 404 when this returns false. The nav must omit the link.
  */
 export function canViewAdminDashboard(input: {
+  email?: string | null;
+  emailVerifiedAt?: string | null;
   googleId?: string | null;
   appleId?: string | null;
   googleEmail?: string | null;
@@ -143,14 +186,6 @@ export function canViewAdminDashboard(input: {
   now?: number;
 }): boolean {
   const now = input.now ?? Date.now();
-  const allow = parseAdminEmails(input.adminEmails);
-  const googleId = input.googleId?.trim() || null;
-  const appleId = input.appleId?.trim() || null;
-  if (
-    listedProviderEmail(googleId, input.googleEmail ?? null, allow) ||
-    listedProviderEmail(appleId, input.appleEmail ?? null, allow)
-  ) {
-    return true;
-  }
+  if (adminEmailIsVerified(input)) return true;
   return adminCookieValid(input.cookie, input.adminSecret, now);
 }

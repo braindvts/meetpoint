@@ -1,9 +1,6 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { unlockAdmin } from "./actions";
-import { ADMIN_COOKIE, adminIdentityFromAuth, canViewAdminDashboard } from "@/lib/adminGate";
-import { getCurrentMember } from "@/lib/memberAuth";
-import { getSession } from "@/lib/session";
+import { canViewAdminFromRequest } from "@/lib/adminAccess";
 
 export const dynamic = "force-dynamic";
 
@@ -12,28 +9,7 @@ export default async function AdminEnterPage({
 }: {
   searchParams: Promise<{ error?: string }>;
 }) {
-  const jar = await cookies();
-  let session = null;
-  try {
-    session = await getSession();
-  } catch {
-    session = null;
-  }
-  let member = null;
-  try {
-    member = await getCurrentMember();
-  } catch {
-    member = null;
-  }
-  const identity = adminIdentityFromAuth(member, session);
-  if (
-    canViewAdminDashboard({
-      ...identity,
-      cookie: jar.get(ADMIN_COOKIE)?.value,
-      adminEmails: process.env.ADMIN_EMAILS,
-      adminSecret: process.env.ADMIN_SECRET,
-    })
-  ) {
+  if (await canViewAdminFromRequest()) {
     redirect("/admin/analytics");
   }
 

@@ -5,7 +5,9 @@ import { test } from "node:test";
 import {
   ADMIN_SESSION_MS,
   adminCookieValid,
+  adminEmailIsVerified,
   adminIdentityFromAuth,
+  adminNavLinkFor,
   canViewAdminDashboard,
   signAdminCookie,
 } from "./adminGate.ts";
@@ -171,15 +173,54 @@ test("allowlisted email and a valid admin cookie can open the dashboard", () => 
   assert.equal(adminCookieValid(tampered, SECRET, NOW + 1_000), false);
 });
 
+test("emailVerifiedAt does not count until the confirmation link exists", () => {
+  assert.equal(
+    adminEmailIsVerified({
+      email: "brian@interlink.test",
+      emailVerifiedAt: "2026-09-01T00:00:00.000Z",
+      adminEmails: "brian@interlink.test",
+    }),
+    false
+  );
+  assert.equal(
+    adminEmailIsVerified({
+      email: "someone@else.test",
+      emailVerifiedAt: "2026-09-01T00:00:00.000Z",
+      googleId: "google-sub-1",
+      googleEmail: "brian@interlink.test",
+      adminEmails: "brian@interlink.test",
+    }),
+    true
+  );
+  const gate = readFileSync(join(import.meta.dirname, "adminGate.ts"), "utf8");
+  assert.match(gate, /export function adminEmailIsVerified/);
+  assert.match(gate, /confirmedByLink = false/);
+  assert.match(gate, /one-time expiring confirmation/);
+  assert.match(gate, /adminEmailIsVerified\(input\)/);
+});
+
+test("non-admins do not get the admin nav link", () => {
+  assert.equal(adminNavLinkFor(false), null);
+  assert.equal(adminNavLinkFor(canViewAdminDashboard({})), null);
+  const nav = readFileSync(join(import.meta.dirname, "../components/Nav.tsx"), "utf8");
+  assert.equal(nav.includes("/admin/analytics"), false);
+  assert.equal(nav.includes(">Admin<"), false);
+  const site = readFileSync(join(import.meta.dirname, "../components/SiteNav.tsx"), "utf8");
+  assert.match(site, /adminNavLinkFor/);
+  assert.match(site, /canViewAdminFromRequest/);
+  assert.match(site, /link \?/);
+  const access = readFileSync(join(import.meta.dirname, "adminAccess.ts"), "utf8");
+  assert.match(access, /canViewAdminDashboard/);
+  assert.match(access, /adminIdentityFromAuth/);
+  assert.match(access, /getSession/);
+});
+
 test("analytics page 404s when the server gate denies access", () => {
   const page = readFileSync(join(import.meta.dirname, "../app/admin/analytics/page.tsx"), "utf8");
-  assert.match(page, /canViewAdminDashboard/);
-  assert.match(page, /adminIdentityFromAuth/);
-  assert.match(page, /getSession/);
+  assert.match(page, /canViewAdminFromRequest/);
   assert.match(page, /if \(!allowed\) notFound\(\)/);
   const gate = readFileSync(join(import.meta.dirname, "adminGate.ts"), "utf8");
-  assert.equal(gate.includes("member?.email"), false);
-  assert.equal(gate.includes("input.emailVerifiedAt"), false);
+  assert.equal(gate.includes("googleEmail: member?.email"), false);
   const sample = readFileSync(
     join(import.meta.dirname, "../app/admin/analytics/sample/page.tsx"),
     "utf8"

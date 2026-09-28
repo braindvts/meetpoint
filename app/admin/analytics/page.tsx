@@ -1,11 +1,7 @@
-import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import AnalyticsDashboard from "@/components/admin/AnalyticsDashboard";
-import Nav from "@/components/Nav";
-import { ADMIN_COOKIE, adminIdentityFromAuth, canViewAdminDashboard } from "@/lib/adminGate";
 import { loadAnalyticsDashboard, parseRange } from "@/lib/analyticsDashboard";
-import { getCurrentMember } from "@/lib/memberAuth";
-import { getSession } from "@/lib/session";
+import { canViewAdminFromRequest } from "@/lib/adminAccess";
 
 export const dynamic = "force-dynamic";
 
@@ -14,27 +10,7 @@ export default async function AdminAnalyticsPage({
 }: {
   searchParams: Promise<{ range?: string }>;
 }) {
-  const jar = await cookies();
-  let session = null;
-  try {
-    session = await getSession();
-  } catch {
-    session = null;
-  }
-  let member = null;
-  try {
-    member = await getCurrentMember();
-  } catch {
-    member = null;
-  }
-  const identity = adminIdentityFromAuth(member, session);
-
-  const allowed = canViewAdminDashboard({
-    ...identity,
-    cookie: jar.get(ADMIN_COOKIE)?.value,
-    adminEmails: process.env.ADMIN_EMAILS,
-    adminSecret: process.env.ADMIN_SECRET,
-  });
+  const allowed = await canViewAdminFromRequest();
   if (!allowed) notFound();
 
   const params = await searchParams;
@@ -49,7 +25,6 @@ export default async function AdminAnalyticsPage({
 
   return (
     <>
-      <Nav />
       <main className="min-h-dvh bg-ink px-4 py-8 text-ivory sm:px-6 sm:py-12">
         {data ? (
           <AnalyticsDashboard data={data} />

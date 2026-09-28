@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import Nav from "@/components/Nav";
 import PageHeader from "@/components/PageHeader";
 import EmptyState from "@/components/EmptyState";
 import EventCard from "@/components/events/EventCard";
@@ -258,7 +257,6 @@ export default function EventsPage() {
   if (!catalogReady && events.length === 0) {
     return (
       <div className="mp-app">
-        <Nav />
         <main className="mx-auto max-w-5xl px-4 pb-24 pt-4 md:px-6">
           <PageHeader title="Events" />
           <p className="mt-8 text-sm text-muted">Loading events…</p>
@@ -269,7 +267,6 @@ export default function EventsPage() {
 
   return (
     <div className="mp-app">
-      <Nav />
       <main className="mx-auto max-w-5xl space-y-12 px-4 pb-28 pt-2 md:px-6">
         <PageHeader
           title="Events"

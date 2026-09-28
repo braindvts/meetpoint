@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { cloneElement, isValidElement, useEffect, useState, type ReactElement, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
 import NotificationBell from "@/components/NotificationBell";
@@ -20,7 +20,7 @@ const LINKS = [
  * Fixed top navigation for the website — always at the top of the viewport,
  * every screen size. (The old bottom dock was easy to miss.)
  */
-export default function Nav() {
+export default function Nav({ adminSlot = null }: { adminSlot?: ReactNode }) {
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
   const [chatUnread, setChatUnread] = useState(0);
@@ -53,6 +53,13 @@ export default function Nav() {
 
   if (!mounted || inChatThread) return null;
 
+  const adminLink = isValidElement(adminSlot)
+    ? cloneElement(adminSlot as ReactElement<{ className?: string; "aria-current"?: "page" }>, {
+        className: `mp-site-nav-link${pathname.startsWith("/admin") ? " is-active" : ""}`,
+        "aria-current": pathname.startsWith("/admin") ? "page" : undefined,
+      })
+    : null;
+
   return createPortal(
     <nav className="mp-site-nav" aria-label="Interlink">
       <div className="mp-site-nav-inner">
@@ -80,6 +87,7 @@ export default function Nav() {
               </Link>
             );
           })}
+          {adminLink}
         </div>
         <NotificationBell active={pathname.startsWith("/notifications")} />
       </div>

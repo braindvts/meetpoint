@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import Nav from "@/components/Nav";
 import MatchCard from "@/components/MatchCard";
 import PersonProfileSheet from "@/components/PersonProfileSheet";
 import { filterByPreference, rankMatches } from "@/lib/match";
@@ -190,7 +189,6 @@ export default function DiscoverPage() {
   if (!profile) {
     return (
       <>
-        <Nav />
         <main className="mp-app px-5 pb-10 pt-6 md:px-6">
           <h1 className="text-[1.85rem] font-semibold tracking-tight text-ivory">Discover</h1>
           <p className="mt-3 text-sm text-muted">
@@ -205,7 +203,6 @@ export default function DiscoverPage() {
 
   return (
     <>
-      <Nav />
       <main className="mp-app px-0 pb-10 md:px-6">
         <header className="sticky top-0 z-40 bg-ink/95 px-5 pb-3 pt-4 backdrop-blur-xl md:px-0 md:pt-6">
           <div className="relative flex h-7 items-center justify-center md:justify-between">
