@@ -4,7 +4,7 @@ import type { Connection, GroupChat, MyProfile, Person } from "./types";
 /** Sync local membership to the server. Only writable identity fields are sent. */
 export async function syncProfileToServer(
   profile: MyProfile
-): Promise<{ ok: boolean; memberId?: string; profile?: MyProfile } | null> {
+): Promise<{ ok: boolean; memberId?: string; profile?: MyProfile; error?: string } | null> {
   try {
     const safe = {
       name: profile.name,
@@ -32,8 +32,9 @@ export async function syncProfileToServer(
       memberId?: string;
       profile?: MyProfile;
       error?: string;
+      code?: string;
     };
-    if (!data.ok) return { ok: false };
+    if (!data.ok) return { ok: false, error: data.code || data.error };
     return { ok: true, memberId: data.memberId, profile: data.profile };
   } catch {
     return null;

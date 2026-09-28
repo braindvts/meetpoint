@@ -8,11 +8,12 @@ import MemberStatusStrip from "@/components/MemberStatusStrip";
 import PlansSection from "@/components/PlansSection";
 import Avatar from "@/components/Avatar";
 import EditProfilePopup from "@/components/EditProfilePopup";
-import Nav from "@/components/Nav";
 import PageHeader from "@/components/PageHeader";
+import ProfileEditor from "@/components/onboarding/ProfileEditor";
 import ProfileForm from "@/components/ProfileForm";
 import MembershipTiers from "@/components/MembershipTiers";
 import { ensureNotifyPermission } from "@/lib/notify";
+import { clearOnboardingStep } from "@/lib/onboardingSession";
 import { clearProfile, getMeetingsAttended, loadProfile } from "@/lib/store";
 import { gateRedirect, resolveSessionGate } from "@/lib/hydrateSession";
 import {
@@ -86,11 +87,7 @@ function ProfileContent() {
       window.alert("Couldn’t reset your profile on the server. Try again.");
       return;
     }
-    try {
-      localStorage.removeItem("interlink.onboarding.step");
-    } catch {
-      /* private mode */
-    }
+    clearOnboardingStep();
     clearProfile();
     router.push("/");
   }
@@ -98,7 +95,6 @@ function ProfileContent() {
   if (!profile) {
     return (
       <>
-        <Nav />
         <main className="mp-app px-5 pb-10 pt-6 md:px-6">
           <PageHeader title="Profile" />
           <p className="mt-3 text-sm text-muted">Loading profile…</p>
@@ -120,7 +116,6 @@ function ProfileContent() {
 
   return (
     <>
-      <Nav />
       <main className="mp-app px-0 pb-10 md:px-6">
         <PageHeader title="Profile" />
         <div className="px-4 pb-6 pt-2">
@@ -211,12 +206,16 @@ function ProfileContent() {
           </button>
         </section>
 
-        <p className="mb-2.5 mt-6 scroll-mt-20 text-[12px] font-medium text-accent" id="edit-details">
-          Edit details
+        <div className="mb-10 mt-6">
+          <ProfileEditor initial={profile} />
+        </div>
+        <p className="mb-2.5 scroll-mt-20 text-[12px] font-medium text-accent" id="edit-details">
+          Credentials and projects
         </p>
         <ProfileForm
           key={(profile.verifications || []).map((v) => `${v.method}:${v.value}`).join("|") || "none"}
           initial={profile}
+          extrasOnly
           focusVerification={needsVerify && !tierInput.verified}
         />
         <AccountEmailConfirm />

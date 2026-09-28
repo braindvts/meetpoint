@@ -16,6 +16,7 @@ export function waitForProfileSave(): Promise<unknown> {
 }
 import { DEMO_PEOPLE } from "./demoPeople";
 import { findPerson } from "./directory";
+import { clearOnboardingStep } from "./onboardingSession";
 import { clearNoticeStore } from "./notifications";
 import {
   BOOKING_FEE_PER_PERSON_USD,
@@ -205,6 +206,7 @@ export function clearProfile(): void {
   localStorage.removeItem(CONNECTIONS_KEY);
   localStorage.removeItem(CHATS_KEY);
   localStorage.removeItem(RATINGS_KEY);
+  clearOnboardingStep();
   clearNoticeStore();
   void import("./demoFlag").then(({ clearDemoOwnerSession }) => clearDemoOwnerSession());
 }

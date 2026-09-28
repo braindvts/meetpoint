@@ -6,6 +6,7 @@ import { sendWelcomeEmail } from "@/lib/email";
 import { GoogleReauthError, verifyGoogleIdToken, verifyGoogleReauthIdToken } from "@/lib/googleAuth";
 import { withMemberCookie } from "@/lib/memberAuth";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
+import { recordSignup } from "@/lib/recordSignup";
 import { sanitizeName } from "@/lib/sanitize";
 import { postAuthPath } from "@/lib/appPath";
 import { oauthReauthDenied, oauthReauthResponse } from "@/lib/oauthReauthRoute";
@@ -136,6 +137,7 @@ export async function GET(req: NextRequest) {
         },
       });
       if (email) void sendWelcomeEmail(email, member.name);
+      await recordSignup(member.id, "google");
     }
 
     const next = postAuthPath({

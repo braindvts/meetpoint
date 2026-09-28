@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { analyticsSkipsPath, trackPageview } from "@/lib/analytics";
+import { isVerifyEmailPath, trackPageview } from "@/lib/analytics";
 import { registerNotifyWorker } from "@/lib/notify";
 
 /** Pageviews + register notification service worker. */
@@ -10,7 +10,7 @@ export default function AnalyticsBeacon() {
   const pathname = usePathname();
 
   useEffect(() => {
-    if (analyticsSkipsPath(pathname || "")) return;
+    if (!pathname || isVerifyEmailPath(pathname)) return;
     trackPageview();
   }, [pathname]);
 

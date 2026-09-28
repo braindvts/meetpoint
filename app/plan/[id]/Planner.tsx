@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import Nav from "@/components/Nav";
 import Avatar from "@/components/Avatar";
 import BlackBadge from "@/components/BlackBadge";
 import StarRating, { cuisineLine } from "@/components/StarRating";
@@ -61,7 +60,6 @@ export default function Planner({ peerId }: { peerId: string }) {
   if (!person) {
     return (
       <>
-        <Nav />
         <main className="mx-auto max-w-3xl px-6 py-16 text-center">
           <p className="text-lg font-semibold">Person not found</p>
           <Link href="/circle" className="mt-2 inline-block text-accent underline">
@@ -96,7 +94,6 @@ export default function Planner({ peerId }: { peerId: string }) {
     const r = options.find((o) => o.id === restaurantId);
     return (
       <>
-        <Nav />
         <main className="mx-auto max-w-xl px-6 py-24 pb-24 text-center">
           <div className="lux-divider mx-auto mb-10 max-w-48">
             <span className="text-accent" aria-hidden>◆</span>
@@ -131,7 +128,6 @@ export default function Planner({ peerId }: { peerId: string }) {
 
   return (
     <>
-      <Nav />
       <main className="mx-auto max-w-3xl px-4 py-10 pb-24 sm:px-6">
         <Link
           href="/circle"

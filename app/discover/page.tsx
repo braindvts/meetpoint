@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import Nav from "@/components/Nav";
 import MatchCard from "@/components/MatchCard";
 import PersonProfileSheet from "@/components/PersonProfileSheet";
 import type { MatchResult } from "@/lib/match";
@@ -35,6 +34,9 @@ import { TIER_DEFINITIONS, tierForPerson, tierForProfile, type MemberTier } from
 import type { Connection, LookingFor, MyProfile, Person } from "@/lib/types";
 import { LOOKING_FOR_OPTIONS } from "@/lib/types";
 import EmptyState from "@/components/EmptyState";
+import ProfileProgressPrompt from "@/components/ProfileProgressPrompt";
+import { copyInviteLink } from "@/lib/copyInvite";
+import { firstIncompleteStep, emptyDraft } from "@/lib/onboardingDraft";
 import NotifyPrompt from "@/components/NotifyPrompt";
 import SkeletonCard from "@/components/SkeletonCard";
 import TierBadge from "@/components/TierBadge";
@@ -89,12 +91,14 @@ export default function DiscoverPage() {
   const [exiting, setExiting] = useState<string | null>(null);
   const [profilePerson, setProfilePerson] = useState<Person | null>(null);
   const [directoryReady, setDirectoryReady] = useState(false);
+  const [discoverError, setDiscoverError] = useState(false);
   const [gateReady, setGateReady] = useState(false);
 
   const refreshConnections = useCallback(() => setConnections(loadConnections()), []);
 
   const loadRanked = useCallback(async (p: MyProfile) => {
     let rows: MatchResult[] = [];
+    let failed = false;
     try {
       const res = await fetch("/api/discover", { credentials: "include" });
       const data = (await res.json()) as {
@@ -110,8 +114,10 @@ export default function DiscoverPage() {
           isLocal: boolean;
         }[];
       };
-      if (data.ok && data.matches) rows = data.matches.map(toMatchResult);
+      if (!res.ok || !data.ok || !data.matches) failed = true;
+      else rows = data.matches.map(toMatchResult);
     } catch {
+      failed = true;
       rows = [];
     }
 
@@ -135,6 +141,7 @@ export default function DiscoverPage() {
       ];
     }
 
+    setDiscoverError(failed);
     setRanked(rows);
     setPeople(rows.map((row) => row.person));
     setDirectoryReady(true);
@@ -276,7 +283,6 @@ export default function DiscoverPage() {
   if (!profile) {
     return (
       <>
-        <Nav />
         <main className="mp-app px-5 pb-10 pt-6 md:px-6">
           <h1 className="text-[1.85rem] font-semibold tracking-tight text-ivory">Discover</h1>
           <p className="mt-3 text-sm text-muted">
@@ -291,7 +297,6 @@ export default function DiscoverPage() {
 
   return (
     <>
-      <Nav />
       <main className="mp-app px-0 pb-10 md:px-6">
         <header className="sticky top-0 z-40 bg-ink/95 px-5 pb-3 pt-4 backdrop-blur-xl md:px-0 md:pt-6">
           <div className="relative flex h-7 items-center justify-center md:justify-between">
@@ -444,46 +449,70 @@ export default function DiscoverPage() {
         ) : null}
 
         <div className="px-4 pb-6 pt-4 md:px-0">
+          <ProfileProgressPrompt profile={profile} />
           {showSkeletons ? (
             <div className="space-y-3">
               <SkeletonCard />
               <SkeletonCard />
             </div>
+          ) : discoverError && visiblePeople.length === 0 ? (
+            <EmptyState
+              title="Couldn’t load the room"
+              body={<>Something went wrong loading people. Try again in a moment.</>}
+              actionLabel="Try again"
+              onAction={() => {
+                setDiscoverError(false);
+                setDirectoryReady(false);
+                void loadRanked(profile);
+              }}
+            />
+          ) : visiblePeople.length === 0 ? (
+            <EmptyState
+              title="The room is quiet"
+              body={
+                <>
+                  No one to introduce yet. Complete the fields that improve matching, then invite
+                  someone to join Interlink.
+                </>
+              }
+              actionHref={
+                firstIncompleteStep(emptyDraft(profile)) !== null ? "/onboarding" : "/profile#edit"
+              }
+              actionLabel={profile.ideaTags?.length ? "Complete your profile" : "Add interests"}
+              secondaryLabel="Invite someone"
+              onSecondary={() => void copyInviteLink()}
+            />
           ) : pool.length === 0 ? (
             <EmptyState
-              title={visiblePeople.length === 0 ? "The room is quiet" : "No matches for this filter"}
+              title="No matches for this filter"
               body={
-                visiblePeople.length === 0 ? (
-                  <>
-                    No other members yet. Share Interlink — profiles appear here when they join this
-                    same app.
-                  </>
-                ) : profile.lookingFor?.length === 0 ? (
-                  <>
-                    Choose what you&apos;re looking for in{" "}
-                    <Link href="/profile" className="text-accent underline underline-offset-2">
-                      Profile
-                    </Link>{" "}
-                    so introductions stay intentional.
-                  </>
-                ) : filter === "local" ? (
+                filter === "local" ? (
                   !profile.city?.name ? (
-                    <>
-                      Set your city in{" "}
-                      <Link href="/profile" className="text-accent underline underline-offset-2">
-                        Profile
-                      </Link>{" "}
-                      so Nearby can find people close to you.
-                    </>
+                    <>Set your city so Nearby can find people close to you.</>
                   ) : (
-                    <>No relevant people nearby yet. Try For you, or refine your ideas in Profile.</>
+                    <>No one nearby yet. Everyone else is still on For you, including people who just joined.</>
                   )
+                ) : profile.lookingFor?.length === 0 ? (
+                  <>Choose what you’re looking for so introductions stay intentional.</>
                 ) : (
-                  <>Add more business ideas in Profile so we can find stronger fits.</>
+                  <>Clear this filter to see the rest of the room.</>
                 )
               }
-              actionHref="/profile"
-              actionLabel="Open profile"
+              actionHref={
+                filter === "local" && profile.city?.name
+                  ? undefined
+                  : "/profile#edit"
+              }
+              actionLabel={
+                filter === "local" && profile.city?.name
+                  ? "See everyone"
+                  : profile.ideaTags?.length
+                    ? "Complete your profile"
+                    : "Add interests"
+              }
+              onAction={
+                filter === "local" && profile.city?.name ? () => setFilter("open") : undefined
+              }
             />
           ) : filtered.length === 0 ? (
             <EmptyState

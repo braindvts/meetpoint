@@ -1,4 +1,7 @@
+"use client";
+
 import PartnerMark from "@/components/PartnerMark";
+import { trackPartnerClick } from "@/lib/analytics";
 import { publicFeaturedPartners } from "@/lib/featuredPartners";
 
 /**
@@ -33,6 +36,7 @@ export default function EdgeableSpotlight({ className = "" }: { className?: stri
           href={partner.href}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() => trackPartnerClick("edgeable", "featured")}
         >
           Visit Edgeable
         </a>

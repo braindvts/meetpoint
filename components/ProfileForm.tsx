@@ -8,7 +8,7 @@ import { canonicalIdeaTag, isAllowedIdeaTag, isCatalogIdeaTag } from "@/lib/idea
 import { IDEA_TAG_LIMIT, INDUSTRIES, partitionIdeaTags } from "@/lib/interests";
 import { showToast } from "@/lib/notify";
 import { formatPhoneDisplay, isValidPhone } from "@/lib/phone";
-import { isDemoProfile, saveProfile } from "@/lib/store";
+import { isDemoProfile, loadProfile, saveProfile } from "@/lib/store";
 import { hasRequiredVerifications } from "@/lib/tiers";
 import { makeVerification, validateVerification } from "@/lib/verifyRules";
 import type {
@@ -140,10 +140,13 @@ function TagChip({
 export default function ProfileForm({
   initial,
   focusVerification = false,
+  extrasOnly = false,
 }: {
   initial?: MyProfile | null;
   /** From Discover when Connect is locked — scroll to and highlight Verification. */
   focusVerification?: boolean;
+  /** Credentials, travel, and projects. Identity fields live in the profile editor. */
+  extrasOnly?: boolean;
 }) {
   const router = useRouter();
   const [name, setName] = useState(initial?.name ?? "");
@@ -277,24 +280,35 @@ export default function ProfileForm({
     const nextErrors: Partial<Record<string, string>> = {};
     const missing: string[] = [];
 
-    if (!photo) {
+    const latest = extrasOnly ? loadProfile() : null;
+    const nameValue = latest?.name ?? name;
+    const jobTitleValue = latest?.jobTitle ?? jobTitle;
+    const photoValue = latest?.photo ?? photo;
+    const companyValue = latest?.company ?? company;
+    const industryValue = latest?.industry ?? industry;
+    const bioValue = latest?.bio ?? bio;
+    const lookingValue = latest?.lookingFor ?? lookingFor;
+    const tagsValue = latest?.ideaTags ?? ideaTags;
+    const cityValue = latest?.city ?? CITIES[cityIdx];
+
+    if (!photoValue) {
       nextErrors.photo = "Add a real photo of yourself.";
       missing.push("Photo");
     }
-    if (!name.trim()) {
+    if (!nameValue.trim()) {
       nextErrors.name = "Enter your full name.";
       missing.push("Full name");
     }
-    if (!jobTitle.trim()) {
+    if (!jobTitleValue.trim()) {
       nextErrors.jobTitle = "Enter your job or role.";
       missing.push("Job / role");
     }
-    const interests = partitionIdeaTags(ideaTags).labels;
+    const interests = partitionIdeaTags(tagsValue).labels;
     if (interests.length === 0) {
       nextErrors.ideaTags = "Add at least one interest.";
       missing.push("Ambitions");
     }
-    if (lookingFor.length === 0) {
+    if (lookingValue.length === 0) {
       nextErrors.lookingFor = "Choose what you’re looking for.";
       missing.push("Looking for");
     }
@@ -358,16 +372,16 @@ export default function ProfileForm({
       .filter((w) => w.title);
 
     const nextProfile: MyProfile = {
-      name: name.trim(),
-      jobTitle: jobTitle.trim(),
-      company: company.trim(),
-      industry: industry.trim(),
-      bio: bio.trim(),
-      photo,
-      city: CITIES[cityIdx],
+      name: nameValue.trim(),
+      jobTitle: jobTitleValue.trim(),
+      company: companyValue.trim(),
+      industry: industryValue.trim(),
+      bio: bioValue.trim(),
+      photo: photoValue,
+      city: cityValue,
       travel,
       meetPreference: "open",
-      lookingFor,
+      lookingFor: lookingValue,
       ideaTags: interests,
       verifications,
       work: projects,
@@ -455,6 +469,27 @@ export default function ProfileForm({
         </div>
       )}
 
+      {extrasOnly ? (
+        <label className="block">
+          <span className={labelCls}>Mobile</span>
+          <input
+            className={fieldErrors.phone ? fieldWarn : field}
+            inputMode="tel"
+            autoComplete="tel"
+            value={phone}
+            onChange={(e) => {
+              setPhone(e.target.value);
+              clearFieldError("phone");
+            }}
+            placeholder="(555) 123-4567"
+            aria-invalid={!!fieldErrors.phone}
+          />
+          {fieldErrors.phone && <p className={errCls}>{fieldErrors.phone}</p>}
+        </label>
+      ) : null}
+
+      {!extrasOnly ? (
+      <>
       <Section
         id="section-identity"
         num="01"
@@ -723,6 +758,8 @@ export default function ProfileForm({
           ))}
         </div>
       </Section>
+      </>
+      ) : null}
 
       <Section
         id="section-verification"
@@ -838,8 +875,13 @@ export default function ProfileForm({
         </div>
       </Section>
 
-      <Section num="05" title="Place" subtitle="Where you are — and how far you’ll go to meet.">
-        <div className="grid gap-3 sm:grid-cols-2 sm:gap-8">
+      <Section
+        num="05"
+        title={extrasOnly ? "Travel" : "Place"}
+        subtitle={extrasOnly ? "How far you’ll go to meet." : "Where you are — and how far you’ll go to meet."}
+      >
+        <div className={`grid gap-3 ${extrasOnly ? "" : "sm:grid-cols-2 sm:gap-8"}`}>
+          {!extrasOnly ? (
           <div>
             <span className={labelCls}>Your city</span>
             <select
@@ -874,6 +916,7 @@ export default function ProfileForm({
               Use my location
             </button>
           </div>
+          ) : null}
 
           <div>
             <span className={labelCls}>Travel range</span>
@@ -898,6 +941,7 @@ export default function ProfileForm({
         </div>
       </Section>
 
+      {!extrasOnly && (
       <Section
         num="06"
         title="How introductions work"
@@ -911,6 +955,7 @@ export default function ProfileForm({
           </p>
         </div>
       </Section>
+      )}
 
       <Section
         num="07"
@@ -964,6 +1009,7 @@ export default function ProfileForm({
         </div>
       </Section>
 
+      {!extrasOnly && (
       <Section num="08" title="About" subtitle="A short note on what you’re building.">
         <textarea
           className={`${field} min-h-20 resize-none leading-relaxed sm:min-h-28`}
@@ -972,6 +1018,7 @@ export default function ProfileForm({
           placeholder="Owner-operator planning a small fleet. Looking to trade notes with people doing the same…"
         />
       </Section>
+      )}
 
       {error && (
         <p className="rounded-lg border border-ivory/25 bg-ivory/5 px-3 py-2 text-[11px] text-ivory sm:px-4 sm:py-3 sm:text-sm">
@@ -990,9 +1037,11 @@ export default function ProfileForm({
         >
           {saving
             ? "Saving…"
-            : initial?.jobTitle || initial?.ideaTags?.length
-              ? "Save profile"
-              : "Start discovering"}
+            : extrasOnly
+              ? "Save credentials"
+              : initial?.jobTitle || initial?.ideaTags?.length
+                ? "Save profile"
+                : "Start discovering"}
         </button>
       </div>
     </form>

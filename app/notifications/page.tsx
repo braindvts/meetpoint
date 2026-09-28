@@ -1,14 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import Nav from "@/components/Nav";
 import PageHeader from "@/components/PageHeader";
 import { NotificationFeed } from "@/components/NotificationBell";
 
 export default function NotificationsPage() {
   return (
     <>
-      <Nav />
       <main className="mp-app px-4 pb-16 pt-4 md:px-6">
         <PageHeader title="Notifications" />
         <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">

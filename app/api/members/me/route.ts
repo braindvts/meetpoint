@@ -9,6 +9,7 @@ import { clearMemberCookie, getCurrentMember, withMemberCookie } from "@/lib/mem
 import { memberToProfile, profileToMemberData } from "@/lib/memberMap";
 import { clearSession, getSession, hasRecentReauth } from "@/lib/session";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
+import { recordSignup } from "@/lib/recordSignup";
 import { rateLimit } from "@/lib/rateLimit";
 import { deleteAccountSchema } from "@/lib/validation/auth";
 import { membersMePutSchema } from "@/lib/validation/profile";
@@ -182,6 +183,10 @@ export async function PUT(req: Request) {
         include: { interests: true },
       });
     });
+
+    if (!existing) {
+      await recordSignup(member.id, session?.provider || "email");
+    }
 
     const res = NextResponse.json({
       ok: true,

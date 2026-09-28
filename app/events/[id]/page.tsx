@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import Nav from "@/components/Nav";
 import PageHeader from "@/components/PageHeader";
 import EmptyState from "@/components/EmptyState";
 import Avatar from "@/components/Avatar";
@@ -130,7 +129,6 @@ export default function EventDetailPage() {
   if (event === undefined) {
     return (
       <div className="mp-app">
-        <Nav />
         <main className="mx-auto max-w-3xl px-4 pb-24 pt-4">
           <PageHeader title="Event" />
           <p className="mt-8 text-sm text-muted">Loading…</p>
@@ -142,7 +140,6 @@ export default function EventDetailPage() {
   if (!event) {
     return (
       <div className="mp-app">
-        <Nav />
         <main className="mx-auto max-w-3xl space-y-6 px-4 pb-24 pt-4">
           <PageHeader title="Event" />
           <EmptyState
@@ -165,7 +162,6 @@ export default function EventDetailPage() {
 
   return (
     <div className="mp-app">
-      <Nav />
       <main className="mx-auto max-w-3xl space-y-8 px-4 pb-28 pt-2 md:px-6">
         <PageHeader
           title="Event"
