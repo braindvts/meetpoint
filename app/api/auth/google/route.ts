@@ -41,6 +41,10 @@ export async function GET(req: NextRequest) {
     access_type: "online",
     prompt: reauth ? "login" : "select_account",
   });
+  if (reauth) {
+    params.set("nonce", nonce);
+    params.set("max_age", "0");
+  }
 
   const res = NextResponse.redirect(
     `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`

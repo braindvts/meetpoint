@@ -3,12 +3,12 @@ import { prisma } from "@/lib/db";
 import { rateLimit } from "@/lib/rateLimit";
 import { OAUTH_CALLBACK_IP } from "@/lib/rateCaps";
 import { sendWelcomeEmail } from "@/lib/email";
-import { verifyGoogleIdToken } from "@/lib/googleAuth";
+import { GoogleReauthError, verifyGoogleIdToken, verifyGoogleReauthIdToken } from "@/lib/googleAuth";
 import { withMemberCookie } from "@/lib/memberAuth";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
 import { sanitizeName } from "@/lib/sanitize";
 import { postAuthPath } from "@/lib/appPath";
-import { oauthReauthResponse } from "@/lib/oauthReauthRoute";
+import { oauthReauthDenied, oauthReauthResponse } from "@/lib/oauthReauthRoute";
 import {
   appUrl,
   clearOAuthStateCookie,
@@ -57,6 +57,27 @@ export async function GET(req: NextRequest) {
       id_token?: string;
     };
 
+    if (challenge.reauth) {
+      if (!token.id_token) return oauthReauthDenied("mismatch");
+      try {
+        const profile = await verifyGoogleReauthIdToken(token.id_token, {
+          nonce: challenge.nonce,
+        });
+        return (
+          (await oauthReauthResponse({
+            intent: challenge.reauth,
+            provider: "google",
+            providerSubject: profile.sub,
+            stateNonce: challenge.nonce,
+          })) ?? oauthReauthDenied("mismatch")
+        );
+      } catch (err) {
+        const code = err instanceof GoogleReauthError ? err.code : "mismatch";
+        console.error("Google reauth rejected", code);
+        return oauthReauthDenied(code);
+      }
+    }
+
     let user: { sub: string; name?: string; email?: string; picture?: string };
 
     if (token.id_token) {
@@ -87,14 +108,6 @@ export async function GET(req: NextRequest) {
     } else {
       return NextResponse.redirect(appUrl("/login?error=token_failed"));
     }
-
-    const reauthRes = await oauthReauthResponse({
-      intent: challenge.reauth,
-      provider: "google",
-      providerSubject: user.sub,
-      stateNonce: challenge.nonce,
-    });
-    if (reauthRes) return reauthRes;
 
     await purgeDemoResidue();
     const email = user.email?.toLowerCase() || null;

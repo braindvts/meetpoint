@@ -383,7 +383,7 @@ test("password reauth is unchanged and reauth mode does not sign in or link a pr
     const src = readFileSync(join(ROOT, file), "utf8");
     const gate = src.indexOf("oauthReauthResponse");
     assert.ok(gate > 0, file);
-    assert.match(src, /providerSubject: (?:user\.sub|sub)/);
+    assert.match(src, /providerSubject: (?:user\.sub|profile\.sub|sub)/);
     assert.match(src, /stateNonce: challenge\.nonce/);
     const create = src.indexOf("prisma.member.create");
     if (create >= 0) assert.ok(gate < create, `${file} creates after reauth`);
@@ -393,6 +393,13 @@ test("password reauth is unchanged and reauth mode does not sign in or link a pr
     if (session >= 0) assert.ok(gate < session, `${file} session after reauth`);
     const emailLookup = src.indexOf("where: { email");
     if (emailLookup >= 0) assert.ok(gate < emailLookup, `${file} email lookup after reauth`);
+    if (file.endsWith("google/callback/route.ts")) {
+      const userinfo = src.indexOf("oauth2/v3/userinfo");
+      assert.ok(userinfo > gate, "userinfo stays on the normal login path");
+      assert.match(src, /if \(!token\.id_token\) return oauthReauthDenied\("mismatch"\)/);
+      assert.match(src, /verifyGoogleReauthIdToken/);
+      assert.doesNotMatch(src.slice(0, gate), /oauth2\/v3\/userinfo/);
+    }
   }
 
   for (const file of [
@@ -407,6 +414,14 @@ test("password reauth is unchanged and reauth mode does not sign in or link a pr
     assert.match(src, /next = OAUTH_REAUTH_RETURN/);
     assert.match(src, /applyReauthBindCookie\(res, intent\.memberId, nonce\)/);
     assert.doesNotMatch(src, /memberId: req\.|memberId: search/);
+    if (file.endsWith("google/route.ts")) {
+      const paramsAt = src.indexOf("new URLSearchParams");
+      const freshAt = src.indexOf('params.set("nonce", nonce)');
+      assert.ok(paramsAt > 0 && freshAt > paramsAt);
+      const paramsBlock = src.slice(paramsAt, freshAt);
+      assert.doesNotMatch(paramsBlock, /nonce|max_age/);
+      assert.match(src, /params\.set\("max_age", "0"\)/);
+    }
   }
 
   const sessionSrc = readFileSync(join(ROOT, "lib/session.ts"), "utf8");

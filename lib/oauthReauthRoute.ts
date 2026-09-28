@@ -35,14 +35,7 @@ export async function oauthReauthResponse(input: {
     nowSec,
   });
 
-  const deny = (error: "mismatch" | "expired") => {
-    const res = NextResponse.redirect(appUrl(`/profile?reauth=${error}#delete`));
-    clearOAuthStateCookie(res);
-    clearReauthBindCookie(res);
-    return res;
-  };
-
-  if (!resolved.ok) return deny(resolved.error);
+  if (!resolved.ok) return oauthReauthDenied(resolved.error);
 
   const bound =
     me && me.id === resolved.memberId
@@ -60,11 +53,19 @@ export async function oauthReauthResponse(input: {
   });
 
   if (decision.action !== "reauth") {
-    return deny(decision.action === "deny" ? decision.error : "mismatch");
+    return oauthReauthDenied(decision.action === "deny" ? decision.error : "mismatch");
   }
 
   const res = NextResponse.redirect(appUrl(OAUTH_REAUTH_RETURN));
   clearOAuthStateCookie(res);
   clearReauthBindCookie(res);
   return withReauth(res, decision.memberId);
+}
+
+/** Mismatch or expiry: drop the one-time cookies and leave the session alone. */
+export function oauthReauthDenied(error: "mismatch" | "expired"): NextResponse {
+  const res = NextResponse.redirect(appUrl(`/profile?reauth=${error}#delete`));
+  clearOAuthStateCookie(res);
+  clearReauthBindCookie(res);
+  return res;
 }
