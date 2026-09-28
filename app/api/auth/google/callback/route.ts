@@ -7,10 +7,11 @@ import { verifyGoogleIdToken } from "@/lib/googleAuth";
 import { withMemberCookie } from "@/lib/memberAuth";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
 import { sanitizeName } from "@/lib/sanitize";
+import { postAuthPath } from "@/lib/appPath";
 import {
   appUrl,
   clearOAuthStateCookie,
-  consumeOAuthState,
+  consumeOAuthChallenge,
   withSession,
 } from "@/lib/session";
 
@@ -29,8 +30,10 @@ export async function GET(req: NextRequest) {
   if (!code || !state) {
     return NextResponse.redirect(appUrl("/login?error=missing_code"));
   }
-  const ok = await consumeOAuthState(state);
-  if (!ok) return NextResponse.redirect(appUrl("/login?error=invalid_state"));
+  const challenge = await consumeOAuthChallenge();
+  if (!challenge || challenge.state !== state) {
+    return NextResponse.redirect(appUrl("/login?error=invalid_state"));
+  }
 
   try {
     await purgeDemoResidue();
@@ -113,7 +116,11 @@ export async function GET(req: NextRequest) {
       if (email) void sendWelcomeEmail(email, member.name);
     }
 
-    const next = member.jobTitle && member.photo ? "/discover" : "/onboarding?google=1";
+    const next = postAuthPath({
+      requested: challenge.next,
+      hasIdentity: !!(member.name?.trim() && member.jobTitle?.trim()),
+      incomplete: "/onboarding?google=1",
+    });
     const res = NextResponse.redirect(appUrl(next));
     clearOAuthStateCookie(res);
     withSession(res, {

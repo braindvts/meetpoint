@@ -133,11 +133,29 @@ The bell in the top nav opens the feed. The same list is at `/notifications`.
 
 ---
 
+## Profile fields (real members)
+
+Saved on the server in `Member`, not only in this browser. Reset clears the same fields in the database.
+
+| Field | Stored as | Notes |
+|-------|-----------|--------|
+| Name | `Member.name` | Required for Identity |
+| Headline / job title | `Member.jobTitle` | Required for Identity |
+| Company | `Member.company` | Optional |
+| Industry | `Member.industry` | Optional. One label from the industry list in `lib/interests.ts` |
+| City | `cityName`, `cityCountry`, `cityLat`, `cityLng` | |
+| Bio | `Member.bio` | Max 800 characters |
+| Looking for | `lookingForJson` | Co-founder, Investor, Mentor, Clients, Hiring, Partnership, Networking |
+| Interests | `MemberInterest` rows plus `ideaTagsJson` | Up to 24. Catalog labels become rows and are the only matching signal. Custom tags stay in `ideaTagsJson` if they are short plain text (no URLs, links, or control characters). |
+| Photo | `Member.photo` | Required for Identity |
+
+Email and phone stay on the account. They are never sent to other members.
+
 ## How matching works (short)
 
-Discover ranks people by shared ambitions, complementary “looking for,” same profession, and distance. Nearby narrows by city/geo. The filter also lets you narrow by **standing** (Member / Verified / BLACK). **Members** only introduce to other Members. **Verified** and **BLACK** can meet anyone. Looking-for preferences can be edited from Discover’s filter anytime.
+Discover asks the server to rank **real** members. Shared interests rank first, then complementary “looking for,” industry, role, and city. Anyone left is still shown, newest first, with the reason “Recently joined”. Cards show a reason such as “3 shared interests: SaaS, AI / Machine Learning, Fintech”. Sample, guest, and bot accounts are excluded. Other members’ cards omit LinkedIn, website, portfolio, and verification badges. So is anyone blocked in either direction, and anyone auto-hidden after open reports from three trusted reporters (`discoverExcludedIds` in `lib/moderation.ts`: verified email, a finished profile, or an account at least a few days old). Brand-new accounts do not count. Nearby narrows by city. The filter also lets you narrow by **standing** (Member / Verified / BLACK). **Members** only introduce to other Members. **Verified** and **BLACK** can meet anyone. Looking-for preferences can be edited from Discover’s filter anytime.
 
-**Events** (`/events`) ranks gatherings the same way: interests/tags, job/role, looking-for, and bio intent phrases, against title, description, topics, audience, and host. Hybrid score (canonical tags + related clusters + TF-IDF + intent heuristics). Short match reasons on cards. Precision over dumping the catalog. Sparse profiles fall back to job and looking-for. Local RSVP (interested / going / pass) nudges similar rooms.
+**Events** (`/events`) ranks gatherings with those same saved interest labels, plus job/role, looking-for, industry, and bio intent phrases, against title, description, topics, audience, and host. Hybrid score (canonical tags + related clusters + TF-IDF + intent heuristics). Short match reasons on cards. Precision over dumping the catalog. Sparse profiles fall back to job and looking-for. A signed-in RSVP (interested / going / pass) is stored in `EventInterest` and nudges similar rooms. Attending and interested counts are the rows in that table.
 
 ---
 
@@ -162,7 +180,15 @@ WALKTHROUGH_OWNER_PASSWORD=
 
 If the gate is off (the production default), email sign-in uses the stored password hash only. Existing members are never overwritten.
 
-Local UI demo flags (do **not** set on production unless you want demo entry). These are not a login and do not create an account:
+Walkthrough owner login also requires the server-only `ENABLE_DEMO_PROFILES` gate below. `NEXT_PUBLIC_ENABLE_DEMO`, `NEXT_PUBLIC_ENABLE_DEMO_PROFILES`, and a flag saved in the browser do not enable it.
+
+The public marketing home does not offer Enter demo, a sample-profile login, or a link to `/demo`. Sign in and Enter go to `/login`. `/demo` is not linked from the home page, nav, or footer. Sample entry on the login page and `/demo` stay off unless `ENABLE_DEMO_PROFILES` is set on the server. A preview can set it for testing. When it is unset, `GET` and `POST /api/auth/demo` return 404 and `/demo` returns 404. The route does not create a database member. The browser ignores `NEXT_PUBLIC_` demo flags and any saved walkthrough flag while the server gate is off.
+
+```
+ENABLE_DEMO_PROFILES=1
+```
+
+These public flags do not enable sample profiles, sample login, or the walkthrough owner. Leave them unset.
 
 ```
 NEXT_PUBLIC_ENABLE_DEMO=1

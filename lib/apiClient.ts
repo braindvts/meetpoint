@@ -15,6 +15,8 @@ export async function syncProfileToServer(
       meetPreference: profile.meetPreference,
       lookingFor: profile.lookingFor,
       ideaTags: profile.ideaTags,
+      company: profile.company || "",
+      industry: profile.industry || "",
       phone: profile.phone,
       work: profile.work,
     };

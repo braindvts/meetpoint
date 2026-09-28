@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { rateLimit } from "@/lib/rateLimit";
 import { OAUTH_IP } from "@/lib/rateCaps";
 import {
@@ -8,7 +8,7 @@ import {
   googleConfigured,
 } from "@/lib/session";
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   const limited = await rateLimit(req, OAUTH_IP);
   if (!limited.ok) return NextResponse.redirect(appUrl("/login?error=rate_limited"));
 
@@ -16,7 +16,7 @@ export async function GET(req: Request) {
     return NextResponse.redirect(appUrl("/login?error=google_not_configured"));
   }
 
-  const { state, cookieValue } = await createOAuthState();
+  const { state, cookieValue } = await createOAuthState(req.nextUrl.searchParams.get("next"));
   const params = new URLSearchParams({
     client_id: process.env.GOOGLE_CLIENT_ID!.trim(),
     redirect_uri: appUrl("/api/auth/google/callback"),

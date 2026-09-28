@@ -128,6 +128,10 @@ export interface Person {
   id: string;
   name: string;
   jobTitle: string;
+  /** Employer or venture. Public. */
+  company?: string;
+  /** Canonical industry label. */
+  industry?: string;
   ideaTags: string[];
   /** Why they're in the room. */
   lookingFor: LookingFor[];
@@ -195,7 +199,12 @@ export type PremierInterval = "month" | "year";
 
 export interface MyProfile {
   name: string;
+  /** Headline / job title. */
   jobTitle: string;
+  /** Employer or venture. Optional. */
+  company?: string;
+  /** Canonical industry label. Optional. */
+  industry?: string;
   ideaTags: string[];
   /** Required — what introductions they're seeking. */
   lookingFor: LookingFor[];

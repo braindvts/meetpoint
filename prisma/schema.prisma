@@ -28,6 +28,14 @@ model Member {
   ideaTagsJson   String   @default("[]")
   verificationsJson String @default("[]")
   workJson       String   @default("[]")
+  /// Employer or venture. Public. Empty until the member sets it.
+  company        String   @default("")
+  /// Canonical industry label (see lib/interests.ts). Empty until set.
+  industry       String   @default("")
+  /// True for seeded, guest, and bot profiles. Real signups stay false.
+  isSample       Boolean  @default(false)
+  /// seed | guest | bot | sample | empty for a real member
+  sampleKind     String   @default("")
   phone          String?
   black          Boolean  @default(false)
   blackSince     DateTime?
@@ -52,6 +60,39 @@ model Member {
   blackInvitesReceived BlackInvite[]     @relation("blackInviteTo")
   blackConnectionsHeld BlackConnection[] @relation("blackHolder")
   blackConnectionsWith BlackConnection[] @relation("blackPeer")
+  interests            MemberInterest[]
+  eventInterests       EventInterest[]
+
+  @@index([isSample])
+}
+
+/// One row per canonical interest a member selected.
+/// Slugs come from lib/interests.ts — not free text.
+/// Custom tags stay on Member.ideaTagsJson and are not rows here.
+model MemberInterest {
+  memberId String
+  slug     String
+  member   Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@id([memberId, slug])
+  @@index([slug])
+}
+
+/// One RSVP per member per catalog event.
+/// Matches the live EventInterest table (see 20260913040000_event_interest):
+/// id, memberId, eventId, status, createdAt, updatedAt.
+/// status is interested | going | passed. Older rows may use saved for interested.
+model EventInterest {
+  id        String   @id @default(cuid())
+  memberId  String
+  eventId   String
+  status    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  member    Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([memberId, eventId])
+  @@index([memberId])
 }
 
 /// An invitation into the BLACK network, always raised inside a private DM.

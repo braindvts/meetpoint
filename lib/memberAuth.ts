@@ -36,9 +36,11 @@ export async function clearMemberCookie(): Promise<void> {
 
 async function memberFromSession(session: AuthSession): Promise<Member | null> {
   if (session.provider === "linkedin" && session.id) {
-    const byLi = await prisma.member.findFirst({ where: { linkedInId: session.id } });
-    if (byLi) return byLi;
-  } else if (session.provider === "google" && session.id) {
+    // A LinkedIn login matches only its own linkedInId. The email LinkedIn
+    // returns is not an account link.
+    return prisma.member.findFirst({ where: { linkedInId: session.id } });
+  }
+  if (session.provider === "google" && session.id) {
     const byG = await prisma.member.findFirst({ where: { googleId: session.id } });
     if (byG) return byG;
   } else if (session.provider === "apple" && session.id) {

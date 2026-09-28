@@ -1,4 +1,5 @@
 import { timingSafeEqual } from "crypto";
+import { demoProfilesServerEnabled } from "./demoProfiles";
 
 export const WALKTHROUGH_OWNER_GATE = "ENABLE_WALKTHROUGH_OWNER";
 export const WALKTHROUGH_OWNER_EMAIL = "WALKTHROUGH_OWNER_EMAIL";
@@ -11,7 +12,7 @@ function envString(env: Env, key: string): string {
 }
 
 export function walkthroughOwnerEnabled(env: Env = process.env): boolean {
-  return envString(env, WALKTHROUGH_OWNER_GATE).trim() === "1";
+  return demoProfilesServerEnabled(env) && envString(env, WALKTHROUGH_OWNER_GATE).trim() === "1";
 }
 
 export function walkthroughOwnerCredentials(

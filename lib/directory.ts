@@ -1,6 +1,9 @@
 import { demoProfilesEnabled } from "./demoFlag";
 import { DEMO_PEOPLE } from "./demoPeople";
+import { LEGACY_SEED_IDS } from "./sampleAccounts";
 import type { Person } from "./types";
+
+const SEED_IDS = new Set(LEGACY_SEED_IDS);
 
 const KEY = "conclave.directory";
 
@@ -20,7 +23,9 @@ export function loadDirectory(): Person[] {
   } catch {
     /* ignore */
   }
-  return [...byId.values()];
+  const people = [...byId.values()];
+  if (demoProfilesEnabled()) return people;
+  return people.filter((person) => !SEED_IDS.has(person.id));
 }
 
 export function saveDirectory(people: Person[]): void {

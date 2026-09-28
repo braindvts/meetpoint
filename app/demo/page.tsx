@@ -1,24 +1,9 @@
-"use client";
+import { notFound } from "next/navigation";
+import DemoBypass from "@/components/DemoBypass";
+import { demoProfilesServerEnabled } from "@/lib/demoProfiles";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { enterAsDemo } from "@/lib/store";
-
-/** Bookmark /demo to skip account creation instantly. */
+/** Guest bypass. Production returns 404 unless ENABLE_DEMO_PROFILES=1. */
 export default function DemoBypassPage() {
-  const router = useRouter();
-
-  useEffect(() => {
-    enterAsDemo();
-    const shot = window.location.search.includes("shot=1") ? "?shot=1" : "";
-    router.replace(`/discover${shot}`);
-  }, [router]);
-
-  return (
-    <main className="grid min-h-dvh place-items-center px-6">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-muted">
-        Entering as Mohammed…
-      </p>
-    </main>
-  );
+  if (!demoProfilesServerEnabled()) notFound();
+  return <DemoBypass />;
 }

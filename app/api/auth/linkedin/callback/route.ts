@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/db";
+import { postAuthPath } from "@/lib/appPath";
+import { purgeDemoResidue } from "@/lib/purgeDemo";
 import { rateLimit } from "@/lib/rateLimit";
 import { OAUTH_CALLBACK_IP } from "@/lib/rateCaps";
 import {
   appUrl,
   clearOAuthStateCookie,
-  consumeOAuthState,
+  consumeOAuthChallenge,
   withSession,
 } from "@/lib/session";
 
@@ -40,8 +43,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(appUrl("/login?error=missing_code"));
   }
 
-  const ok = await consumeOAuthState(state);
-  if (!ok) {
+  const challenge = await consumeOAuthChallenge();
+  if (!challenge || challenge.state !== state) {
     return NextResponse.redirect(appUrl("/login?error=invalid_state"));
   }
 
@@ -81,7 +84,28 @@ export async function GET(req: NextRequest) {
       [user.given_name, user.family_name].filter(Boolean).join(" ") ||
       "LinkedIn Member";
 
-    const res = NextResponse.redirect(appUrl("/onboarding?linkedin=1"));
+    await purgeDemoResidue();
+    const email = user.email?.toLowerCase() || null;
+    // Look up an existing row only to choose the post-login page.
+    // This does not write linkedInId, email, or any other field, and it
+    // does not merge the LinkedIn identity into that account.
+    const linked = await prisma.member.findFirst({
+      where: { linkedInId: user.sub },
+      select: { name: true, jobTitle: true },
+    });
+    const sameEmail = !linked && email
+      ? await prisma.member.findFirst({
+          where: { email },
+          select: { name: true, jobTitle: true },
+        })
+      : null;
+    const identitySource = linked || sameEmail;
+    const dest = postAuthPath({
+      requested: challenge.next,
+      hasIdentity: !!(identitySource?.name?.trim() && identitySource?.jobTitle?.trim()),
+      incomplete: "/onboarding?linkedin=1",
+    });
+    const res = NextResponse.redirect(appUrl(dest));
     clearOAuthStateCookie(res);
     return withSession(res, {
       id: user.sub,

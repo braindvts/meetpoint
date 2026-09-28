@@ -487,9 +487,11 @@ test("the walkthrough mailbox is exempt from the account-wide login lock", () =>
   resetAuthLockoutForTests();
   const previous = {
     gate: process.env.ENABLE_WALKTHROUGH_OWNER,
+    demo: process.env.ENABLE_DEMO_PROFILES,
     mailbox: process.env.WALKTHROUGH_OWNER_EMAIL,
     password: process.env.WALKTHROUGH_OWNER_PASSWORD,
   };
+  process.env.ENABLE_DEMO_PROFILES = "1";
   process.env.ENABLE_WALKTHROUGH_OWNER = "1";
   process.env.WALKTHROUGH_OWNER_EMAIL = "owner@walkthrough.test";
   process.env.WALKTHROUGH_OWNER_PASSWORD = "sample-password";
@@ -506,6 +508,8 @@ test("the walkthrough mailbox is exempt from the account-wide login lock", () =>
     resetAuthLockoutForTests();
     if (previous.gate === undefined) delete process.env.ENABLE_WALKTHROUGH_OWNER;
     else process.env.ENABLE_WALKTHROUGH_OWNER = previous.gate;
+    if (previous.demo === undefined) delete process.env.ENABLE_DEMO_PROFILES;
+    else process.env.ENABLE_DEMO_PROFILES = previous.demo;
     if (previous.mailbox === undefined) delete process.env.WALKTHROUGH_OWNER_EMAIL;
     else process.env.WALKTHROUGH_OWNER_EMAIL = previous.mailbox;
     if (previous.password === undefined) delete process.env.WALKTHROUGH_OWNER_PASSWORD;

@@ -49,3 +49,28 @@ Never pass `--accept-data-loss`. Never put `prisma db push` in the Vercel build.
 3. Write an **additive** migration (`ADD COLUMN IF NOT EXISTS` / `CREATE TABLE IF NOT EXISTS`).
 4. Review the SQL. No `DROP` on Report.
 5. Ship it. Vercel runs `scripts/prisma-migrate-deploy.mjs` (`migrate deploy` only) on the next Production build.
+
+## Merge order with the safety PR
+
+`20260928150000_rate_limit_bucket` (report/block safety work) sorts **before** `20260928160000_member_profile_interests`. Apply the safety migration first. Prisma refuses a later `migrate deploy` if an earlier migration is still missing (`historiesDiverge`). This migration does not create `RateLimitBucket`, `Block`, or `Report`.
+
+When both schema edits land, keep `RateLimitBucket` from the safety PR and `Member.company`, `Member.industry`, `Member.isSample`, `Member.sampleKind`, and `MemberInterest` from this one.
+
+## Event RSVPs
+
+`EventInterest` already exists on the live database and in `20260913040000_event_interest`. It was missing from `schema.prisma`. `20260928180000_event_interest_baseline` creates the same table with `IF NOT EXISTS` (and the same indexes and foreign key). If the table is already there, the migration changes nothing and does not delete RSVP rows. The Prisma model uses those exact columns: `id`, `memberId`, `eventId`, `status`, `createdAt`, `updatedAt`.
+
+## Sample accounts
+
+`20260928160000_member_profile_interests` adds `company`, `industry`, `isSample`, `sampleKind`, and `MemberInterest`. It marks known sample rows. It does not delete them.
+
+Brian has approved deleting bot accounts. The cleanup script is still dry-run unless `--apply` is passed. It is not in `npm run build`, Vercel’s build command, or CI. If those environments start it, it exits without touching the database.
+
+Run it for real only after the owner confirms a database backup and a teammate reviews the dry-run output on a preview:
+
+```
+npx tsx scripts/cleanup-sample-accounts.ts           # dry run
+npx tsx scripts/cleanup-sample-accounts.ts --apply   # delete, after that review
+```
+
+The dry run lists each sample account and what would be removed, kept, or reassigned. Nothing is reassigned. Real members, their RSVPs, and the event catalog stay. See the comment at the top of that script.

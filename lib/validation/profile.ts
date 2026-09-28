@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { isAllowedIdeaTag } from "@/lib/ideaTags";
+import { isAllowedIdeaTag, normalizeIdeaTags } from "@/lib/ideaTags";
+import { IDEA_TAG_LIMIT, canonicalIndustry } from "@/lib/interests";
 import { LOOKING_FOR_OPTIONS } from "@/lib/types";
 import { citySchema, lookingForEnum, meetPrefEnum, travelEnum, zShortText } from "./primitives";
 
@@ -49,6 +50,8 @@ const phoneSchema = z
 /**
  * Client-writable profile fields only.
  * Rejects privileged keys (black, meetingsAttended, premier, verifications…).
+ * Custom interest tags use the same plain-text rules as the safety work
+ * (short, no URLs, no markup). Up to 24. Only catalog tags are matched on.
  */
 export const profileUpdateSchema = z
   .object({
@@ -71,11 +74,31 @@ export const profileUpdateSchema = z
             "Use a listed idea or a short custom tag without links or markup"
           )
       )
-      .max(12),
+      .max(IDEA_TAG_LIMIT),
+    company: zShortText(120).optional().or(z.literal("")),
+    industry: zShortText(80).optional().or(z.literal("")),
     phone: phoneSchema.optional().or(z.literal("")),
     work: z.array(workSchema).max(12).optional(),
   })
-  .strict();
+  .strict()
+  .superRefine((value, ctx) => {
+    if (canonicalIndustry(value.industry) === null) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["industry"],
+        message: "Choose an industry from the list",
+      });
+    }
+  })
+  .transform((value) => {
+    const industry = canonicalIndustry(value.industry) || "";
+    return {
+      ...value,
+      company: (value.company || "").trim(),
+      industry,
+      ideaTags: normalizeIdeaTags(value.ideaTags, IDEA_TAG_LIMIT),
+    };
+  });
 
 export const membersMePutSchema = z
   .object({

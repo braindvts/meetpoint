@@ -7,6 +7,7 @@ import { sendWelcomeEmail } from "@/lib/email";
 import { withMemberCookie } from "@/lib/memberAuth";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
 import { sanitizeName } from "@/lib/sanitize";
+import { postAuthPath } from "@/lib/appPath";
 import {
   appUrl,
   appleConfigured,
@@ -106,7 +107,11 @@ export async function POST(req: NextRequest) {
       if (email) void sendWelcomeEmail(email, member.name);
     }
 
-    const next = member.jobTitle && member.photo ? "/discover" : "/onboarding?apple=1";
+    const next = postAuthPath({
+      requested: challenge.next,
+      hasIdentity: !!(member.name?.trim() && member.jobTitle?.trim()),
+      incomplete: "/onboarding?apple=1",
+    });
     const res = NextResponse.redirect(appUrl(next));
     clearOAuthStateCookie(res);
     withSession(res, {

@@ -20,6 +20,7 @@ import { accountKey, rateLimit } from "@/lib/rateLimit";
 import { AUTH_EMAIL_IP, AUTH_SIGNUP_ACCOUNT, AUTH_SIGNUP_IP } from "@/lib/rateCaps";
 import { publicError } from "@/lib/safeError";
 import { sanitizeName } from "@/lib/sanitize";
+import { postAuthPath } from "@/lib/appPath";
 import { appUrl, withSession } from "@/lib/session";
 import { emailAuthSchema } from "@/lib/validation/auth";
 import { clientIp, parseBody } from "@/lib/validation/parse";
@@ -83,7 +84,11 @@ export async function POST(req: Request) {
       clearAuthFailures(email, ip);
       const res = NextResponse.json({
         ok: true,
-        next: "/onboarding",
+        next: postAuthPath({
+          requested: parsed.data.next,
+          hasIdentity: false,
+          incomplete: "/onboarding",
+        }),
         memberId: member.id,
         profile: memberToProfile(member),
       });
@@ -119,7 +124,11 @@ export async function POST(req: Request) {
       });
     }
 
-    const next = member.jobTitle && member.photo ? "/discover" : "/onboarding";
+    const next = postAuthPath({
+      requested: parsed.data.next,
+      hasIdentity: !!(member.name?.trim() && member.jobTitle?.trim()),
+      incomplete: "/onboarding",
+    });
     const res = NextResponse.json({
       ok: true,
       next,

@@ -1,5 +1,6 @@
 import type { Member } from "@prisma/client";
 import { normalizeIdeaTags } from "./ideaTags";
+import { IDEA_TAG_LIMIT, canonicalIndustry, isLookingFor, labelsForSlugs } from "./interests";
 import { sanitizeName, sanitizeText } from "./sanitize";
 import { hasRequiredVerifications } from "./tiers";
 import type {
@@ -13,10 +14,24 @@ import type {
 } from "./types";
 import { LOOKING_FOR_OPTIONS } from "./types";
 
-export function memberToProfile(m: Member): MyProfile {
+type MemberRow = Member & { interests?: { slug: string }[] };
+
+function ideaLabels(m: MemberRow): string[] {
+  const stored = safeJson<string[]>(m.ideaTagsJson, []);
+  const fromRows = labelsForSlugs((m.interests || []).map((row) => row.slug));
+  return normalizeIdeaTags([...stored, ...fromRows], IDEA_TAG_LIMIT);
+}
+
+function lookingLabels(raw: string): LookingFor[] {
+  return safeJson<string[]>(raw, []).filter(isLookingFor);
+}
+
+export function memberToProfile(m: MemberRow): MyProfile {
   return {
     name: m.name,
     jobTitle: m.jobTitle,
+    company: m.company || "",
+    industry: canonicalIndustry(m.industry) || "",
     bio: m.bio,
     photo: m.photo,
     city: {
@@ -27,8 +42,8 @@ export function memberToProfile(m: Member): MyProfile {
     },
     travel: (m.travel as TravelRange) || "worldwide",
     meetPreference: (m.meetPreference as MeetPreference) || "open",
-    lookingFor: safeJson<LookingFor[]>(m.lookingForJson, []),
-    ideaTags: safeJson<string[]>(m.ideaTagsJson, []),
+    lookingFor: lookingLabels(m.lookingForJson),
+    ideaTags: ideaLabels(m),
     verifications: safeJson<Verification[]>(m.verificationsJson, []),
     work: safeJson<PersonWork[]>(
       "workJson" in m ? String((m as { workJson?: string }).workJson || "[]") : "[]",
@@ -74,9 +89,10 @@ function publicHttps(url: string | undefined): string | undefined {
 /**
  * What other members are allowed to see.
  * Email, phone, passwordHash, OAuth ids, and verification values stay off this object.
+ * LinkedIn, website, portfolio, and verification badges stay off too.
  * `verified` is enough for the standing badge.
  */
-export function memberToPerson(m: Member): Person {
+export function memberToPerson(m: MemberRow): Person {
   const vers = safeJson<Verification[]>(m.verificationsJson, []);
   const work = safeJson<PersonWork[]>(
     "workJson" in m ? String((m as { workJson?: string }).workJson || "[]") : "[]",
@@ -86,6 +102,8 @@ export function memberToPerson(m: Member): Person {
     id: m.id,
     name: m.name,
     jobTitle: m.jobTitle,
+    company: m.company || undefined,
+    industry: canonicalIndustry(m.industry) || undefined,
     bio: sanitizeText(m.bio || "", 800),
     photoUrl: publicPhoto(m.photo),
     city: {
@@ -95,8 +113,8 @@ export function memberToPerson(m: Member): Person {
       lng: m.cityLng,
     },
     travel: (m.travel as TravelRange) || "worldwide",
-    lookingFor: safeJson<LookingFor[]>(m.lookingForJson, []),
-    ideaTags: safeJson<string[]>(m.ideaTagsJson, []),
+    lookingFor: lookingLabels(m.lookingForJson),
+    ideaTags: ideaLabels(m),
     verifications: [],
     verified: hasRequiredVerifications(vers),
     work: work.map((item) => ({
@@ -118,6 +136,8 @@ export function profileToMemberData(profile: MyProfile) {
   return {
     name: sanitizeName(profile.name || "Member") || "Member",
     jobTitle: sanitizeText(profile.jobTitle || "", 120),
+    company: sanitizeText(profile.company || "", 120),
+    industry: canonicalIndustry(profile.industry) || "",
     bio: sanitizeText(profile.bio || "", 800),
     photo: profile.photo || "",
     cityName: sanitizeText(profile.city.name, 80),
@@ -131,7 +151,7 @@ export function profileToMemberData(profile: MyProfile) {
         .filter((tag) => (LOOKING_FOR_OPTIONS as readonly string[]).includes(tag))
         .slice(0, LOOKING_FOR_OPTIONS.length)
     ),
-    ideaTagsJson: JSON.stringify(normalizeIdeaTags(profile.ideaTags || [])),
+    ideaTagsJson: JSON.stringify(normalizeIdeaTags(profile.ideaTags || [], IDEA_TAG_LIMIT)),
     workJson: JSON.stringify(
       (profile.work || []).slice(0, 12).map((item) => ({
         title: sanitizeText(item.title || "", 120),

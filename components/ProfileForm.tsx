@@ -5,9 +5,10 @@ import { useRouter } from "next/navigation";
 import { CITIES, cityKey, indexOfCity, nearestCity } from "@/lib/cities";
 import { IDEA_TAGS, POPULAR_TAGS } from "@/lib/data";
 import { canonicalIdeaTag, isAllowedIdeaTag, isCatalogIdeaTag } from "@/lib/ideaTags";
+import { IDEA_TAG_LIMIT, INDUSTRIES, partitionIdeaTags } from "@/lib/interests";
 import { showToast } from "@/lib/notify";
 import { formatPhoneDisplay, isValidPhone } from "@/lib/phone";
-import { saveProfile } from "@/lib/store";
+import { isDemoProfile, saveProfile } from "@/lib/store";
 import { hasRequiredVerifications } from "@/lib/tiers";
 import { makeVerification, validateVerification } from "@/lib/verifyRules";
 import type {
@@ -147,6 +148,8 @@ export default function ProfileForm({
   const router = useRouter();
   const [name, setName] = useState(initial?.name ?? "");
   const [jobTitle, setJobTitle] = useState(initial?.jobTitle ?? "");
+  const [company, setCompany] = useState(initial?.company ?? "");
+  const [industry, setIndustry] = useState(initial?.industry ?? "");
   const [bio, setBio] = useState(initial?.bio ?? "");
   const [photo, setPhoto] = useState(initial?.photo ?? "");
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -222,7 +225,7 @@ export default function ProfileForm({
       const existing = tags.find((item) => item.toLowerCase() === tag.trim().toLowerCase());
       if (existing) return tags.filter((item) => item !== existing);
       if (!canonical || !isAllowedIdeaTag(canonical)) return tags;
-      if (tags.length >= 12) return tags;
+      if (tags.length >= IDEA_TAG_LIMIT) return tags;
       return [...tags, canonical];
     });
     clearFieldError("ideaTags");
@@ -286,8 +289,9 @@ export default function ProfileForm({
       nextErrors.jobTitle = "Enter your job or role.";
       missing.push("Job / role");
     }
-    if (ideaTags.length === 0) {
-      nextErrors.ideaTags = "Pick at least one business idea or interest.";
+    const interests = partitionIdeaTags(ideaTags).labels;
+    if (interests.length === 0) {
+      nextErrors.ideaTags = "Add at least one interest.";
       missing.push("Ambitions");
     }
     if (lookingFor.length === 0) {
@@ -356,13 +360,15 @@ export default function ProfileForm({
     const nextProfile: MyProfile = {
       name: name.trim(),
       jobTitle: jobTitle.trim(),
+      company: company.trim(),
+      industry: industry.trim(),
       bio: bio.trim(),
       photo,
       city: CITIES[cityIdx],
       travel,
       meetPreference: "open",
       lookingFor,
-      ideaTags,
+      ideaTags: interests,
       verifications,
       work: projects,
       phone: phone.trim() ? formatPhoneDisplay(phone) : undefined,
@@ -402,6 +408,11 @@ export default function ProfileForm({
 
     setHighlightVerify(false);
     setSaving(false);
+
+    if (!isDemoProfile(nextProfile) && !synced) {
+      showToast("Couldn’t save to your account. Check your connection and try again.");
+      return;
+    }
 
     if (wasVerified && !nowVerified) {
       showToast(synced ? "Saved — you’re a Member again" : "Saved on this device — you’re a Member again");
@@ -534,6 +545,33 @@ export default function ProfileForm({
               {fieldErrors.jobTitle && <p className={errCls}>{fieldErrors.jobTitle}</p>}
             </label>
             <label className="block">
+              <span className={labelCls}>Company</span>
+              <input
+                className={field}
+                value={company}
+                onChange={(e) => setCompany(e.target.value)}
+                placeholder="Company or venture"
+                maxLength={120}
+              />
+            </label>
+            <label className="block">
+              <span className={labelCls}>Industry</span>
+              <select
+                className={`${field} cursor-pointer appearance-none`}
+                value={industry}
+                onChange={(e) => setIndustry(e.target.value)}
+              >
+                <option value="" className="bg-panel text-ivory">
+                  Select an industry
+                </option>
+                {INDUSTRIES.map((label) => (
+                  <option key={label} value={label} className="bg-panel text-ivory">
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="block">
               <span className={labelCls}>Mobile</span>
               <input
                 className={fieldErrors.phone ? fieldWarn : field}
@@ -559,7 +597,7 @@ export default function ProfileForm({
         id="section-ambitions"
         num="02"
         title="Ambitions"
-        subtitle="What you’re building. Up to 12, including a tag of your own."
+        subtitle="What you’re building — pick from the list or add your own. Up to 24."
         missing={!!fieldErrors.ideaTags}
         missingLabel={fieldErrors.ideaTags}
       >
@@ -580,7 +618,7 @@ export default function ProfileForm({
                 }
               }
             }}
-            placeholder="Search ideas…"
+            placeholder="Search interests"
           />
         </div>
 

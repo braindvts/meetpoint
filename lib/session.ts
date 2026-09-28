@@ -1,6 +1,7 @@
 import { createHmac, randomBytes, timingSafeEqual } from "crypto";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { safeAppPath } from "./appPath";
 
 export type AuthProvider = "linkedin" | "google" | "apple" | "email";
 
@@ -112,12 +113,20 @@ export async function clearSession(): Promise<void> {
   jar.delete(REAUTH_COOKIE);
 }
 
-export type OAuthChallenge = { state: string; nonce: string };
+export type OAuthChallenge = { state: string; nonce: string; next?: string };
 
-export async function createOAuthState(): Promise<OAuthChallenge & { cookieValue: string }> {
+export async function createOAuthState(
+  nextPath?: string | null
+): Promise<OAuthChallenge & { cookieValue: string }> {
   const state = randomBytes(16).toString("hex");
   const nonce = randomBytes(16).toString("hex");
-  return { state, nonce, cookieValue: signValue(JSON.stringify({ state, nonce })) };
+  const next = safeAppPath(nextPath) || undefined;
+  return {
+    state,
+    nonce,
+    next,
+    cookieValue: signValue(JSON.stringify({ state, nonce, ...(next ? { next } : {}) })),
+  };
 }
 
 export function applyOAuthStateCookie(res: NextResponse, cookieValue: string): NextResponse {
@@ -129,7 +138,8 @@ function parseOAuthChallenge(payload: string): OAuthChallenge | null {
   try {
     const parsed = JSON.parse(payload) as Partial<OAuthChallenge>;
     if (typeof parsed.state === "string" && parsed.state && typeof parsed.nonce === "string") {
-      return { state: parsed.state, nonce: parsed.nonce };
+      const next = safeAppPath(typeof parsed.next === "string" ? parsed.next : null) || undefined;
+      return { state: parsed.state, nonce: parsed.nonce, next };
     }
   } catch {
     /* ignore */

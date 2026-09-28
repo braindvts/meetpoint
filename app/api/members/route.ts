@@ -2,8 +2,9 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getCurrentMember } from "@/lib/memberAuth";
 import { memberToPerson } from "@/lib/memberMap";
-import { blackConnectionCounts } from "@/lib/blackServer";
 import { discoverExcludedIds } from "@/lib/moderation";
+import { sampleMemberWhere } from "@/lib/sampleAccounts";
+import { blackConnectionCounts } from "@/lib/blackServer";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
 import { rateLimit } from "@/lib/rateLimit";
 import { publicError } from "@/lib/safeError";
@@ -22,14 +23,15 @@ export async function GET(req: Request) {
 
     const excluded = await discoverExcludedIds(me.id);
     const people = await prisma.member.findMany({
-      where: { id: { notIn: excluded } },
+      where: {
+        AND: [{ id: { notIn: excluded } }, { NOT: sampleMemberWhere() }],
+      },
+      include: { interests: true },
       orderBy: { updatedAt: "desc" },
-      take: 200,
     });
 
-    const visible = people;
-    const counts = await blackConnectionCounts(visible.map((m) => m.id));
-    const members = visible.map((m) => ({
+    const counts = await blackConnectionCounts(people.map((m) => m.id));
+    const members = people.map((m) => ({
       ...memberToPerson(m),
       blackConnections: counts[m.id] || 0,
     }));
