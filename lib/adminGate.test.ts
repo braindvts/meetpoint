@@ -5,6 +5,7 @@ import { test } from "node:test";
 import {
   ADMIN_SESSION_MS,
   adminCookieValid,
+  adminIdentityFromAuth,
   canViewAdminDashboard,
   signAdminCookie,
 } from "./adminGate.ts";
@@ -16,7 +17,6 @@ test("non-admins are blocked from the dashboard gate", () => {
   assert.equal(canViewAdminDashboard({}), false);
   assert.equal(
     canViewAdminDashboard({
-      email: "stranger@example.com",
       adminEmails: "brian@interlink.test",
       adminSecret: SECRET,
     }),
@@ -24,7 +24,6 @@ test("non-admins are blocked from the dashboard gate", () => {
   );
   assert.equal(
     canViewAdminDashboard({
-      email: "brian@interlink.test",
       adminEmails: "",
       cookie: "v1.1.forged",
       adminSecret: SECRET,
@@ -51,60 +50,99 @@ test("non-admins are blocked from the dashboard gate", () => {
   );
 });
 
-test("an unverified listed email is denied", () => {
-  assert.equal(
-    canViewAdminDashboard({
+test("emailVerifiedAt alone does not grant a listed email", () => {
+  const identity = adminIdentityFromAuth(
+    {
       email: "brian@interlink.test",
-      adminEmails: "brian@interlink.test",
-      emailVerifiedAt: null,
+      emailVerifiedAt: "2026-09-01T00:00:00.000Z",
       googleId: null,
       appleId: null,
+    },
+    { id: "member-1", email: "brian@interlink.test", provider: "email" }
+  );
+  assert.equal(identity.googleEmail, null);
+  assert.equal(identity.appleEmail, null);
+  assert.equal(
+    canViewAdminDashboard({
+      ...identity,
+      adminEmails: "brian@interlink.test",
     }),
     false
   );
   assert.equal(
     canViewAdminDashboard({
-      email: "Brian@Interlink.test",
-      adminEmails: " brian@interlink.test ",
-      emailVerifiedAt: "   ",
+      googleId: "   ",
+      appleId: "",
+      googleEmail: "brian@interlink.test",
+      adminEmails: "brian@interlink.test",
     }),
     false
   );
 });
 
-test("a verified listed email is allowed", () => {
+test("Google or Apple provider email allows a listed address", () => {
+  const google = adminIdentityFromAuth(
+    { email: "typed-later@attacker.test", googleId: "google-sub-1", appleId: null },
+    { id: "google-sub-1", email: "Brian@Interlink.test", provider: "google" }
+  );
+  assert.equal(google.googleEmail, "Brian@Interlink.test");
   assert.equal(
     canViewAdminDashboard({
-      email: "Brian@Interlink.test",
+      ...google,
       adminEmails: " brian@interlink.test, ops@interlink.test ",
-      emailVerifiedAt: "2026-09-01T00:00:00.000Z",
+    }),
+    true
+  );
+
+  const apple = adminIdentityFromAuth(
+    { email: "typed-later@attacker.test", googleId: null, appleId: "apple-sub-1" },
+    { id: "apple-sub-1", email: "ops@interlink.test", provider: "apple" }
+  );
+  assert.equal(
+    canViewAdminDashboard({
+      ...apple,
+      adminEmails: "brian@interlink.test, ops@interlink.test",
     }),
     true
   );
 });
 
-test("Google or Apple sign-in allows a listed email", () => {
-  assert.equal(
-    canViewAdminDashboard({
-      email: "brian@interlink.test",
-      adminEmails: "brian@interlink.test",
-      googleId: "google-sub-1",
-    }),
-    true
+test("account email is not the provider email", () => {
+  const linkedButDifferent = adminIdentityFromAuth(
+    { email: "brian@interlink.test", googleId: "google-sub-1" },
+    { id: "google-sub-1", email: "attacker@gmail.com", provider: "google" }
   );
+  assert.equal(linkedButDifferent.googleEmail, "attacker@gmail.com");
   assert.equal(
     canViewAdminDashboard({
-      email: "brian@interlink.test",
+      ...linkedButDifferent,
       adminEmails: "brian@interlink.test",
-      appleId: "apple-sub-1",
     }),
-    true
+    false
   );
+
+  const idWithoutProviderEmail = adminIdentityFromAuth(
+    { email: "brian@interlink.test", googleId: "google-sub-1" },
+    { id: "google-sub-1", email: "  ", provider: "google" }
+  );
+  assert.equal(idWithoutProviderEmail.googleEmail, null);
   assert.equal(
     canViewAdminDashboard({
-      email: "brian@interlink.test",
-      adminEmails: "someone-else@interlink.test",
-      googleId: "google-sub-1",
+      ...idWithoutProviderEmail,
+      adminEmails: "brian@interlink.test",
+    }),
+    false
+  );
+
+  const subjectMismatch = adminIdentityFromAuth(
+    { email: "brian@interlink.test", googleId: "google-sub-1" },
+    { id: "other-sub", email: "brian@interlink.test", provider: "google" }
+  );
+  assert.equal(subjectMismatch.googleEmail, null);
+  assert.equal(
+    canViewAdminDashboard({
+      ...subjectMismatch,
+      adminEmails: "brian@interlink.test",
     }),
     false
   );
@@ -113,11 +151,11 @@ test("Google or Apple sign-in allows a listed email", () => {
 test("allowlisted email and a valid admin cookie can open the dashboard", () => {
   assert.equal(
     canViewAdminDashboard({
-      email: "Brian@Interlink.test",
       adminEmails: " brian@interlink.test, ops@interlink.test ",
-      emailVerifiedAt: "2026-09-01T00:00:00.000Z",
+      googleId: null,
+      googleEmail: null,
     }),
-    true
+    false
   );
   const token = signAdminCookie(SECRET, NOW);
   assert.equal(adminCookieValid(token, SECRET, NOW + 1_000), true);
@@ -136,8 +174,12 @@ test("allowlisted email and a valid admin cookie can open the dashboard", () => 
 test("analytics page 404s when the server gate denies access", () => {
   const page = readFileSync(join(import.meta.dirname, "../app/admin/analytics/page.tsx"), "utf8");
   assert.match(page, /canViewAdminDashboard/);
-  assert.match(page, /adminIdentityFromMember/);
+  assert.match(page, /adminIdentityFromAuth/);
+  assert.match(page, /getSession/);
   assert.match(page, /if \(!allowed\) notFound\(\)/);
+  const gate = readFileSync(join(import.meta.dirname, "adminGate.ts"), "utf8");
+  assert.equal(gate.includes("member?.email"), false);
+  assert.equal(gate.includes("input.emailVerifiedAt"), false);
   const sample = readFileSync(
     join(import.meta.dirname, "../app/admin/analytics/sample/page.tsx"),
     "utf8"

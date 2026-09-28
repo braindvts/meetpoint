@@ -2,9 +2,10 @@ import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import AnalyticsDashboard from "@/components/admin/AnalyticsDashboard";
 import Nav from "@/components/Nav";
-import { ADMIN_COOKIE, adminIdentityFromMember, canViewAdminDashboard } from "@/lib/adminGate";
+import { ADMIN_COOKIE, adminIdentityFromAuth, canViewAdminDashboard } from "@/lib/adminGate";
 import { loadAnalyticsDashboard, parseRange } from "@/lib/analyticsDashboard";
 import { getCurrentMember } from "@/lib/memberAuth";
+import { getSession } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
@@ -14,12 +15,19 @@ export default async function AdminAnalyticsPage({
   searchParams: Promise<{ range?: string }>;
 }) {
   const jar = await cookies();
-  let identity = adminIdentityFromMember(null);
+  let session = null;
   try {
-    identity = adminIdentityFromMember(await getCurrentMember());
+    session = await getSession();
   } catch {
-    identity = adminIdentityFromMember(null);
+    session = null;
   }
+  let member = null;
+  try {
+    member = await getCurrentMember();
+  } catch {
+    member = null;
+  }
+  const identity = adminIdentityFromAuth(member, session);
 
   const allowed = canViewAdminDashboard({
     ...identity,
