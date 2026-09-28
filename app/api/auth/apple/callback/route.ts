@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { sendWelcomeEmail } from "@/lib/email";
 import { withMemberCookie } from "@/lib/memberAuth";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
+import { recordSignup } from "@/lib/recordSignup";
 import { sanitizeName } from "@/lib/sanitize";
 import {
   appUrl,
@@ -99,6 +100,7 @@ export async function POST(req: NextRequest) {
         data: { appleId: sub, email, name },
       });
       if (email) void sendWelcomeEmail(email, member.name);
+      await recordSignup(member.id, "apple");
     }
 
     const next = member.jobTitle && member.photo ? "/discover" : "/onboarding?apple=1";

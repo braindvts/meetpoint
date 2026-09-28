@@ -22,6 +22,7 @@ import { sanitizeName } from "@/lib/sanitize";
 import { appUrl, withSession } from "@/lib/session";
 import { emailAuthSchema } from "@/lib/validation/auth";
 import { clientIp, parseBody } from "@/lib/validation/parse";
+import { recordSignup } from "@/lib/recordSignup";
 import { matchesWalkthroughOwner } from "@/lib/walkthroughOwner";
 
 export async function POST(req: Request) {
@@ -67,6 +68,7 @@ export async function POST(req: Request) {
       });
 
       void sendWelcomeEmail(email, member.name);
+      await recordSignup(member.id, "email");
 
       clearAuthFailures(email, ip);
       const res = NextResponse.json({

@@ -1,0 +1,70 @@
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { unlockAdmin } from "./actions";
+import { ADMIN_COOKIE, canViewAdminDashboard } from "@/lib/adminGate";
+import { getCurrentMember } from "@/lib/memberAuth";
+
+export const dynamic = "force-dynamic";
+
+export default async function AdminEnterPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const jar = await cookies();
+  let email: string | null = null;
+  try {
+    const member = await getCurrentMember();
+    email = member?.email ?? null;
+  } catch {
+    email = null;
+  }
+  if (
+    canViewAdminDashboard({
+      email,
+      cookie: jar.get(ADMIN_COOKIE)?.value,
+      adminEmails: process.env.ADMIN_EMAILS,
+      adminSecret: process.env.ADMIN_SECRET,
+    })
+  ) {
+    redirect("/admin/analytics");
+  }
+
+  const params = await searchParams;
+  const error =
+    params.error === "config"
+      ? "Admin access is not configured on this server."
+      : params.error
+        ? "That secret does not match."
+        : "";
+
+  return (
+    <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center bg-ink px-4 py-16 text-ivory">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-accent">Admin</p>
+      <h1 className="mt-2 text-3xl font-semibold tracking-tight">Open analytics</h1>
+      <p className="mt-3 text-sm leading-relaxed text-muted">
+        Use the same operator secret as reports and BLACK grants. A signed-in email listed in
+        ADMIN_EMAILS can open the dashboard without this step.
+      </p>
+      <form action={unlockAdmin} className="mt-8">
+        <label className="block text-[11px] uppercase tracking-[0.16em] text-muted">
+          Admin secret
+          <input
+            type="password"
+            name="secret"
+            autoComplete="off"
+            required
+            className="mt-2 min-h-11 w-full border border-line bg-panel px-3 text-sm text-ivory outline-none focus:border-accent"
+          />
+        </label>
+        {error ? <p className="mt-3 text-sm text-accent">{error}</p> : null}
+        <button
+          type="submit"
+          className="mt-4 min-h-11 w-full bg-ivory text-[11px] font-semibold uppercase tracking-[0.18em] text-ink"
+        >
+          Continue
+        </button>
+      </form>
+    </main>
+  );
+}

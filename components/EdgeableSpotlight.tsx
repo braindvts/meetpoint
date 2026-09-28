@@ -1,4 +1,7 @@
+"use client";
+
 import PartnerMark from "@/components/PartnerMark";
+import { trackPartnerClick } from "@/lib/analytics";
 
 /**
  * Compact featured-partner credit beside the landing marquee.
@@ -28,6 +31,7 @@ export default function EdgeableSpotlight({ className = "" }: { className?: stri
           href="https://edgeable.app"
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() => trackPartnerClick("edgeable", "featured")}
         >
           Visit Edgeable
         </a>

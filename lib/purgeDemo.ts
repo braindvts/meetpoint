@@ -4,10 +4,10 @@ import { demoEntryEnabled } from "./demoFlag";
 let done: Promise<void> | null = null;
 
 /** Ids of the fake members this app used to ship with. */
-const LEGACY_SEED_IDS = Array.from({ length: 18 }, (_, i) => `p${i + 1}`);
+export const LEGACY_SEED_IDS = Array.from({ length: 18 }, (_, i) => `p${i + 1}`);
 
 /** The old "Enter demo" account signed itself with this LinkedIn value. */
-const DEMO_PROFILE_MARKER = "linkedin.com/in/conclave-demo";
+export const DEMO_PROFILE_MARKER = "linkedin.com/in/conclave-demo";
 
 async function removeMembers(ids: string[]): Promise<void> {
   if (!ids.length) return;

@@ -4,6 +4,7 @@ import { sendWelcomeEmail } from "@/lib/email";
 import { verifyGoogleIdToken } from "@/lib/googleAuth";
 import { withMemberCookie } from "@/lib/memberAuth";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
+import { recordSignup } from "@/lib/recordSignup";
 import { sanitizeName } from "@/lib/sanitize";
 import {
   appUrl,
@@ -99,6 +100,7 @@ export async function GET(req: NextRequest) {
         },
       });
       if (email) void sendWelcomeEmail(email, member.name);
+      await recordSignup(member.id, "google");
     }
 
     const next = member.jobTitle && member.photo ? "/discover" : "/onboarding?google=1";

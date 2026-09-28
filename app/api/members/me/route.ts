@@ -5,6 +5,7 @@ import { getCurrentMember, withMemberCookie } from "@/lib/memberAuth";
 import { memberToProfile, profileToMemberData } from "@/lib/memberMap";
 import { getSession } from "@/lib/session";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
+import { recordSignup } from "@/lib/recordSignup";
 import { rateLimit } from "@/lib/rateLimit";
 import { membersMePutSchema } from "@/lib/validation/profile";
 import { parseBody } from "@/lib/validation/parse";
@@ -111,6 +112,8 @@ export async function PUT(req: Request) {
           name: data.name || session?.name || "Member",
         },
       });
+      const provider = session?.provider || "email";
+      await recordSignup(member.id, provider);
     }
 
     const res = NextResponse.json({

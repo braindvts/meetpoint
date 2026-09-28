@@ -1,6 +1,7 @@
 "use client";
 
 import PartnerMark from "@/components/PartnerMark";
+import { trackPartnerClick } from "@/lib/analytics";
 import { featuredPartnersInOrder, type FeaturedPartner } from "@/lib/featuredPartners";
 import type { CSSProperties } from "react";
 
@@ -65,7 +66,10 @@ function PartnerCredit({ partner, index }: { partner: FeaturedPartner; index: nu
         rel="noopener noreferrer"
         className="mp-featured-partner-link"
         aria-label={`${partner.name} (opens in a new tab)`}
-        onClick={(event) => event.stopPropagation()}
+        onClick={(event) => {
+          event.stopPropagation();
+          trackPartnerClick(partner.id, "loading");
+        }}
       >
         <span className="mp-featured-partner-mark-wrap">
           <PartnerMark

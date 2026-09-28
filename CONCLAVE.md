@@ -124,6 +124,8 @@ The bell in the top nav opens the feed. The same list is at `/notifications`.
 | `/discover` | The Room — For you / Nearby match cards |
 | `/events` | Events & conventions — public catalog (RSVP needs an account) |
 | `/events/[id]` | Event detail, RSVP, related rooms, people attending |
+| `/admin/analytics` | Owner analytics — partner clicks, page views, accounts, BLACK, RSVPs, reports. Server-gated |
+| `/admin/enter` | Enter `ADMIN_SECRET` to open analytics (12-hour httpOnly cookie) |
 | `/admin/events` | Create / edit / publish events (ADMIN_SECRET + local overlay) |
 | `/circle` | Incoming connects + booked reservations |
 | `/notifications` | Acceptances and upcoming gatherings (also the bell in the top nav) |
@@ -169,7 +171,9 @@ When sample profiles are on, the room includes **Member**, **Verified**, and **B
 ## Tech & data
 
 - **Frontend:** Next.js App Router, TypeScript, Tailwind  
-- **DB:** Postgres via Prisma (`Member`, connections, chats, BLACK tables, `Report`)
+- **DB:** Postgres via Prisma (`Member`, connections, chats, BLACK tables, `Report`, `AnalyticsEvent`, `EventInterest`)
+- **Admin analytics:** `/admin/analytics` returns 404 unless the signed-in email is in `ADMIN_EMAILS` or the browser has an admin cookie from `/admin/enter` (`ADMIN_SECRET`, same secret as reports and BLACK grant). The report queue can use `canViewAdminDashboard` in `lib/adminGate.ts`. Clicks and page views are first-party and start at deploy. Accounts and BLACK are historical rows on `Member`.
+- **Levels in the database:** there is no memberships table. **Member** and **Verified** are derived (Verified = business email and LinkedIn on `verificationsJson`). **BLACK** is `Member.black`, with `blackSince` and `blackSource` (`paid` | `earned` | `granted`). Paid BLACK is confirmed after Stripe Checkout. `premierActive` is a leftover column and is not a current plan. Event RSVPs that were saved on the server live in `EventInterest`; the events UI also keeps a browser copy.
 - **Vercel build:** `prisma generate && node scripts/prisma-migrate-deploy.mjs && next build` (`migrate deploy` only). Never `prisma db push` on Production (that tried to DROP live `Report` columns). Never `--accept-data-loss`. Details: [prisma/README.md](./prisma/README.md).
 - **Auth:** email/password + Google / LinkedIn / Apple (when keyed)  
 - **Payments:** Stripe Checkout (`black_month`, `black_year`, table fee)  
