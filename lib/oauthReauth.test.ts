@@ -2,16 +2,19 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
-import { claimOAuthNonceStored, oauthNonceKey } from "./oauthNonceStore.ts";
-import { prisma } from "./db.ts";
+import { newEmailToken } from "./emailConfirm.ts";
 import {
   buildReauthBindToken,
   buildReauthToken,
   createOAuthState,
+  decodeSession,
+  encodeSession,
   oauthStateCookieOptions,
+  readMemberCookie,
   readReauthBindToken,
   readReauthToken,
   REAUTH_TTL_SEC,
+  signMemberCookie,
   verifyValue,
 } from "./session.ts";
 import {
@@ -235,8 +238,9 @@ test("reauth state is one-time, short-lived, and bound to the member who started
   assert.equal(created.reauth?.provider, "apple");
   assert.ok(created.exp - Math.floor(Date.now() / 1000) <= 600);
   assert.ok(created.exp > Math.floor(Date.now() / 1000));
-  const signed = verifyValue(created.cookieValue);
+  const signed = verifyValue("oauth-state", created.cookieValue);
   assert.ok(signed);
+  assert.match(signed!, /"purpose":"oauth-state"/);
   assert.match(signed!, /"memberId":"member-a"/);
 
   const normal = await createOAuthState("/onboarding");
@@ -267,8 +271,16 @@ test("reauth state is one-time, short-lived, and bound to the member who started
     else process.env.NODE_ENV = prev;
   }
 
-  resetOAuthNoncesForTests();
-  const nonce = `once-${created.nonce}`;
+});
+
+test("stored oauth nonce is rejected on replay", async (t) => {
+  if (!process.env.DATABASE_URL) {
+    t.skip("DATABASE_URL is not set");
+    return;
+  }
+  const { claimOAuthNonceStored, oauthNonceKey } = await import("./oauthNonceStore.ts");
+  const { prisma } = await import("./db.ts");
+  const nonce = `once-${Date.now().toString(36)}`;
   const exp = Math.floor(Date.now() / 1000) + 120;
   try {
     assert.equal(await claimOAuthNonceStored(nonce, exp), true);
@@ -277,6 +289,55 @@ test("reauth state is one-time, short-lived, and bound to the member who started
   } finally {
     await prisma.rateLimitBucket.deleteMany({ where: { key: oauthNonceKey(nonce) } });
   }
+});
+
+test("a bind, session, or OAuth state token is not a reauth proof", async () => {
+  const proof = buildReauthToken("member-a", NOW);
+  const bind = buildReauthBindToken(
+    { memberId: "member-a", nonce: "nonce-bind", exp: NOW + 60 },
+    NOW
+  );
+  const session = encodeSession({ id: "member-a", name: "Member A", provider: "email" });
+  const state = (
+    await createOAuthState("/profile#delete", { memberId: "member-a", provider: "google" })
+  ).cookieValue;
+  const member = signMemberCookie("member-a");
+  const emailToken = newEmailToken().raw;
+
+  assert.equal(readReauthToken(proof, "member-a", NOW), true);
+  assert.equal(readReauthBindToken(bind, NOW)?.memberId, "member-a");
+
+  assert.equal(readReauthToken(bind, "member-a", NOW), false);
+  assert.equal(readReauthBindToken(proof, NOW), null);
+
+  assert.equal(readReauthToken(session, "member-a", NOW), false);
+  assert.equal(readReauthBindToken(session, NOW), null);
+  assert.equal(readReauthToken(state, "member-a", NOW), false);
+  assert.equal(readReauthBindToken(state, NOW), null);
+
+  assert.equal(readReauthToken(member, "member-a", NOW), false);
+  assert.equal(readReauthBindToken(member, NOW), null);
+  assert.equal(readMemberCookie(member), "member-a");
+  assert.equal(readMemberCookie(proof), null);
+  assert.equal(readMemberCookie(bind), null);
+
+  assert.equal(decodeSession(session)?.id, "member-a");
+  assert.equal(decodeSession(proof), null);
+  assert.equal(decodeSession(bind), null);
+  assert.equal(decodeSession(state), null);
+  assert.equal(decodeSession(member), null);
+
+  assert.equal(readReauthToken(emailToken, "member-a", NOW), false);
+  assert.equal(readReauthBindToken(emailToken, NOW), null);
+  assert.equal(readReauthToken("admin-shared-secret", "member-a", NOW), false);
+  assert.equal(decodeSession("admin-shared-secret"), null);
+
+  const admin = readFileSync(join(ROOT, "lib/adminAuth.ts"), "utf8");
+  assert.match(admin, /secretsMatch/);
+  assert.doesNotMatch(admin, /signValue|verifyValue/);
+  const emailSrc = readFileSync(join(ROOT, "lib/emailConfirm.ts"), "utf8");
+  assert.match(emailSrc, /createHash\("sha256"\)/);
+  assert.doesNotMatch(emailSrc, /signValue|verifyValue/);
 });
 
 test("password reauth is unchanged and reauth mode does not sign in or link a provider", () => {

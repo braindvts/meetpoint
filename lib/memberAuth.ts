@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import type { Member } from "@prisma/client";
 import { prisma } from "./db";
 import { memberAuthSource } from "./safetyRules";
-import { getSession, signValue, verifyValue, type AuthSession } from "./session";
+import { getSession, readMemberCookie, signMemberCookie, type AuthSession } from "./session";
 
 const MEMBER_COOKIE = "conclave_member";
 
@@ -21,11 +21,11 @@ export async function getMemberIdFromCookie(): Promise<string | null> {
   const jar = await cookies();
   const raw = jar.get(MEMBER_COOKIE)?.value;
   if (!raw) return null;
-  return verifyValue(raw);
+  return readMemberCookie(raw);
 }
 
 export function withMemberCookie(res: NextResponse, memberId: string): NextResponse {
-  res.cookies.set(MEMBER_COOKIE, signValue(memberId), cookieOpts(60 * 60 * 24 * 7));
+  res.cookies.set(MEMBER_COOKIE, signMemberCookie(memberId), cookieOpts(60 * 60 * 24 * 7));
   return res;
 }
 

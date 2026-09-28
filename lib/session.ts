@@ -43,17 +43,26 @@ function secret(): string {
   return process.env.LINKEDIN_CLIENT_SECRET?.trim() || "meetpoint-dev-secret";
 }
 
-export function signValue(payload: string): string {
-  const sig = createHmac("sha256", secret()).update(payload).digest("base64url");
+/**
+ * Each signed cookie has its own HMAC input (`type|payload`) and a purpose
+ * field that the reader requires. A bind cookie cannot satisfy a reauth
+ * proof, and a session or OAuth state cannot satisfy either.
+ * Email confirmation tokens are random secrets stored as SHA-256 hashes, not
+ * these signatures. Admin access compares ADMIN_SECRET directly.
+ */
+export type SignedTokenType = "session" | "oauth-state" | "reauth-proof" | "reauth-bind" | "member";
+
+export function signValue(type: SignedTokenType, payload: string): string {
+  const sig = createHmac("sha256", secret()).update(`${type}|${payload}`).digest("base64url");
   return `${payload}.${sig}`;
 }
 
-export function verifyValue(token: string): string | null {
+export function verifyValue(type: SignedTokenType, token: string): string | null {
   const i = token.lastIndexOf(".");
   if (i < 0) return null;
   const payload = token.slice(0, i);
   const sig = token.slice(i + 1);
-  const expected = createHmac("sha256", secret()).update(payload).digest("base64url");
+  const expected = createHmac("sha256", secret()).update(`${type}|${payload}`).digest("base64url");
   try {
     const a = Buffer.from(sig);
     const b = Buffer.from(expected);
@@ -64,25 +73,48 @@ export function verifyValue(token: string): string | null {
   }
 }
 
-function withExpiry(session: AuthSession, ttlSec: number): AuthSession {
+function withExpiry(session: AuthSession, ttlSec: number): AuthSession & { purpose: "session" } {
   const iat = Math.floor(Date.now() / 1000);
-  return { ...session, iat, exp: iat + ttlSec };
+  return { ...session, purpose: "session", iat, exp: iat + ttlSec };
 }
 
 export function encodeSession(session: AuthSession): string {
   const full = withExpiry(session, SESSION_TTL_SEC);
-  return signValue(Buffer.from(JSON.stringify(full)).toString("base64url"));
+  return signValue("session", Buffer.from(JSON.stringify(full)).toString("base64url"));
 }
 
 export function decodeSession(token: string): AuthSession | null {
-  const payload = verifyValue(token);
+  const payload = verifyValue("session", token);
   if (!payload) return null;
   try {
-    const session = JSON.parse(
-      Buffer.from(payload, "base64url").toString("utf8")
-    ) as AuthSession;
+    const session = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as AuthSession & {
+      purpose?: string;
+    };
+    if (session.purpose !== "session") return null;
     if (session.exp && Math.floor(Date.now() / 1000) > session.exp) return null;
-    return session;
+    const { purpose: _purpose, ...rest } = session;
+    return rest;
+  } catch {
+    return null;
+  }
+}
+
+export function signMemberCookie(memberId: string): string {
+  const payload = Buffer.from(JSON.stringify({ purpose: "member", memberId })).toString("base64url");
+  return signValue("member", payload);
+}
+
+export function readMemberCookie(token: string): string | null {
+  const payload = verifyValue("member", token);
+  if (!payload) return null;
+  try {
+    const data = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as {
+      purpose?: string;
+      memberId?: string;
+    };
+    if (data.purpose !== "member" || typeof data.memberId !== "string" || !data.memberId) return null;
+    if (data.memberId.length > 80) return null;
+    return data.memberId;
   } catch {
     return null;
   }
@@ -164,9 +196,10 @@ export async function createOAuthState(
         }
       : {}),
   };
+  const signedBody = JSON.stringify({ purpose: "oauth-state", ...payload });
   return {
     ...payload,
-    cookieValue: signValue(JSON.stringify(payload)),
+    cookieValue: signValue("oauth-state", signedBody),
   };
 }
 
@@ -182,14 +215,14 @@ export function buildReauthBindToken(
   const payload = Buffer.from(
     JSON.stringify({ purpose: "reauth-bind", ...bind, iat: nowSec })
   ).toString("base64url");
-  return signValue(payload);
+  return signValue("reauth-bind", payload);
 }
 
 export function readReauthBindToken(
   token: string,
   nowSec = Math.floor(Date.now() / 1000)
 ): OAuthReauthBind | null {
-  const payload = verifyValue(token);
+  const payload = verifyValue("reauth-bind", token);
   if (!payload) return null;
   try {
     const data = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as {
@@ -234,8 +267,10 @@ export function clearReauthBindCookie(res: NextResponse): NextResponse {
 function parseOAuthChallenge(payload: string): OAuthStatePayload | null {
   try {
     const parsed = JSON.parse(payload) as Partial<OAuthStatePayload> & {
+      purpose?: string;
       reauth?: Partial<OAuthReauthIntent>;
     };
+    if (parsed.purpose !== "oauth-state") return null;
     if (typeof parsed.state !== "string" || !parsed.state) return null;
     if (typeof parsed.nonce !== "string" || !parsed.nonce) return null;
     if (typeof parsed.exp !== "number" || !Number.isFinite(parsed.exp)) return null;
@@ -268,7 +303,7 @@ export async function consumeOAuthChallenge(presentedState: string): Promise<OAu
   const raw = jar.get(STATE_COOKIE)?.value;
   if (!raw) return null;
   jar.delete(STATE_COOKIE);
-  const payload = verifyValue(raw);
+  const payload = verifyValue("oauth-state", raw);
   if (!payload) return null;
   const parsed = parseOAuthChallenge(payload);
   const decision = evaluateOAuthState({
@@ -295,9 +330,9 @@ export function clearOAuthStateCookie(res: NextResponse): NextResponse {
 /** Signed 10-minute proof. The cookie helpers store this value. */
 export function buildReauthToken(memberId: string, nowSec = Math.floor(Date.now() / 1000)): string {
   const payload = Buffer.from(
-    JSON.stringify({ memberId, iat: nowSec, exp: nowSec + REAUTH_TTL_SEC })
+    JSON.stringify({ purpose: "reauth-proof", memberId, iat: nowSec, exp: nowSec + REAUTH_TTL_SEC })
   ).toString("base64url");
-  return signValue(payload);
+  return signValue("reauth-proof", payload);
 }
 
 export function readReauthToken(
@@ -305,13 +340,15 @@ export function readReauthToken(
   memberId: string,
   nowSec = Math.floor(Date.now() / 1000)
 ): boolean {
-  const payload = verifyValue(token);
+  const payload = verifyValue("reauth-proof", token);
   if (!payload) return false;
   try {
     const data = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as {
+      purpose?: string;
       memberId?: string;
       exp?: number;
     };
+    if (data.purpose !== "reauth-proof") return false;
     if (data.memberId !== memberId) return false;
     if (!data.exp || nowSec > data.exp) return false;
     return true;

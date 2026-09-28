@@ -37,7 +37,6 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    await purgeDemoResidue();
     const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -97,6 +96,7 @@ export async function GET(req: NextRequest) {
     });
     if (reauthRes) return reauthRes;
 
+    await purgeDemoResidue();
     const email = user.email?.toLowerCase() || null;
     const displayName = sanitizeName(user.name || "Member") || "Member";
     let member = await prisma.member.findFirst({ where: { googleId: user.sub } });

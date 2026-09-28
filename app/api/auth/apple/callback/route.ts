@@ -39,8 +39,6 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    await purgeDemoResidue();
-
     const tokenRes = await fetch("https://appleid.apple.com/auth/token", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -95,6 +93,7 @@ export async function POST(req: NextRequest) {
     });
     if (reauthRes) return reauthRes;
 
+    await purgeDemoResidue();
     const email = claims.email || null;
     let member = await prisma.member.findFirst({ where: { appleId: sub } });
     if (!member && email) {
