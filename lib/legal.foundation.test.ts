@@ -189,7 +189,9 @@ test("consent, deletion, and admin authorization are enforced in server routes",
   assert.doesNotMatch(deletion, /report\.delete/);
   assert.match(connections, /canIntroduceToTier/);
   assert.match(connections, /legalConsentDenied/);
-  assert.match(report, /requireAdmin/);
+  assert.match(report, /requireReportAdmin/);
+  const adminAuth = readFileSync(join(ROOT, "lib/adminAuth.ts"), "utf8");
+  assert.match(adminAuth, /return requireAdmin\(req\)/);
   assert.match(grant, /requireAdmin/);
   assert.match(meeting, /paidBookingMatches/);
   assert.match(meeting, /rateLimit/);

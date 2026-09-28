@@ -95,7 +95,11 @@ test("LinkedIn email lookup does not link or merge accounts", () => {
   assert.match(callback, /postAuthPath/);
   assert.match(callback, /where: \{ email \}/);
   assert.doesNotMatch(callback, /prisma\.member\.(update|create|upsert)/);
-  assert.match(auth, /return prisma\.member\.findFirst\(\{ where: \{ linkedInId: session\.id \} \}\)/);
+  assert.match(
+    auth,
+    /findFirst\(\{ where: \{ linkedInId: session\.id, deletedAt: null \} \}\)/
+  );
+  assert.doesNotMatch(auth, /provider === "linkedin"[\s\S]{0,180}session\.email/);
   assert.match(me, /existing\.linkedInId === session\.id/);
   assert.match(me, /if \(taken\) createEmail = null/);
 });

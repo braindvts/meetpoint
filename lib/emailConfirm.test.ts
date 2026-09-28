@@ -60,5 +60,5 @@ test("account email confirmation is separate from profile business email", () =>
   assert.match(signup, /issueEmailConfirmation/);
   assert.match(deletion, /emailVerificationToken\.deleteMany/);
   assert.match(schema, /model EmailVerificationToken/);
-  assert.doesNotMatch(schema, /model EventInterest /);
+  assert.match(schema, /model EventInterest \{/);
 });
