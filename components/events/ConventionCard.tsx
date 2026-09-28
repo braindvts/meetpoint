@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import {
+  formatCount,
   formatEventDate,
   type InterlinkEvent,
 } from "@/lib/events";
@@ -43,7 +44,7 @@ export default function ConventionCard({ event }: Props) {
           </p>
           {event.expectedAttendance ? (
             <p className="text-[11px] text-muted">
-              Expected attendance · {event.expectedAttendance.toLocaleString()}
+              Expected attendance · {formatCount(event.expectedAttendance)}
             </p>
           ) : null}
           {event.speakers?.length ? (

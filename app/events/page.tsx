@@ -6,11 +6,13 @@ import { useRouter } from "next/navigation";
 import Nav from "@/components/Nav";
 import PageHeader from "@/components/PageHeader";
 import EmptyState from "@/components/EmptyState";
+import ProfileProgressPrompt from "@/components/ProfileProgressPrompt";
 import EventCard from "@/components/events/EventCard";
 import ConventionCard from "@/components/events/ConventionCard";
 import EventFiltersBar from "@/components/events/EventFiltersBar";
 import {
   filterEvents,
+  formatCount,
   getPublishedEvents,
   getUpcomingSorted,
   type EventFilters,
@@ -97,6 +99,7 @@ export default function EventsPage() {
   });
   const [connectedIds, setConnectedIds] = useState<string[]>([]);
   const [rsvpTick, setRsvpTick] = useState(0);
+  const [rsvpReady, setRsvpReady] = useState(false);
 
   const refresh = useCallback(() => {
     setEvents(listPublishedEvents());
@@ -116,6 +119,7 @@ export default function EventsPage() {
       if (cancelled) return;
       setEvents(remote);
       setCatalogReady(true);
+      setRsvpReady(true);
       const p = await hydrateLocalProfile();
       if (cancelled) return;
       setProfile(p);
@@ -200,6 +204,14 @@ export default function EventsPage() {
   );
   const industryEvents = byCategory((e) => !!e.industry);
   const exclusive = byCategory((e) => !!e.exclusive || e.category === "exclusive");
+  const myPlans = useMemo(() => {
+    if (!rsvpReady) return [];
+    return events.filter((event) => {
+      const status = getRsvp(event.id);
+      return status === "going" || status === "interested";
+    });
+  }, [events, rsvpTick, rsvpReady]);
+
   const conventions = useMemo(
     () =>
       getUpcomingSorted(
@@ -209,9 +221,9 @@ export default function EventsPage() {
   );
 
   const cardProps = (event: InterlinkEvent, opts?: { forYou?: boolean }) => {
-    const counts = displayCounts(event);
+    const counts = displayCounts(event, { local: rsvpReady });
     const network = networkAttendingCount(event, connectedIds);
-    const rsvp = getRsvp(event.id);
+    const rsvp = rsvpReady ? getRsvp(event.id) : null;
     const interested = rsvp === "interested";
     const going = rsvp === "going";
     const match = rankedById.get(event.id);
@@ -236,20 +248,24 @@ export default function EventsPage() {
           showToast("You’re marked attending. Change it on the event page.");
           return;
         }
-        if (cur === "interested") {
-          setRsvp(event.id, null);
-          showToast("Removed from saved events");
-        } else {
-          setRsvp(event.id, "interested");
-          showToast("Marked interested");
-        }
-        refresh();
+        const next = cur === "interested" ? null : "interested";
+        void setRsvp(event.id, next).then((saved) => {
+          if (!saved.ok) {
+            showToast(saved.error || "Could not save your RSVP");
+            return;
+          }
+          showToast(next ? "Marked interested" : "Removed from saved events");
+        });
       },
       onPass: opts?.forYou
         ? () => {
-            setRsvp(event.id, "passed");
-            showToast("Passed — we’ll show fewer like this");
-            refresh();
+            void setRsvp(event.id, "passed").then((saved) => {
+              if (!saved.ok) {
+                showToast(saved.error || "Could not save your RSVP");
+                return;
+              }
+              showToast("Passed — we’ll show fewer like this");
+            });
           }
         : undefined,
     };
@@ -373,6 +389,30 @@ export default function EventsPage() {
           </div>
           <EventFiltersBar value={filters} onChange={setFilters} />
         </div>
+
+        <ProfileProgressPrompt profile={profile} />
+
+        {rsvpReady && !hasActiveFilters && events.length > 0 ? (
+          <Section
+            title="Your plans"
+            subtitle="Gatherings you’ve marked interested or attending."
+          >
+            {myPlans.length === 0 ? (
+              <EmptyState
+                title="No RSVPs yet"
+                body="Tell a room you’re interested or going. Your plan stays on your account, and similar gatherings rank higher."
+                actionHref="#worldwide"
+                actionLabel="Browse events"
+              />
+            ) : (
+              <Grid>
+                {myPlans.map((event) => (
+                  <EventCard key={event.id} {...cardProps(event)} />
+                ))}
+              </Grid>
+            )}
+          </Section>
+        ) : null}
 
         {!hasActiveFilters && events.length === 0 ? (
           <EmptyState

@@ -20,7 +20,7 @@ import { parseBody } from "@/lib/validation/parse";
  */
 export async function POST(req: Request) {
   try {
-    const limited = rateLimit(req, { name: "black-activate", limit: 15, windowMs: 60_000 });
+    const limited = await rateLimit(req, { name: "black-activate", limit: 15, windowMs: 60_000 });
     if (!limited.ok) return limited.response;
 
     await purgeDemoResidue();

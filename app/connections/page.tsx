@@ -9,6 +9,8 @@ import Avatar from "@/components/Avatar";
 import BlackBadge from "@/components/BlackBadge";
 import BlackConnectionBadge from "@/components/BlackConnectionBadge";
 import EmptyState from "@/components/EmptyState";
+import ProfileProgressPrompt from "@/components/ProfileProgressPrompt";
+import { copyInviteLink } from "@/lib/copyInvite";
 import PersonProfileSheet from "@/components/PersonProfileSheet";
 import RateMeeting from "@/components/RateMeeting";
 import StarRating, { cuisineLine } from "@/components/StarRating";
@@ -218,12 +220,15 @@ export default function ConnectionsPage() {
         </div>
 
         <div className="px-4 pb-6 pt-4">
+          <ProfileProgressPrompt profile={profile} />
           {empty ? (
             <EmptyState
-              title="Your circle is quiet"
-              body="When someone wants to connect, or you book a table, it shows up here."
+              title="No connections yet"
+              body="Introductions you accept, and tables you book, land here. Start in Discover, or invite someone to Interlink."
               actionHref="/discover"
-              actionLabel="Discover"
+              actionLabel="Discover people"
+              secondaryLabel="Invite someone"
+              onSecondary={() => void copyInviteLink()}
             />
           ) : (
             <div className="space-y-8">

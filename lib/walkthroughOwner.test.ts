@@ -3,6 +3,7 @@ import { test } from "node:test";
 import { matchesWalkthroughOwner, walkthroughOwnerCredentials } from "./walkthroughOwner.ts";
 
 const gated = {
+  ENABLE_DEMO_PROFILES: "1",
   ENABLE_WALKTHROUGH_OWNER: "1",
   WALKTHROUGH_OWNER_EMAIL: "local-walkthrough@example.test",
   WALKTHROUGH_OWNER_PASSWORD: "local-only-password",
@@ -16,13 +17,34 @@ test("walkthrough is off when the server gate is unset", () => {
   );
 });
 
+test("walkthrough is off unless the server demo gate is also on", () => {
+  assert.equal(
+    walkthroughOwnerCredentials({
+      ENABLE_WALKTHROUGH_OWNER: "1",
+      WALKTHROUGH_OWNER_EMAIL: "local-walkthrough@example.test",
+      WALKTHROUGH_OWNER_PASSWORD: "local-only-password",
+    }),
+    null
+  );
+  assert.equal(
+    matchesWalkthroughOwner("local-walkthrough@example.test", "local-only-password", {
+      ENABLE_WALKTHROUGH_OWNER: "1",
+      WALKTHROUGH_OWNER_EMAIL: "local-walkthrough@example.test",
+      WALKTHROUGH_OWNER_PASSWORD: "local-only-password",
+      NEXT_PUBLIC_ENABLE_DEMO_PROFILES: "1",
+    }),
+    false
+  );
+});
+
 test("walkthrough is off when the gate is on but mailbox or password is missing", () => {
   assert.equal(
-    walkthroughOwnerCredentials({ ENABLE_WALKTHROUGH_OWNER: "1" }),
+    walkthroughOwnerCredentials({ ENABLE_DEMO_PROFILES: "1", ENABLE_WALKTHROUGH_OWNER: "1" }),
     null
   );
   assert.equal(
     matchesWalkthroughOwner("anyone@example.com", "password12", {
+      ENABLE_DEMO_PROFILES: "1",
       ENABLE_WALKTHROUGH_OWNER: "1",
       WALKTHROUGH_OWNER_EMAIL: "anyone@example.com",
     }),

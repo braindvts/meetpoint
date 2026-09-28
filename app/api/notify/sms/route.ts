@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { publicError } from "@/lib/safeError";
 import { getCurrentMember } from "@/lib/memberAuth";
+import { digitsOnly } from "@/lib/phone";
 import { rateLimit } from "@/lib/rateLimit";
+import { secretsMatch } from "@/lib/secretCompare";
 import { parseBody } from "@/lib/validation/parse";
 import { smsSchema } from "@/lib/validation/safety";
 
@@ -11,25 +13,30 @@ import { smsSchema } from "@/lib/validation/safety";
  * Optional NOTIFY_SECRET via x-conclave-notify for service-to-service calls.
  */
 export async function POST(req: Request) {
-  const limited = rateLimit(req, { name: "sms", limit: 12, windowMs: 60_000 });
+  const limited = await rateLimit(req, { name: "sms", limit: 8, windowMs: 60 * 60_000 });
   if (!limited.ok) return limited.response;
 
   const secret = process.env.NOTIFY_SECRET?.trim();
-  if (secret) {
-    const got = req.headers.get("x-conclave-notify") || "";
-    if (got !== secret) {
-      return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
-    }
-  } else {
-    const me = await getCurrentMember();
-    if (!me) {
-      return NextResponse.json({ ok: false, error: "Sign in first" }, { status: 401 });
-    }
+  const presented = req.headers.get("x-conclave-notify") || "";
+  const service = !!secret && secretsMatch(presented, secret);
+  const me = await getCurrentMember();
+  if (!service && !me) {
+    return NextResponse.json({ ok: false, error: "Sign in first" }, { status: 401 });
   }
 
   const parsed = await parseBody(req, smsSchema);
   if (!parsed.ok) return parsed.response;
   const { to, body: text } = parsed.data;
+
+  if (!service) {
+    const mine = digitsOnly(me?.phone || "");
+    if (!mine || mine !== digitsOnly(to)) {
+      return NextResponse.json(
+        { ok: false, error: "Texts can only go to the phone on your profile." },
+        { status: 403 }
+      );
+    }
+  }
 
   const sid = process.env.TWILIO_ACCOUNT_SID;
   const token = process.env.TWILIO_AUTH_TOKEN;
@@ -59,6 +66,6 @@ export async function POST(req: Request) {
     }
   }
 
-  console.info("[conclave sms skipped]", { to, body: text.slice(0, 80) });
+  console.info("[conclave sms skipped]", { digits: digitsOnly(to).slice(-2) });
   return NextResponse.json({ ok: true, provider: "none" });
 }

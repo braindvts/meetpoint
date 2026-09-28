@@ -6,9 +6,17 @@ import type { FoodSuggestion } from "./foodAi";
 import { resolveChatId, withChatAlias } from "./chatIdentity";
 import { mergeServerConnections } from "./connectionMerge";
 import { DEMO_PROFILE } from "./demoAccount";
-import { demoEntryEnabled, demoProfilesEnabled } from "./demoFlag";
+import { demoEntryEnabled, demoGateKnown, demoProfilesEnabled } from "./demoFlag";
+
+let profileSave: Promise<unknown> = Promise.resolve();
+
+/** Resolves when the latest profile write to the server has finished. */
+export function waitForProfileSave(): Promise<unknown> {
+  return profileSave;
+}
 import { DEMO_PEOPLE } from "./demoPeople";
 import { findPerson } from "./directory";
+import { clearOnboardingStep } from "./onboardingSession";
 import { clearNoticeStore } from "./notifications";
 import {
   BOOKING_FEE_PER_PERSON_USD,
@@ -61,8 +69,9 @@ export function loadProfile(): MyProfile | null {
     if (!raw) return null;
     const p = JSON.parse(raw) as MyProfile;
 
-    // With demo mode off, a browser that once used it shouldn't keep that member alive.
-    if (!demoEntryEnabled() && isDemoProfile(p)) {
+    // Once the server has said sample profiles are off, drop a saved guest.
+    // A NEXT_PUBLIC_ flag or a saved walkthrough flag does not keep it.
+    if (demoGateKnown() && !demoEntryEnabled() && isDemoProfile(p)) {
       clearProfile();
       return null;
     }
@@ -98,7 +107,7 @@ export function saveProfile(profile: MyProfile): void {
   // Persist so other devices / members can see you — except the demo member,
   // who would otherwise show up in the real room as a stranger.
   if (isDemoProfile(profile)) return;
-  void import("./apiClient").then(({ syncProfileToServer }) => syncProfileToServer(profile));
+  profileSave = import("./apiClient").then(({ syncProfileToServer }) => syncProfileToServer(profile));
 }
 
 /** Install the sample member and skip onboarding — demo mode only. */
@@ -197,6 +206,7 @@ export function clearProfile(): void {
   localStorage.removeItem(CONNECTIONS_KEY);
   localStorage.removeItem(CHATS_KEY);
   localStorage.removeItem(RATINGS_KEY);
+  clearOnboardingStep();
   clearNoticeStore();
   void import("./demoFlag").then(({ clearDemoOwnerSession }) => clearDemoOwnerSession());
 }

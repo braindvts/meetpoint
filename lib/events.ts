@@ -477,18 +477,32 @@ function venueDateParts(iso: string): { y: number; m: number; d: number; h: numb
   };
 }
 
+const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] as const;
+
+/**
+ * Venue calendar date, written without Intl.
+ * `toLocaleDateString()` follows the server locale during SSR and the browser
+ * locale on the client, which is React hydration error #418.
+ */
 export function formatEventDate(iso: string): string {
   const parts = venueDateParts(iso);
-  const d = parts
-    ? new Date(Date.UTC(parts.y, parts.m - 1, parts.d, 12, 0, 0))
-    : new Date(iso);
-  return d.toLocaleDateString(undefined, {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    timeZone: "UTC",
-  });
+  if (parts) {
+    const utc = new Date(Date.UTC(parts.y, parts.m - 1, parts.d, 12, 0, 0));
+    const weekday = WEEKDAYS[utc.getUTCDay()];
+    const month = MONTHS[parts.m - 1] || MONTHS[0];
+    return `${weekday}, ${month} ${parts.d}, ${parts.y}`;
+  }
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return `${WEEKDAYS[d.getUTCDay()]}, ${MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()}`;
+}
+
+/** Grouped thousands, always `en` digits. Locale-sensitive `toLocaleString` hydrates wrong. */
+export function formatCount(n: number): string {
+  const value = Math.round(Number(n) || 0);
+  const sign = value < 0 ? "-" : "";
+  return sign + Math.abs(value).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
 export function formatEventTime(iso: string): string {
@@ -500,10 +514,13 @@ export function formatEventTime(iso: string): string {
     const h12 = h24 % 12 || 12;
     return `${h12}:${String(min).padStart(2, "0")} ${ampm}`;
   }
-  return new Date(iso).toLocaleTimeString(undefined, {
-    hour: "numeric",
-    minute: "2-digit",
-  });
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const h24 = d.getUTCHours();
+  const min = d.getUTCMinutes();
+  const ampm = h24 >= 12 ? "PM" : "AM";
+  const h12 = h24 % 12 || 12;
+  return `${h12}:${String(min).padStart(2, "0")} ${ampm}`;
 }
 
 export function formatEventRange(start: string, end: string): string {

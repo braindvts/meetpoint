@@ -1,12 +1,16 @@
 import { NextResponse } from "next/server";
+import { getCurrentMember } from "@/lib/memberAuth";
 import { rateLimit } from "@/lib/rateLimit";
 
 /**
  * Proxy Google Places photos so GOOGLE_PLACES_API_KEY never reaches the browser.
  */
 export async function GET(req: Request) {
-  const limited = rateLimit(req, { name: "places-photo", limit: 80, windowMs: 60_000 });
+  const limited = await rateLimit(req, { name: "places-photo", limit: 80, windowMs: 60_000 });
   if (!limited.ok) return limited.response;
+
+  const me = await getCurrentMember();
+  if (!me) return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
 
   const key = process.env.GOOGLE_PLACES_API_KEY?.trim();
   if (!key) {

@@ -13,18 +13,16 @@ export { isUsableProfile };
  * re-Verifying people after they cleared email / LinkedIn and saved.
  */
 export async function hydrateLocalProfile(): Promise<MyProfile | null> {
-  const local = loadProfile();
-  if (local?.name && local.jobTitle) return local;
-
   try {
     const res = await fetch("/api/members/me", { credentials: "include" });
     const data = (await res.json()) as {
       ok?: boolean;
       profile?: MyProfile | null;
+      memberId?: string | null;
     };
-    if (data.ok && data.profile?.name) {
-      saveProfile(data.profile);
-      return data.profile;
+    if (data.ok && data.memberId) {
+      if (data.profile?.name) saveProfile(data.profile);
+      return data.profile ?? null;
     }
   } catch {
     /* offline / not signed in */
@@ -42,9 +40,6 @@ export type SessionGate =
  * Guests belong on /login — not dumped into Identity setup.
  */
 export async function resolveSessionGate(): Promise<SessionGate> {
-  const local = loadProfile();
-  if (isUsableProfile(local)) return { status: "member", profile: local };
-
   try {
     const [meRes, authRes] = await Promise.all([
       fetch("/api/members/me", { credentials: "include" }),
@@ -56,15 +51,21 @@ export async function resolveSessionGate(): Promise<SessionGate> {
       memberId?: string | null;
     };
     const auth = (await authRes.json()) as { user?: unknown };
+    const signedIn = !!(me.memberId || auth.user);
+    const local = loadProfile();
+    if (isUsableProfile(local)) return { status: "member", profile: local };
     if (me.ok && isUsableProfile(me.profile)) {
       saveProfile(me.profile);
       return { status: "member", profile: me.profile };
     }
-    if (me.memberId || auth.user) return { status: "needs-onboarding" };
+    if (signedIn) return { status: "needs-onboarding" };
   } catch {
-    /* offline */
+    const local = loadProfile();
+    if (isUsableProfile(local)) return { status: "member", profile: local };
   }
 
+  const local = loadProfile();
+  if (isUsableProfile(local)) return { status: "member", profile: local };
   if (local) return { status: "needs-onboarding" };
   return { status: "guest" };
 }
