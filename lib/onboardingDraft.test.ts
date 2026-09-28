@@ -70,6 +70,14 @@ test("interests cap at 24 and bio at 800", () => {
   assert.match(validateAll(draft).bio || "", /800/);
 });
 
+test("custom interests reuse the shared plain-text rules", () => {
+  const draft = emptyDraft(filled());
+  draft.ideaTags = ["https://example.com", "<script>", "A".repeat(41)];
+  assert.equal(validateInterests(draft).ideaTags, "Add at least one interest.");
+  draft.ideaTags = ["A".repeat(40), "Night markets"];
+  assert.equal(validateInterests(draft).ideaTags, undefined);
+});
+
 test("resume returns to the stored step and repairs earlier gaps", () => {
   const draft = emptyDraft(null);
   draft.name = "Amina Laurent";

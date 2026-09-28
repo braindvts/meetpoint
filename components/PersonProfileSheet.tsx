@@ -7,7 +7,7 @@ import NameMarks from "@/components/NameMarks";
 import SafetyMenu from "@/components/SafetyMenu";
 import TierBadge from "@/components/TierBadge";
 import { getPeerReputation } from "@/lib/store";
-import { isOwner, ownedCompanies, otherWork, VERIFY_LABEL } from "@/lib/personFacts";
+import { isOwner, ownedCompanies, otherWork } from "@/lib/personFacts";
 import { tierDefinition, tierForPerson } from "@/lib/tiers";
 import type { ConnectionDirection, ConnectionStatus, Person, PersonWork, WorkKind } from "@/lib/types";
 
@@ -39,14 +39,6 @@ const WORK_LABEL: Record<WorkKind, string> = {
 };
 
 const DISMISS_PX = 100;
-
-function hostLabel(url: string): string {
-  try {
-    return new URL(url).hostname.replace(/^www\./, "");
-  } catch {
-    return url;
-  }
-}
 
 function WorkBlock({ work, owner = false }: { work: PersonWork; owner?: boolean }) {
   const inner = (
@@ -349,72 +341,6 @@ export default function PersonProfileSheet({
               {work.length === 0 && (
                 <p className="mt-6 text-[13px] text-muted">No companies or projects listed yet.</p>
               )}
-
-              {(person.verifications?.length ?? 0) > 0 && (
-                <>
-                  <p className="mt-6 text-[10px] font-semibold uppercase tracking-[0.22em] text-accent">
-                    Verified
-                  </p>
-                  <div className="mt-2 flex flex-wrap gap-1.5">
-                    {person.verifications.map((method) => (
-                      <span
-                        key={method}
-                        className="rounded-md border border-accent/20 px-2 py-1 text-[11px] text-ivory/80"
-                      >
-                        {VERIFY_LABEL[method]}
-                      </span>
-                    ))}
-                  </div>
-                </>
-              )}
-
-              <p className="mt-6 text-[10px] font-semibold uppercase tracking-[0.22em] text-accent">
-                Links
-              </p>
-              <div className="mt-2 space-y-1.5">
-                {person.linkedInUrl && (
-                  <a
-                    href={person.linkedInUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-between gap-3 rounded-lg border border-accent/20 bg-ink/40 px-3 py-2.5 text-[13px] text-ivory"
-                  >
-                    <span className="font-medium">LinkedIn</span>
-                    <span className="truncate text-[11px] text-muted">
-                      {hostLabel(person.linkedInUrl)}
-                    </span>
-                  </a>
-                )}
-                {person.websiteUrl && (
-                  <a
-                    href={person.websiteUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-between gap-3 rounded-lg border border-accent/20 bg-ink/40 px-3 py-2.5 text-[13px] text-ivory"
-                  >
-                    <span className="font-medium">Website</span>
-                    <span className="truncate text-[11px] text-muted">
-                      {hostLabel(person.websiteUrl)}
-                    </span>
-                  </a>
-                )}
-                {person.portfolioUrl && (
-                  <a
-                    href={person.portfolioUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-between gap-3 rounded-lg border border-accent/20 bg-ink/40 px-3 py-2.5 text-[13px] text-ivory"
-                  >
-                    <span className="font-medium">Portfolio</span>
-                    <span className="truncate text-[11px] text-muted">
-                      {hostLabel(person.portfolioUrl)}
-                    </span>
-                  </a>
-                )}
-                {!person.linkedInUrl && !person.websiteUrl && !person.portfolioUrl && (
-                  <p className="text-[13px] text-muted">No public links yet.</p>
-                )}
-              </div>
             </div>
           </div>
 

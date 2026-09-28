@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useMemo, useRef, useState } from "react";
+import { canonicalIdeaTag } from "@/lib/ideaTags";
 import { IDEA_TAG_LIMIT, partitionIdeaTags } from "@/lib/interests";
 import { INTEREST_GROUPS } from "@/lib/onboardingDraft";
 import { showToast } from "@/lib/notify";
@@ -35,10 +36,8 @@ export default function InterestPicker({ value, error, onChange }: Props) {
 
   const flat = useMemo(() => groups.flatMap((group) => [...group.tags]), [groups]);
 
-  const customLabel = useMemo(() => {
-    if (!query.trim()) return "";
-    return partitionIdeaTags([query], 1).labels[0] || "";
-  }, [query]);
+  const customLabel = useMemo(() => canonicalIdeaTag(query) || "", [query]);
+  const rejected = query.trim().length > 0 && !customLabel;
 
   const customAlready =
     !!customLabel &&
@@ -65,10 +64,6 @@ export default function InterestPicker({ value, error, onChange }: Props) {
 
   function addCustom() {
     if (!customLabel || customAlready) return;
-    if (customLabel.length > 80) {
-      showToast("Keep that interest under 80 characters");
-      return;
-    }
     toggle(customLabel);
     setQuery("");
     setActive(0);
@@ -146,6 +141,10 @@ export default function InterestPicker({ value, error, onChange }: Props) {
         >
           Add “{customLabel}”
         </button>
+      ) : rejected ? (
+        <p className="mt-2 text-[13px] text-muted">
+          Use a short plain-text label. Links and markup aren’t saved.
+        </p>
       ) : null}
 
       {value.length > 0 ? (
@@ -166,7 +165,7 @@ export default function InterestPicker({ value, error, onChange }: Props) {
       ) : null}
 
       <div ref={listRef} className="mt-5 space-y-5">
-        {groups.length === 0 && !showCustom ? (
+        {groups.length === 0 && !showCustom && !rejected ? (
           <p className="text-sm text-muted">No interests match that search.</p>
         ) : null}
         {groups.map((group) => (

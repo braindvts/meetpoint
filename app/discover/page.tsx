@@ -453,37 +453,53 @@ export default function DiscoverPage() {
               <SkeletonCard />
               <SkeletonCard />
             </div>
+          ) : visiblePeople.length === 0 ? (
+            <EmptyState
+              title="The room is quiet"
+              body={
+                <>
+                  No one to introduce yet. Complete the fields that improve matching, then invite
+                  someone to join Interlink.
+                </>
+              }
+              actionHref={
+                firstIncompleteStep(emptyDraft(profile)) !== null ? "/onboarding" : "/profile#edit"
+              }
+              actionLabel={profile.ideaTags?.length ? "Complete your profile" : "Add interests"}
+              secondaryLabel="Invite someone"
+              onSecondary={() => void copyInviteLink()}
+            />
           ) : pool.length === 0 ? (
             <EmptyState
-              title={visiblePeople.length === 0 ? "The room is quiet" : "No matches for this filter"}
+              title="No matches for this filter"
               body={
-                visiblePeople.length === 0 ? (
-                  <>
-                    No one to introduce yet. Complete the fields that improve matching, then invite
-                    someone to join Interlink.
-                  </>
-                ) : profile.lookingFor?.length === 0 ? (
-                  <>Choose what you’re looking for so introductions stay intentional.</>
-                ) : filter === "local" ? (
+                filter === "local" ? (
                   !profile.city?.name ? (
                     <>Set your city so Nearby can find people close to you.</>
                   ) : (
-                    <>No one nearby yet. Try For you, or add a few more interests.</>
+                    <>No one nearby yet. Everyone else is still on For you, including people who just joined.</>
                   )
+                ) : profile.lookingFor?.length === 0 ? (
+                  <>Choose what you’re looking for so introductions stay intentional.</>
                 ) : (
-                  <>Add interests so stronger fits can surface.</>
+                  <>Clear this filter to see the rest of the room.</>
                 )
               }
               actionHref={
-                visiblePeople.length === 0 && firstIncompleteStep(emptyDraft(profile)) !== null
-                  ? "/onboarding"
+                filter === "local" && profile.city?.name
+                  ? undefined
                   : "/profile#edit"
               }
               actionLabel={
-                profile.ideaTags?.length ? "Complete your profile" : "Add interests"
+                filter === "local" && profile.city?.name
+                  ? "See everyone"
+                  : profile.ideaTags?.length
+                    ? "Complete your profile"
+                    : "Add interests"
               }
-              secondaryLabel="Invite someone"
-              onSecondary={() => void copyInviteLink()}
+              onAction={
+                filter === "local" && profile.city?.name ? () => setFilter("open") : undefined
+              }
             />
           ) : filtered.length === 0 ? (
             <EmptyState
@@ -507,12 +523,6 @@ export default function DiscoverPage() {
             />
           ) : (
             <div key={filter} className="mp-scroll-stagger grid gap-3 md:grid-cols-2 md:gap-4">
-              {filtered.length > 0 && filtered.length <= 3 ? (
-                <p className="md:col-span-2 text-sm leading-relaxed text-muted">
-                  Only a few people to meet right now. Add interests so the next members find you, or
-                  invite someone you already know.
-                </p>
-              ) : null}
               {filtered.map((m) => {
                 const allowed = canIntroduceToTier(myTier, m.tier);
                 const leaving = exiting === m.person.id;

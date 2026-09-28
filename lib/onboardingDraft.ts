@@ -10,7 +10,6 @@ export const PROFILE_LIMITS = {
   headline: 120,
   company: 120,
   bio: 800,
-  tag: 80,
   tags: IDEA_TAG_LIMIT,
   lookingFor: 8,
 } as const;
