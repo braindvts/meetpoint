@@ -1,5 +1,6 @@
 import { demoProfilesEnabled } from "./demoFlag";
 import { DEMO_PEOPLE } from "./demoPeople";
+import { fetchMemberPages } from "./memberPage";
 import { LEGACY_SEED_IDS } from "./sampleAccounts";
 import type { Person } from "./types";
 
@@ -44,10 +45,14 @@ export function findPerson(id: string): Person | undefined {
 
 export async function refreshDirectory(): Promise<Person[]> {
   try {
-    const res = await fetch("/api/members");
-    const data = (await res.json()) as { ok?: boolean; members?: Person[] };
-    if (data.ok && data.members) {
-      saveDirectory(data.members);
+    const members = await fetchMemberPages<Person>(
+      "/api/members",
+      (data) => (Array.isArray(data.members) ? (data.members as Person[]) : null),
+      { credentials: "include" },
+      { requireComplete: true }
+    );
+    if (members) {
+      saveDirectory(members);
       return loadDirectory();
     }
   } catch {

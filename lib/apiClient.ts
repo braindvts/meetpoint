@@ -1,3 +1,4 @@
+import { fetchMemberPages } from "./memberPage";
 import type { Connection, GroupChat, MyProfile, Person } from "./types";
 
 /** Sync local membership to the server. Only writable identity fields are sent. */
@@ -41,9 +42,12 @@ export async function syncProfileToServer(
 
 export async function fetchServerMembers(): Promise<Person[] | null> {
   try {
-    const res = await fetch("/api/members");
-    const data = (await res.json()) as { ok?: boolean; members?: Person[] };
-    return data.ok && data.members ? data.members : null;
+    return await fetchMemberPages<Person>(
+      "/api/members",
+      (data) => (Array.isArray(data.members) ? (data.members as Person[]) : null),
+      { credentials: "include" },
+      { requireComplete: true }
+    );
   } catch {
     return null;
   }

@@ -5,6 +5,7 @@ import { getCurrentMember } from "@/lib/memberAuth";
 import { memberToPerson, memberToProfile } from "@/lib/memberMap";
 import { blackConnectionCounts } from "@/lib/blackServer";
 import { discoverExcludedIds } from "@/lib/moderation";
+import { pageAfterId, memberPageQuery } from "@/lib/memberPage";
 import { rankPeople } from "@/lib/peopleMatch";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
 import { rateLimit } from "@/lib/rateLimit";
@@ -18,6 +19,8 @@ import { sampleMemberWhere } from "@/lib/sampleAccounts";
  * and members auto-hidden after open reports from trusted reporters
  * (lib/moderation.ts from the safety work — verified email, finished
  * profile, or an older account). Brand-new accounts do not count.
+ * The candidate scan is the full real-member pool. The JSON body is one
+ * page (default 50, hard cap 100); callers follow nextCursor.
  */
 export async function GET(req: Request) {
   try {
@@ -38,9 +41,14 @@ export async function GET(req: Request) {
       return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
     }
 
+    const { limit, cursor, cursorRejected } = memberPageQuery(req.url);
+    if (cursorRejected) {
+      return NextResponse.json({ ok: false, error: "Invalid cursor" }, { status: 400 });
+    }
+
     const excluded = await discoverExcludedIds(viewer.id);
     const people: Prisma.MemberGetPayload<{ include: { interests: true } }>[] = [];
-    let cursor: string | undefined;
+    let batchCursor: string | undefined;
     for (;;) {
       const batch = await prisma.member.findMany({
         where: {
@@ -49,12 +57,12 @@ export async function GET(req: Request) {
         include: { interests: true },
         orderBy: { id: "asc" },
         take: 500,
-        ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+        ...(batchCursor ? { cursor: { id: batchCursor }, skip: 1 } : {}),
       });
       people.push(...batch);
       if (batch.length < 500) break;
-      cursor = batch[batch.length - 1]?.id;
-      if (!cursor) break;
+      batchCursor = batch[batch.length - 1]?.id;
+      if (!batchCursor) break;
     }
 
     const visible = people.filter((row) => row.name.trim());
@@ -92,10 +100,14 @@ export async function GET(req: Request) {
       })
     );
 
+    const paged = pageAfterId(ranked, (row) => row.person.id || "", cursor, limit);
+
     return NextResponse.json({
       ok: true,
       meId: viewer.id,
-      matches: ranked.map((row) => ({
+      limit,
+      nextCursor: paged.nextCursor,
+      matches: paged.page.map((row) => ({
         person: row.person.person,
         score: row.score,
         reasons: row.reasons,
