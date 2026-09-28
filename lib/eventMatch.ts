@@ -27,7 +27,11 @@ export interface EventInterest {
 /** Profile fields the matcher actually reads. */
 export interface MemberMatchInput {
   jobTitle?: string;
+  company?: string;
+  industry?: string;
   ideaTags?: string[];
+  /** Canonical interest labels. Unioned with ideaTags. */
+  interests?: string[];
   lookingFor?: LookingFor[];
   bio?: string;
   work?: { title?: string; description?: string }[];
@@ -108,7 +112,11 @@ function extractPhrases(bio: string): string[] {
 }
 
 export function extractMemberSignals(me: MemberMatchInput): MemberSignals {
-  const ideaTags = (me.ideaTags || []).map((t) => t.trim()).filter(Boolean);
+  const ideaTags = [
+    ...new Set(
+      [...(me.ideaTags || []), ...(me.interests || [])].map((t) => t.trim()).filter(Boolean)
+    ),
+  ];
   const lookingFor = me.lookingFor || [];
   const bio = me.bio || "";
   const job = me.jobTitle || "";
@@ -118,9 +126,15 @@ export function extractMemberSignals(me: MemberMatchInput): MemberSignals {
 
   const phrases = extractPhrases(bio);
   const phraseText = phrases.join(" ");
-  const blob = [job, ideaTags.join(" "), lookingFor.join(" "), bio, workText].join(" ");
+  const industry = me.industry || "";
+  const company = me.company || "";
+  const blob = [job, company, industry, ideaTags.join(" "), lookingFor.join(" "), bio, workText].join(
+    " "
+  );
 
   const tokens = bagFrom(job, 2.2);
+  mergeBags(tokens, bagFrom(company, 1.2));
+  mergeBags(tokens, bagFrom(industry, 1.6));
   mergeBags(tokens, bagFrom(ideaTags.join(" "), 2.4));
   mergeBags(tokens, bagFrom(lookingFor.join(" "), 2));
   mergeBags(tokens, bagFrom(bio, 1.4));

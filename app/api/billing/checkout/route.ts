@@ -16,7 +16,7 @@ function stripeClient() {
 
 /** Create a Stripe Checkout session. Amounts for BLACK are server-fixed. */
 export async function POST(req: Request) {
-  const limited = rateLimit(req, { name: "billing", limit: 20, windowMs: 60_000 });
+  const limited = await rateLimit(req, { name: "billing", limit: 20, windowMs: 60_000 });
   if (!limited.ok) return limited.response;
 
   const stripe = stripeClient();
@@ -112,7 +112,7 @@ export async function POST(req: Request) {
         memberId: me.id,
         chatId: chatId || "",
         meetupAt: body.meetupAt || "",
-        phone: body.phone || "",
+        phone: me.phone || "",
       },
     });
 

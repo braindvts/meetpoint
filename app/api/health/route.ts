@@ -31,6 +31,7 @@ export async function GET(req: Request) {
         has("TWILIO_FROM_NUMBER"),
       adminSecret: has("ADMIN_SECRET"),
       walkthroughOwner: has("ENABLE_WALKTHROUGH_OWNER"),
+      demoProfiles: has("ENABLE_DEMO_PROFILES"),
     };
 
     return NextResponse.json({

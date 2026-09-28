@@ -1,4 +1,5 @@
 import { timingSafeEqual } from "crypto";
+import { demoProfilesServerEnabled } from "./demoProfiles";
 
 export const WALKTHROUGH_OWNER_GATE = "ENABLE_WALKTHROUGH_OWNER";
 export const WALKTHROUGH_OWNER_EMAIL = "WALKTHROUGH_OWNER_EMAIL";
@@ -11,7 +12,7 @@ function envString(env: Env, key: string): string {
 }
 
 export function walkthroughOwnerEnabled(env: Env = process.env): boolean {
-  return envString(env, WALKTHROUGH_OWNER_GATE).trim() === "1";
+  return demoProfilesServerEnabled(env) && envString(env, WALKTHROUGH_OWNER_GATE).trim() === "1";
 }
 
 export function walkthroughOwnerCredentials(
@@ -29,6 +30,13 @@ function safeEqual(a: string, b: string): boolean {
   const right = Buffer.from(b);
   if (left.length !== right.length) return false;
   return timingSafeEqual(left, right);
+}
+
+/** True when the server-only walkthrough mailbox is configured and this is that address. */
+export function isWalkthroughOwnerEmail(email: string, env: Env = process.env): boolean {
+  const creds = walkthroughOwnerCredentials(env);
+  if (!creds) return false;
+  return safeEqual(email.trim().toLowerCase(), creds.email);
 }
 
 /** True only when the server-only gate is on and env credentials match. */

@@ -8,7 +8,11 @@ import {
   blackConnectionCount,
   resolvePairing,
 } from "@/lib/blackServer";
+import { pairIsBlocked } from "@/lib/moderation";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
+import { rateLimit } from "@/lib/rateLimit";
+import { blackMeetingSchema } from "@/lib/validation/black";
+import { parseBody } from "@/lib/validation/parse";
 
 /**
  * A booked business meeting with a BLACK member is the second way to reach
@@ -17,14 +21,24 @@ import { purgeDemoResidue } from "@/lib/purgeDemo";
  */
 export async function POST(req: Request) {
   try {
+    const limited = await rateLimit(req, { name: "black-meeting", limit: 20, windowMs: 60_000 });
+    if (!limited.ok) return limited.response;
+
     await purgeDemoResidue();
     const me = await getCurrentMember();
     if (!me) return NextResponse.json({ ok: false, error: "Sign in first" }, { status: 401 });
 
-    const body = (await req.json()) as { peerId?: string };
-    const peerId = String(body.peerId || "").trim();
-    if (!peerId || peerId === me.id) {
+    const parsed = await parseBody(req, blackMeetingSchema);
+    if (!parsed.ok) return parsed.response;
+    const peerId = parsed.data.peerId;
+    if (peerId === me.id) {
       return NextResponse.json({ ok: false, error: "peerId required" }, { status: 400 });
+    }
+    if (await pairIsBlocked(me.id, peerId)) {
+      return NextResponse.json(
+        { ok: false, error: "This member isn’t available." },
+        { status: 403 }
+      );
     }
 
     const peer = await prisma.member.findUnique({ where: { id: peerId } });

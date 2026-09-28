@@ -11,6 +11,7 @@ import ConventionCard from "@/components/events/ConventionCard";
 import EventFiltersBar from "@/components/events/EventFiltersBar";
 import {
   filterEvents,
+  formatCount,
   getPublishedEvents,
   getUpcomingSorted,
   type EventFilters,
@@ -97,6 +98,7 @@ export default function EventsPage() {
   });
   const [connectedIds, setConnectedIds] = useState<string[]>([]);
   const [rsvpTick, setRsvpTick] = useState(0);
+  const [rsvpReady, setRsvpReady] = useState(false);
 
   const refresh = useCallback(() => {
     setEvents(listPublishedEvents());
@@ -116,6 +118,7 @@ export default function EventsPage() {
       if (cancelled) return;
       setEvents(remote);
       setCatalogReady(true);
+      setRsvpReady(true);
       const p = await hydrateLocalProfile();
       if (cancelled) return;
       setProfile(p);
@@ -209,9 +212,9 @@ export default function EventsPage() {
   );
 
   const cardProps = (event: InterlinkEvent, opts?: { forYou?: boolean }) => {
-    const counts = displayCounts(event);
+    const counts = displayCounts(event, { local: rsvpReady });
     const network = networkAttendingCount(event, connectedIds);
-    const rsvp = getRsvp(event.id);
+    const rsvp = rsvpReady ? getRsvp(event.id) : null;
     const interested = rsvp === "interested";
     const going = rsvp === "going";
     const match = rankedById.get(event.id);
@@ -236,20 +239,24 @@ export default function EventsPage() {
           showToast("You’re marked attending. Change it on the event page.");
           return;
         }
-        if (cur === "interested") {
-          setRsvp(event.id, null);
-          showToast("Removed from saved events");
-        } else {
-          setRsvp(event.id, "interested");
-          showToast("Marked interested");
-        }
-        refresh();
+        const next = cur === "interested" ? null : "interested";
+        void setRsvp(event.id, next).then((saved) => {
+          if (!saved.ok) {
+            showToast(saved.error || "Could not save your RSVP");
+            return;
+          }
+          showToast(next ? "Marked interested" : "Removed from saved events");
+        });
       },
       onPass: opts?.forYou
         ? () => {
-            setRsvp(event.id, "passed");
-            showToast("Passed — we’ll show fewer like this");
-            refresh();
+            void setRsvp(event.id, "passed").then((saved) => {
+              if (!saved.ok) {
+                showToast(saved.error || "Could not save your RSVP");
+                return;
+              }
+              showToast("Passed — we’ll show fewer like this");
+            });
           }
         : undefined,
     };

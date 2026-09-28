@@ -6,7 +6,10 @@ import { useRouter } from "next/navigation";
 import Nav from "@/components/Nav";
 import MatchCard from "@/components/MatchCard";
 import PersonProfileSheet from "@/components/PersonProfileSheet";
-import { filterByPreference, rankMatches } from "@/lib/match";
+import type { MatchResult } from "@/lib/match";
+import { rankPeople } from "@/lib/peopleMatch";
+import { demoProfilesEnabled, refreshDemoGate } from "@/lib/demoFlag";
+import { DEMO_PEOPLE } from "@/lib/demoPeople";
 import { canIntroduceToTier } from "@/lib/plans";
 import { preferConnection } from "@/lib/connectionSync";
 import {
@@ -19,15 +22,15 @@ import {
   loadBlockedIds,
   loadConnections,
   loadProfile,
-  loadRatings,
   openOrCreateDirectChat,
   requestConnection,
   saveProfile,
+  waitForProfileSave,
 } from "@/lib/store";
-import { findPerson, refreshDirectory, loadDirectory } from "@/lib/directory";
+import { findPerson, refreshDirectory } from "@/lib/directory";
 import { fetchServerConnections, syncProfileToServer } from "@/lib/apiClient";
-import { readClientConnections, readClientProfile } from "@/lib/clientProfile";
 import { gateRedirect, resolveSessionGate } from "@/lib/hydrateSession";
+import { summarizeReputation } from "@/lib/reputation";
 import { TIER_DEFINITIONS, tierForPerson, tierForProfile, type MemberTier } from "@/lib/tiers";
 import type { Connection, LookingFor, MyProfile, Person } from "@/lib/types";
 import { LOOKING_FOR_OPTIONS } from "@/lib/types";
@@ -42,26 +45,105 @@ type Filter = "open" | "local";
 
 const STANDING_OPTIONS: MemberTier[] = [1, 2, 3];
 
+function toMatchResult(input: {
+  person: Person;
+  score: number;
+  reasons: string[];
+  sharedInterests: string[];
+  intentFit: boolean;
+  sameRole: boolean;
+  distanceKm: number | null;
+  isLocal: boolean;
+}): MatchResult {
+  return {
+    person: input.person,
+    score: input.score,
+    sharedIdeas: input.sharedInterests,
+    sameBusiness: input.sharedInterests.length > 0,
+    canHelp: false,
+    helpReasons: [],
+    sameJob: input.sameRole,
+    sharedLookingFor: [],
+    intentFit: input.intentFit,
+    reputationScore: 80,
+    reputationStatus: "standing",
+    tier: tierForPerson(input.person, summarizeReputation(input.person.id, [])),
+    distance: input.distanceKm ?? Number.POSITIVE_INFINITY,
+    isLocal: input.isLocal,
+    reachable: true,
+    reasonLine: input.reasons.slice(0, 2).join(" · "),
+  };
+}
+
 export default function DiscoverPage() {
   const router = useRouter();
-  const [profile, setProfile] = useState<MyProfile | null>(() => readClientProfile());
-  const [connections, setConnections] = useState<Connection[]>(() => readClientConnections());
-  const [people, setPeople] = useState<Person[]>(() => loadDirectory());
-  const [blocked, setBlocked] = useState<string[]>(() => loadBlockedIds());
+  const [profile, setProfile] = useState<MyProfile | null>(null);
+  const [connections, setConnections] = useState<Connection[]>([]);
+  const [people, setPeople] = useState<Person[]>([]);
+  const [ranked, setRanked] = useState<MatchResult[]>([]);
+  const [blocked, setBlocked] = useState<string[]>([]);
   const [filter, setFilter] = useState<Filter>("open");
   const [rankFilter, setRankFilter] = useState<MemberTier[]>([]);
   const [filterOpen, setFilterOpen] = useState(false);
   const [skipped, setSkipped] = useState<string[]>([]);
   const [exiting, setExiting] = useState<string | null>(null);
   const [profilePerson, setProfilePerson] = useState<Person | null>(null);
-  const [directoryReady, setDirectoryReady] = useState(() => loadDirectory().length > 0);
-  const [gateReady, setGateReady] = useState(() => !!readClientProfile());
+  const [directoryReady, setDirectoryReady] = useState(false);
+  const [gateReady, setGateReady] = useState(false);
 
   const refreshConnections = useCallback(() => setConnections(loadConnections()), []);
+
+  const loadRanked = useCallback(async (p: MyProfile) => {
+    let rows: MatchResult[] = [];
+    try {
+      const res = await fetch("/api/discover", { credentials: "include" });
+      const data = (await res.json()) as {
+        ok?: boolean;
+        matches?: {
+          person: Person;
+          score: number;
+          reasons: string[];
+          sharedInterests: string[];
+          intentFit: boolean;
+          sameRole: boolean;
+          distanceKm: number | null;
+          isLocal: boolean;
+        }[];
+      };
+      if (data.ok && data.matches) rows = data.matches.map(toMatchResult);
+    } catch {
+      rows = [];
+    }
+
+    if (demoProfilesEnabled()) {
+      const seen = new Set(rows.map((row) => row.person.id));
+      const extras = rankPeople(p, DEMO_PEOPLE).filter((row) => !seen.has(row.person.id));
+      rows = [
+        ...rows,
+        ...extras.map((row) =>
+          toMatchResult({
+            person: row.person,
+            score: row.score,
+            reasons: row.reasons,
+            sharedInterests: row.sharedInterests,
+            intentFit: row.intentFit,
+            sameRole: row.sameRole,
+            distanceKm: Number.isFinite(row.distanceKm) ? row.distanceKm : null,
+            isLocal: row.isLocal,
+          })
+        ),
+      ];
+    }
+
+    setRanked(rows);
+    setPeople(rows.map((row) => row.person));
+    setDirectoryReady(true);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
     void (async () => {
+      await refreshDemoGate();
       const gate = await resolveSessionGate();
       if (cancelled) return;
       const dest = gateRedirect(gate, "/discover");
@@ -74,19 +156,26 @@ export default function DiscoverPage() {
         router.replace("/onboarding");
         return;
       }
-      setProfile(p);
+      const local = loadProfile();
+      const rankingProfile = local && !isDemoProfile(local) ? local : p;
+      setProfile(rankingProfile);
+      setBlocked(loadBlockedIds());
       setGateReady(true);
       setFilter("open");
       refreshConnections();
       ensureSampleInboundRequest();
-      if (!isDemoProfile(p)) void syncProfileToServer(p);
+      await waitForProfileSave();
+      if (!isDemoProfile(rankingProfile)) {
+        const saved = await syncProfileToServer(rankingProfile);
+        if (saved?.ok && saved.profile) setProfile(saved.profile);
+      }
       track("discover_open");
-      const [list, remoteConnections] = await Promise.all([
+      const [, remoteConnections] = await Promise.all([
         refreshDirectory(),
         fetchServerConnections(),
+        loadRanked(rankingProfile),
       ]);
       if (cancelled) return;
-      setPeople(list);
       setDirectoryReady(true);
       if (remoteConnections) {
         setConnections(applyServerConnections(remoteConnections));
@@ -94,21 +183,18 @@ export default function DiscoverPage() {
     })();
 
     const onProfile = () => setProfile(loadProfile());
-    const onDir = () => setPeople(loadDirectory());
     const onBlocks = () => setBlocked(loadBlockedIds());
     window.addEventListener("meetpoint:connections-changed", refreshConnections);
     window.addEventListener("meetpoint:profile-changed", onProfile);
-    window.addEventListener("meetpoint:directory-changed", onDir);
     void syncBlackFromServer();
     window.addEventListener("meetpoint:blocks-changed", onBlocks);
     return () => {
       cancelled = true;
       window.removeEventListener("meetpoint:connections-changed", refreshConnections);
       window.removeEventListener("meetpoint:profile-changed", onProfile);
-      window.removeEventListener("meetpoint:directory-changed", onDir);
       window.removeEventListener("meetpoint:blocks-changed", onBlocks);
     };
-  }, [router, refreshConnections]);
+  }, [router, refreshConnections, loadRanked]);
 
   const visiblePeople = useMemo(
     () => people.filter((person) => !blocked.includes(person.id)),
@@ -116,12 +202,12 @@ export default function DiscoverPage() {
   );
 
   const matches = useMemo(
-    () => (profile ? rankMatches(profile, visiblePeople, loadRatings()) : []),
-    [profile, visiblePeople]
+    () => ranked.filter((row) => !blocked.includes(row.person.id)),
+    [ranked, blocked]
   );
 
-  const forYou = useMemo(() => filterByPreference(matches, "open"), [matches]);
-  const nearby = useMemo(() => filterByPreference(matches, "local"), [matches]);
+  const forYou = matches;
+  const nearby = useMemo(() => matches.filter((row) => row.isLocal), [matches]);
   const pool = filter === "open" ? forYou : nearby;
 
   const byRank = useMemo(
@@ -294,6 +380,10 @@ export default function DiscoverPage() {
                         const updated = { ...profile, lookingFor: next };
                         saveProfile(updated);
                         setProfile(updated);
+                        void (async () => {
+                          if (!isDemoProfile(updated)) await syncProfileToServer(updated);
+                          await loadRanked(updated);
+                        })();
                       }}
                       className={`mp-press border px-2.5 py-1 text-[12px] ${
                         on

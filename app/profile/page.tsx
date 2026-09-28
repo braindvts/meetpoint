@@ -12,7 +12,6 @@ import ProfileForm from "@/components/ProfileForm";
 import MembershipTiers from "@/components/MembershipTiers";
 import { ensureNotifyPermission } from "@/lib/notify";
 import { clearProfile, getMeetingsAttended, loadProfile } from "@/lib/store";
-import { readClientProfile } from "@/lib/clientProfile";
 import { gateRedirect, resolveSessionGate } from "@/lib/hydrateSession";
 import {
   computeMemberTier,
@@ -28,11 +27,8 @@ function ProfileContent() {
   const router = useRouter();
   const params = useSearchParams();
   const needsVerify = params.get("verify") === "1";
-  const [profile, setProfile] = useState<MyProfile | null>(() => readClientProfile());
-  const [meetings, setMeetings] = useState(() => {
-    const p = readClientProfile();
-    return p ? getMeetingsAttended(p) : 0;
-  });
+  const [profile, setProfile] = useState<MyProfile | null>(null);
+  const [meetings, setMeetings] = useState(0);
   const [editPopupOpen, setEditPopupOpen] = useState(false);
 
   useEffect(() => {
@@ -73,11 +69,23 @@ function ProfileContent() {
     return () => window.clearTimeout(timer);
   }, [needsVerify]);
 
-  function reset() {
-    if (confirm("Delete your profile and all connections?")) {
-      clearProfile();
-      router.push("/");
+  async function reset() {
+    if (!confirm("Delete your profile and all connections?")) return;
+    try {
+      const res = await fetch("/api/members/me", {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (res.status !== 401 && !res.ok) {
+        window.alert("Couldn’t reset your profile on the server. Try again.");
+        return;
+      }
+    } catch {
+      window.alert("Couldn’t reset your profile on the server. Try again.");
+      return;
     }
+    clearProfile();
+    router.push("/");
   }
 
   if (!profile) {

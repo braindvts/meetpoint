@@ -7,9 +7,9 @@ import { clearDemoOwnerSession, markDemoOwnerSession } from "@/lib/demoFlag";
 import { saveProfile } from "@/lib/store";
 import type { MyProfile } from "@/lib/types";
 
-export default function EmailAuthForm() {
+export default function EmailAuthForm({ next }: { next?: string | null }) {
   const searchParams = useSearchParams();
-  const requestedNext = safeAppPath(searchParams.get("next"));
+  const requestedNext = safeAppPath(next) || safeAppPath(searchParams.get("next"));
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -36,10 +36,7 @@ export default function EmailAuthForm() {
     } else {
       clearDemoOwnerSession();
     }
-    const dest =
-      data.profile?.jobTitle && requestedNext
-        ? requestedNext
-        : data.next || requestedNext || "/onboarding";
+    const dest = safeAppPath(data.next) || requestedNext || "/discover";
     window.location.href = dest;
   }
 
@@ -52,7 +49,13 @@ export default function EmailAuthForm() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ email, password, name, mode }),
+        body: JSON.stringify({
+          email,
+          password,
+          name,
+          mode,
+          ...(requestedNext ? { next: requestedNext } : {}),
+        }),
       });
       const data = (await res.json()) as {
         ok?: boolean;

@@ -189,6 +189,8 @@ export interface MatchResult {
   distance: number;
   isLocal: boolean;
   reachable: boolean;
+  /** Server ranking sentence, e.g. "3 shared interests: SaaS, AI, Fintech". */
+  reasonLine?: string;
 }
 
 function normalizeJob(job: string): string {

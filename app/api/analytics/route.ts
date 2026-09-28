@@ -8,7 +8,7 @@ import { analyticsSchema } from "@/lib/validation/safety";
 
 /** First-party event ingest (no third-party required). */
 export async function POST(req: Request) {
-  const limited = rateLimit(req, { name: "analytics", limit: 120, windowMs: 60_000 });
+  const limited = await rateLimit(req, { name: "analytics", limit: 120, windowMs: 60_000 });
   if (!limited.ok) return limited.response;
 
   try {
