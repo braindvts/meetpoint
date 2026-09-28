@@ -228,7 +228,7 @@ model Report {
   id          String   @id @default(cuid())
   reporterId  String
   peerId      String
-  /// harassment | spam | fake_profile | inappropriate | scam | other
+  /// harassment | spam | fraud | impersonation | inappropriate | suspicious_account | fake_profile | scam | other
   category    String   @default("other")
   reason      String
   /// open | reviewing | resolved | dismissed

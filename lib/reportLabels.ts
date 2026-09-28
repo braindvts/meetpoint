@@ -1,9 +1,13 @@
 /** Shared report labels — safe for client components (no Zod). */
 
 /**
- * Member-facing reasons plus legacy slugs already stored in Production
- * (`fake_profile`, `scam`, `other`). Do not drop the legacy slugs — the
- * report/block work on another branch still accepts them.
+ * Same Report.category string as PR #24. No second report table.
+ * That PR already accepts harassment, spam, fake_profile, inappropriate,
+ * scam, and other. It does not include fraud, impersonation, or
+ * suspicious_account, so those slugs are added here. Keep every PR #24 slug
+ * valid. Admin review stays on requireAdmin, which PR #24 wraps as
+ * requireReportAdmin. PR #25's canViewAdminDashboard belongs inside that
+ * wrapper. This file does not add another admin check.
  */
 export const REPORT_CATEGORIES = [
   "harassment",

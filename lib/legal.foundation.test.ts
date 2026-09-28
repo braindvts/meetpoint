@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
 import { accountDeletionDecision, anonymizedMemberData } from "./accountDeletion";
@@ -132,7 +132,22 @@ test("paid booking sessions must belong to the member", () => {
   );
 });
 
-test("report categories add the requested reasons without dropping legacy slugs", () => {
+test("legal migration stays after the report and profile migrations and does not touch their tables", () => {
+  const root = join(ROOT, "prisma/migrations");
+  const dirs = readdirSync(root);
+  assert.ok(dirs.includes("20260928170000_legal_consent_and_deletion"));
+  assert.equal(dirs.includes("20260928150000_legal_consent_and_deletion"), false);
+  assert.equal(dirs.includes("20260928150000_rate_limit_bucket"), false);
+  const sql = readFileSync(
+    join(root, "20260928170000_legal_consent_and_deletion/migration.sql"),
+    "utf8"
+  );
+  assert.match(sql, /termsAcceptedAt/);
+  assert.match(sql, /deletedAt/);
+  assert.doesNotMatch(sql, /RateLimitBucket|CREATE TABLE|model Report|ALTER TABLE "Report"/i);
+});
+
+test("report categories extend PR #24 slugs and do not add an admin gate", () => {
   for (const slug of [
     "harassment",
     "spam",
@@ -154,6 +169,8 @@ test("report categories add the requested reasons without dropping legacy slugs"
     "inappropriate",
     "suspicious_account",
   ]);
+  assert.equal(existsSync(join(ROOT, "lib/adminGate.ts")), false);
+  assert.equal(existsSync(join(ROOT, "lib/adminAccess.ts")), false);
 });
 
 test("consent, deletion, and admin authorization are enforced in server routes", () => {
