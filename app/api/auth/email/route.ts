@@ -16,7 +16,8 @@ import {
   verifyPassword,
 } from "@/lib/password";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
-import { rateLimit } from "@/lib/rateLimit";
+import { accountKey, rateLimit } from "@/lib/rateLimit";
+import { AUTH_EMAIL_IP, AUTH_SIGNUP_ACCOUNT, AUTH_SIGNUP_IP } from "@/lib/rateCaps";
 import { publicError } from "@/lib/safeError";
 import { sanitizeName } from "@/lib/sanitize";
 import { appUrl, withSession } from "@/lib/session";
@@ -26,7 +27,7 @@ import { matchesWalkthroughOwner } from "@/lib/walkthroughOwner";
 
 export async function POST(req: Request) {
   try {
-    const limited = rateLimit(req, { name: "auth-email", limit: 20, windowMs: 60_000 });
+    const limited = await rateLimit(req, AUTH_EMAIL_IP);
     if (!limited.ok) return limited.response;
 
     await purgeDemoResidue();
@@ -37,6 +38,17 @@ export async function POST(req: Request) {
 
     const { email, password, name: rawName } = parsed.data;
     const mode = parsed.data.mode === "signup" ? "signup" : "signin";
+    const acct = accountKey(email);
+
+    if (mode === "signup") {
+      const signupLimited = await rateLimit(req, AUTH_SIGNUP_IP);
+      if (!signupLimited.ok) return signupLimited.response;
+      const signupAccount = await rateLimit(req, {
+        ...AUTH_SIGNUP_ACCOUNT,
+        keyExtra: acct,
+      });
+      if (!signupAccount.ok) return signupAccount.response;
+    }
 
     if (isAuthLocked(email, ip)) {
       return NextResponse.json(

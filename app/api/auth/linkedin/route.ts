@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { rateLimit } from "@/lib/rateLimit";
+import { OAUTH_IP } from "@/lib/rateCaps";
 import {
   appUrl,
   applyOAuthStateCookie,
@@ -6,7 +8,10 @@ import {
   linkedInConfigured,
 } from "@/lib/session";
 
-export async function GET() {
+export async function GET(req: Request) {
+  const limited = await rateLimit(req, OAUTH_IP);
+  if (!limited.ok) return NextResponse.redirect(appUrl("/login?error=rate_limited"));
+
   if (!linkedInConfigured()) {
     return NextResponse.redirect(appUrl("/login?error=not_configured"));
   }

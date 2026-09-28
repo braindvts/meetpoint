@@ -22,7 +22,7 @@ Those fields were added on the live database (Studio, SQL, or an uncommitted sch
 ## What we do instead
 
 1. `Report` in `schema.prisma` includes the four columns so nothing wants them gone.
-2. Migrations are **additive and idempotent** (`IF NOT EXISTS`, no `DROP`). A later additive migration adds `Report.reviewedAt` and status indexes used by the current report queue.
+2. Migrations are **additive and idempotent** (`IF NOT EXISTS`, no `DROP`). A later additive migration adds `Report.reviewedAt` and status indexes used by the current report queue. `20260928150000_rate_limit_bucket` adds only the `RateLimitBucket` table.
 3. Vercel / `npm run build` is `prisma generate && node scripts/prisma-migrate-deploy.mjs && next build`.
 
 That script runs **`prisma migrate deploy` only**. It never calls `db push` and never passes `--accept-data-loss`.
