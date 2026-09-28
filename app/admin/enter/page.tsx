@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { unlockAdmin } from "./actions";
-import { ADMIN_COOKIE, canViewAdminDashboard } from "@/lib/adminGate";
+import { ADMIN_COOKIE, adminIdentityFromMember, canViewAdminDashboard } from "@/lib/adminGate";
 import { getCurrentMember } from "@/lib/memberAuth";
 
 export const dynamic = "force-dynamic";
@@ -12,16 +12,15 @@ export default async function AdminEnterPage({
   searchParams: Promise<{ error?: string }>;
 }) {
   const jar = await cookies();
-  let email: string | null = null;
+  let identity = adminIdentityFromMember(null);
   try {
-    const member = await getCurrentMember();
-    email = member?.email ?? null;
+    identity = adminIdentityFromMember(await getCurrentMember());
   } catch {
-    email = null;
+    identity = adminIdentityFromMember(null);
   }
   if (
     canViewAdminDashboard({
-      email,
+      ...identity,
       cookie: jar.get(ADMIN_COOKIE)?.value,
       adminEmails: process.env.ADMIN_EMAILS,
       adminSecret: process.env.ADMIN_SECRET,
@@ -34,17 +33,20 @@ export default async function AdminEnterPage({
   const error =
     params.error === "config"
       ? "Admin access is not configured on this server."
-      : params.error
-        ? "That secret does not match."
-        : "";
+      : params.error === "rate"
+        ? "Too many attempts. Try again in a few minutes."
+        : params.error
+          ? "That secret does not match."
+          : "";
 
   return (
     <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center bg-ink px-4 py-16 text-ivory">
       <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-accent">Admin</p>
       <h1 className="mt-2 text-3xl font-semibold tracking-tight">Open analytics</h1>
       <p className="mt-3 text-sm leading-relaxed text-muted">
-        Use the same operator secret as reports and BLACK grants. A signed-in email listed in
-        ADMIN_EMAILS can open the dashboard without this step.
+        Use the same operator secret as reports and BLACK grants. A signed-in email in
+        ADMIN_EMAILS opens the dashboard only after that address is verified, or after
+        Google or Apple sign-in.
       </p>
       <form action={unlockAdmin} className="mt-8">
         <label className="block text-[11px] uppercase tracking-[0.16em] text-muted">

@@ -1,6 +1,6 @@
 "use server";
 
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import {
   ADMIN_COOKIE,
@@ -9,8 +9,23 @@ import {
   secretsMatch,
   signAdminCookie,
 } from "@/lib/adminGate";
+import { limitAdminSecretAttempt } from "@/lib/adminSecretLimit";
+
+async function attemptRequest(): Promise<Request> {
+  const incoming = await headers();
+  return new Request("https://interlink.local/admin/enter", {
+    method: "POST",
+    headers: {
+      "x-forwarded-for": incoming.get("x-forwarded-for") || "",
+      "x-real-ip": incoming.get("x-real-ip") || "",
+    },
+  });
+}
 
 export async function unlockAdmin(formData: FormData): Promise<void> {
+  const limited = await limitAdminSecretAttempt(await attemptRequest());
+  if (!limited.ok) redirect("/admin/enter?error=rate");
+
   const expected = process.env.ADMIN_SECRET?.trim() || "";
   const got = String(formData.get("secret") || "");
   if (!expected) redirect("/admin/enter?error=config");

@@ -6,9 +6,13 @@ import {
   adminCookieOptions,
   signAdminCookie,
 } from "@/lib/adminGate";
+import { limitAdminSecretAttempt } from "@/lib/adminSecretLimit";
 
 /** Exchange ADMIN_SECRET for the httpOnly admin cookie used by /admin/analytics. */
 export async function POST(req: Request) {
+  const limited = await limitAdminSecretAttempt(req);
+  if (!limited.ok) return limited.response;
+
   const gate = requireAdmin(req);
   if (!gate.ok) return gate.response;
   const secret = process.env.ADMIN_SECRET?.trim() || "";

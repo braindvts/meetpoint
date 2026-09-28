@@ -51,11 +51,71 @@ test("non-admins are blocked from the dashboard gate", () => {
   );
 });
 
+test("an unverified listed email is denied", () => {
+  assert.equal(
+    canViewAdminDashboard({
+      email: "brian@interlink.test",
+      adminEmails: "brian@interlink.test",
+      emailVerifiedAt: null,
+      googleId: null,
+      appleId: null,
+    }),
+    false
+  );
+  assert.equal(
+    canViewAdminDashboard({
+      email: "Brian@Interlink.test",
+      adminEmails: " brian@interlink.test ",
+      emailVerifiedAt: "   ",
+    }),
+    false
+  );
+});
+
+test("a verified listed email is allowed", () => {
+  assert.equal(
+    canViewAdminDashboard({
+      email: "Brian@Interlink.test",
+      adminEmails: " brian@interlink.test, ops@interlink.test ",
+      emailVerifiedAt: "2026-09-01T00:00:00.000Z",
+    }),
+    true
+  );
+});
+
+test("Google or Apple sign-in allows a listed email", () => {
+  assert.equal(
+    canViewAdminDashboard({
+      email: "brian@interlink.test",
+      adminEmails: "brian@interlink.test",
+      googleId: "google-sub-1",
+    }),
+    true
+  );
+  assert.equal(
+    canViewAdminDashboard({
+      email: "brian@interlink.test",
+      adminEmails: "brian@interlink.test",
+      appleId: "apple-sub-1",
+    }),
+    true
+  );
+  assert.equal(
+    canViewAdminDashboard({
+      email: "brian@interlink.test",
+      adminEmails: "someone-else@interlink.test",
+      googleId: "google-sub-1",
+    }),
+    false
+  );
+});
+
 test("allowlisted email and a valid admin cookie can open the dashboard", () => {
   assert.equal(
     canViewAdminDashboard({
       email: "Brian@Interlink.test",
       adminEmails: " brian@interlink.test, ops@interlink.test ",
+      emailVerifiedAt: "2026-09-01T00:00:00.000Z",
     }),
     true
   );
@@ -76,6 +136,7 @@ test("allowlisted email and a valid admin cookie can open the dashboard", () => 
 test("analytics page 404s when the server gate denies access", () => {
   const page = readFileSync(join(import.meta.dirname, "../app/admin/analytics/page.tsx"), "utf8");
   assert.match(page, /canViewAdminDashboard/);
+  assert.match(page, /adminIdentityFromMember/);
   assert.match(page, /if \(!allowed\) notFound\(\)/);
   const sample = readFileSync(
     join(import.meta.dirname, "../app/admin/analytics/sample/page.tsx"),

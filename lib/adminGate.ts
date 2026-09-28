@@ -62,16 +62,55 @@ export function adminCookieOptions(maxAgeSec: number) {
 }
 
 /**
+ * True when this member's address is safe to trust for ADMIN_EMAILS.
+ *
+ * `emailVerifiedAt` is the only verification timestamp on Member. Google and
+ * Apple sign-in are recorded as `googleId` / `appleId` (the provider checked
+ * the address). A password signup leaves all three empty, so a listed email
+ * alone is not enough.
+ */
+export function adminEmailIsVerified(input: {
+  emailVerifiedAt?: string | null;
+  googleId?: string | null;
+  appleId?: string | null;
+}): boolean {
+  if (input.emailVerifiedAt?.trim()) return true;
+  if (input.googleId?.trim()) return true;
+  if (input.appleId?.trim()) return true;
+  return false;
+}
+
+export function adminIdentityFromMember(
+  member: {
+    email?: string | null;
+    emailVerifiedAt?: string | null;
+    googleId?: string | null;
+    appleId?: string | null;
+  } | null
+) {
+  return {
+    email: member?.email ?? null,
+    emailVerifiedAt: member?.emailVerifiedAt ?? null,
+    googleId: member?.googleId ?? null,
+    appleId: member?.appleId ?? null,
+  };
+}
+
+/**
  * Page gate for /admin/analytics (and later the report review queue).
  *
  * Allowed when either:
- * - the signed-in member's email is listed in ADMIN_EMAILS, or
+ * - the signed-in email is listed in ADMIN_EMAILS AND that address is verified, or
  * - the browser holds a cookie signed with the existing ADMIN_SECRET.
  *
- * Neither condition is a UI hide. Callers must 404 when this returns false.
+ * An unverified listed email falls through to the secret. Callers must 404
+ * when this returns false.
  */
 export function canViewAdminDashboard(input: {
   email?: string | null;
+  emailVerifiedAt?: string | null;
+  googleId?: string | null;
+  appleId?: string | null;
   cookie?: string | null;
   adminEmails?: string | null;
   adminSecret?: string | null;
@@ -80,6 +119,6 @@ export function canViewAdminDashboard(input: {
   const now = input.now ?? Date.now();
   const allow = parseAdminEmails(input.adminEmails);
   const email = input.email?.trim().toLowerCase() || "";
-  if (email && allow.has(email)) return true;
+  if (email && allow.has(email) && adminEmailIsVerified(input)) return true;
   return adminCookieValid(input.cookie, input.adminSecret, now);
 }

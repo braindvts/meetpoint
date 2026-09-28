@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import AnalyticsDashboard from "@/components/admin/AnalyticsDashboard";
 import Nav from "@/components/Nav";
-import { ADMIN_COOKIE, canViewAdminDashboard } from "@/lib/adminGate";
+import { ADMIN_COOKIE, adminIdentityFromMember, canViewAdminDashboard } from "@/lib/adminGate";
 import { loadAnalyticsDashboard, parseRange } from "@/lib/analyticsDashboard";
 import { getCurrentMember } from "@/lib/memberAuth";
 
@@ -14,16 +14,15 @@ export default async function AdminAnalyticsPage({
   searchParams: Promise<{ range?: string }>;
 }) {
   const jar = await cookies();
-  let email: string | null = null;
+  let identity = adminIdentityFromMember(null);
   try {
-    const member = await getCurrentMember();
-    email = member?.email ?? null;
+    identity = adminIdentityFromMember(await getCurrentMember());
   } catch {
-    email = null;
+    identity = adminIdentityFromMember(null);
   }
 
   const allowed = canViewAdminDashboard({
-    email,
+    ...identity,
     cookie: jar.get(ADMIN_COOKIE)?.value,
     adminEmails: process.env.ADMIN_EMAILS,
     adminSecret: process.env.ADMIN_SECRET,
