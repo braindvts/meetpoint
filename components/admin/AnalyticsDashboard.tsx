@@ -47,10 +47,12 @@ function Bars({ series }: { series: ChartPoint[] }) {
           </div>
         ))}
       </div>
-      <div className="mt-2 flex justify-between text-[10px] uppercase tracking-[0.14em] text-muted">
+      <div className="mt-2 flex justify-between gap-2 text-[10px] uppercase tracking-[0.14em] text-muted">
         <span>{series[0]?.label}</span>
         <span>{series.length > 2 ? series[Math.floor(series.length / 2)]?.label : ""}</span>
-        <span>{series[series.length - 1]?.label}</span>
+        <span>
+          {series[series.length - 1]?.label} ET
+        </span>
       </div>
     </div>
   );
@@ -108,7 +110,7 @@ export default function AnalyticsDashboard({
         <p className="mt-5 max-w-2xl text-sm leading-relaxed text-muted">
           Partner clicks and page views count from the deploy that turned this tracking on.
           Accounts, BLACK memberships, event RSVPs, and reports are read from the database
-          and include earlier history. Dates are UTC.
+          and include earlier history. Chart days are Eastern Time (ET).
         </p>
       )}
 
@@ -178,7 +180,8 @@ export default function AnalyticsDashboard({
         <div className="min-w-0 border border-line bg-panel p-4 sm:p-6">
           <Stat value={data.accounts.total} label="Accounts created" />
           <p className="mt-3 text-[12px] leading-relaxed text-muted">
-            Real member rows in this range. Sample and demo accounts are excluded
+            Real member rows in this range. Sample ids p1–p18, the demo profile, and the
+            shared Mohammed sample login are excluded
             {data.accounts.seededInRange > 0
               ? ` (${data.accounts.seededInRange} in range, ${data.accounts.seededAllTime} all time)`
               : data.accounts.seededAllTime > 0
@@ -262,14 +265,14 @@ export default function AnalyticsDashboard({
                   ))
                 )}
               </ul>
-              <p className="mt-4 text-[12px] leading-relaxed text-muted">
-                Read from the EventInterest table. The events screens also keep interested
-                and going choices in the browser, and those do not appear here.
-              </p>
             </>
           ) : (
             <p className="mt-4 text-sm text-muted">The RSVP table could not be read.</p>
           )}
+          <p className="mt-4 text-[12px] leading-relaxed text-muted">
+            Read from EventInterest, one row per member. RSVPs saved only in the browser
+            before that change are not counted.
+          </p>
         </div>
 
         <div className="min-w-0 border border-line bg-panel p-4 sm:p-6">

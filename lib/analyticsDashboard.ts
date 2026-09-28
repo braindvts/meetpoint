@@ -2,6 +2,13 @@ import type { Prisma } from "@prisma/client";
 import { prisma } from "./db";
 import { FEATURED_PARTNERS } from "./featuredPartners";
 import { PARTNER_PLACEMENTS, type PartnerPlacement } from "./analyticsIngest";
+import {
+  SAMPLE_LOGIN_BIO,
+  SAMPLE_LOGIN_EMAIL,
+  SAMPLE_LOGIN_NAME,
+  SAMPLE_LOGIN_PHONE,
+  SAMPLE_LOGIN_PHOTO_ID,
+} from "./demoAccount";
 import { DEMO_PROFILE_MARKER, LEGACY_SEED_IDS } from "./purgeDemo";
 
 export type RangeKey = "7d" | "30d" | "all";
@@ -59,7 +66,8 @@ export interface DashboardData {
 }
 
 const EVENT_CAP = 20_000;
-const DEMO_ACCOUNT_EMAIL = "demo@conclave.app";
+/** Charts and range windows use Eastern Time so an evening click stays on that day. */
+export const CHART_TIME_ZONE = "America/New_York";
 
 export function parseRange(value: string | undefined): RangeKey {
   if (value === "30d" || value === "all" || value === "7d") return value;
@@ -69,9 +77,9 @@ export function parseRange(value: string | undefined): RangeKey {
 export function rangeStart(range: RangeKey, now = new Date()): Date | null {
   if (range === "all") return null;
   const days = range === "7d" ? 7 : 30;
-  const start = startOfUtcDay(now);
-  start.setUTCDate(start.getUTCDate() - (days - 1));
-  return start;
+  const today = etParts(now);
+  const start = addCalendarDays(today.year, today.month, today.day, -(days - 1));
+  return etMidnight(start.year, start.month, start.day);
 }
 
 export function standingFromMember(member: {
@@ -101,7 +109,22 @@ export function seededMemberWhere(): Prisma.MemberWhereInput {
     OR: [
       { id: { in: [...LEGACY_SEED_IDS] } },
       { verificationsJson: { contains: DEMO_PROFILE_MARKER } },
-      { email: DEMO_ACCOUNT_EMAIL },
+      { email: SAMPLE_LOGIN_EMAIL },
+      { verificationsJson: { contains: SAMPLE_LOGIN_EMAIL } },
+      {
+        // The shared guest can be stored without the demo email or LinkedIn marker.
+        // Name plus phone, photo, or bio keeps a real Mohammed who is none of those.
+        AND: [
+          { name: { equals: SAMPLE_LOGIN_NAME, mode: "insensitive" } },
+          {
+            OR: [
+              { phone: SAMPLE_LOGIN_PHONE },
+              { photo: { contains: SAMPLE_LOGIN_PHOTO_ID } },
+              { bio: SAMPLE_LOGIN_BIO },
+            ],
+          },
+        ],
+      },
     ],
   };
 }
@@ -110,12 +133,72 @@ export function realMemberWhere(): Prisma.MemberWhereInput {
   return { NOT: seededMemberWhere() };
 }
 
-function startOfUtcDay(date: Date): Date {
-  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+function partMap(date: Date): Record<string, number> {
+  const fmt = new Intl.DateTimeFormat("en-US", {
+    timeZone: CHART_TIME_ZONE,
+    hourCycle: "h23",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+  const map: Record<string, number> = {};
+  for (const part of fmt.formatToParts(date)) {
+    if (part.type === "literal") continue;
+    map[part.type] = Number(part.value);
+  }
+  if (map.hour === 24) map.hour = 0;
+  return map;
+}
+
+function etParts(date: Date): { year: number; month: number; day: number } {
+  const map = partMap(date);
+  return { year: map.year!, month: map.month!, day: map.day! };
+}
+
+function ymd(parts: { year: number; month: number; day: number }): string {
+  return `${parts.year}-${String(parts.month).padStart(2, "0")}-${String(parts.day).padStart(2, "0")}`;
+}
+
+function addCalendarDays(year: number, month: number, day: number, delta: number) {
+  const utc = new Date(Date.UTC(year, month - 1, day + delta));
+  return { year: utc.getUTCFullYear(), month: utc.getUTCMonth() + 1, day: utc.getUTCDate() };
+}
+
+/** UTC instant of midnight in America/New_York on this calendar day. */
+function etMidnight(year: number, month: number, day: number): Date {
+  const noon = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
+  const wall = partMap(noon);
+  const midnightAsUtc = Date.UTC(wall.year!, wall.month! - 1, wall.day!, 0, 0, 0);
+  const noonWallAsUtc = Date.UTC(
+    wall.year!,
+    wall.month! - 1,
+    wall.day!,
+    wall.hour!,
+    wall.minute!,
+    wall.second!
+  );
+  const offsetMs = noonWallAsUtc - noon.getTime();
+  return new Date(midnightAsUtc - offsetMs);
+}
+
+function startOfEtDay(date: Date): Date {
+  const parts = etParts(date);
+  return etMidnight(parts.year, parts.month, parts.day);
 }
 
 function dayKey(date: Date): string {
-  return startOfUtcDay(date).toISOString().slice(0, 10);
+  return ymd(etParts(date));
+}
+
+function calendarSpan(start: Date, end: Date): number {
+  const a = etParts(start);
+  const b = etParts(end);
+  const from = Date.UTC(a.year, a.month - 1, a.day);
+  const to = Date.UTC(b.year, b.month - 1, b.day);
+  return Math.round((to - from) / 86_400_000) + 1;
 }
 
 function dayLabel(key: string): string {
@@ -125,16 +208,15 @@ function dayLabel(key: string): string {
 }
 
 export function seriesFromDates(dates: Date[], range: RangeKey, now = new Date()): ChartPoint[] {
-  const end = startOfUtcDay(now);
+  const end = startOfEtDay(now);
   const start =
     range === "all"
       ? dates.length
-        ? startOfUtcDay(dates.reduce((min, date) => (date < min ? date : min), dates[0]!))
+        ? startOfEtDay(dates.reduce((min, date) => (date < min ? date : min), dates[0]!))
         : end
       : rangeStart(range, now)!;
 
-  const spanDays = Math.round((end.getTime() - start.getTime()) / 86_400_000) + 1;
-  if (range === "all" && spanDays > 62) return bucketWeeks(dates, start, end);
+  if (range === "all" && calendarSpan(start, end) > 62) return bucketWeeks(dates, start, end);
   return bucketDays(dates, start, end);
 }
 
@@ -145,33 +227,37 @@ function bucketDays(dates: Date[], start: Date, end: Date): ChartPoint[] {
     counts.set(key, (counts.get(key) || 0) + 1);
   }
   const points: ChartPoint[] = [];
-  const cursor = new Date(start);
-  const last = startOfUtcDay(end);
-  while (cursor <= last && points.length < 400) {
-    const key = dayKey(cursor);
+  let cursor = etParts(start);
+  const lastKey = dayKey(end);
+  while (points.length < 400) {
+    const key = ymd(cursor);
     points.push({ label: dayLabel(key), count: counts.get(key) || 0 });
-    cursor.setUTCDate(cursor.getUTCDate() + 1);
+    if (key >= lastKey) break;
+    cursor = addCalendarDays(cursor.year, cursor.month, cursor.day, 1);
   }
   return points;
+}
+
+function weekKey(date: Date): string {
+  const parts = etParts(date);
+  const weekday = new Date(Date.UTC(parts.year, parts.month - 1, parts.day)).getUTCDay();
+  return ymd(addCalendarDays(parts.year, parts.month, parts.day, -weekday));
 }
 
 function bucketWeeks(dates: Date[], start: Date, end: Date): ChartPoint[] {
   const counts = new Map<string, number>();
   for (const date of dates) {
-    const week = startOfUtcDay(date);
-    const day = week.getUTCDay();
-    week.setUTCDate(week.getUTCDate() - day);
-    const key = dayKey(week);
+    const key = weekKey(date);
     counts.set(key, (counts.get(key) || 0) + 1);
   }
   const points: ChartPoint[] = [];
-  const cursor = startOfUtcDay(start);
-  cursor.setUTCDate(cursor.getUTCDate() - cursor.getUTCDay());
-  const last = startOfUtcDay(end);
-  while (cursor <= last && points.length < 120) {
-    const key = dayKey(cursor);
-    points.push({ label: `Week of ${dayLabel(key)}`, count: counts.get(key) || 0 });
-    cursor.setUTCDate(cursor.getUTCDate() + 7);
+  let cursor = weekKey(start);
+  const last = weekKey(end);
+  while (points.length < 120) {
+    points.push({ label: `Week of ${dayLabel(cursor)}`, count: counts.get(cursor) || 0 });
+    if (cursor >= last) break;
+    const [year, month, day] = cursor.split("-").map(Number);
+    cursor = ymd(addCalendarDays(year!, month!, day!, 7));
   }
   return points;
 }
