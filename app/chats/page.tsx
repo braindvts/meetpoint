@@ -3,11 +3,12 @@
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import Nav from "@/components/Nav";
 import Avatar from "@/components/Avatar";
 import NameMarks from "@/components/NameMarks";
 import ChatThreadPanel from "@/components/ChatThreadPanel";
 import EmptyState from "@/components/EmptyState";
+import ProfileProgressPrompt from "@/components/ProfileProgressPrompt";
+import { copyInviteLink } from "@/lib/copyInvite";
 import NewChatSheet from "@/components/NewChatSheet";
 import InterlinksSheet from "@/components/InterlinksSheet";
 import ChatOverflowMenu from "@/components/ChatOverflowMenu";
@@ -267,7 +268,6 @@ function ChatsInner() {
   if (!profile) {
     return (
       <>
-        <Nav />
         <main className="mp-chats-layout">
           <aside className="mp-chats-rail flex border-r border-line/50">
             <div className="px-4 py-8">
@@ -286,7 +286,6 @@ function ChatsInner() {
 
   return (
     <>
-      <Nav />
       <main className="mp-chats-layout">
         <aside
           className={`mp-chats-rail border-r border-line/50 ${
@@ -366,11 +365,19 @@ function ChatsInner() {
           </div>
 
           <div className="min-h-0 flex-1 overflow-y-auto px-2 py-2">
+            <div className="px-1 pb-2">
+              <ProfileProgressPrompt profile={profile} />
+            </div>
             {rows.length === 0 ? (
-              <div className="px-2 py-8">
+              <div className="px-2 py-4">
                 <EmptyState
+                  compact
                   title="No chats yet"
-                  body="Open Interlinks to message someone you’re connected to, or use the group icon to start a group."
+                  body="When you connect with someone, the conversation shows up here. Meet a member, or invite someone you already know."
+                  actionHref="/discover"
+                  actionLabel="Meet someone"
+                  secondaryLabel="Invite someone"
+                  onSecondary={() => void copyInviteLink()}
                 />
               </div>
             ) : filteredRows.length === 0 ? (
@@ -500,6 +507,19 @@ function ChatsInner() {
               embedded
               onBack={clearSelection}
             />
+          ) : rows.length === 0 ? (
+            <div className="flex h-full w-full items-center justify-center px-6">
+              <div className="w-full max-w-md">
+                <EmptyState
+                  title="No chats yet"
+                  body="When you connect with someone, the conversation shows up here. Meet a member, or invite someone you already know."
+                  actionHref="/discover"
+                  actionLabel="Meet someone"
+                  secondaryLabel="Invite someone"
+                  onSecondary={() => void copyInviteLink()}
+                />
+              </div>
+            </div>
           ) : (
             <div className="flex h-full w-full flex-col items-center justify-center px-8 text-center">
               <p className="font-display text-2xl font-semibold text-ivory">Select a chat</p>

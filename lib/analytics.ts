@@ -1,4 +1,32 @@
-/** Fire-and-forget first-party analytics (+ optional Plausible if configured). */
+/** First-party beacon. sendBeacon so a new tab does not drop the click. */
+function sendFirstParty(name: string, meta?: Record<string, string>): void {
+  if (typeof window === "undefined") return;
+  const path = window.location.pathname;
+  const body = JSON.stringify(meta ? { name, path, meta } : { name, path });
+  try {
+    if (typeof navigator.sendBeacon === "function") {
+      const blob = new Blob([body], { type: "application/json" });
+      if (navigator.sendBeacon("/api/analytics", blob)) return;
+    }
+  } catch {
+    /* fetch fallback */
+  }
+  void fetch("/api/analytics", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body,
+    keepalive: true,
+  }).catch(() => undefined);
+}
+
+export function trackPartnerClick(
+  partnerId: string,
+  placement: "landing" | "loading" | "featured"
+): void {
+  sendFirstParty("partner_click", { partner: partnerId, placement });
+}
+
+/** Fire-and-forget product events (+ optional Plausible if configured). */
 export function track(name: string, meta?: Record<string, unknown>): void {
   if (typeof window === "undefined") return;
   const path = window.location.pathname;
@@ -22,5 +50,8 @@ export function track(name: string, meta?: Record<string, unknown>): void {
 }
 
 export function trackPageview(): void {
-  track("pageview");
+  if (typeof window === "undefined") return;
+  const path = window.location.pathname;
+  if (path === "/verify-email" || path.startsWith("/verify-email/")) return;
+  sendFirstParty("pageview");
 }

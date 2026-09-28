@@ -10,6 +10,7 @@ export default function AnalyticsBeacon() {
   const pathname = usePathname();
 
   useEffect(() => {
+    if (!pathname || pathname === "/verify-email" || pathname.startsWith("/verify-email/")) return;
     trackPageview();
   }, [pathname]);
 

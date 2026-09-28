@@ -11,11 +11,14 @@ import {
 type MemberBrief = {
   id: string;
   name: string;
-  email?: string | null;
   jobTitle?: string;
   cityName?: string;
   black?: boolean;
   photo?: string;
+  filedCount?: number;
+  reportCount?: number;
+  openReporterCount?: number;
+  hiddenFromDiscover?: boolean;
 };
 
 type ReportRow = {
@@ -33,6 +36,7 @@ type ReportRow = {
 
 const STATUS_FILTERS = [
   { value: "open", label: "Open" },
+  { value: "reviewing", label: "Reviewing" },
   { value: "resolved", label: "Resolved" },
   { value: "dismissed", label: "Dismissed" },
   { value: "all", label: "All" },
@@ -61,6 +65,7 @@ export default function ReportsAdminPage() {
   const [unlocked, setUnlocked] = useState(false);
   const [filter, setFilter] = useState<(typeof STATUS_FILTERS)[number]["value"]>("open");
   const [reports, setReports] = useState<ReportRow[]>([]);
+  const [autoHidden, setAutoHidden] = useState<MemberBrief[]>([]);
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
   const [notesDraft, setNotesDraft] = useState<Record<string, string>>({});
@@ -77,6 +82,7 @@ export default function ReportsAdminPage() {
           ok?: boolean;
           error?: string;
           reports?: ReportRow[];
+          autoHidden?: MemberBrief[];
         };
         if (!data.ok) {
           setMessage(data.error || "Could not load reports");
@@ -84,6 +90,7 @@ export default function ReportsAdminPage() {
           return;
         }
         setReports(data.reports || []);
+        setAutoHidden(data.autoHidden || []);
         setUnlocked(true);
         setNotesDraft(
           Object.fromEntries((data.reports || []).map((r) => [r.id, r.notes || ""]))
@@ -180,6 +187,24 @@ export default function ReportsAdminPage() {
         </form>
       ) : (
         <>
+          {autoHidden.length > 0 && (
+            <section className="mt-6 border border-accent/50 bg-panel/70 p-4">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-accent">
+                Auto-hidden from Discover
+              </p>
+              <ul className="mt-2 space-y-1 text-sm text-ivory">
+                {autoHidden.map((member) => (
+                  <li key={member.id}>
+                    {member.name}
+                    {member.jobTitle ? ` · ${member.jobTitle}` : ""}
+                    {" · "}
+                    {member.openReporterCount ?? 0} qualifying reports
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
           <div className="mt-6 flex flex-wrap gap-2">
             {STATUS_FILTERS.map((f) => (
               <button
@@ -226,6 +251,18 @@ export default function ReportsAdminPage() {
                     <br />
                     <span className="text-ivory">{r.peer.name}</span>
                     {r.peer.jobTitle ? ` · ${r.peer.jobTitle}` : ""}
+                    {r.peer.cityName ? ` · ${r.peer.cityName}` : ""}
+                    <br />
+                    <span className="text-white/50">
+                      {r.peer.reportCount ?? 0} reports · {r.peer.openReporterCount ?? 0} open
+                      reporters
+                    </span>
+                    {r.peer.hiddenFromDiscover ? (
+                      <>
+                        <br />
+                        <span className="text-accent">Hidden from Discover</span>
+                      </>
+                    ) : null}
                     <br />
                     <span className="break-all font-mono text-[10px] text-white/30">
                       {r.peer.id}
@@ -235,12 +272,11 @@ export default function ReportsAdminPage() {
                     <span className="text-white/40">Reporter</span>
                     <br />
                     <span className="text-ivory">{r.reporter.name}</span>
-                    {r.reporter.email ? (
-                      <>
-                        <br />
-                        <span className="text-white/50">{r.reporter.email}</span>
-                      </>
-                    ) : null}
+                    {r.reporter.jobTitle ? ` · ${r.reporter.jobTitle}` : ""}
+                    <br />
+                    <span className="text-white/50">
+                      Filed {r.reporter.filedCount ?? 0}
+                    </span>
                     <br />
                     <span className="break-all font-mono text-[10px] text-white/30">
                       {r.reporter.id}
@@ -263,6 +299,14 @@ export default function ReportsAdminPage() {
                   />
                 </label>
                 <div className="mt-3 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => void setStatus(r.id, "open")}
+                    className="border border-line px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted hover:text-ivory disabled:opacity-40"
+                  >
+                    Open
+                  </button>
                   <button
                     type="button"
                     disabled={busy}

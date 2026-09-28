@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { publicError } from "@/lib/safeError";
 import { RESTAURANTS } from "@/lib/data";
+import { getCurrentMember } from "@/lib/memberAuth";
 import { rateLimit } from "@/lib/rateLimit";
 import { placesQuerySchema } from "@/lib/validation/safety";
 
@@ -9,8 +10,11 @@ import { placesQuerySchema } from "@/lib/validation/safety";
  * Photo URLs go through /api/places/photo — the API key never leaves the server.
  */
 export async function GET(req: Request) {
-  const limited = rateLimit(req, { name: "places", limit: 40, windowMs: 60_000 });
+  const limited = await rateLimit(req, { name: "places", limit: 40, windowMs: 60_000 });
   if (!limited.ok) return limited.response;
+
+  const me = await getCurrentMember();
+  if (!me) return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
 
   const { searchParams } = new URL(req.url);
   const parsed = placesQuerySchema.safeParse({

@@ -1,39 +1,74 @@
 /**
- * Failed-login lockout (best-effort per serverless isolate).
- * After N failures, block that email+IP for a cooldown window.
+ * Failed-login lockout.
+ * The tight lock is email+IP together, so one person who knows an address
+ * cannot lock the account out from every network.
+ * A much higher account-wide ceiling still stops a distributed password spray.
+ * The walkthrough owner mailbox is exempt from that account-wide ceiling.
  */
 
-type Row = { fails: number; lockedUntil: number };
+import { isWalkthroughOwnerEmail } from "@/lib/walkthroughOwner";
+
+type Row = { fails: number; windowStart: number; lockedUntil: number };
 
 const store = new Map<string, Row>();
 
-const MAX_FAILS = 8;
-const WINDOW_MS = 15 * 60_000;
+export const AUTH_LOCK_PAIR_FAILS = 8;
+export const AUTH_LOCK_ACCOUNT_FAILS = 100;
+export const AUTH_LOCK_WINDOW_MS = 15 * 60_000;
 
-export function isAuthLocked(email: string, ip: string): boolean {
-  const key = `${ip}:${email.toLowerCase()}`;
-  const row = store.get(key);
-  if (!row) return false;
-  if (Date.now() < row.lockedUntil) return true;
-  if (Date.now() - (row.lockedUntil - WINDOW_MS) > WINDOW_MS) {
-    store.delete(key);
-  }
-  return false;
+function pairKey(email: string, ip: string): string {
+  return `pair:${ip}:${email.trim().toLowerCase()}`;
 }
 
-export function recordAuthFailure(email: string, ip: string): void {
-  const key = `${ip}:${email.toLowerCase()}`;
-  const now = Date.now();
-  const row = store.get(key) || { fails: 0, lockedUntil: 0 };
-  if (now < row.lockedUntil) return;
+function accountKey(email: string): string {
+  return `acct:${email.trim().toLowerCase()}`;
+}
+
+function readRow(key: string, now: number): Row | null {
+  const row = store.get(key);
+  if (!row) return null;
+  if (row.lockedUntil && now >= row.lockedUntil) {
+    store.delete(key);
+    return null;
+  }
+  if (!row.lockedUntil && now - row.windowStart >= AUTH_LOCK_WINDOW_MS) {
+    store.delete(key);
+    return null;
+  }
+  return row;
+}
+
+function addFail(key: string, maxFails: number, now: number): void {
+  let row = readRow(key, now);
+  if (row?.lockedUntil && now < row.lockedUntil) return;
+  if (!row) row = { fails: 0, windowStart: now, lockedUntil: 0 };
   row.fails += 1;
-  if (row.fails >= MAX_FAILS) {
-    row.lockedUntil = now + WINDOW_MS;
+  if (row.fails >= maxFails) {
+    row.lockedUntil = now + AUTH_LOCK_WINDOW_MS;
     row.fails = 0;
   }
   store.set(key, row);
 }
 
+export function isAuthLocked(email: string, ip: string, now = Date.now()): boolean {
+  const pair = readRow(pairKey(email, ip), now);
+  if (pair?.lockedUntil && now < pair.lockedUntil) return true;
+  if (isWalkthroughOwnerEmail(email)) return false;
+  const account = readRow(accountKey(email), now);
+  return !!(account?.lockedUntil && now < account.lockedUntil);
+}
+
+export function recordAuthFailure(email: string, ip: string, now = Date.now()): void {
+  addFail(pairKey(email, ip), AUTH_LOCK_PAIR_FAILS, now);
+  if (isWalkthroughOwnerEmail(email)) return;
+  addFail(accountKey(email), AUTH_LOCK_ACCOUNT_FAILS, now);
+}
+
 export function clearAuthFailures(email: string, ip: string): void {
-  store.delete(`${ip}:${email.toLowerCase()}`);
+  store.delete(pairKey(email, ip));
+  store.delete(accountKey(email));
+}
+
+export function resetAuthLockoutForTests(): void {
+  store.clear();
 }

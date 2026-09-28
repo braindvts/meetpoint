@@ -46,7 +46,7 @@ export const blockSchema = z
 export const reportSchema = z
   .object({
     peerId: zId,
-    category: z.enum(REPORT_CATEGORIES).optional(),
+    category: z.enum(REPORT_CATEGORIES),
     reason: zShortText(500).min(3),
     alsoBlock: z.boolean().optional(),
   })
