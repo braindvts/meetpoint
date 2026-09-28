@@ -49,6 +49,7 @@ test("cleanup refuses CI, Vercel, and the build lifecycle", () => {
 test("dry-run summary names accounts and what stays", () => {
   const text = formatCleanupPlan(plan, false);
   assert.match(text, /Dry run\. Nothing was deleted/);
+  assert.match(text, /preview and production use different databases and a backup exists/);
   assert.match(text, /owner confirms a database backup/);
   assert.match(text, /teammate has reviewed this output on a preview/);
   assert.match(text, /p1  Marcus  marcus@conclave.app  kind=seed  matched=id:p1-p18/);
@@ -57,6 +58,9 @@ test("dry-run summary names accounts and what stays", () => {
   assert.match(text, /4 EventInterest RSVPs filed by real members/);
   assert.match(text, /Would reassign:\n- nothing/);
   assert.doesNotMatch(text, /Applying sample cleanup/);
+  const applying = formatCleanupPlan(plan, true);
+  assert.match(applying, /Applying sample cleanup/);
+  assert.match(applying, /preview and production use different databases and a backup exists/);
 });
 
 test("build and deploy do not invoke the cleanup script", () => {
@@ -76,5 +80,6 @@ test("build and deploy do not invoke the cleanup script", () => {
   assert.equal(pkg.scripts["samples:cleanup"], "tsx scripts/cleanup-sample-accounts.ts");
   const script = readFileSync(new URL("../scripts/cleanup-sample-accounts.ts", import.meta.url), "utf8");
   assert.match(script, /cleanupBlockedByEnvironment/);
+  assert.match(script, /preview and production use different databases and a backup exists/);
   assert.doesNotMatch(script, /argv\.includes\("--apply"\)[\s\S]{0,80}true/);
 });

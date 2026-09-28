@@ -16,7 +16,29 @@ import { LOOKING_FOR_OPTIONS } from "./types";
 
 type MemberRow = Member & { interests?: { slug: string }[] };
 
-function ideaLabels(m: MemberRow): string[] {
+/** Fields other members may see, plus what Discover needs to rank. No secrets. */
+export type PublicCardSource = {
+  id: string;
+  name: string;
+  jobTitle: string;
+  company?: string | null;
+  industry?: string | null;
+  bio?: string | null;
+  photo?: string | null;
+  cityName: string;
+  cityCountry: string;
+  cityLat: number;
+  cityLng: number;
+  travel: string;
+  lookingForJson: string;
+  ideaTagsJson: string;
+  verificationsJson: string;
+  workJson?: string | null;
+  black?: boolean | null;
+  interests?: { slug: string }[] | null;
+};
+
+function ideaLabels(m: { ideaTagsJson: string; interests?: { slug: string }[] | null }): string[] {
   const stored = safeJson<string[]>(m.ideaTagsJson, []);
   const fromRows = labelsForSlugs((m.interests || []).map((row) => row.slug));
   return normalizeIdeaTags([...stored, ...fromRows], IDEA_TAG_LIMIT);
@@ -92,7 +114,7 @@ function publicHttps(url: string | undefined): string | undefined {
  * LinkedIn, website, portfolio, and verification badges stay off too.
  * `verified` is enough for the standing badge.
  */
-export function memberToPerson(m: MemberRow): Person {
+export function memberToPerson(m: PublicCardSource): Person {
   const vers = safeJson<Verification[]>(m.verificationsJson, []);
   const work = safeJson<PersonWork[]>(
     "workJson" in m ? String((m as { workJson?: string }).workJson || "[]") : "[]",
@@ -105,7 +127,7 @@ export function memberToPerson(m: MemberRow): Person {
     company: m.company || undefined,
     industry: canonicalIndustry(m.industry) || undefined,
     bio: sanitizeText(m.bio || "", 800),
-    photoUrl: publicPhoto(m.photo),
+    photoUrl: publicPhoto(m.photo || ""),
     city: {
       name: m.cityName,
       country: m.cityCountry,

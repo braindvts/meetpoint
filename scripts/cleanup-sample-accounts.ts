@@ -5,8 +5,9 @@
  * This script is not part of CI, `npm run build`, or Vercel deploy.
  * If those environments invoke it, it exits without reading or writing the database.
  *
- * Run for real only after:
- * 1. The owner confirms a database backup.
+ * WARNING: Do not run --apply until it is confirmed that preview and production use different databases and a backup exists.
+ * Then:
+ * 1. The owner confirms that backup.
  * 2. A teammate reviews the dry-run output against a preview database.
  *
  *   npx tsx scripts/cleanup-sample-accounts.ts
@@ -17,7 +18,8 @@
  * - id is a legacy seed id p1–p18
  * - verifications or linkedInId contain "conclave-demo"
  * - email is exactly demo@conclave.app
- * - photo URL contains randomuser.me
+ * - photo is exactly https://randomuser.me/api/portraits/(men|women)/<n>.jpg
+ *   (n is 0–99). A photo that only mentions randomuser.me is not a sample.
  *
  * Nothing is reassigned. Real members, their RSVPs, and the event catalog stay.
  * A chat that still has a real member stays; the sample is only detached.
@@ -27,6 +29,7 @@
 import { PrismaClient } from "@prisma/client";
 import { classifySample, sampleMarkers, sampleMemberWhere } from "../lib/sampleAccounts";
 import {
+  CLEANUP_APPLY_WARNING,
   cleanupBlockedByEnvironment,
   formatCleanupPlan,
   type CleanupPlan,
@@ -40,6 +43,8 @@ if (blocked) {
   );
   process.exit(0);
 }
+
+console.error(`WARNING: ${CLEANUP_APPLY_WARNING}`);
 
 const prisma = new PrismaClient();
 

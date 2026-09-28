@@ -29,7 +29,6 @@ import {
 } from "@/lib/store";
 import { findPerson, refreshDirectory } from "@/lib/directory";
 import { fetchServerConnections, syncProfileToServer } from "@/lib/apiClient";
-import { fetchMemberPages } from "@/lib/memberPage";
 import { gateRedirect, resolveSessionGate } from "@/lib/hydrateSession";
 import { summarizeReputation } from "@/lib/reputation";
 import { TIER_DEFINITIONS, tierForPerson, tierForProfile, type MemberTier } from "@/lib/tiers";
@@ -97,40 +96,21 @@ export default function DiscoverPage() {
   const loadRanked = useCallback(async (p: MyProfile) => {
     let rows: MatchResult[] = [];
     try {
-      const matches = await fetchMemberPages<{
-        person: Person;
-        score: number;
-        reasons: string[];
-        sharedInterests: string[];
-        intentFit: boolean;
-        sameRole: boolean;
-        distanceKm: number | null;
-        isLocal: boolean;
-      }>(
-        "/api/discover",
-        (data) =>
-          Array.isArray(data.matches)
-            ? (data.matches as {
-                person: Person;
-                score: number;
-                reasons: string[];
-                sharedInterests: string[];
-                intentFit: boolean;
-                sameRole: boolean;
-                distanceKm: number | null;
-                isLocal: boolean;
-              }[])
-            : null,
-        { credentials: "include" }
-      );
-      if (matches) {
-        const seen = new Set<string>();
-        for (const match of matches) {
-          if (seen.has(match.person.id)) continue;
-          seen.add(match.person.id);
-          rows.push(toMatchResult(match));
-        }
-      }
+      const res = await fetch("/api/discover", { credentials: "include" });
+      const data = (await res.json()) as {
+        ok?: boolean;
+        matches?: {
+          person: Person;
+          score: number;
+          reasons: string[];
+          sharedInterests: string[];
+          intentFit: boolean;
+          sameRole: boolean;
+          distanceKm: number | null;
+          isLocal: boolean;
+        }[];
+      };
+      if (data.ok && data.matches) rows = data.matches.map(toMatchResult);
     } catch {
       rows = [];
     }

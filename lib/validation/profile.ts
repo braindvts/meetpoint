@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { isAllowedIdeaTag, normalizeIdeaTags } from "@/lib/ideaTags";
 import { IDEA_TAG_LIMIT, canonicalIndustry } from "@/lib/interests";
+import { isRandomUserPhotoHost } from "@/lib/sampleAccounts";
 import { LOOKING_FOR_OPTIONS } from "@/lib/types";
 import { citySchema, lookingForEnum, meetPrefEnum, travelEnum, zShortText } from "./primitives";
 
@@ -35,7 +36,11 @@ export const photoSchema = z
     if (!value) return true;
     if (value.startsWith("https://")) return value.length <= 2_000 && /^https:\/\/\S+$/i.test(value);
     return /^data:image\/(jpeg|jpg|png|webp);base64,[a-z0-9+/=\r\n]+$/i.test(value);
-  }, "Use an https image URL or a JPEG, PNG, or WebP upload.");
+  }, "Use an https image URL or a JPEG, PNG, or WebP upload.")
+  .refine(
+    (value) => !value || !isRandomUserPhotoHost(value),
+    "Choose a photo that is not hosted on randomuser.me."
+  );
 
 const phoneSchema = z
   .string()

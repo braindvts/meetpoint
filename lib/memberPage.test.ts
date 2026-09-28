@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
+import { DISCOVER_RESULT_CAP, discoverMemberSelect } from "./discoverSelect.ts";
 import {
   MEMBER_PAGE_DEFAULT,
   MEMBER_PAGE_MAX,
@@ -79,6 +80,25 @@ test("ranked pages stay within the cap and advance by id", () => {
   assert.equal(tail.nextCursor, null);
 });
 
+test("discover loads ranking fields only and returns the top 100", () => {
+  assert.equal(DISCOVER_RESULT_CAP, 100);
+  const keys = Object.keys(discoverMemberSelect);
+  for (const secret of [
+    "email",
+    "passwordHash",
+    "phone",
+    "linkedInId",
+    "googleId",
+    "appleId",
+    "emailVerifiedAt",
+  ]) {
+    assert.equal(keys.includes(secret), false, secret);
+  }
+  for (const needed of ["id", "name", "jobTitle", "ideaTagsJson", "lookingForJson", "updatedAt", "interests"]) {
+    assert.equal(keys.includes(needed), true, needed);
+  }
+});
+
 test("member and discover routes page the response and keep exclusions", () => {
   const members = readFileSync(new URL("../app/api/members/route.ts", import.meta.url), "utf8");
   const discover = readFileSync(new URL("../app/api/discover/route.ts", import.meta.url), "utf8");
@@ -95,14 +115,20 @@ test("member and discover routes page the response and keep exclusions", () => {
   assert.doesNotMatch(members, /take:\s*200/);
 
   assert.match(discover, /take:\s*500/);
-  assert.match(discover, /pageAfterId/);
-  assert.match(discover, /nextCursor/);
+  assert.match(discover, /discoverMemberSelect/);
+  assert.match(discover, /DISCOVER_RESULT_CAP/);
+  assert.match(discover, /ranked\.slice\(0,\s*DISCOVER_RESULT_CAP\)/);
   assert.match(discover, /rankPeople/);
   assert.match(discover, /discoverExcludedIds/);
   assert.match(discover, /sampleMemberWhere/);
   assert.match(discover, /memberToPerson/);
+  assert.doesNotMatch(discover, /email:\s*true/);
+  assert.doesNotMatch(discover, /passwordHash:\s*true/);
+  assert.doesNotMatch(discover, /phone:\s*true/);
+  assert.doesNotMatch(discover, /include:\s*\{\s*interests:\s*true\s*\}/);
 
   assert.match(directory, /fetchMemberPages/);
   assert.match(client, /fetchMemberPages/);
-  assert.match(page, /fetchMemberPages/);
+  assert.match(page, /\/api\/discover/);
+  assert.doesNotMatch(page, /fetchMemberPages/);
 });

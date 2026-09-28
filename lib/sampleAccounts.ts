@@ -18,8 +18,17 @@ export const GUEST_PROFILE_MARKER = "conclave-demo";
  */
 export const KNOWN_SAMPLE_EMAILS = ["demo@conclave.app"] as const;
 
-/** Portrait host used by the seeded sample people. */
-export const SAMPLE_PHOTO_HOST = "randomuser.me";
+/**
+ * Seed portraits only. The host publishes men/0.jpg–men/99.jpg and the same
+ * for women. A URL that merely contains "randomuser.me" is not a sample.
+ * Anchored to the full string so a real member's CDN link cannot match.
+ */
+export const SAMPLE_PORTRAIT_RE =
+  /^https:\/\/randomuser\.me\/api\/portraits\/(?:men|women)\/(?:0|[1-9][0-9]?)\.jpg$/i;
+
+const SAMPLE_PORTRAIT_URLS = (["men", "women"] as const).flatMap((folder) =>
+  Array.from({ length: 100 }, (_, n) => `https://randomuser.me/api/portraits/${folder}/${n}.jpg`)
+);
 
 export type SampleKind = "seed" | "guest" | "bot" | "sample";
 
@@ -46,7 +55,7 @@ export function sampleMarkers(row: SampleProbe): string[] {
   const linkedInId = (row.linkedInId || "").toLowerCase();
   if (verifications.includes(GUEST_PROFILE_MARKER)) markers.push("verifications:conclave-demo");
   if (linkedInId.includes(GUEST_PROFILE_MARKER)) markers.push("linkedInId:conclave-demo");
-  if ((row.photo || "").toLowerCase().includes(SAMPLE_PHOTO_HOST)) markers.push("photo:randomuser.me");
+  if (isSamplePortraitUrl(row.photo)) markers.push("photo:randomuser.me");
   if (row.isSample) markers.push("isSample");
   const kind = (row.sampleKind || "").trim();
   if (kind) markers.push(`sampleKind:${kind}`);
@@ -78,6 +87,27 @@ export function isSampleAccount(row: SampleProbe): boolean {
   return classifySample(row) !== null;
 }
 
+/** True only for the exact seed portrait URL, not for any other use of that host. */
+export function isSamplePortraitUrl(photo: string | null | undefined): boolean {
+  return SAMPLE_PORTRAIT_RE.test((photo || "").trim());
+}
+
+/**
+ * Any photo hosted on randomuser.me. Real members cannot save these.
+ * A non-portrait path on that host is still rejected, and it is not a sample.
+ */
+export function isRandomUserPhotoHost(photo: string | null | undefined): boolean {
+  const value = (photo || "").trim();
+  if (!value) return false;
+  let host = "";
+  try {
+    host = new URL(value).hostname.toLowerCase();
+  } catch {
+    return false;
+  }
+  return host === "randomuser.me" || host.endsWith(".randomuser.me");
+}
+
 /** Prisma filter matching the same markers. Safe to negate for real-member queries. */
 export function sampleMemberWhere(): Prisma.MemberWhereInput {
   return {
@@ -100,7 +130,7 @@ export function sampleMemberWhere(): Prisma.MemberWhereInput {
           { email: { in: [...KNOWN_SAMPLE_EMAILS], mode: "insensitive" } },
         ],
       },
-      { photo: { contains: SAMPLE_PHOTO_HOST, mode: "insensitive" } },
+      { photo: { in: SAMPLE_PORTRAIT_URLS, mode: "insensitive" } },
     ],
   };
 }

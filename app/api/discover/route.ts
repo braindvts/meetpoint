@@ -1,11 +1,10 @@
 import { NextResponse } from "next/server";
-import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { getCurrentMember } from "@/lib/memberAuth";
-import { memberToPerson, memberToProfile } from "@/lib/memberMap";
+import { memberToPerson } from "@/lib/memberMap";
 import { blackConnectionCounts } from "@/lib/blackServer";
 import { discoverExcludedIds } from "@/lib/moderation";
-import { pageAfterId, memberPageQuery } from "@/lib/memberPage";
+import { DISCOVER_RESULT_CAP, discoverMemberSelect, type DiscoverMember } from "@/lib/discoverSelect";
 import { rankPeople } from "@/lib/peopleMatch";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
 import { rateLimit } from "@/lib/rateLimit";
@@ -19,8 +18,9 @@ import { sampleMemberWhere } from "@/lib/sampleAccounts";
  * and members auto-hidden after open reports from trusted reporters
  * (lib/moderation.ts from the safety work — verified email, finished
  * profile, or an older account). Brand-new accounts do not count.
- * The candidate scan is the full real-member pool. The JSON body is one
- * page (default 50, hard cap 100); callers follow nextCursor.
+ * The candidate scan walks the full real-member pool and selects only the
+ * columns ranking and the public card need. The JSON body is the top
+ * DISCOVER_RESULT_CAP matches, not the rest of the ranked list.
  */
 export async function GET(req: Request) {
   try {
@@ -35,26 +35,21 @@ export async function GET(req: Request) {
 
     const viewer = await prisma.member.findUnique({
       where: { id: me.id },
-      include: { interests: true },
+      select: discoverMemberSelect,
     });
     if (!viewer) {
       return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
     }
 
-    const { limit, cursor, cursorRejected } = memberPageQuery(req.url);
-    if (cursorRejected) {
-      return NextResponse.json({ ok: false, error: "Invalid cursor" }, { status: 400 });
-    }
-
     const excluded = await discoverExcludedIds(viewer.id);
-    const people: Prisma.MemberGetPayload<{ include: { interests: true } }>[] = [];
+    const people: DiscoverMember[] = [];
     let batchCursor: string | undefined;
     for (;;) {
       const batch = await prisma.member.findMany({
         where: {
           AND: [{ id: { notIn: excluded } }, { NOT: sampleMemberWhere() }],
         },
-        include: { interests: true },
+        select: discoverMemberSelect,
         orderBy: { id: "asc" },
         take: 500,
         ...(batchCursor ? { cursor: { id: batchCursor }, skip: 1 } : {}),
@@ -66,25 +61,21 @@ export async function GET(req: Request) {
     }
 
     const visible = people.filter((row) => row.name.trim());
-    const counts = await blackConnectionCounts(visible.map((row) => row.id));
-    const profile = memberToProfile(viewer);
+    const viewerCard = memberToPerson(viewer);
 
     const ranked = rankPeople(
       {
         id: viewer.id,
-        jobTitle: profile.jobTitle,
-        company: profile.company,
-        industry: profile.industry,
-        bio: profile.bio,
-        lookingFor: profile.lookingFor,
-        interests: profile.ideaTags,
-        city: profile.city,
+        jobTitle: viewerCard.jobTitle,
+        company: viewerCard.company,
+        industry: viewerCard.industry,
+        bio: viewerCard.bio,
+        lookingFor: viewerCard.lookingFor,
+        interests: viewerCard.ideaTags,
+        city: viewerCard.city,
       },
       visible.map((row) => {
-        const person = {
-          ...memberToPerson(row),
-          blackConnections: counts[row.id] || 0,
-        };
+        const person = memberToPerson(row);
         return {
           id: person.id,
           jobTitle: person.jobTitle,
@@ -100,15 +91,19 @@ export async function GET(req: Request) {
       })
     );
 
-    const paged = pageAfterId(ranked, (row) => row.person.id || "", cursor, limit);
+    const top = ranked.slice(0, DISCOVER_RESULT_CAP);
+    const counts = await blackConnectionCounts(top.map((row) => row.person.id || ""));
 
     return NextResponse.json({
       ok: true,
       meId: viewer.id,
-      limit,
-      nextCursor: paged.nextCursor,
-      matches: paged.page.map((row) => ({
-        person: row.person.person,
+      limit: DISCOVER_RESULT_CAP,
+      nextCursor: null,
+      matches: top.map((row) => ({
+        person: {
+          ...row.person.person,
+          blackConnections: counts[row.person.id || ""] || 0,
+        },
         score: row.score,
         reasons: row.reasons,
         sharedInterests: row.sharedInterests,

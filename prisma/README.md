@@ -66,7 +66,7 @@ When both schema edits land, keep `RateLimitBucket` from the safety PR and `Memb
 
 Brian has approved deleting bot accounts. The cleanup script is still dry-run unless `--apply` is passed. It is not in `npm run build`, Vercel’s build command, or CI. If those environments start it, it exits without touching the database.
 
-Run it for real only after the owner confirms a database backup and a teammate reviews the dry-run output on a preview:
+Do not run `--apply` until it is confirmed that preview and production use different databases and a backup exists. Run it for real only after that confirmation, and after a teammate reviews the dry-run output on a preview:
 
 ```
 npx tsx scripts/cleanup-sample-accounts.ts           # dry run

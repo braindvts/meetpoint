@@ -1,7 +1,12 @@
 /**
  * Sample-account cleanup planning. The script in scripts/ is dry-run unless
  * --apply is passed, and it refuses to run in CI or on a Vercel build.
+ * Do not run --apply until it is confirmed that preview and production use
+ * different databases and a backup exists.
  */
+
+export const CLEANUP_APPLY_WARNING =
+  "Do not run --apply until it is confirmed that preview and production use different databases and a backup exists.";
 
 export interface CleanupAccount {
   id: string;
@@ -56,9 +61,10 @@ function lines(label: string, value: number, detail?: string): string {
 /** Human-readable dry-run. Nothing in this string is a delete. */
 export function formatCleanupPlan(plan: CleanupPlan, apply: boolean): string {
   const header = apply
-    ? "Applying sample cleanup because --apply was passed."
+    ? ["Applying sample cleanup because --apply was passed.", CLEANUP_APPLY_WARNING].join("\n")
     : [
         "Dry run. Nothing was deleted.",
+        CLEANUP_APPLY_WARNING,
         "Run for real only after the owner confirms a database backup and a teammate has reviewed this output on a preview:",
         "  npx tsx scripts/cleanup-sample-accounts.ts --apply",
       ].join("\n");

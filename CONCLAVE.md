@@ -129,7 +129,7 @@ The bell in the top nav opens the feed. The same list is at `/notifications`.
 | `/notifications` | Acceptances and upcoming gatherings (also the bell in the top nav) |
 | `/chats` | People list (left) + open thread (right) |
 | `/profile` | Your card, Plans (BLACK · Free), levels |
-| `/demo` | Demo bypass (only if `NEXT_PUBLIC_ENABLE_DEMO=1`) |
+| `/demo` | Demo bypass (only if server-only `ENABLE_DEMO_PROFILES=1`) |
 
 ---
 
@@ -147,13 +147,13 @@ Saved on the server in `Member`, not only in this browser. Reset clears the same
 | Bio | `Member.bio` | Max 800 characters |
 | Looking for | `lookingForJson` | Co-founder, Investor, Mentor, Clients, Hiring, Partnership, Networking |
 | Interests | `MemberInterest` rows plus `ideaTagsJson` | Up to 24. Catalog labels become rows and are the only matching signal. Custom tags stay in `ideaTagsJson` if they are short plain text (no URLs, links, or control characters). |
-| Photo | `Member.photo` | Required for Identity |
+| Photo | `Member.photo` | Required for Identity. https or a JPEG/PNG/WebP upload. randomuser.me URLs are rejected. |
 
 Email and phone stay on the account. They are never sent to other members.
 
 ## How matching works (short)
 
-Discover asks the server to rank **real** members. Shared interests rank first, then complementary “looking for,” industry, role, and city. Anyone left is still shown, newest first, with the reason “Recently joined”. Ranking still reads the full real-member pool on the server. Each `/api/members` and `/api/discover` response is one page (default 50, never more than 100); clients follow `nextCursor`. Cards show a reason such as “3 shared interests: SaaS, AI / Machine Learning, Fintech”. Sample, guest, and bot accounts are excluded. Other members’ cards omit LinkedIn, website, portfolio, and verification badges. So is anyone blocked in either direction, and anyone auto-hidden after open reports from three trusted reporters (`discoverExcludedIds` in `lib/moderation.ts`: verified email, a finished profile, or an account at least a few days old). Brand-new accounts do not count. Nearby narrows by city. The filter also lets you narrow by **standing** (Member / Verified / BLACK). **Members** only introduce to other Members. **Verified** and **BLACK** can meet anyone. Looking-for preferences can be edited from Discover’s filter anytime.
+Discover asks the server to rank **real** members. Shared interests rank first, then complementary “looking for,” industry, role, and city. Anyone left is still shown, newest first, with the reason “Recently joined”. Ranking still reads the full real-member pool on the server, selecting only the fields the rank and the public card need (not email, password hash, phone, or OAuth ids). The Discover response is the top 100. `GET /api/members` stays paged (default 50, never more than 100); clients follow `nextCursor`. Cards show a reason such as “3 shared interests: SaaS, AI / Machine Learning, Fintech”. Sample, guest, and bot accounts are excluded. Other members’ cards omit LinkedIn, website, portfolio, and verification badges. So is anyone blocked in either direction, and anyone auto-hidden after open reports from three trusted reporters (`discoverExcludedIds` in `lib/moderation.ts`: verified email, a finished profile, or an account at least a few days old). Brand-new accounts do not count. Nearby narrows by city. The filter also lets you narrow by **standing** (Member / Verified / BLACK). **Members** only introduce to other Members. **Verified** and **BLACK** can meet anyone. Looking-for preferences can be edited from Discover’s filter anytime.
 
 **Events** (`/events`) ranks gatherings with those same saved interest labels, plus job/role, looking-for, industry, and bio intent phrases, against title, description, topics, audience, and host. Hybrid score (canonical tags + related clusters + TF-IDF + intent heuristics). Short match reasons on cards. Precision over dumping the catalog. Sparse profiles fall back to job and looking-for. A signed-in RSVP (interested / going / pass) is stored in `EventInterest` and nudges similar rooms. Attending and interested counts are the rows in that table.
 
