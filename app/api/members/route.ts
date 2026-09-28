@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
+import { legalConsentDenied } from "@/lib/legalGuard";
 import { getCurrentMember } from "@/lib/memberAuth";
 import { memberToPerson } from "@/lib/memberMap";
 import { discoverExcludedIds } from "@/lib/moderation";
@@ -25,6 +26,8 @@ export async function GET(req: Request) {
     if (!me) {
       return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
     }
+    const denied = legalConsentDenied(me);
+    if (denied) return denied;
 
     const { limit, cursor, cursorRejected } = memberPageQuery(req.url);
     if (cursorRejected) {
@@ -53,6 +56,7 @@ export async function GET(req: Request) {
       where: {
         AND: [
           { id: { notIn: excluded } },
+          { deletedAt: null },
           { NOT: sampleMemberWhere() },
           ...(keyset ? [keyset] : []),
         ],

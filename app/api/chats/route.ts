@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { legalConsentDenied } from "@/lib/legalGuard";
 import { getCurrentMember } from "@/lib/memberAuth";
 import { blockedPeerIdSet, pairIsBlocked } from "@/lib/moderation";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
@@ -15,6 +16,8 @@ export async function GET() {
     await purgeDemoResidue();
     const me = await getCurrentMember();
     if (!me) return NextResponse.json({ ok: true, chats: [] });
+    const denied = legalConsentDenied(me);
+    if (denied) return denied;
 
     const [memberships, blocked] = await Promise.all([
       prisma.chatMember.findMany({
@@ -67,6 +70,8 @@ export async function POST(req: Request) {
     await purgeDemoResidue();
     const me = await getCurrentMember();
     if (!me) return NextResponse.json({ ok: false, error: "Not signed in" }, { status: 401 });
+    const denied = legalConsentDenied(me);
+    if (denied) return denied;
 
     const parsed = await parseBody(req, chatCreateSchema);
     if (!parsed.ok) return parsed.response;

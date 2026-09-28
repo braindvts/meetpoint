@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { legalConsentDenied } from "@/lib/legalGuard";
 import { getCurrentMember } from "@/lib/memberAuth";
 import { blackConnectionLevel } from "@/lib/black";
 import {
@@ -30,6 +31,8 @@ export async function POST(req: Request) {
     await purgeDemoResidue();
     const me = await getCurrentMember();
     if (!me) return NextResponse.json({ ok: false, error: "Sign in first" }, { status: 401 });
+    const denied = legalConsentDenied(me);
+    if (denied) return denied;
 
     const parsed = await parseBody(req, blackInvitePostSchema);
     if (!parsed.ok) return parsed.response;
@@ -135,6 +138,8 @@ export async function PATCH(req: Request) {
 
     const me = await getCurrentMember();
     if (!me) return NextResponse.json({ ok: false, error: "Sign in first" }, { status: 401 });
+    const denied = legalConsentDenied(me);
+    if (denied) return denied;
 
     const parsed = await parseBody(req, blackInvitePatchSchema);
     if (!parsed.ok) return parsed.response;

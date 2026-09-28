@@ -258,7 +258,7 @@ export async function respondBlackInvite(
  * Called once a table is booked. Awards BLACK CONNECTION only when a meeting
  * invitation between the two was accepted first.
  */
-export async function settleBlackMeeting(peerId: string): Promise<{
+export async function settleBlackMeeting(peerId: string, sessionId?: string): Promise<{
   awarded: boolean;
   level?: BlackConnectionLevel;
 }> {
@@ -271,7 +271,7 @@ export async function settleBlackMeeting(peerId: string): Promise<{
   if (!accepted) return { awarded: false };
 
   if (!isDemoPeer(peerId)) {
-    const remote = await reportBlackMeeting(peerId);
+    const remote = await reportBlackMeeting(peerId, sessionId);
     if (!remote?.ok || !remote.awarded) return { awarded: false };
     recordConnection(peerId, "meeting");
     return { awarded: true, level: remote.blackConnections || myBlackConnectionLevel() };

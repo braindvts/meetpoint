@@ -21,6 +21,7 @@ import { AUTH_EMAIL_IP, AUTH_SIGNUP_ACCOUNT, AUTH_SIGNUP_IP } from "@/lib/rateCa
 import { publicError } from "@/lib/safeError";
 import { sanitizeName } from "@/lib/sanitize";
 import { postAuthPath } from "@/lib/appPath";
+import { legalConsentStamp } from "@/lib/legal";
 import { appUrl, withSession } from "@/lib/session";
 import { emailAuthSchema } from "@/lib/validation/auth";
 import { clientIp, parseBody } from "@/lib/validation/parse";
@@ -71,11 +72,21 @@ export async function POST(req: Request) {
       }
       const name =
         sanitizeName(rawName || "") || sanitizeName(email.split("@")[0] || "Member") || "Member";
+      if (parsed.data.acceptTerms !== true || parsed.data.acceptPrivacy !== true) {
+        return NextResponse.json(
+          {
+            ok: false,
+            error: "Accept the Terms of Service and acknowledge the Privacy Policy to create an account.",
+          },
+          { status: 400 }
+        );
+      }
       const member = await prisma.member.create({
         data: {
           email,
           name,
           passwordHash: hashPassword(password),
+          ...legalConsentStamp(),
         },
       });
 

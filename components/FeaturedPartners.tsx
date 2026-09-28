@@ -1,7 +1,7 @@
 "use client";
 
 import PartnerMark from "@/components/PartnerMark";
-import { featuredPartnersInOrder, type FeaturedPartner } from "@/lib/featuredPartners";
+import { publicFeaturedPartners, type FeaturedPartner } from "@/lib/featuredPartners";
 import type { CSSProperties } from "react";
 
 interface Props {
@@ -14,7 +14,7 @@ interface Props {
  * Logo and name sit open on the ink — no plate. BijuuFlow leads.
  */
 export default function FeaturedPartners({ revealed }: Props) {
-  const partners = featuredPartnersInOrder();
+  const partners = publicFeaturedPartners();
   if (partners.length === 0) return null;
 
   return (

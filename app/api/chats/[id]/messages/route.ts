@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { legalConsentDenied } from "@/lib/legalGuard";
 import { getCurrentMember } from "@/lib/memberAuth";
 import { blockedPeerIdSet } from "@/lib/moderation";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
@@ -27,6 +28,8 @@ export async function GET(
     await purgeDemoResidue();
     const me = await getCurrentMember();
     if (!me) return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+    const denied = legalConsentDenied(me);
+    if (denied) return denied;
     const { id } = await ctx.params;
 
     const membership = await prisma.chatMember.findUnique({
@@ -76,6 +79,8 @@ export async function POST(
     await purgeDemoResidue();
     const me = await getCurrentMember();
     if (!me) return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+    const denied = legalConsentDenied(me);
+    if (denied) return denied;
     const { id } = await ctx.params;
 
     const parsed = await parseBody(req, chatMessageSchema);

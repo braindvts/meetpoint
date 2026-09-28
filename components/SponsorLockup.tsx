@@ -1,4 +1,4 @@
-import { featuredPartnersInOrder } from "@/lib/featuredPartners";
+import { publicFeaturedPartners } from "@/lib/featuredPartners";
 import PartnerMarquee from "@/components/PartnerMarquee";
 import PartnerMark from "@/components/PartnerMark";
 
@@ -23,7 +23,7 @@ function PartnerName({ name }: { name: string }) {
 }
 
 export default function SponsorLockup({ className = "" }: Props) {
-  const partners = featuredPartnersInOrder();
+  const partners = publicFeaturedPartners();
 
   return (
     <div className={`mp-sponsor-lockup ${className}`.trim()}>

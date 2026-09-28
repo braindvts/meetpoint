@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { legalConsentDenied } from "@/lib/legalGuard";
 import { getCurrentMember } from "@/lib/memberAuth";
 import { accountKey, rateLimit } from "@/lib/rateLimit";
 import { VERIFY_IP } from "@/lib/rateCaps";
@@ -14,6 +15,8 @@ export async function POST(req: Request) {
 
   const me = await getCurrentMember();
   if (!me) return NextResponse.json({ ok: false, error: "Sign in first." }, { status: 401 });
+  const denied = legalConsentDenied(me);
+  if (denied) return denied;
 
   const accountLimited = await rateLimit(req, {
     name: "verify-acct",

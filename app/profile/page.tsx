@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import AccountDeletion from "@/components/AccountDeletion";
 import MemberStatusStrip from "@/components/MemberStatusStrip";
 import PlansSection from "@/components/PlansSection";
 import Avatar from "@/components/Avatar";
@@ -11,7 +12,7 @@ import PageHeader from "@/components/PageHeader";
 import ProfileForm from "@/components/ProfileForm";
 import MembershipTiers from "@/components/MembershipTiers";
 import { ensureNotifyPermission } from "@/lib/notify";
-import { clearProfile, getMeetingsAttended, loadProfile } from "@/lib/store";
+import { getMeetingsAttended, loadProfile } from "@/lib/store";
 import { gateRedirect, resolveSessionGate } from "@/lib/hydrateSession";
 import {
   computeMemberTier,
@@ -68,25 +69,6 @@ function ProfileContent() {
     }, 200);
     return () => window.clearTimeout(timer);
   }, [needsVerify]);
-
-  async function reset() {
-    if (!confirm("Delete your profile and all connections?")) return;
-    try {
-      const res = await fetch("/api/members/me", {
-        method: "DELETE",
-        credentials: "include",
-      });
-      if (res.status !== 401 && !res.ok) {
-        window.alert("Couldn’t reset your profile on the server. Try again.");
-        return;
-      }
-    } catch {
-      window.alert("Couldn’t reset your profile on the server. Try again.");
-      return;
-    }
-    clearProfile();
-    router.push("/");
-  }
 
   if (!profile) {
     return (
@@ -160,9 +142,9 @@ function ProfileContent() {
               <p className="text-[12px] text-accent">{profile.jobTitle || "Member"}</p>
             </div>
           </div>
-          <button type="button" onClick={reset} className="text-[12px] text-red-400">
-            Reset
-          </button>
+          <a href="#delete-account" className="text-[12px] text-red-400">
+            Delete account
+          </a>
         </section>
 
         <MemberStatusStrip profile={profile} tier={computeMemberTier(tierInput)} />
@@ -212,6 +194,7 @@ function ProfileContent() {
           initial={profile}
           focusVerification={needsVerify && !tierInput.verified}
         />
+        <AccountDeletion />
         </div>
       </main>
 

@@ -24,10 +24,15 @@ Interlink hardens the API so secrets stay on the server and user input is strict
 | **No committed owner credentials** | Mailbox and password are not in the repo; no one-tap owner login |
 | **Health endpoint** | Public `/api/health` only says up/misconfigured — full checklist needs admin Bearer |
 | **Schema validation** | Zod `.strict()` schemas under `lib/validation/` |
-| **Rate limits** | Per-IP limits on auth, billing, Places, SMS, reports, analytics, connections, chats, invites |
+| **Rate limits** | Per-IP limits on auth, billing, Places, SMS, reports, analytics, connections, chats, invites, account deletion, legal consent, and BLACK meeting awards |
 | **Login lockout** | After 8 failed password attempts per email+IP, 15-minute cooldown |
-| **Sessions** | Signed cookies `iat`/`exp`; **7-day**; `HttpOnly` + `SameSite=Lax` (+ `Secure` in prod) |
-| **CSRF** | Mutating `/api/*` needs matching Origin/Referer in production |
+| **Sessions** | Signed cookies `iat`/`exp`; **7-day**; `HttpOnly` + `SameSite=Lax` (+ `Secure` in prod). Logout is POST only |
+| **CSRF** | Mutating `/api/*` needs matching Origin/Referer in production. A random Authorization header does not skip the check; the admin or notify secret must match |
+| **Legal consent** | Email signup stores Terms and Privacy versions only when both boxes are true. Other signed-in product APIs return 403 until the current versions are on the member |
+| **Account deletion** | `DELETE /api/members/me` requires the word DELETE and a recent password re-auth when the account has a password. Personal fields are anonymized; reports and payment flags stay |
+| **Intro standing** | Connection create and accept use the same Verified / BLACK rules as the product, on the server |
+| **SMS** | A member can text only the phone saved on their profile. Service calls need `NOTIFY_SECRET` |
+| **Live bookings** | Production does not confirm a table without Stripe checkout. BLACK CONNECTION from a meeting requires a paid booking session when the site is live |
 | **Security headers** | CSP, HSTS (prod), frame deny, nosniff, COOP/CORP, Permissions-Policy |
 | **OAuth** | Apple exchanges `code` at Apple’s token endpoint, then verifies the returned id_token via JWKs (iss, aud, exp, nonce). Client-posted tokens are ignored. Google ID tokens verified via JWKS |
 | **Secrets** | Never `NEXT_PUBLIC_` for passwords/API keys |

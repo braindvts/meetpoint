@@ -26,7 +26,7 @@ interface Mail {
 export async function sendEmail({ to, subject, html, text }: Mail): Promise<boolean> {
   const key = process.env.RESEND_API_KEY?.trim();
   if (!key) {
-    console.info("[conclave email skipped]", { to, subject });
+    console.info("[conclave email skipped]");
     return false;
   }
 
@@ -40,7 +40,7 @@ export async function sendEmail({ to, subject, html, text }: Mail): Promise<bool
       body: JSON.stringify({ from: fromAddress(), to: [to], subject, html, text }),
     });
     if (!res.ok) {
-      console.error("[conclave email failed]", res.status, await res.text());
+      console.error("[conclave email failed]", res.status);
       return false;
     }
     return true;
@@ -50,7 +50,19 @@ export async function sendEmail({ to, subject, html, text }: Mail): Promise<bool
   }
 }
 
+function escapeHtml(value: string): string {
+  return value.replace(/[&<>"']/g, (ch) => {
+    if (ch === "&") return "&amp;";
+    if (ch === "<") return "&lt;";
+    if (ch === ">") return "&gt;";
+    if (ch === '"') return "&quot;";
+    return "&#39;";
+  });
+}
+
 function welcomeHtml(firstName: string, link: string): string {
+  const safeName = escapeHtml(firstName);
+  const safeLink = escapeHtml(link);
   return `<!doctype html>
 <html>
   <body style="margin:0;padding:32px 16px;background:#050505;font-family:'Helvetica Neue',Arial,sans-serif;">
@@ -62,7 +74,7 @@ function welcomeHtml(firstName: string, link: string): string {
       </tr>
       <tr>
         <td style="padding:16px 28px 0;">
-          <h1 style="margin:0;color:#f3efe6;font-size:24px;font-weight:600;">Welcome, ${firstName}.</h1>
+          <h1 style="margin:0;color:#f3efe6;font-size:24px;font-weight:600;">Welcome, ${safeName}.</h1>
           <p style="margin:14px 0 0;color:#8f877a;font-size:15px;line-height:1.6;">
             You're in. Interlink introduces you to people matched by ambition and profession — and it ends at a real table.
           </p>
@@ -73,7 +85,7 @@ function welcomeHtml(firstName: string, link: string): string {
       </tr>
       <tr>
         <td style="padding:28px;text-align:center;">
-          <a href="${link}" style="display:inline-block;padding:14px 34px;background:#d4c4a8;color:#050505;font-size:13px;font-weight:700;letter-spacing:0.04em;text-decoration:none;border-radius:10px;">
+          <a href="${safeLink}" style="display:inline-block;padding:14px 34px;background:#d4c4a8;color:#050505;font-size:13px;font-weight:700;letter-spacing:0.04em;text-decoration:none;border-radius:10px;">
             Finish your profile
           </a>
         </td>

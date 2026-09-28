@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import BlackBadge from "@/components/BlackBadge";
 import EdgeableSpotlight from "@/components/EdgeableSpotlight";
+import LegalFooter from "@/components/LegalFooter";
 import SponsorLockup from "@/components/SponsorLockup";
 import TierBadge from "@/components/TierBadge";
 import { EVENTS } from "@/lib/events";
@@ -253,6 +254,7 @@ export default function Landing() {
           <p className="text-[11px] text-muted">
             Interlink · Private introductions for ambitious people
           </p>
+          <LegalFooter embedded />
         </div>
       </footer>
     </main>

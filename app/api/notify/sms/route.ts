@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { publicError } from "@/lib/safeError";
+import { legalConsentDenied } from "@/lib/legalGuard";
 import { getCurrentMember } from "@/lib/memberAuth";
 import { digitsOnly } from "@/lib/phone";
 import { rateLimit } from "@/lib/rateLimit";
@@ -19,9 +20,13 @@ export async function POST(req: Request) {
   const secret = process.env.NOTIFY_SECRET?.trim();
   const presented = req.headers.get("x-conclave-notify") || "";
   const service = !!secret && secretsMatch(presented, secret);
-  const me = await getCurrentMember();
+  const me = service ? null : await getCurrentMember();
   if (!service && !me) {
     return NextResponse.json({ ok: false, error: "Sign in first" }, { status: 401 });
+  }
+  if (me) {
+    const denied = legalConsentDenied(me);
+    if (denied) return denied;
   }
 
   const parsed = await parseBody(req, smsSchema);

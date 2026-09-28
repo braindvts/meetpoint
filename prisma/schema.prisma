@@ -47,6 +47,13 @@ model Member {
   premierTrialEndsAt String?
   emailVerifiedAt String?
   meetingsAttended Int    @default(0)
+  /// Set only when the member checks the consent box. Null means not accepted.
+  termsAcceptedAt   DateTime?
+  termsVersion      String?
+  privacyAcceptedAt DateTime?
+  privacyVersion    String?
+  /// Set when the account is anonymized. The row stays for payment and safety records.
+  deletedAt         DateTime?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
@@ -64,6 +71,7 @@ model Member {
   eventInterests       EventInterest[]
 
   @@index([isSample])
+  @@index([deletedAt])
 }
 
 /// One row per canonical interest a member selected.

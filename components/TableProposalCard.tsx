@@ -150,7 +150,16 @@ export default function TableProposalCard({
         window.location.href = checkout.url;
         return;
       }
-      // No Stripe key → confirm locally
+      if (process.env.NODE_ENV === "production") {
+        window.dispatchEvent(
+          new CustomEvent("meetpoint:toast", {
+            detail: { message: "Checkout isn’t available, so this table wasn’t booked." },
+          })
+        );
+        setPaying(false);
+        return;
+      }
+      // No Stripe key in development → confirm locally
     } catch {
       /* fall through to local confirm */
     }

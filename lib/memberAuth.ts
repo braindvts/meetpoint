@@ -34,25 +34,38 @@ export async function clearMemberCookie(): Promise<void> {
   jar.delete(MEMBER_COOKIE);
 }
 
+function activeMember(member: Member | null): Member | null {
+  if (!member || member.deletedAt) return null;
+  return member;
+}
+
 async function memberFromSession(session: AuthSession): Promise<Member | null> {
   if (session.provider === "linkedin" && session.id) {
     // A LinkedIn login matches only its own linkedInId. The email LinkedIn
     // returns is not an account link.
-    return prisma.member.findFirst({ where: { linkedInId: session.id } });
+    return activeMember(
+      await prisma.member.findFirst({ where: { linkedInId: session.id, deletedAt: null } })
+    );
   }
   if (session.provider === "google" && session.id) {
-    const byG = await prisma.member.findFirst({ where: { googleId: session.id } });
+    const byG = await prisma.member.findFirst({
+      where: { googleId: session.id, deletedAt: null },
+    });
     if (byG) return byG;
   } else if (session.provider === "apple" && session.id) {
-    const byA = await prisma.member.findFirst({ where: { appleId: session.id } });
+    const byA = await prisma.member.findFirst({
+      where: { appleId: session.id, deletedAt: null },
+    });
     if (byA) return byA;
   } else if (session.provider === "email" && session.id) {
     const byId = await prisma.member.findUnique({ where: { id: session.id } });
-    if (byId) return byId;
+    if (byId && !byId.deletedAt) return byId;
   }
 
   if (session.email) {
-    const byEmail = await prisma.member.findFirst({ where: { email: session.email } });
+    const byEmail = await prisma.member.findFirst({
+      where: { email: session.email, deletedAt: null },
+    });
     if (byEmail) return byEmail;
   }
   return null;
@@ -62,6 +75,7 @@ async function memberFromSession(session: AuthSession): Promise<Member | null> {
  * Resolve the signed-in member.
  * A live session that does not match a member returns null — it does not
  * fall through to a leftover member cookie from another account.
+ * An anonymized account (deletedAt) is treated as signed out.
  */
 export async function getCurrentMember(): Promise<Member | null> {
   const session = await getSession();
@@ -70,7 +84,7 @@ export async function getCurrentMember(): Promise<Member | null> {
   const source = memberAuthSource(!!session, !!sessionMember, !!cookieId);
   if (source === "session") return sessionMember;
   if (source === "cookie" && cookieId) {
-    return prisma.member.findUnique({ where: { id: cookieId } });
+    return activeMember(await prisma.member.findUnique({ where: { id: cookieId } }));
   }
   return null;
 }

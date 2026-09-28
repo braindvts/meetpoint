@@ -2,7 +2,9 @@ import type { Metadata, Viewport } from "next";
 import { Outfit } from "next/font/google";
 import AnalyticsBeacon from "@/components/AnalyticsBeacon";
 import AppChrome from "@/components/AppChrome";
+import LegalConsentGate from "@/components/LegalConsentGate";
 import PlausibleScript from "@/components/PlausibleScript";
+import PublicLegalFooter from "@/components/PublicLegalFooter";
 import ToastHost from "@/components/ToastHost";
 import { SITE_DESCRIPTION, SITE_ORIGIN, SITE_TITLE } from "@/lib/site";
 import "./globals.css";
@@ -55,6 +57,8 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen antialiased [text-rendering:optimizeLegibility]">
         <AppChrome>{children}</AppChrome>
+        <PublicLegalFooter />
+        <LegalConsentGate />
         <ToastHost />
         <AnalyticsBeacon />
         <PlausibleScript />

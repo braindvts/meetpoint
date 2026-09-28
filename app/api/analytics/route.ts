@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { publicError } from "@/lib/safeError";
 import { prisma } from "@/lib/db";
+import { hasCurrentLegalConsent } from "@/lib/legal";
 import { getCurrentMember } from "@/lib/memberAuth";
 import { rateLimit } from "@/lib/rateLimit";
 import { parseBody } from "@/lib/validation/parse";
@@ -20,7 +21,7 @@ export async function POST(req: Request) {
       data: {
         name: parsed.data.name,
         path: (parsed.data.path || "").slice(0, 240),
-        memberId: me?.id || null,
+        memberId: me && hasCurrentLegalConsent(me) ? me.id : null,
         metaJson: JSON.stringify(parsed.data.meta || {}),
       },
     });

@@ -59,7 +59,7 @@ They become **Verified** only when Identity is done **and** both credentials are
 
 Optional extras (do not replace those two): resume, website, business registration, portfolio.
 
-Signup must **not** block on verification — only Identity is required to create the account / enter the room.
+Signup must **not** block on verification — only Identity is required to create the account / enter the room. Creating an account does require an unchecked checkbox agreeing to the Terms and acknowledging the Privacy Policy. Existing accounts are asked on the next sign-in. That consent is not verification and does not change Member, Verified, or BLACK.
 
 ### BLACK vs BLACK CONNECTION
 

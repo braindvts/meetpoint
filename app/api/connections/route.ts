@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { collapseConnections, planConnectionRequest } from "@/lib/connectionSync";
+import { legalConsentDenied } from "@/lib/legalGuard";
+import { canIntroduceToTier } from "@/lib/plans";
 import { publicError } from "@/lib/safeError";
+import { standingTier } from "@/lib/standing";
 import { prisma } from "@/lib/db";
 import { getCurrentMember } from "@/lib/memberAuth";
 import { blockedPeerIdSet, pairIsBlocked } from "@/lib/moderation";
@@ -45,6 +48,8 @@ export async function GET() {
     await purgeDemoResidue();
     const me = await getCurrentMember();
     if (!me) return NextResponse.json({ ok: true, connections: [] as ClientConnection[] });
+    const denied = legalConsentDenied(me);
+    if (denied) return denied;
 
     return NextResponse.json({
       ok: true,
@@ -64,6 +69,8 @@ export async function POST(req: Request) {
     await purgeDemoResidue();
     const me = await getCurrentMember();
     if (!me) return NextResponse.json({ ok: false, error: "Not signed in" }, { status: 401 });
+    const denied = legalConsentDenied(me);
+    if (denied) return denied;
 
     const accountLimited = await rateLimit(req, {
       name: "connections-post-acct",
@@ -83,7 +90,9 @@ export async function POST(req: Request) {
     }
 
     const peer = await prisma.member.findUnique({ where: { id: peerId } });
-    if (!peer) return NextResponse.json({ ok: false, error: "Peer not found" }, { status: 404 });
+    if (!peer || peer.deletedAt) {
+      return NextResponse.json({ ok: false, error: "Peer not found" }, { status: 404 });
+    }
 
     if (await pairIsBlocked(me.id, peerId)) {
       return NextResponse.json(
@@ -101,6 +110,18 @@ export async function POST(req: Request) {
       },
     });
     const plan = planConnectionRequest(pair, me.id, peerId);
+    if (plan === "request" && !canIntroduceToTier(standingTier(me), standingTier(peer))) {
+      return NextResponse.json(
+        { ok: false, error: "Become Verified to connect beyond Members." },
+        { status: 403 }
+      );
+    }
+    if (plan === "accept" && !canIntroduceToTier(standingTier(peer), standingTier(me))) {
+      return NextResponse.json(
+        { ok: false, error: "That introduction is outside your standing." },
+        { status: 403 }
+      );
+    }
     if (plan === "accept") {
       await prisma.connection.updateMany({
         where: { fromId: peerId, toId: me.id, status: "requested" },
@@ -132,6 +153,8 @@ export async function PATCH(req: Request) {
     await purgeDemoResidue();
     const me = await getCurrentMember();
     if (!me) return NextResponse.json({ ok: false, error: "Not signed in" }, { status: 401 });
+    const denied = legalConsentDenied(me);
+    if (denied) return denied;
 
     const parsed = await parseBody(req, connectionPatchSchema);
     if (!parsed.ok) return parsed.response;
@@ -145,6 +168,16 @@ export async function PATCH(req: Request) {
     }
 
     if (action === "accept") {
+      const peer = await prisma.member.findUnique({ where: { id: peerId } });
+      if (!peer || peer.deletedAt) {
+        return NextResponse.json({ ok: false, error: "Peer not found" }, { status: 404 });
+      }
+      if (!canIntroduceToTier(standingTier(peer), standingTier(me))) {
+        return NextResponse.json(
+          { ok: false, error: "That introduction is outside your standing." },
+          { status: 403 }
+        );
+      }
       await prisma.connection.updateMany({
         where: { fromId: peerId, toId: me.id, status: "requested" },
         data: { status: "connected" },

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { safeAppPath } from "@/lib/appPath";
 import { clearDemoOwnerSession, markDemoOwnerSession } from "@/lib/demoFlag";
@@ -16,6 +17,8 @@ export default function EmailAuthForm({ next }: { next?: string | null }) {
   const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [acceptTerms, setAcceptTerms] = useState(false);
+  const [acceptPrivacy, setAcceptPrivacy] = useState(false);
 
   async function finishAuth(data: {
     ok?: boolean;
@@ -42,6 +45,10 @@ export default function EmailAuthForm({ next }: { next?: string | null }) {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    if (mode === "signup" && (!acceptTerms || !acceptPrivacy)) {
+      setError("Agree to the Terms and acknowledge the Privacy Policy. The boxes start unchecked.");
+      return;
+    }
     setError("");
     setBusy(true);
     try {
@@ -55,6 +62,7 @@ export default function EmailAuthForm({ next }: { next?: string | null }) {
           name,
           mode,
           ...(requestedNext ? { next: requestedNext } : {}),
+          ...(mode === "signup" ? { acceptTerms, acceptPrivacy } : {}),
         }),
       });
       const data = (await res.json()) as {
@@ -80,14 +88,22 @@ export default function EmailAuthForm({ next }: { next?: string | null }) {
       <div className="flex gap-4 text-[11px] font-semibold uppercase tracking-[0.18em]">
         <button
           type="button"
-          onClick={() => setMode("signin")}
+          onClick={() => {
+            setMode("signin");
+            setAcceptTerms(false);
+            setAcceptPrivacy(false);
+          }}
           className={mode === "signin" ? "text-accent" : "text-muted"}
         >
           Sign in
         </button>
         <button
           type="button"
-          onClick={() => setMode("signup")}
+          onClick={() => {
+            setMode("signup");
+            setAcceptTerms(false);
+            setAcceptPrivacy(false);
+          }}
           className={mode === "signup" ? "text-accent" : "text-muted"}
         >
           Create account
@@ -122,6 +138,42 @@ export default function EmailAuthForm({ next }: { next?: string | null }) {
         minLength={8}
         className={field}
       />
+      {mode === "signup" && (
+        <div className="space-y-2 text-[12px] leading-snug text-muted">
+          <div className="flex items-start gap-2.5">
+            <input
+              type="checkbox"
+              checked={acceptTerms}
+              onChange={(e) => setAcceptTerms(e.target.checked)}
+              className="mt-0.5 accent-[#d4c4a8]"
+              aria-describedby="signup-terms"
+            />
+            <p id="signup-terms">
+              I agree to the{" "}
+              <Link href="/terms" className="text-accent underline-offset-4 hover:underline">
+                Terms of Service
+              </Link>
+              .
+            </p>
+          </div>
+          <div className="flex items-start gap-2.5">
+            <input
+              type="checkbox"
+              checked={acceptPrivacy}
+              onChange={(e) => setAcceptPrivacy(e.target.checked)}
+              className="mt-0.5 accent-[#d4c4a8]"
+              aria-describedby="signup-privacy"
+            />
+            <p id="signup-privacy">
+              I acknowledge the{" "}
+              <Link href="/privacy" className="text-accent underline-offset-4 hover:underline">
+                Privacy Policy
+              </Link>
+              .
+            </p>
+          </div>
+        </div>
+      )}
       {error && <p className="text-[13px] text-red-300/90">{error}</p>}
       <button
         type="submit"

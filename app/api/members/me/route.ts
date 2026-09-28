@@ -1,12 +1,16 @@
 import { NextResponse } from "next/server";
+import { accountDeletionDecision, anonymizedMemberData } from "@/lib/accountDeletion";
 import { publicError } from "@/lib/safeError";
 import { prisma } from "@/lib/db";
-import { getCurrentMember, withMemberCookie } from "@/lib/memberAuth";
 import { partitionIdeaTags } from "@/lib/interests";
+import { hasCurrentLegalConsent } from "@/lib/legal";
+import { legalConsentDenied } from "@/lib/legalGuard";
+import { clearMemberCookie, getCurrentMember, withMemberCookie } from "@/lib/memberAuth";
 import { memberToProfile, profileToMemberData } from "@/lib/memberMap";
-import { getSession } from "@/lib/session";
+import { clearSession, getSession, hasRecentReauth } from "@/lib/session";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
 import { rateLimit } from "@/lib/rateLimit";
+import { deleteAccountSchema } from "@/lib/validation/auth";
 import { membersMePutSchema } from "@/lib/validation/profile";
 import { parseBody } from "@/lib/validation/parse";
 
@@ -15,16 +19,34 @@ export async function GET() {
   try {
     await purgeDemoResidue();
     const me = await getCurrentMember();
-    if (!me) return NextResponse.json({ ok: true, profile: null, memberId: null });
+    if (!me) {
+      return NextResponse.json({
+        ok: true,
+        profile: null,
+        memberId: null,
+        legalConsent: false,
+        hasPassword: false,
+      });
+    }
     const full = await prisma.member.findUnique({
       where: { id: me.id },
       include: { interests: true },
     });
-    if (!full) return NextResponse.json({ ok: true, profile: null, memberId: null });
+    if (!full) {
+      return NextResponse.json({
+        ok: true,
+        profile: null,
+        memberId: null,
+        legalConsent: false,
+        hasPassword: false,
+      });
+    }
     return NextResponse.json({
       ok: true,
       profile: memberToProfile(full),
       memberId: full.id,
+      legalConsent: hasCurrentLegalConsent(full),
+      hasPassword: !!full.passwordHash,
     });
   } catch (e) {
     return publicError(e, "Failed");
@@ -47,6 +69,10 @@ export async function PUT(req: Request) {
     // Require a session or existing member cookie for updates
     if (!session && !existing) {
       return NextResponse.json({ ok: false, error: "Sign in first" }, { status: 401 });
+    }
+    if (existing) {
+      const denied = legalConsentDenied(existing);
+      if (denied) return denied;
     }
 
     const profile = parsed.data.profile;
@@ -161,42 +187,82 @@ export async function PUT(req: Request) {
 }
 
 /**
- * Clear the signed-in member's public profile and introductions.
- * The account (email, password, OAuth ids) stays so they can sign in again.
+ * Anonymize the signed-in account. Password accounts need a recent re-auth.
+ * Reports and payment flags stay attached to the anonymized id.
+ * Profile interests and event RSVPs are removed with the public profile.
  */
 export async function DELETE(req: Request) {
   try {
-    const limited = await rateLimit(req, { name: "members-me-delete", limit: 10, windowMs: 60_000 });
+    const limited = await rateLimit(req, { name: "account-delete", limit: 5, windowMs: 60 * 60_000 });
     if (!limited.ok) return limited.response;
 
-    const existing = await getCurrentMember();
-    if (!existing) {
-      return NextResponse.json({ ok: false, error: "Sign in first" }, { status: 401 });
+    const me = await getCurrentMember();
+    if (!me) return NextResponse.json({ ok: false, error: "Sign in first" }, { status: 401 });
+
+    const parsed = await parseBody(req, deleteAccountSchema);
+    if (!parsed.ok) return parsed.response;
+
+    const decision = accountDeletionDecision({
+      confirm: parsed.data.confirm,
+      hasPassword: !!me.passwordHash,
+      recentReauth: await hasRecentReauth(me.id),
+    });
+    if (!decision.ok) {
+      return NextResponse.json(
+        { ok: false, error: decision.error, needsReauth: !!decision.needsReauth },
+        { status: decision.status }
+      );
     }
 
-    await prisma.$transaction([
-      prisma.memberInterest.deleteMany({ where: { memberId: existing.id } }),
-      prisma.connection.deleteMany({
-        where: { OR: [{ fromId: existing.id }, { toId: existing.id }] },
-      }),
-      prisma.member.update({
-        where: { id: existing.id },
-        data: {
-          jobTitle: "",
-          bio: "",
-          photo: "",
-          company: "",
-          industry: "",
-          phone: null,
-          lookingForJson: "[]",
-          ideaTagsJson: "[]",
-          workJson: "[]",
-        },
-      }),
-    ]);
+    const id = me.id;
+    await prisma.$transaction(async (tx) => {
+      await tx.message.updateMany({ where: { senderId: id }, data: { text: "" } });
+      const memberships = await tx.chatMember.findMany({
+        where: { memberId: id },
+        select: { chatId: true },
+      });
+      const chatIds = memberships.map((row) => row.chatId);
+      await tx.chatMember.deleteMany({ where: { memberId: id } });
+      if (chatIds.length) {
+        const remaining = await tx.chatMember.groupBy({
+          by: ["chatId"],
+          where: { chatId: { in: chatIds } },
+          _count: { _all: true },
+        });
+        const still = new Set(remaining.map((row) => row.chatId));
+        const empty = chatIds.filter((chatId) => !still.has(chatId));
+        if (empty.length) {
+          await tx.chat.deleteMany({ where: { id: { in: empty } } });
+        }
+      }
+      await tx.connection.deleteMany({
+        where: { OR: [{ fromId: id }, { toId: id }] },
+      });
+      await tx.block.deleteMany({
+        where: { OR: [{ blockerId: id }, { blockedId: id }] },
+      });
+      await tx.blackInvite.deleteMany({
+        where: { OR: [{ fromId: id }, { toId: id }] },
+      });
+      await tx.blackConnection.deleteMany({
+        where: { OR: [{ blackMemberId: id }, { peerId: id }] },
+      });
+      await tx.memberInterest.deleteMany({ where: { memberId: id } });
+      await tx.eventInterest.deleteMany({ where: { memberId: id } });
+      await tx.analyticsEvent.updateMany({
+        where: { memberId: id },
+        data: { memberId: null },
+      });
+      await tx.member.update({
+        where: { id },
+        data: anonymizedMemberData(),
+      });
+    });
 
-    return NextResponse.json({ ok: true, profile: null, memberId: existing.id });
+    await clearSession();
+    await clearMemberCookie();
+    return NextResponse.json({ ok: true });
   } catch (e) {
-    return publicError(e, "Failed");
+    return publicError(e, "Failed to delete account");
   }
 }

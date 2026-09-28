@@ -49,7 +49,7 @@ export async function GET(req: NextRequest) {
       }),
     });
     if (!tokenRes.ok) {
-      console.error("Google token error", await tokenRes.text());
+      console.error("Google token error", tokenRes.status);
       return NextResponse.redirect(appUrl("/login?error=token_failed"));
     }
     const token = (await tokenRes.json()) as {
