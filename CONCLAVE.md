@@ -120,7 +120,7 @@ The bell in the top nav opens the feed. The same list is at `/notifications`.
 |-------|---------|
 | `/` | Landing |
 | `/login` | Email + OAuth sign-in |
-| `/onboarding` | Profile setup (highlights missing fields) |
+| `/onboarding` | Multi-step setup after sign-up: Basics, Work, Goals, Interests, Bio. Saved on the account. If they leave, they return to the step they stopped on. |
 | `/discover` | The Room — For you / Nearby match cards |
 | `/events` | Events & conventions — public catalog (RSVP needs an account) |
 | `/events/[id]` | Event detail, RSVP, related rooms, people attending |
@@ -148,6 +148,8 @@ Saved on the server in `Member`, not only in this browser. Reset clears the same
 | Looking for | `lookingForJson` | Co-founder, Investor, Mentor, Clients, Hiring, Partnership, Networking |
 | Interests | `MemberInterest` rows plus `ideaTagsJson` | Up to 24. Catalog labels become rows and are the only matching signal. Custom tags stay in `ideaTagsJson` if they are short plain text (no URLs, links, or control characters). |
 | Photo | `Member.photo` | Required for Identity. https or a JPEG/PNG/WebP upload. randomuser.me URLs are rejected. |
+
+Setup (`/onboarding`) and Edit profile use these same limits. Interests are a searchable, grouped picker (up to 24, including custom tags). A quiet “complete your profile” prompt appears when industry, interests, looking-for, or bio would improve matching.
 
 Email and phone stay on the account. They are never sent to other members.
 

@@ -1615,6 +1615,7 @@ html.mp-boot-splash body::before {
   .mp-featured-partners-rule,
   .mp-featured-partner,
   .mp-page-enter,
+  .mp-step-in,
   .mp-skeleton::after,
   .mp-ambient {
     animation: none !important;
@@ -2435,6 +2436,7 @@ html.mp-boot-splash body::before {
   .mp-login-photo img,
   .mp-film-track,
   .mp-notice-panel,
+  .mp-step-in,
   .mp-notice-panel.is-closing,
   .mp-notice-scrim.is-closing,
   .mp-rsvp.is-going,
@@ -2452,4 +2454,19 @@ html.mp-boot-splash body::before {
   .mp-notice-row:active {
     transform: none !important;
   }
+}
+
+@keyframes mpStepIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.mp-step-in {
+  animation: mpStepIn 180ms ease;
 }

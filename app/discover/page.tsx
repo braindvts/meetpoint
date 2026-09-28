@@ -35,6 +35,9 @@ import { TIER_DEFINITIONS, tierForPerson, tierForProfile, type MemberTier } from
 import type { Connection, LookingFor, MyProfile, Person } from "@/lib/types";
 import { LOOKING_FOR_OPTIONS } from "@/lib/types";
 import EmptyState from "@/components/EmptyState";
+import ProfileProgressPrompt from "@/components/ProfileProgressPrompt";
+import { copyInviteLink } from "@/lib/copyInvite";
+import { firstIncompleteStep, emptyDraft } from "@/lib/onboardingDraft";
 import NotifyPrompt from "@/components/NotifyPrompt";
 import SkeletonCard from "@/components/SkeletonCard";
 import TierBadge from "@/components/TierBadge";
@@ -444,6 +447,7 @@ export default function DiscoverPage() {
         ) : null}
 
         <div className="px-4 pb-6 pt-4 md:px-0">
+          <ProfileProgressPrompt profile={profile} />
           {showSkeletons ? (
             <div className="space-y-3">
               <SkeletonCard />
@@ -455,35 +459,31 @@ export default function DiscoverPage() {
               body={
                 visiblePeople.length === 0 ? (
                   <>
-                    No other members yet. Share Interlink — profiles appear here when they join this
-                    same app.
+                    No one to introduce yet. Complete the fields that improve matching, then invite
+                    someone to join Interlink.
                   </>
                 ) : profile.lookingFor?.length === 0 ? (
-                  <>
-                    Choose what you&apos;re looking for in{" "}
-                    <Link href="/profile" className="text-accent underline underline-offset-2">
-                      Profile
-                    </Link>{" "}
-                    so introductions stay intentional.
-                  </>
+                  <>Choose what you’re looking for so introductions stay intentional.</>
                 ) : filter === "local" ? (
                   !profile.city?.name ? (
-                    <>
-                      Set your city in{" "}
-                      <Link href="/profile" className="text-accent underline underline-offset-2">
-                        Profile
-                      </Link>{" "}
-                      so Nearby can find people close to you.
-                    </>
+                    <>Set your city so Nearby can find people close to you.</>
                   ) : (
-                    <>No relevant people nearby yet. Try For you, or refine your ideas in Profile.</>
+                    <>No one nearby yet. Try For you, or add a few more interests.</>
                   )
                 ) : (
-                  <>Add more business ideas in Profile so we can find stronger fits.</>
+                  <>Add interests so stronger fits can surface.</>
                 )
               }
-              actionHref="/profile"
-              actionLabel="Open profile"
+              actionHref={
+                visiblePeople.length === 0 && firstIncompleteStep(emptyDraft(profile)) !== null
+                  ? "/onboarding"
+                  : "/profile#edit"
+              }
+              actionLabel={
+                profile.ideaTags?.length ? "Complete your profile" : "Add interests"
+              }
+              secondaryLabel="Invite someone"
+              onSecondary={() => void copyInviteLink()}
             />
           ) : filtered.length === 0 ? (
             <EmptyState
@@ -507,6 +507,12 @@ export default function DiscoverPage() {
             />
           ) : (
             <div key={filter} className="mp-scroll-stagger grid gap-3 md:grid-cols-2 md:gap-4">
+              {filtered.length > 0 && filtered.length <= 3 ? (
+                <p className="md:col-span-2 text-sm leading-relaxed text-muted">
+                  Only a few people to meet right now. Add interests so the next members find you, or
+                  invite someone you already know.
+                </p>
+              ) : null}
               {filtered.map((m) => {
                 const allowed = canIntroduceToTier(myTier, m.tier);
                 const leaving = exiting === m.person.id;

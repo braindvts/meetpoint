@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import Avatar from "@/components/Avatar";
 import NameMarks from "@/components/NameMarks";
-import ReportDialog from "@/components/ReportDialog";
+import SafetyMenu from "@/components/SafetyMenu";
 import TierBadge from "@/components/TierBadge";
 import { getPeerReputation } from "@/lib/store";
 import { isOwner, ownedCompanies, otherWork, VERIFY_LABEL } from "@/lib/personFacts";
@@ -86,7 +86,6 @@ export default function PersonProfileSheet({
   editHref,
   eyebrow,
 }: Props) {
-  const [reportOpen, setReportOpen] = useState(false);
   const sheetRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const startY = useRef(0);
@@ -107,10 +106,7 @@ export default function PersonProfileSheet({
     document.body.style.overflow = "hidden";
     document.documentElement.classList.add("mp-sheet-open");
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        if (reportOpen) setReportOpen(false);
-        else onClose();
-      }
+      if (e.key === "Escape") onClose();
     };
     window.addEventListener("keydown", onKey);
     return () => {
@@ -118,7 +114,7 @@ export default function PersonProfileSheet({
       document.documentElement.classList.remove("mp-sheet-open");
       window.removeEventListener("keydown", onKey);
     };
-  }, [open, onClose, person?.id, reportOpen]);
+  }, [open, onClose, person?.id]);
 
   function onHandlePointerDown(e: React.PointerEvent) {
     active.current = true;
@@ -207,13 +203,18 @@ export default function PersonProfileSheet({
             <span className="h-0.5 w-8 bg-white/40" />
           </div>
 
-          <button
-            type="button"
-            onClick={onClose}
-            className="absolute right-3 top-3 z-20 rounded-lg border border-white/15 bg-black/70 px-2.5 py-1 text-[11px] uppercase tracking-[0.12em] text-white/85 sm:right-4 sm:top-4"
-          >
-            Close
-          </button>
+          <div className="absolute right-3 top-3 z-20 flex items-center gap-2 sm:right-4 sm:top-4">
+            {person && !editHref ? (
+              <SafetyMenu peerId={person.id} peerName={person.name} onBlocked={onClose} />
+            ) : null}
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-lg border border-white/15 bg-black/70 px-2.5 py-1 text-[11px] uppercase tracking-[0.12em] text-white/85"
+            >
+              Close
+            </button>
+          </div>
 
           {/* ONE scroll: photo scrolls away with the rest of the profile */}
           <div
@@ -487,48 +488,10 @@ export default function PersonProfileSheet({
                   {canConnect ? "Connect" : "Get Verified to connect"}
                 </button>
               ) : null}
-              <div className="mt-2 flex gap-2">
-                <button
-                  type="button"
-                  className="flex-1 py-2 text-[11px] font-medium text-white/40 transition hover:text-white/70"
-                  onClick={() => setReportOpen(true)}
-                >
-                  Report
-                </button>
-                <button
-                  type="button"
-                  className="flex-1 py-2 text-[11px] font-medium text-red-400/70 transition hover:text-red-300"
-                  onClick={() => {
-                    if (!confirm(`Block ${person.name}? They’ll be removed from your room.`)) {
-                      return;
-                    }
-                    void import("@/lib/store").then(({ blockPeer }) => {
-                      blockPeer(person.id);
-                      window.dispatchEvent(
-                        new CustomEvent("meetpoint:toast", {
-                          detail: { message: `${person.name.split(" ")[0]} blocked.` },
-                        })
-                      );
-                      onClose();
-                    });
-                  }}
-                >
-                  Block
-                </button>
-              </div>
             </div>
           ) : null}
         </div>
       </div>
-      {person ? (
-        <ReportDialog
-          open={reportOpen}
-          peerId={person.id}
-          peerName={person.name}
-          onClose={() => setReportOpen(false)}
-          onSubmitted={() => onClose()}
-        />
-      ) : null}
     </div>
   );
 }

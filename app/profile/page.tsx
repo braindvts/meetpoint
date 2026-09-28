@@ -8,6 +8,7 @@ import Avatar from "@/components/Avatar";
 import EditProfilePopup from "@/components/EditProfilePopup";
 import Nav from "@/components/Nav";
 import PageHeader from "@/components/PageHeader";
+import ProfileEditor from "@/components/onboarding/ProfileEditor";
 import ProfileForm from "@/components/ProfileForm";
 import MembershipTiers from "@/components/MembershipTiers";
 import { ensureNotifyPermission } from "@/lib/notify";
@@ -204,12 +205,16 @@ function ProfileContent() {
           </button>
         </section>
 
-        <p className="mb-2.5 mt-6 scroll-mt-20 text-[12px] font-medium text-accent" id="edit-details">
-          Edit details
+        <div className="mb-10 mt-6">
+          <ProfileEditor initial={profile} />
+        </div>
+        <p className="mb-2.5 scroll-mt-20 text-[12px] font-medium text-accent" id="edit-details">
+          Credentials and projects
         </p>
         <ProfileForm
           key={(profile.verifications || []).map((v) => `${v.method}:${v.value}`).join("|") || "none"}
           initial={profile}
+          extrasOnly
           focusVerification={needsVerify && !tierInput.verified}
         />
         </div>
