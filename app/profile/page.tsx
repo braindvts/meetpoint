@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import AccountDeletion from "@/components/AccountDeletion";
+import { AccountEmailConfirm } from "@/components/EmailCheckPanel";
 import MemberStatusStrip from "@/components/MemberStatusStrip";
 import PlansSection from "@/components/PlansSection";
 import Avatar from "@/components/Avatar";
@@ -185,6 +186,8 @@ function ProfileContent() {
             Enable alerts
           </button>
         </section>
+
+        <AccountEmailConfirm />
 
         <p className="mb-2.5 mt-6 scroll-mt-20 text-[12px] font-medium text-accent" id="edit-details">
           Edit details

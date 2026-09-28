@@ -1,3 +1,4 @@
+import { confirmationMailPlan, EMAIL_CONFIRM_UNCONFIGURED } from "./emailConfirm";
 import { appUrl } from "./session";
 
 const RESEND_ENDPOINT = "https://api.resend.com/emails";
@@ -116,14 +117,6 @@ export function adminNotifyEmails(env: Record<string, string | undefined> = proc
   return out;
 }
 
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
 /**
  * One note when a member crosses into auto-hide.
  * Without RESEND_API_KEY or ADMIN_EMAILS this no-ops. The report still saves.
@@ -148,6 +141,51 @@ export async function sendAutoHideAlert(member: { id: string; name: string }): P
   } catch (err) {
     console.error("[conclave auto-hide alert]", err);
   }
+}
+
+/** Account-email confirmation. Never logs the token. In development, prints the link when Resend is unset. */
+export async function sendEmailConfirmation(to: string, link: string): Promise<boolean> {
+  const plan = confirmationMailPlan(process.env);
+  if (plan !== "send") {
+    console.warn(EMAIL_CONFIRM_UNCONFIGURED);
+    if (plan === "dev-link") {
+      console.info("[interlink email] development confirmation link:", link);
+    }
+    return false;
+  }
+  const safeLink = escapeHtml(link);
+  return sendEmail({
+    to,
+    subject: "Confirm your Interlink email",
+    html: `<!doctype html>
+<html>
+  <body style="margin:0;padding:32px 16px;background:#050505;font-family:'Helvetica Neue',Arial,sans-serif;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;margin:0 auto;background:#0c0b0a;border:1px solid rgba(212,196,168,0.22);">
+      <tr>
+        <td style="padding:32px 28px 8px;text-align:center;">
+          <p style="margin:0;color:#d4c4a8;font-size:13px;letter-spacing:0.28em;">INTERLINK</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:16px 28px 0;">
+          <h1 style="margin:0;color:#f3efe6;font-size:22px;font-weight:600;">Confirm your email</h1>
+          <p style="margin:14px 0 0;color:#8f877a;font-size:15px;line-height:1.6;">
+            This link expires in 24 hours and works once. If you did not create an Interlink account or ask to change this address, you can ignore it.
+          </p>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:28px;text-align:center;">
+          <a href="${safeLink}" style="display:inline-block;padding:14px 34px;background:#d4c4a8;color:#050505;font-size:13px;font-weight:700;letter-spacing:0.04em;text-decoration:none;border-radius:10px;">
+            Confirm email
+          </a>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`,
+    text: `Confirm your Interlink email.\n\nThis link expires in 24 hours and works once:\n${link}\n\nIf you did not ask for this, ignore it.`,
+  });
 }
 
 /** Sent once, when a member account is first created. */

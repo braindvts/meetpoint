@@ -47,6 +47,8 @@ export async function GET() {
       memberId: full.id,
       legalConsent: hasCurrentLegalConsent(full),
       hasPassword: !!full.passwordHash,
+      accountEmail: full.email,
+      emailVerified: !!full.emailVerifiedAt,
     });
   } catch (e) {
     return publicError(e, "Failed");
@@ -253,6 +255,7 @@ export async function DELETE(req: Request) {
         where: { memberId: id },
         data: { memberId: null },
       });
+      await tx.emailVerificationToken.deleteMany({ where: { memberId: id } });
       await tx.member.update({
         where: { id },
         data: anonymizedMemberData(),

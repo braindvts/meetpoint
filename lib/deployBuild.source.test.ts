@@ -88,9 +88,10 @@ describe("Vercel / npm build uses migrate deploy only", () => {
     }
   });
 
-  it("schema includes EventInterest from the existing migration", () => {
+  it("keeps EventInterest from the profiles migrations and the email token table", () => {
     const schema = readFileSync(new URL("../prisma/schema.prisma", import.meta.url), "utf8");
     assert.match(schema, /model EventInterest \{/);
+    assert.match(schema, /model EmailVerificationToken \{/);
     assert.match(schema, /@@unique\(\[memberId, eventId\]\)/);
     assert.match(schema, /@@index\(\[memberId\]\)/);
     assert.match(schema, /onDelete: Cascade/);
@@ -99,6 +100,11 @@ describe("Vercel / npm build uses migrate deploy only", () => {
     );
     assert.ok(dirs.includes("20260913040000_event_interest"));
     assert.ok(dirs.includes("20260928180000_event_interest_baseline"));
+    assert.ok(
+      readdirSync(new URL("../prisma/migrations/", import.meta.url)).some((name) =>
+        name.includes("email_verification_token")
+      )
+    );
   });
 });
 

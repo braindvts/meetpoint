@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
-const OPEN_PATHS = ["/terms", "/privacy", "/contact", "/login"];
+const OPEN_PATHS = ["/terms", "/privacy", "/contact", "/login", "/verify-email"];
 
 /**
  * Existing and OAuth accounts are not pre-accepted. This gate stays up until the

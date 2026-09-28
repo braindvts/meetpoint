@@ -31,7 +31,7 @@ Set `MIGRATE_ON_PREVIEW=1` only on Vercel Preview, and only after Preview is con
 
 `migrate deploy` applies pending SQL only. It does **not** diff the schema and drop extra columns. Events, Tables, chats, and the waitlist are unchanged.
 
-`20260928170000_legal_consent_and_deletion` only adds Member consent columns and `deletedAt`. It does not create `RateLimitBucket` or change `Report` / `Block`. It is timestamped after PR #24’s `20260928150000_rate_limit_bucket` and the profiles PR’s `20260928160000_member_profile_interests`, so those three can apply in that order. Merge PR #24 first, then the profiles PR, then rebase this branch before merging it.
+`20260928170000_legal_consent_and_deletion` only adds Member consent columns and `deletedAt`. It does not create `RateLimitBucket` or change `Report` / `Block`. `20260928210000_email_verification_token` adds the confirmation-token table only. The profiles PR’s migrations currently run through `20260928200000`, so rebase this branch after that PR and keep this token migration later than those. Merge PR #24 first, then the profiles PR, then rebase this branch before merging it. This branch does not add `EventInterest` to `schema.prisma`.
 
 The oldest migration was SQLite-shaped (`DATETIME`, `REAL`). It is rewritten as Postgres `CREATE TABLE IF NOT EXISTS`. Production was evolved with `db push`, so the first `migrate deploy` would exit **P3005** (schema not empty, no history). The script then baselines `20260813034540_init` with `prisma migrate resolve --applied` (marks it applied, runs no SQL) and deploys the remaining **additive** migrations. Report rows stay.
 

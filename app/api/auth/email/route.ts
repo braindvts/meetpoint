@@ -6,7 +6,8 @@ import {
   recordAuthFailure,
 } from "@/lib/authLockout";
 import { emailSignupTaken } from "@/lib/emailSignup";
-import { sendWelcomeEmail } from "@/lib/email";
+import { sendEmailConfirmation, sendWelcomeEmail } from "@/lib/email";
+import { issueEmailConfirmation } from "@/lib/emailConfirmStore";
 import { provisionWalkthroughOwnerIfAbsent } from "@/lib/ensureDemoOwner";
 import { withMemberCookie } from "@/lib/memberAuth";
 import { memberToProfile } from "@/lib/memberMap";
@@ -90,6 +91,11 @@ export async function POST(req: Request) {
         },
       });
 
+      const issued = await issueEmailConfirmation(member.id, email);
+      void sendEmailConfirmation(
+        email,
+        appUrl(`/verify-email?token=${encodeURIComponent(issued.raw)}`)
+      );
       void sendWelcomeEmail(email, member.name);
 
       clearAuthFailures(email, ip);

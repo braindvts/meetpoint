@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { EmailCheckPanel } from "@/components/EmailCheckPanel";
 import { safeAppPath } from "@/lib/appPath";
 import { clearDemoOwnerSession, markDemoOwnerSession } from "@/lib/demoFlag";
 import { saveProfile } from "@/lib/store";
@@ -19,6 +20,8 @@ export default function EmailAuthForm({ next }: { next?: string | null }) {
   const [busy, setBusy] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [acceptPrivacy, setAcceptPrivacy] = useState(false);
+  const [confirmEmail, setConfirmEmail] = useState("");
+  const [continueTo, setContinueTo] = useState("/onboarding");
 
   async function finishAuth(data: {
     ok?: boolean;
@@ -40,6 +43,11 @@ export default function EmailAuthForm({ next }: { next?: string | null }) {
       clearDemoOwnerSession();
     }
     const dest = safeAppPath(data.next) || requestedNext || "/discover";
+    if (mode === "signup") {
+      setConfirmEmail(email.trim());
+      setContinueTo(dest);
+      return;
+    }
     window.location.href = dest;
   }
 
@@ -82,6 +90,17 @@ export default function EmailAuthForm({ next }: { next?: string | null }) {
 
   const field =
     "w-full rounded-lg border border-line/80 bg-ink/60 px-3 py-2 text-[14px] text-ivory outline-none placeholder:text-muted/55 focus:border-accent";
+
+  if (confirmEmail) {
+    return (
+      <EmailCheckPanel
+        email={confirmEmail}
+        onContinue={() => {
+          window.location.href = continueTo;
+        }}
+      />
+    );
+  }
 
   return (
     <form onSubmit={submit} className="space-y-2.5">

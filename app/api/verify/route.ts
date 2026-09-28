@@ -52,8 +52,6 @@ export async function POST(req: Request) {
     where: { id: me.id },
     data: {
       verificationsJson: JSON.stringify(next),
-      emailVerifiedAt:
-        method === "company-email" ? new Date().toISOString() : me.emailVerifiedAt,
     },
   });
 

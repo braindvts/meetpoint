@@ -42,6 +42,12 @@ export default function PrivacyPage() {
             A password hash (scrypt) if you use email sign-in. The password itself is not stored
             and should not be logged.
           </li>
+          <li>
+            A hashed, single-use confirmation token and its expiry when you create an email
+            account or ask to change that account email. The raw link is not stored. When the link
+            matches that account and address, we store the time the account email was confirmed. A
+            business email typed on your profile does not confirm the account email.
+          </li>
           <li>Provider identifiers if you use LinkedIn, Google, or Apple.</li>
           <li>
             The time you accepted the Terms and Privacy Policy, and the version ids you accepted.
