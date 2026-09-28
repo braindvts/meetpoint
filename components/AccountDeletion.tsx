@@ -25,6 +25,11 @@ export default function AccountDeletion() {
   }, []);
 
   async function finishLocal() {
+    try {
+      localStorage.removeItem("interlink.onboarding.step");
+    } catch {
+      /* private mode */
+    }
     clearProfile();
     window.location.href = "/";
   }

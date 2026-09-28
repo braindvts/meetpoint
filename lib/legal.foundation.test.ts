@@ -222,6 +222,23 @@ test("consent, deletion, and admin authorization are enforced in server routes",
   assert.match(grant, /requireAdmin/);
   assert.match(meeting, /paidBookingMatches/);
   assert.match(meeting, /rateLimit/);
+
+  const profile = readFileSync(join(ROOT, "app/profile/page.tsx"), "utf8");
+  const reset = readFileSync(join(ROOT, "app/api/members/me/reset/route.ts"), "utf8");
+  const deletionUi = readFileSync(join(ROOT, "components/AccountDeletion.tsx"), "utf8");
+  assert.match(profile, /\/api\/members\/me\/reset/);
+  assert.match(profile, /method:\s*"POST"/);
+  assert.doesNotMatch(profile, /method:\s*"DELETE"/);
+  assert.match(profile, /<AccountEmailConfirm/);
+  assert.match(profile, /<AccountDeletion/);
+  assert.match(deletionUi, /method:\s*"DELETE"/);
+  assert.match(deletionUi, /\/api\/members\/me"/);
+  assert.match(deletionUi, /interlink\.onboarding\.step/);
+  assert.match(reset, /jobTitle:\s*""/);
+  assert.match(reset, /connection\.deleteMany/);
+  assert.doesNotMatch(reset, /anonymizeDeletedAccount/);
+  assert.doesNotMatch(reset, /hasRecentReauth/);
+  assert.doesNotMatch(reset, /export async function DELETE/);
 });
 
 test("privacy policy discloses first-party analytics and optional regional sections", () => {

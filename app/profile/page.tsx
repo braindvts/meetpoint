@@ -13,7 +13,7 @@ import PageHeader from "@/components/PageHeader";
 import ProfileForm from "@/components/ProfileForm";
 import MembershipTiers from "@/components/MembershipTiers";
 import { ensureNotifyPermission } from "@/lib/notify";
-import { getMeetingsAttended, loadProfile } from "@/lib/store";
+import { clearProfile, getMeetingsAttended, loadProfile } from "@/lib/store";
 import { gateRedirect, resolveSessionGate } from "@/lib/hydrateSession";
 import {
   computeMemberTier,
@@ -70,6 +70,30 @@ function ProfileContent() {
     }, 200);
     return () => window.clearTimeout(timer);
   }, [needsVerify]);
+
+  async function reset() {
+    if (!confirm("Delete your profile and all connections?")) return;
+    try {
+      const res = await fetch("/api/members/me/reset", {
+        method: "POST",
+        credentials: "include",
+      });
+      if (res.status !== 401 && !res.ok) {
+        window.alert("Couldn’t reset your profile on the server. Try again.");
+        return;
+      }
+    } catch {
+      window.alert("Couldn’t reset your profile on the server. Try again.");
+      return;
+    }
+    try {
+      localStorage.removeItem("interlink.onboarding.step");
+    } catch {
+      /* private mode */
+    }
+    clearProfile();
+    router.push("/");
+  }
 
   if (!profile) {
     return (
@@ -143,9 +167,9 @@ function ProfileContent() {
               <p className="text-[12px] text-accent">{profile.jobTitle || "Member"}</p>
             </div>
           </div>
-          <a href="#delete-account" className="text-[12px] text-red-400">
-            Delete account
-          </a>
+          <button type="button" onClick={reset} className="text-[12px] text-red-400">
+            Reset
+          </button>
         </section>
 
         <MemberStatusStrip profile={profile} tier={computeMemberTier(tierInput)} />
@@ -187,8 +211,6 @@ function ProfileContent() {
           </button>
         </section>
 
-        <AccountEmailConfirm />
-
         <p className="mb-2.5 mt-6 scroll-mt-20 text-[12px] font-medium text-accent" id="edit-details">
           Edit details
         </p>
@@ -197,6 +219,7 @@ function ProfileContent() {
           initial={profile}
           focusVerification={needsVerify && !tierInput.verified}
         />
+        <AccountEmailConfirm />
         <AccountDeletion />
         </div>
       </main>

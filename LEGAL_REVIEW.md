@@ -67,7 +67,7 @@ Privacy also includes optional EU/UK and California sections, each marked `[INCL
 
 ## Data and payments that counsel should read in the code
 
-- Account deletion anonymizes the member row instead of dropping it. It requires a fresh sign-in (`hasRecentReauth`, the same check as `POST /api/auth/reauth`). Safety reports and blocks stay attached to that id, whether the member filed them or was named in them. Block foreign keys are `ON DELETE RESTRICT`. Payment flags stay on the same id. See `DELETE` in `app/api/members/me/route.ts` and `anonymizeDeletedAccount`. Report, block, and account deletion stay available when Terms consent is out of date.
+- Account deletion anonymizes the member row instead of dropping it. It requires a fresh sign-in (`hasRecentReauth`, the same check as `POST /api/auth/reauth`). Safety reports and blocks stay attached to that id, whether the member filed them or was named in them. Block foreign keys are `ON DELETE RESTRICT`. Payment flags stay on the same id. See `DELETE` in `app/api/members/me/route.ts` and `anonymizeDeletedAccount`. Report, block, and account deletion stay available when Terms consent is out of date. Profile Reset is a different action: `POST /api/members/me/reset` clears public profile fields and introductions and leaves the account in place.
 - There is no self-serve refund or subscription-cancel screen.
 - Event RSVPs are stored on the server in `EventInterest` (interested, going, or passed), one row per member per event. A browser copy may still exist. Public counts skip sample accounts and anonymized members (`deletedAt`).
 - Profile rows also store company, industry, and selected interests (`MemberInterest`). Account deletion clears those fields and deletes interest and RSVP rows.
