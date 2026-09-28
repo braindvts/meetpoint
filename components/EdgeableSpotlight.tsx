@@ -4,7 +4,7 @@ import { publicFeaturedPartners } from "@/lib/featuredPartners";
 /**
  * Compact featured-partner credit beside the landing marquee.
  * One line of Edgeable's boilerplate — not the full legal note.
- * Hidden when Edgeable is not an approved partner.
+ * Hidden when Edgeable is not a public partner.
  */
 export default function EdgeableSpotlight({ className = "" }: { className?: string }) {
   const partner = publicFeaturedPartners().find((item) => item.id === "edgeable");

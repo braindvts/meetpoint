@@ -55,7 +55,7 @@ export async function consumeEmailConfirmation(
       }
       const other = await tx.member.findFirst({
         where: {
-          email: decision.email,
+          email: { equals: decision.email, mode: "insensitive" },
           id: { not: decision.memberId },
           deletedAt: null,
         },

@@ -16,6 +16,8 @@ test("deletion transaction anonymizes personal data and keeps the report", async
       name: "Delete Me",
       phone: "+15555550123",
       bio: "secret bio",
+      company: "Secret Co",
+      industry: "Finance",
       passwordHash: "hash",
       googleId: `g-${stamp}`,
     },
@@ -55,6 +57,8 @@ test("deletion transaction anonymizes personal data and keeps the report", async
     assert.equal(stored.googleId, null);
     assert.equal(stored.passwordHash, null);
     assert.equal(stored.name, "Deleted member");
+    assert.equal(stored.company, "");
+    assert.equal(stored.industry, "");
     assert.ok(stored.deletedAt);
 
     const message = await prisma.message.findFirst({ where: { chatId: chat.id, senderId: member.id } });

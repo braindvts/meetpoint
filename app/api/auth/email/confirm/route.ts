@@ -13,7 +13,7 @@ const confirmSchema = z
 
 /** Sets emailVerifiedAt only when the token matches that member and address. */
 export async function POST(req: Request) {
-  const limited = rateLimit(req, { name: "email-confirm", limit: 30, windowMs: 60_000 });
+  const limited = await rateLimit(req, { name: "email-confirm", limit: 30, windowMs: 60_000 });
   if (!limited.ok) return limited.response;
 
   try {

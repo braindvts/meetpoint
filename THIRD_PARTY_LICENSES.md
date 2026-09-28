@@ -33,7 +33,7 @@ Transitive packages are pulled in by those dependencies (Next.js, Prisma engines
 | Asset | Used for | License / terms | Commercial use | Review |
 | --- | --- | --- | --- | --- |
 | LinkedIn, Google, and Apple marks drawn in `components/AuthButtons.tsx` | Sign-in buttons | Those companies’ brand guidelines, not an open-source license | Only as the guidelines allow | Confirm the buttons match each brand’s “sign in with” rules. Do not treat the SVG paths as Interlink-owned art |
-| Partner marks: BijuuFlow, Grounded, ONYX Futures, Edgeable | Landing row, loading splash, Edgeable card | Not established in this repo | Unknown until written permission is on file | Config status is `approved` so the live site does not change. Each entry has a TODO that written permission must be confirmed. See `lib/featuredPartners.ts` and `LEGAL_REVIEW.md` |
+| Partner marks: BijuuFlow, Grounded, ONYX Futures, Edgeable | Landing row, loading splash, Edgeable card | Not established in this repo | Unknown until written permission is on file | Visible with `pending_written_confirmation`. Brian approved the graphic and must confirm written permission. See `lib/featuredPartners.ts` and `LEGAL_REVIEW.md` |
 
 ## Images and photos
 
@@ -42,7 +42,7 @@ Transitive packages are pulled in by those dependencies (Next.js, Prisma engines
 | Unsplash URLs in `lib/restaurantPhotos.ts` and some event imagery | Restaurant and event pictures | Unsplash License | Unsplash’s license generally allows commercial use | Unsplash photos are not assigned to Interlink. Do not imply we own them. Keep the Unsplash terms |
 | Files under `public/events/` and `public/social/` | Event and social imagery | Not stated in the repo | Unknown | Confirm the photographer or stock license, or replace them |
 | `public/conclave-instagram.png` and the matching PDF / story image | A social export page | Not stated in the repo | Unknown | The filename still says “conclave”. Ownership is not documented |
-| `public/edgeable-logo.png` and the SVG partner marks | Partner credits | Partner-owned | Pending written permission | Same TODO as the partner config |
+| `public/edgeable-logo.png` and the SVG partner marks | Partner credits | Partner-owned | Pending written permission | Same `pending_written_confirmation` status as the partner config |
 
 ## Maps and places
 

@@ -37,7 +37,7 @@ Privacy also includes optional EU/UK and California sections, each marked `[INCL
 ## Third-party assets
 
 - [ ] Partner marks are centralized in `lib/featuredPartners.ts`.
-- [ ] BijuuFlow, Grounded (legal name recorded as Grounded Peptides), ONYX Futures, and Edgeable are set to `permission: "approved"` **only so the current public pages keep showing them**. Each row includes a TODO: written permission is **not** in the repo and must be confirmed before launch. `permissionReviewBy` is `2026-12-31`.
+- [ ] BijuuFlow, Grounded (legal name recorded as Grounded Peptides), ONYX Futures, and Edgeable stay visible because Brian approved the partner graphic. Each row is `permission: "pending_written_confirmation"`. Brian must confirm written permission is on file. `permissionReviewBy` is `2026-12-31`.
 - [ ] If permission is not confirmed, change that partner to `pending` or `revoked`. Public pages read `publicFeaturedPartners()` and will hide them.
 - [ ] Unsplash images and files in `public/events`, `public/social`, and `public/conclave-instagram*` need a recorded license or a replacement. See `THIRD_PARTY_LICENSES.md`.
 - [ ] Sign-in buttons use LinkedIn, Google, and Apple artwork. Follow each brand’s guidelines.
@@ -50,12 +50,12 @@ Privacy also includes optional EU/UK and California sections, each marked `[INCL
 
 ## Partners and APIs
 
-- [ ] Written logo permission for each `approved` partner.
+- [ ] Written logo permission for each partner. Public status is `pending_written_confirmation` until Brian confirms it.
 - [ ] Stripe account owned by the entity that will appear on card statements.
 - [ ] Google Cloud project for OAuth and Places, with the right API restrictions.
 - [ ] Apple Developer account for Sign in with Apple.
 - [ ] LinkedIn app review if the API terms require it.
-- [ ] Resend domain authentication for the from-address.
+- [ ] Resend domain authentication for the from-address (`RESEND_API_KEY` and `EMAIL_FROM`). Confirmation links and welcome mail both go through Resend. The raw confirmation token is not stored.
 - [ ] Twilio account and a registered sender if SMS stays on.
 - [ ] Plausible site, only if `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` is set in production. First-party page visits and partner-click counts do not use an external package. No advertising pixel is loaded.
 - [ ] Vercel team ownership.
@@ -69,5 +69,7 @@ Privacy also includes optional EU/UK and California sections, each marked `[INCL
 
 - Account deletion anonymizes the member row instead of dropping it, so safety reports and payment flags still have an id. See `DELETE` in `app/api/members/me/route.ts`.
 - There is no self-serve refund or subscription-cancel screen.
-- Event RSVPs are stored in the browser, not in a dedicated server table.
-- Verification values are self-attested. Verified standing on the server requires both business email and LinkedIn to be present on the profile. It is not a check that the email inbox or LinkedIn account was independently proven in every path.
+- Event RSVPs are stored on the server in `EventInterest` (interested, going, or passed), one row per member per event. A browser copy may still exist. Public counts skip sample accounts and anonymized members (`deletedAt`).
+- Profile rows also store company, industry, and selected interests (`MemberInterest`). Account deletion clears those fields and deletes interest and RSVP rows.
+- Account email confirmation is a single-use hashed token emailed through Resend. `emailVerifiedAt` is set only when that link matches the member and address. Saving a business email on the profile does not confirm the account email.
+- Verification values on the profile are self-attested. Verified standing on the server requires both business email and LinkedIn to be present on the profile. It is not a check that the email inbox or LinkedIn account was independently proven in every path.

@@ -4,9 +4,18 @@ import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
+function peekStashedConfirmToken(): string {
+  if (typeof window === "undefined") return "";
+  try {
+    return sessionStorage.getItem("interlink.emailConfirm") || "";
+  } catch {
+    return "";
+  }
+}
+
 function ConfirmEmail() {
   const params = useSearchParams();
-  const token = params.get("token") || "";
+  const token = params.get("token") || peekStashedConfirmToken();
   const [state, setState] = useState<"working" | "ok" | "bad">("working");
   const [error, setError] = useState("");
 
@@ -15,6 +24,11 @@ function ConfirmEmail() {
       setState("bad");
       setError("This confirmation link is missing.");
       return;
+    }
+    try {
+      sessionStorage.removeItem("interlink.emailConfirm");
+    } catch {
+      /* ignore */
     }
     let cancelled = false;
     void fetch("/api/auth/email/confirm", {

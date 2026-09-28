@@ -16,7 +16,7 @@ export async function POST(req: Request) {
     const denied = legalConsentDenied(me);
     if (denied) return denied;
 
-    const limited = rateLimit(req, {
+    const limited = await rateLimit(req, {
       name: "email-confirm-resend",
       limit: 5,
       windowMs: 60 * 60_000,

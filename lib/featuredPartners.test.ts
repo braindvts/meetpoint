@@ -94,7 +94,7 @@ test("later partners follow the lead without a layout rewrite", () => {
   );
 });
 
-test("public surfaces omit partners that are not approved", () => {
+test("public surfaces omit pending and revoked partners", () => {
   const hidden: FeaturedPartner[] = [
     {
       id: "shown",
@@ -113,6 +113,14 @@ test("public surfaces omit partners that are not approved", () => {
       permission: "pending",
     },
     {
+      id: "graphic",
+      name: "Graphic",
+      href: "https://example.com/graphic",
+      logoSrc: "/graphic.svg",
+      logoAlt: "Graphic",
+      permission: "pending_written_confirmation",
+    },
+    {
       id: "gone",
       name: "Gone",
       href: "https://example.com/gone",
@@ -123,11 +131,15 @@ test("public surfaces omit partners that are not approved", () => {
   ];
   assert.deepEqual(
     publicFeaturedPartners(hidden).map((partner) => partner.id),
-    ["shown"]
+    ["shown", "graphic"]
   );
   assert.equal(publicFeaturedPartners().length, FEATURED_PARTNERS.length);
-  assert.ok(FEATURED_PARTNERS.every((partner) => partner.permission === "approved"));
-  assert.ok(FEATURED_PARTNERS.every((partner) => partner.permissionNote?.includes("TODO")));
+  assert.ok(
+    FEATURED_PARTNERS.every((partner) => partner.permission === "pending_written_confirmation")
+  );
+  assert.ok(
+    FEATURED_PARTNERS.every((partner) => partner.permissionNote?.includes("written permission"))
+  );
 });
 
 test("splash shows featured partners on a short minimal loader", () => {

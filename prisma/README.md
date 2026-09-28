@@ -31,7 +31,7 @@ Set `MIGRATE_ON_PREVIEW=1` only on Vercel Preview, and only after Preview is con
 
 `migrate deploy` applies pending SQL only. It does **not** diff the schema and drop extra columns. Events, Tables, chats, and the waitlist are unchanged.
 
-`20260928170000_legal_consent_and_deletion` only adds Member consent columns and `deletedAt`. It does not create `RateLimitBucket` or change `Report` / `Block`. `20260928210000_email_verification_token` adds the confirmation-token table only. The profiles PR’s migrations currently run through `20260928200000`, so rebase this branch after that PR and keep this token migration later than those. Merge PR #24 first, then the profiles PR, then rebase this branch before merging it. This branch does not add `EventInterest` to `schema.prisma`.
+`20260928205000_legal_consent_and_deletion` only adds Member consent columns and `deletedAt`. It sorts after `20260928200000_narrow_sample_photo` so a database that already applied the profile migrations can take it as a new step. It does not create `RateLimitBucket` or change `Report` / `Block`. `20260928210000_email_verification_token` adds the confirmation-token table only. `EventInterest`, `MemberInterest`, `isSample`, and `sampleKind` come from the profiles migrations already on this branch. Those migration folders are unchanged.
 
 The oldest migration was SQLite-shaped (`DATETIME`, `REAL`). It is rewritten as Postgres `CREATE TABLE IF NOT EXISTS`. Production was evolved with `db push`, so the first `migrate deploy` would exit **P3005** (schema not empty, no history). The script then baselines `20260813034540_init` with `prisma migrate resolve --applied` (marks it applied, runs no SQL) and deploys the remaining **additive** migrations. Report rows stay.
 
@@ -58,9 +58,9 @@ Do not point local `db:deploy` at Production. Never pass `--accept-data-loss`. N
 
 ## Merge order with the safety PR
 
-`20260928150000_rate_limit_bucket` (report/block safety work) sorts **before** `20260928160000_member_profile_interests`. Apply the safety migration first. Prisma refuses a later `migrate deploy` if an earlier migration is still missing (`historiesDiverge`). This migration does not create `RateLimitBucket`, `Block`, or `Report`.
+`20260928150000_rate_limit_bucket` (report/block safety work) sorts **before** `20260928160000_member_profile_interests`. This branch is already based on that history. Prisma refuses a later `migrate deploy` if an earlier migration is still missing (`historiesDiverge`). The legal migration does not create `RateLimitBucket`, `Block`, or `Report`.
 
-When both schema edits land, keep `RateLimitBucket` from the safety PR and `Member.company`, `Member.industry`, `Member.isSample`, `Member.sampleKind`, and `MemberInterest` from this one.
+Keep `RateLimitBucket` from the safety work and `Member.company`, `Member.industry`, `Member.isSample`, `Member.sampleKind`, `MemberInterest`, and `EventInterest` from the profiles work.
 
 ## Event RSVPs
 

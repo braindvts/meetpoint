@@ -31,7 +31,7 @@ export async function POST(req: Request) {
     const denied = legalConsentDenied(me);
     if (denied) return denied;
 
-    const limited = rateLimit(req, {
+    const limited = await rateLimit(req, {
       name: "email-confirm-change",
       limit: 5,
       windowMs: 60 * 60_000,
@@ -52,7 +52,11 @@ export async function POST(req: Request) {
     }
 
     const taken = await prisma.member.findFirst({
-      where: { email, id: { not: me.id }, deletedAt: null },
+      where: {
+        email: { equals: email, mode: "insensitive" },
+        id: { not: me.id },
+        deletedAt: null,
+      },
       select: { id: true },
     });
     if (taken) {

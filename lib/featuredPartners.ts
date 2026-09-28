@@ -1,4 +1,8 @@
-export type PartnerPermission = "approved" | "pending" | "revoked";
+export type PartnerPermission =
+  | "approved"
+  | "pending"
+  | "pending_written_confirmation"
+  | "revoked";
 
 export interface FeaturedPartner {
   id: string;
@@ -18,9 +22,9 @@ export interface FeaturedPartner {
    */
   invertOnInk?: boolean;
   /**
-   * Public surfaces render `approved` only.
-   * TODO: written permission to display these marks is not in the repo.
-   * `approved` keeps the live site unchanged until counsel confirms or revokes.
+   * Public surfaces render `approved` and `pending_written_confirmation`.
+   * Brian must confirm written permission is on file. Until then the four
+   * marks stay visible because he approved the partner graphic.
    */
   permission: PartnerPermission;
   /** ISO date to re-check written permission. */
@@ -29,7 +33,12 @@ export interface FeaturedPartner {
 }
 
 const PERMISSION_TODO =
-  "TODO: written permission to display this mark is not in the repo and must be confirmed before launch. Status is approved so the current public site does not change.";
+  "Brian must confirm written permission to display this mark. It stays visible as pending_written_confirmation until that confirmation is on file.";
+
+const VISIBLE_PERMISSIONS = new Set<PartnerPermission>([
+  "approved",
+  "pending_written_confirmation",
+]);
 
 /**
  * Loading-screen credit. Append a partner to extend the line —
@@ -46,7 +55,7 @@ export const FEATURED_PARTNERS: readonly FeaturedPartner[] = [
     logoAlt: "BijuuFlow",
     lead: true,
     invertOnInk: true,
-    permission: "approved",
+    permission: "pending_written_confirmation",
     permissionReviewBy: "2026-12-31",
     permissionNote: PERMISSION_TODO,
   },
@@ -57,7 +66,7 @@ export const FEATURED_PARTNERS: readonly FeaturedPartner[] = [
     href: "https://groundedpeptides.com",
     logoSrc: "/grounded-logo.svg",
     logoAlt: "Grounded",
-    permission: "approved",
+    permission: "pending_written_confirmation",
     permissionReviewBy: "2026-12-31",
     permissionNote: PERMISSION_TODO,
   },
@@ -67,7 +76,7 @@ export const FEATURED_PARTNERS: readonly FeaturedPartner[] = [
     href: "https://onyx-futures.com",
     logoSrc: "/onyx-logo.svg",
     logoAlt: "ONYX Futures",
-    permission: "approved",
+    permission: "pending_written_confirmation",
     permissionReviewBy: "2026-12-31",
     permissionNote: PERMISSION_TODO,
   },
@@ -77,7 +86,7 @@ export const FEATURED_PARTNERS: readonly FeaturedPartner[] = [
     href: "https://edgeable.app",
     logoSrc: "/edgeable-logo.png",
     logoAlt: "Edgeable",
-    permission: "approved",
+    permission: "pending_written_confirmation",
     permissionReviewBy: "2026-12-31",
     permissionNote: PERMISSION_TODO,
   },
@@ -89,11 +98,13 @@ export function featuredPartnersInOrder(
   return [...partners].sort((a, b) => Number(b.lead === true) - Number(a.lead === true));
 }
 
-/** Partners the public site may show. Pending and revoked marks stay in config only. */
+/** Partners the public site may show. Plain pending and revoked marks stay in config only. */
 export function publicFeaturedPartners(
   partners: readonly FeaturedPartner[] = FEATURED_PARTNERS
 ): FeaturedPartner[] {
-  return featuredPartnersInOrder(partners.filter((partner) => partner.permission === "approved"));
+  return featuredPartnersInOrder(
+    partners.filter((partner) => VISIBLE_PERMISSIONS.has(partner.permission))
+  );
 }
 
 /**

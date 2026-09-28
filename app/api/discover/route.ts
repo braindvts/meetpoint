@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { legalConsentDenied } from "@/lib/legalGuard";
 import { getCurrentMember } from "@/lib/memberAuth";
 import { memberToPerson } from "@/lib/memberMap";
 import { blackConnectionCounts } from "@/lib/blackServer";
@@ -32,6 +33,8 @@ export async function GET(req: Request) {
     if (!me) {
       return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
     }
+    const denied = legalConsentDenied(me);
+    if (denied) return denied;
 
     const viewer = await prisma.member.findUnique({
       where: { id: me.id },
@@ -47,7 +50,7 @@ export async function GET(req: Request) {
     for (;;) {
       const batch = await prisma.member.findMany({
         where: {
-          AND: [{ id: { notIn: excluded } }, { NOT: sampleMemberWhere() }],
+          AND: [{ id: { notIn: excluded } }, { deletedAt: null }, { NOT: sampleMemberWhere() }],
         },
         select: discoverMemberSelect,
         orderBy: { id: "asc" },

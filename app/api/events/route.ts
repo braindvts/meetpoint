@@ -25,7 +25,7 @@ export async function GET() {
     try {
       const grouped = await prisma.eventInterest.groupBy({
         by: ["eventId", "status"],
-        where: { member: { NOT: sampleMemberWhere() } },
+        where: { member: { AND: [{ deletedAt: null }, { NOT: sampleMemberWhere() }] } },
         _count: { _all: true },
       });
       counts = foldInterestCounts(

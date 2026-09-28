@@ -135,13 +135,14 @@ test("paid booking sessions must belong to the member", () => {
 test("legal migration stays after the report and profile migrations and does not touch their tables", () => {
   const root = join(ROOT, "prisma/migrations");
   const dirs = readdirSync(root);
-  assert.ok(dirs.includes("20260928170000_legal_consent_and_deletion"));
+  const legal = dirs.find((name) => name.includes("legal_consent"));
+  assert.equal(legal, "20260928205000_legal_consent_and_deletion");
+  assert.ok(legal > "20260928200000_narrow_sample_photo");
+  assert.ok(legal < "20260928210000_email_verification_token");
   assert.equal(dirs.includes("20260928150000_legal_consent_and_deletion"), false);
-  assert.equal(dirs.includes("20260928150000_rate_limit_bucket"), false);
-  const sql = readFileSync(
-    join(root, "20260928170000_legal_consent_and_deletion/migration.sql"),
-    "utf8"
-  );
+  assert.equal(dirs.includes("20260928170000_legal_consent_and_deletion"), false);
+  assert.ok(dirs.includes("20260928150000_rate_limit_bucket"));
+  const sql = readFileSync(join(root, `${legal}/migration.sql`), "utf8");
   assert.match(sql, /termsAcceptedAt/);
   assert.match(sql, /deletedAt/);
   assert.doesNotMatch(sql, /RateLimitBucket|CREATE TABLE|model Report|ALTER TABLE "Report"/i);

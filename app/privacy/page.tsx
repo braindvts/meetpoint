@@ -55,7 +55,11 @@ export default function PrivacyPage() {
         </ul>
         <p className="mt-3">Profile and business information you choose to add</p>
         <ul className="mt-2">
-          <li>Job title, bio, and profile photo.</li>
+          <li>Job title, company, industry, bio, and profile photo.</li>
+          <li>
+            Interests you select. Those are stored as rows tied to your account, separate from free-text
+            idea tags.
+          </li>
           <li>City name, country, and coordinates you select.</li>
           <li>Travel range, meeting preference, what you are looking for, and idea tags.</li>
           <li>Work or project entries you add.</li>
@@ -84,8 +88,9 @@ export default function PrivacyPage() {
             meetup time. The phone number is not copied into Stripe metadata.
           </li>
           <li>
-            Event RSVPs and notification state may stay in this browser’s local storage rather than
-            on the server.
+            Event RSVPs (interested, going, or passed) are stored on the server, one row per event.
+            A copy of notification state, and sometimes an RSVP, may also stay in this browser’s
+            local storage.
           </li>
         </ul>
         <p className="mt-3">Device, analytics, and cookies</p>
@@ -113,7 +118,9 @@ export default function PrivacyPage() {
             Plausible script may also receive page measurements under Plausible’s own terms. When
             that setting is empty, the script is not loaded. Plausible is the only third-party
             analytics tool in the codebase, and it is off unless that setting is present. Interlink
-            does not load third-party advertising or ad-analytics trackers.
+            does not load third-party advertising or ad-analytics trackers. The email confirmation
+            page is excluded from these measurements, and the confirmation token is removed from the
+            address before a page measurement can record it.
           </li>
           <li>
             Cookies. First-party analytics does not set its own cookie. The signed httpOnly cookies
@@ -139,7 +146,10 @@ export default function PrivacyPage() {
           <li>To show your profile to other signed-in members according to the product rules.</li>
           <li>To deliver introductions, chats, blocks, and reports.</li>
           <li>To take a BLACK subscription or booking payment through Stripe.</li>
-          <li>To send a welcome email when Resend is configured, and a booking text when Twilio is configured.</li>
+          <li>
+            To send a welcome email and an account-email confirmation link when Resend is configured,
+            and a booking text when Twilio is configured.
+          </li>
           <li>To look up restaurants through Google Places when that key is configured.</li>
           <li>
             To count page visits and partner-link clicks, including which surface a partner click
@@ -160,7 +170,8 @@ export default function PrivacyPage() {
         <p className="mt-2">
           Google, Apple, and LinkedIn receive the sign-in you start with them. Stripe receives
           checkout details and may retain them under Stripe’s policy even after we anonymize our
-          copy. Resend receives your email and the welcome message when mail is enabled. Twilio
+          copy. Resend receives your email and the message (welcome or confirmation link) when mail
+          is enabled. Twilio
           receives the destination number and message body when SMS is enabled; members can only
           trigger a text to the phone saved on their own profile unless a separate server notify
           secret is used. Google Places receives the search. Page visits and partner-link clicks
@@ -191,7 +202,8 @@ export default function PrivacyPage() {
         <p className="mt-2">
           Profile includes a delete-account control. You must type DELETE. If the account has a
           password, you must enter it again first. We then clear sign-in identifiers, contact
-          details, profile text, photo, phone, and verification values; delete introductions,
+          details, profile text, company, industry, photo, phone, and verification values; delete
+          selected interests and event RSVPs; delete introductions,
           blocks, and BLACK invitation or connection rows; blank your messages; drop you from
           chats; and clear the member id on analytics events. The anonymized row can keep
           non-identifying payment flags (such as whether BLACK was paid). Reports stay, attributed

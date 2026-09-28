@@ -6,6 +6,14 @@ export default function PlausibleScript() {
   if (!domain) return null;
   const src =
     process.env.NEXT_PUBLIC_PLAUSIBLE_SRC?.trim() ||
-    "https://plausible.io/js/script.js";
-  return <Script defer data-domain={domain} src={src} strategy="afterInteractive" />;
+    "https://plausible.io/js/script.exclusions.js";
+  return (
+    <Script
+      defer
+      data-domain={domain}
+      data-exclude="/verify-email"
+      src={src}
+      strategy="afterInteractive"
+    />
+  );
 }

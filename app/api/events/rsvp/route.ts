@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { catalogEvent, foldInterestCounts, isStoredRsvp } from "@/lib/eventRsvp";
+import { legalConsentDenied } from "@/lib/legalGuard";
 import { getCurrentMember } from "@/lib/memberAuth";
 import { rateLimit } from "@/lib/rateLimit";
 import { publicError } from "@/lib/safeError";
@@ -18,7 +19,10 @@ const rsvpSchema = z
 async function countsFor(eventId: string) {
   const grouped = await prisma.eventInterest.groupBy({
     by: ["eventId", "status"],
-    where: { eventId, member: { NOT: sampleMemberWhere() } },
+    where: {
+      eventId,
+      member: { AND: [{ deletedAt: null }, { NOT: sampleMemberWhere() }] },
+    },
     _count: { _all: true },
   });
   const folded = foldInterestCounts(
@@ -41,6 +45,8 @@ export async function PUT(req: Request) {
     if (!me) {
       return NextResponse.json({ ok: false, error: "Sign in first" }, { status: 401 });
     }
+    const denied = legalConsentDenied(me);
+    if (denied) return denied;
 
     const parsed = await parseBody(req, rsvpSchema);
     if (!parsed.ok) return parsed.response;

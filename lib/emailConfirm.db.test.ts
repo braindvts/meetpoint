@@ -38,3 +38,35 @@ test("confirmation link sets emailVerifiedAt once for that member and address", 
     await prisma.member.delete({ where: { id: member.id } });
   }
 });
+
+test("confirmation refuses an address another member already holds, ignoring case", async (t) => {
+  if (!process.env.DATABASE_URL) {
+    t.skip("DATABASE_URL is not set");
+    return;
+  }
+
+  const { prisma } = await import("./db");
+  const { issueEmailConfirmation, consumeEmailConfirmation } = await import("./emailConfirmStore");
+  const stamp = Date.now().toString(36);
+  const holder = await prisma.member.create({
+    data: { email: `held-${stamp}@example.com`, name: "Holder" },
+  });
+  const mover = await prisma.member.create({
+    data: { email: `mover-${stamp}@example.com`, name: "Mover", passwordHash: "hash" },
+  });
+
+  try {
+    const issued = await issueEmailConfirmation(mover.id, `Held-${stamp}@Example.com`);
+    const result = await consumeEmailConfirmation(issued.raw);
+    assert.equal(result.ok, false);
+    if (!result.ok) assert.match(result.error, /already used/i);
+    const unchanged = await prisma.member.findUnique({ where: { id: mover.id } });
+    assert.equal(unchanged?.email, `mover-${stamp}@example.com`);
+    assert.equal(unchanged?.emailVerifiedAt, null);
+  } finally {
+    await prisma.emailVerificationToken.deleteMany({
+      where: { memberId: { in: [holder.id, mover.id] } },
+    });
+    await prisma.member.deleteMany({ where: { id: { in: [holder.id, mover.id] } } });
+  }
+});

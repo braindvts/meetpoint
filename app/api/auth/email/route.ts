@@ -92,7 +92,7 @@ export async function POST(req: Request) {
       });
 
       const issued = await issueEmailConfirmation(member.id, email);
-      void sendEmailConfirmation(
+      await sendEmailConfirmation(
         email,
         appUrl(`/verify-email?token=${encodeURIComponent(issued.raw)}`)
       );

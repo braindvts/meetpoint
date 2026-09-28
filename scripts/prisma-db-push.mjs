@@ -63,8 +63,15 @@ function hasProdMarker(value) {
   return /(^|[._-])prod(uction)?([._-]|$)/i.test(value) || value.includes("production");
 }
 
+const NON_PROD_TOKENS = new Set(["dev", "local", "staging", "preview", "test", "ci", "sandbox"]);
+
+/** Whole tokens split on `.`, `-`, and `_`. A substring such as "ci" inside "principal" does not count. */
 function hasNonProdMarker(value) {
-  return /(dev|local|staging|preview|test|ci|sandbox)/i.test(value);
+  return value
+    .toLowerCase()
+    .split(/[._-]+/)
+    .filter(Boolean)
+    .some((token) => NON_PROD_TOKENS.has(token));
 }
 
 function main() {

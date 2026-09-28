@@ -137,6 +137,20 @@ describe("db:push refuses production", () => {
       ),
       null
     );
+    assert.equal(
+      dbPushBlockReason(
+        { DATABASE_URL: "postgresql://u:p@ep-ci.us-east-2.aws.neon.tech/interlink" },
+        ["node", "script"]
+      ),
+      null
+    );
+    assert.match(
+      dbPushBlockReason(
+        { DATABASE_URL: "postgresql://u:p@ep-principal.us-east-2.aws.neon.tech/decision" },
+        ["node", "script"]
+      ) || "",
+      /looks like production/
+    );
     assert.match(
       dbPushBlockReason(local, ["node", "script", "--accept-data-loss"]) || "",
       /accept-data-loss/
