@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { publicError } from "@/lib/safeError";
 import Stripe from "stripe";
+import { legalConsentDenied } from "@/lib/legalGuard";
 import { getCurrentMember } from "@/lib/memberAuth";
 import { memberToProfile } from "@/lib/memberMap";
 import {
@@ -20,12 +21,14 @@ import { parseBody } from "@/lib/validation/parse";
  */
 export async function POST(req: Request) {
   try {
-    const limited = rateLimit(req, { name: "black-activate", limit: 15, windowMs: 60_000 });
+    const limited = await rateLimit(req, { name: "black-activate", limit: 15, windowMs: 60_000 });
     if (!limited.ok) return limited.response;
 
     await purgeDemoResidue();
     const me = await getCurrentMember();
     if (!me) return NextResponse.json({ ok: false, error: "Sign in first" }, { status: 401 });
+    const denied = legalConsentDenied(me);
+    if (denied) return denied;
 
     if (!isVerified(me)) {
       return NextResponse.json(

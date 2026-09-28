@@ -2,8 +2,8 @@ import type { Person } from "./types";
 import { CITIES } from "./cities";
 
 /**
- * Sample members for local demos only. Never loaded unless
- * NEXT_PUBLIC_ENABLE_DEMO_PROFILES=1, so the live room stays real people.
+ * Sample members for local demos only. Never loaded unless the server-only
+ * gate ENABLE_DEMO_PROFILES is exactly "1", so the live room stays real people.
  * A subset is Member standing (see MEMBER_SAMPLE_IDS) so a Member account
  * can complete Connect. The rest stay Verified or BLACK.
  */

@@ -26,6 +26,7 @@ export const blackInvitePatchSchema = z
 export const blackMeetingSchema = z
   .object({
     peerId: zId,
+    sessionId: zShortText(200).optional(),
   })
   .strict();
 

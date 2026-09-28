@@ -1,4 +1,7 @@
-import { featuredPartnersInOrder } from "@/lib/featuredPartners";
+"use client";
+
+import { trackPartnerClick } from "@/lib/analytics";
+import { publicFeaturedPartners } from "@/lib/featuredPartners";
 import PartnerMarquee from "@/components/PartnerMarquee";
 import PartnerMark from "@/components/PartnerMark";
 
@@ -23,12 +26,19 @@ function PartnerName({ name }: { name: string }) {
 }
 
 export default function SponsorLockup({ className = "" }: Props) {
-  const partners = featuredPartnersInOrder();
+  const partners = publicFeaturedPartners();
 
   return (
     <div className={`mp-sponsor-lockup ${className}`.trim()}>
       <span className="mp-sponsor-lockup-kicker">Supported by</span>
-      <PartnerMarquee partners={partners} variant="lockup" />
+      <PartnerMarquee
+        partners={partners}
+        variant="lockup"
+        onLinkClick={(event) => {
+          const id = event.currentTarget.getAttribute("data-partner");
+          if (id) trackPartnerClick(id, "landing");
+        }}
+      />
       <p className="mp-sponsor-lockup-row mp-marquee-static">
       {partners.map((partner, index) => (
         <span key={partner.id} className="mp-sponsor-lockup-slot">
@@ -45,6 +55,7 @@ export default function SponsorLockup({ className = "" }: Props) {
               partner.id === "edgeable" ? " mp-partner-edgeable" : ""
             }`}
             aria-label={`${partner.name} (opens in a new tab)`}
+            onClick={() => trackPartnerClick(partner.id, "landing")}
           >
             <PartnerMark
               partner={partner}

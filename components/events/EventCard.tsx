@@ -3,6 +3,7 @@
 import Link from "next/link";
 import {
   CATEGORY_LABEL,
+  formatCount,
   formatEventDate,
   formatEventTime,
   type InterlinkEvent,
@@ -95,9 +96,9 @@ export default function EventCard({
             </p>
           ) : null}
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-1 text-[11px] text-muted">
-            <span>{interestedN.toLocaleString()} interested</span>
+            <span>{formatCount(interestedN)} interested</span>
             <span className="text-line">·</span>
-            <span>{attendeesN.toLocaleString()} attending</span>
+            <span>{formatCount(attendeesN)} attending</span>
             {networkCount > 0 ? (
               <>
                 <span className="text-line">·</span>

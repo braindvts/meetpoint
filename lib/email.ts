@@ -1,3 +1,4 @@
+import { confirmationMailPlan, EMAIL_CONFIRM_UNCONFIGURED } from "./emailConfirm";
 import { appUrl } from "./session";
 
 const RESEND_ENDPOINT = "https://api.resend.com/emails";
@@ -26,7 +27,7 @@ interface Mail {
 export async function sendEmail({ to, subject, html, text }: Mail): Promise<boolean> {
   const key = process.env.RESEND_API_KEY?.trim();
   if (!key) {
-    console.info("[conclave email skipped]", { to, subject });
+    console.info("[conclave email skipped]");
     return false;
   }
 
@@ -40,7 +41,7 @@ export async function sendEmail({ to, subject, html, text }: Mail): Promise<bool
       body: JSON.stringify({ from: fromAddress(), to: [to], subject, html, text }),
     });
     if (!res.ok) {
-      console.error("[conclave email failed]", res.status, await res.text());
+      console.error("[conclave email failed]", res.status);
       return false;
     }
     return true;
@@ -50,7 +51,19 @@ export async function sendEmail({ to, subject, html, text }: Mail): Promise<bool
   }
 }
 
+function escapeHtml(value: string): string {
+  return value.replace(/[&<>"']/g, (ch) => {
+    if (ch === "&") return "&amp;";
+    if (ch === "<") return "&lt;";
+    if (ch === ">") return "&gt;";
+    if (ch === '"') return "&quot;";
+    return "&#39;";
+  });
+}
+
 function welcomeHtml(firstName: string, link: string): string {
+  const safeName = escapeHtml(firstName);
+  const safeLink = escapeHtml(link);
   return `<!doctype html>
 <html>
   <body style="margin:0;padding:32px 16px;background:#050505;font-family:'Helvetica Neue',Arial,sans-serif;">
@@ -62,7 +75,7 @@ function welcomeHtml(firstName: string, link: string): string {
       </tr>
       <tr>
         <td style="padding:16px 28px 0;">
-          <h1 style="margin:0;color:#f3efe6;font-size:24px;font-weight:600;">Welcome, ${firstName}.</h1>
+          <h1 style="margin:0;color:#f3efe6;font-size:24px;font-weight:600;">Welcome, ${safeName}.</h1>
           <p style="margin:14px 0 0;color:#8f877a;font-size:15px;line-height:1.6;">
             You're in. Interlink introduces you to people matched by ambition and profession — and it ends at a real table.
           </p>
@@ -73,7 +86,7 @@ function welcomeHtml(firstName: string, link: string): string {
       </tr>
       <tr>
         <td style="padding:28px;text-align:center;">
-          <a href="${link}" style="display:inline-block;padding:14px 34px;background:#d4c4a8;color:#050505;font-size:13px;font-weight:700;letter-spacing:0.04em;text-decoration:none;border-radius:10px;">
+          <a href="${safeLink}" style="display:inline-block;padding:14px 34px;background:#d4c4a8;color:#050505;font-size:13px;font-weight:700;letter-spacing:0.04em;text-decoration:none;border-radius:10px;">
             Finish your profile
           </a>
         </td>
@@ -88,6 +101,91 @@ function welcomeHtml(firstName: string, link: string): string {
     </table>
   </body>
 </html>`;
+}
+
+/** Comma-separated ADMIN_EMAILS. Recipients only — not an access gate. */
+export function adminNotifyEmails(env: Record<string, string | undefined> = process.env): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const part of (env.ADMIN_EMAILS || "").split(/[,;\s]+/)) {
+    const email = part.trim().toLowerCase();
+    if (!email || seen.has(email)) continue;
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) continue;
+    seen.add(email);
+    out.push(email);
+  }
+  return out;
+}
+
+/**
+ * One note when a member crosses into auto-hide.
+ * Without RESEND_API_KEY or ADMIN_EMAILS this no-ops. The report still saves.
+ */
+export async function sendAutoHideAlert(member: { id: string; name: string }): Promise<void> {
+  try {
+    const recipients = adminNotifyEmails();
+    if (!recipients.length) return;
+    const link = appUrl("/admin/reports");
+    const name = (member.name || "Member").trim() || "Member";
+    const safeName = escapeHtml(name);
+    const subject = `Auto-hidden from Discover: ${name}`;
+    const text = [
+      `${name} (${member.id}) is hidden from Discover.`,
+      "Open reports from enough distinct trusted reporters crossed the auto-hide line.",
+      `Review the queue: ${link}`,
+    ].join("\n");
+    const html = `<p><strong>${safeName}</strong> (${escapeHtml(member.id)}) is hidden from Discover.</p><p>Open reports from enough distinct trusted reporters crossed the auto-hide line.</p><p><a href="${escapeHtml(link)}">Review the queue</a></p>`;
+    await Promise.all(
+      recipients.map((to) => sendEmail({ to, subject, html, text }))
+    );
+  } catch (err) {
+    console.error("[conclave auto-hide alert]", err);
+  }
+}
+
+/** Account-email confirmation. Never logs the token. In development, prints the link when Resend is unset. */
+export async function sendEmailConfirmation(to: string, link: string): Promise<boolean> {
+  const plan = confirmationMailPlan(process.env);
+  if (plan !== "send") {
+    console.warn(EMAIL_CONFIRM_UNCONFIGURED);
+    if (plan === "dev-link") {
+      console.info("[interlink email] development confirmation link:", link);
+    }
+    return false;
+  }
+  const safeLink = escapeHtml(link);
+  return sendEmail({
+    to,
+    subject: "Confirm your Interlink email",
+    html: `<!doctype html>
+<html>
+  <body style="margin:0;padding:32px 16px;background:#050505;font-family:'Helvetica Neue',Arial,sans-serif;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;margin:0 auto;background:#0c0b0a;border:1px solid rgba(212,196,168,0.22);">
+      <tr>
+        <td style="padding:32px 28px 8px;text-align:center;">
+          <p style="margin:0;color:#d4c4a8;font-size:13px;letter-spacing:0.28em;">INTERLINK</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:16px 28px 0;">
+          <h1 style="margin:0;color:#f3efe6;font-size:22px;font-weight:600;">Confirm your email</h1>
+          <p style="margin:14px 0 0;color:#8f877a;font-size:15px;line-height:1.6;">
+            This link expires in 24 hours and works once. If you did not create an Interlink account or ask to change this address, you can ignore it.
+          </p>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:28px;text-align:center;">
+          <a href="${safeLink}" style="display:inline-block;padding:14px 34px;background:#d4c4a8;color:#050505;font-size:13px;font-weight:700;letter-spacing:0.04em;text-decoration:none;border-radius:10px;">
+            Confirm email
+          </a>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`,
+    text: `Confirm your Interlink email.\n\nThis link expires in 24 hours and works once:\n${link}\n\nIf you did not ask for this, ignore it.`,
+  });
 }
 
 /** Sent once, when a member account is first created. */

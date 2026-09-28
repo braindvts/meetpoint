@@ -1,7 +1,8 @@
 "use client";
 
 import PartnerMark from "@/components/PartnerMark";
-import { featuredPartnersInOrder, type FeaturedPartner } from "@/lib/featuredPartners";
+import { trackPartnerClick } from "@/lib/analytics";
+import { publicFeaturedPartners, type FeaturedPartner } from "@/lib/featuredPartners";
 import type { CSSProperties } from "react";
 
 interface Props {
@@ -14,7 +15,7 @@ interface Props {
  * Logo and name sit open on the ink — no plate. BijuuFlow leads.
  */
 export default function FeaturedPartners({ revealed }: Props) {
-  const partners = featuredPartnersInOrder();
+  const partners = publicFeaturedPartners();
   if (partners.length === 0) return null;
 
   return (
@@ -65,7 +66,10 @@ function PartnerCredit({ partner, index }: { partner: FeaturedPartner; index: nu
         rel="noopener noreferrer"
         className="mp-featured-partner-link"
         aria-label={`${partner.name} (opens in a new tab)`}
-        onClick={(event) => event.stopPropagation()}
+        onClick={(event) => {
+          event.stopPropagation();
+          trackPartnerClick(partner.id, "loading");
+        }}
       >
         <span className="mp-featured-partner-mark-wrap">
           <PartnerMark

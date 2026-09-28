@@ -1,12 +1,14 @@
 const WALKTHROUGH_SESSION_FLAG = "conclave.demoOwner";
 
 /**
- * Demo mode is for looking at the app locally. Public env flags default to
- * off. A walkthrough owner session is marked only after the server says so
- * (`demoOwner: true`), which requires ENABLE_WALKTHROUGH_OWNER on the server.
+ * Sample profiles and the walkthrough session are off unless the server
+ * says ENABLE_DEMO_PROFILES is on. NEXT_PUBLIC_ flags and this saved flag
+ * cannot turn them on.
  */
+let serverAllowsDemo = false;
+let serverGateKnown = false;
 
-function walkthroughSessionActive(): boolean {
+function readSavedFlag(): boolean {
   if (typeof window === "undefined") return false;
   try {
     return localStorage.getItem(WALKTHROUGH_SESSION_FLAG) === "1";
@@ -15,19 +17,43 @@ function walkthroughSessionActive(): boolean {
   }
 }
 
-/** Shows "Enter demo" and enables the /demo bypass. */
+/** True after refreshDemoGate has heard from the server. */
+export function demoGateKnown(): boolean {
+  return serverGateKnown;
+}
+
+/** True only after the server has allowed sample profiles for this page. */
 export function demoEntryEnabled(): boolean {
-  return process.env.NEXT_PUBLIC_ENABLE_DEMO === "1" || walkthroughSessionActive();
+  return serverGateKnown && serverAllowsDemo;
 }
 
-/** Puts the sample members in Discover, and lets them accept and reply. */
+/** Puts sample members in Discover only when the server gate is on. */
 export function demoProfilesEnabled(): boolean {
-  return process.env.NEXT_PUBLIC_ENABLE_DEMO_PROFILES === "1" || walkthroughSessionActive();
+  return serverGateKnown && serverAllowsDemo;
 }
 
-/** Mark this browser as a local walkthrough after the server confirms it. */
+export function applyServerDemoGate(enabled: boolean): void {
+  serverGateKnown = true;
+  serverAllowsDemo = enabled;
+  if (!enabled) clearDemoOwnerSession();
+}
+
+/** Ask the server. A public env flag or a saved browser flag is ignored. */
+export async function refreshDemoGate(): Promise<boolean> {
+  try {
+    const res = await fetch("/api/auth/demo", { credentials: "include" });
+    applyServerDemoGate(res.ok);
+    return res.ok;
+  } catch {
+    applyServerDemoGate(false);
+    return false;
+  }
+}
+
+/** Mark this browser only after the server has already allowed demo mode. */
 export function markDemoOwnerSession(): void {
   if (typeof window === "undefined") return;
+  if (!demoEntryEnabled()) return;
   try {
     localStorage.setItem(WALKTHROUGH_SESSION_FLAG, "1");
   } catch {
@@ -42,4 +68,9 @@ export function clearDemoOwnerSession(): void {
   } catch {
     /* ignore */
   }
+}
+
+/** Saved walkthrough flag. It does not enable demo mode by itself. */
+export function savedDemoFlagPresent(): boolean {
+  return readSavedFlag();
 }

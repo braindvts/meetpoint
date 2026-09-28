@@ -6,6 +6,7 @@ import {
   FEATURED_PARTNERS,
   featuredPartnersInOrder,
   partnerMarqueeRepeat,
+  publicFeaturedPartners,
   type FeaturedPartner,
 } from "./featuredPartners";
 
@@ -75,7 +76,7 @@ test("marquee repeats the list enough to loop without a gap", () => {
 
 test("later partners follow the lead without a layout rewrite", () => {
   const partners: FeaturedPartner[] = [
-    { id: "second", name: "Second", href: "https://example.com/second", logoSrc: "/second.svg", logoAlt: "Second" },
+    { id: "second", name: "Second", href: "https://example.com/second", logoSrc: "/second.svg", logoAlt: "Second", permission: "approved" },
     {
       id: "bijuuflow",
       name: "BijuuFlow",
@@ -83,12 +84,61 @@ test("later partners follow the lead without a layout rewrite", () => {
       logoSrc: "/bijuuflow-logo.svg",
       logoAlt: "BijuuFlow",
       lead: true,
+      permission: "approved",
     },
-    { id: "third", name: "Third", href: "https://example.com/third", logoSrc: "/third.svg", logoAlt: "Third" },
+    { id: "third", name: "Third", href: "https://example.com/third", logoSrc: "/third.svg", logoAlt: "Third", permission: "approved" },
   ];
   assert.deepEqual(
     featuredPartnersInOrder(partners).map((partner) => partner.id),
     ["bijuuflow", "second", "third"]
+  );
+});
+
+test("public surfaces omit pending and revoked partners", () => {
+  const hidden: FeaturedPartner[] = [
+    {
+      id: "shown",
+      name: "Shown",
+      href: "https://example.com/shown",
+      logoSrc: "/shown.svg",
+      logoAlt: "Shown",
+      permission: "approved",
+    },
+    {
+      id: "wait",
+      name: "Wait",
+      href: "https://example.com/wait",
+      logoSrc: "/wait.svg",
+      logoAlt: "Wait",
+      permission: "pending",
+    },
+    {
+      id: "graphic",
+      name: "Graphic",
+      href: "https://example.com/graphic",
+      logoSrc: "/graphic.svg",
+      logoAlt: "Graphic",
+      permission: "pending_written_confirmation",
+    },
+    {
+      id: "gone",
+      name: "Gone",
+      href: "https://example.com/gone",
+      logoSrc: "/gone.svg",
+      logoAlt: "Gone",
+      permission: "revoked",
+    },
+  ];
+  assert.deepEqual(
+    publicFeaturedPartners(hidden).map((partner) => partner.id),
+    ["shown", "graphic"]
+  );
+  assert.equal(publicFeaturedPartners().length, FEATURED_PARTNERS.length);
+  assert.ok(
+    FEATURED_PARTNERS.every((partner) => partner.permission === "pending_written_confirmation")
+  );
+  assert.ok(
+    FEATURED_PARTNERS.every((partner) => partner.permissionNote?.includes("written permission"))
   );
 });
 
@@ -111,7 +161,7 @@ test("splash shows featured partners on a short minimal loader", () => {
 
   assert.match(plate, /Supported by our partners/);
   assert.doesNotMatch(plate, /PartnerMarquee|mp-marquee/);
-  assert.match(plate, /featuredPartnersInOrder/);
+  assert.match(plate, /publicFeaturedPartners/);
   assert.match(plate, /PartnerMark/);
   assert.match(plate, /opens in a new tab/);
   assert.match(plate, /stopPropagation/);
@@ -140,7 +190,7 @@ test("splash shows featured partners on a short minimal loader", () => {
   assert.match(css, /stroke-dashoffset:\s*0/);
 
   assert.match(lockup, /Supported by/);
-  assert.match(lockup, /featuredPartnersInOrder/);
+  assert.match(lockup, /publicFeaturedPartners/);
   assert.match(lockup, /target="_blank"/);
   assert.match(lockup, /noopener noreferrer/);
   assert.match(lockup, /partner\.href/);

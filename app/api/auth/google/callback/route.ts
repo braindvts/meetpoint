@@ -1,18 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { rateLimit } from "@/lib/rateLimit";
+import { OAUTH_CALLBACK_IP } from "@/lib/rateCaps";
 import { sendWelcomeEmail } from "@/lib/email";
-import { verifyGoogleIdToken } from "@/lib/googleAuth";
+import { GoogleReauthError, verifyGoogleIdToken, verifyGoogleReauthIdToken } from "@/lib/googleAuth";
 import { withMemberCookie } from "@/lib/memberAuth";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
+import { recordSignup } from "@/lib/recordSignup";
 import { sanitizeName } from "@/lib/sanitize";
+import { postAuthPath } from "@/lib/appPath";
+import { oauthReauthDenied, oauthReauthResponse } from "@/lib/oauthReauthRoute";
 import {
   appUrl,
   clearOAuthStateCookie,
-  consumeOAuthState,
+  consumeOAuthChallenge,
   withSession,
 } from "@/lib/session";
 
 export async function GET(req: NextRequest) {
+  const limited = await rateLimit(req, OAUTH_CALLBACK_IP);
+  if (!limited.ok) return NextResponse.redirect(appUrl("/login?error=rate_limited"));
+
   const url = req.nextUrl;
   const code = url.searchParams.get("code");
   const state = url.searchParams.get("state");
@@ -24,11 +32,12 @@ export async function GET(req: NextRequest) {
   if (!code || !state) {
     return NextResponse.redirect(appUrl("/login?error=missing_code"));
   }
-  const ok = await consumeOAuthState(state);
-  if (!ok) return NextResponse.redirect(appUrl("/login?error=invalid_state"));
+  const challenge = await consumeOAuthChallenge(state);
+  if (!challenge || challenge.state !== state) {
+    return NextResponse.redirect(appUrl("/login?error=invalid_state"));
+  }
 
   try {
-    await purgeDemoResidue();
     const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -41,13 +50,34 @@ export async function GET(req: NextRequest) {
       }),
     });
     if (!tokenRes.ok) {
-      console.error("Google token error", await tokenRes.text());
+      console.error("Google token error", tokenRes.status);
       return NextResponse.redirect(appUrl("/login?error=token_failed"));
     }
     const token = (await tokenRes.json()) as {
       access_token?: string;
       id_token?: string;
     };
+
+    if (challenge.reauth) {
+      if (!token.id_token) return oauthReauthDenied("mismatch");
+      try {
+        const profile = await verifyGoogleReauthIdToken(token.id_token, {
+          nonce: challenge.nonce,
+        });
+        return (
+          (await oauthReauthResponse({
+            intent: challenge.reauth,
+            provider: "google",
+            providerSubject: profile.sub,
+            stateNonce: challenge.nonce,
+          })) ?? oauthReauthDenied("mismatch")
+        );
+      } catch (err) {
+        const code = err instanceof GoogleReauthError ? err.code : "mismatch";
+        console.error("Google reauth rejected", code);
+        return oauthReauthDenied(code);
+      }
+    }
 
     let user: { sub: string; name?: string; email?: string; picture?: string };
 
@@ -60,19 +90,27 @@ export async function GET(req: NextRequest) {
       if (!profileRes.ok) {
         return NextResponse.redirect(appUrl("/login?error=profile_failed"));
       }
-      user = (await profileRes.json()) as {
-        sub: string;
+      const raw = (await profileRes.json()) as {
+        sub?: string;
         name?: string;
         email?: string;
+        email_verified?: boolean;
         picture?: string;
       };
-      if (!user.sub) {
+      if (!raw.sub) {
         return NextResponse.redirect(appUrl("/login?error=profile_failed"));
       }
+      user = {
+        sub: raw.sub,
+        name: raw.name,
+        picture: raw.picture,
+        email: raw.email_verified === true ? raw.email : undefined,
+      };
     } else {
       return NextResponse.redirect(appUrl("/login?error=token_failed"));
     }
 
+    await purgeDemoResidue();
     const email = user.email?.toLowerCase() || null;
     const displayName = sanitizeName(user.name || "Member") || "Member";
     let member = await prisma.member.findFirst({ where: { googleId: user.sub } });
@@ -99,9 +137,14 @@ export async function GET(req: NextRequest) {
         },
       });
       if (email) void sendWelcomeEmail(email, member.name);
+      await recordSignup(member.id, "google");
     }
 
-    const next = member.jobTitle && member.photo ? "/discover" : "/onboarding?google=1";
+    const next = postAuthPath({
+      requested: challenge.next,
+      hasIdentity: !!(member.name?.trim() && member.jobTitle?.trim()),
+      incomplete: "/onboarding?google=1",
+    });
     const res = NextResponse.redirect(appUrl(next));
     clearOAuthStateCookie(res);
     withSession(res, {

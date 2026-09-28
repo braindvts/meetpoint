@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { publicError } from "@/lib/safeError";
 import Stripe from "stripe";
 import { BLACK_MONTHLY_USD, BLACK_YEARLY_USD } from "@/lib/black";
+import { legalConsentDenied } from "@/lib/legalGuard";
 import { getCurrentMember } from "@/lib/memberAuth";
 import { rateLimit } from "@/lib/rateLimit";
 import { appUrl, hasRecentReauth } from "@/lib/session";
@@ -16,7 +17,7 @@ function stripeClient() {
 
 /** Create a Stripe Checkout session. Amounts for BLACK are server-fixed. */
 export async function POST(req: Request) {
-  const limited = rateLimit(req, { name: "billing", limit: 20, windowMs: 60_000 });
+  const limited = await rateLimit(req, { name: "billing", limit: 20, windowMs: 60_000 });
   if (!limited.ok) return limited.response;
 
   const stripe = stripeClient();
@@ -30,6 +31,8 @@ export async function POST(req: Request) {
 
   const me = await getCurrentMember();
   if (!me) return NextResponse.json({ ok: false, error: "Not signed in" }, { status: 401 });
+  const denied = legalConsentDenied(me);
+  if (denied) return denied;
 
   if (me.passwordHash && !(await hasRecentReauth(me.id))) {
     return NextResponse.json(
@@ -67,7 +70,7 @@ export async function POST(req: Request) {
   const chatId = body.chatId?.trim();
   const successPath =
     kind === "booking" && chatId
-      ? `/chats?c=${encodeURIComponent(chatId)}&paid=1`
+      ? `/chats?c=${encodeURIComponent(chatId)}&paid=1&session_id={CHECKOUT_SESSION_ID}`
       : kind.startsWith("black")
         ? "/profile?black=success"
         : "/profile?billing=success";
@@ -112,7 +115,6 @@ export async function POST(req: Request) {
         memberId: me.id,
         chatId: chatId || "",
         meetupAt: body.meetupAt || "",
-        phone: body.phone || "",
       },
     });
 

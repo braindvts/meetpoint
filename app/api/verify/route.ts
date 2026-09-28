@@ -1,18 +1,31 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { legalConsentDenied } from "@/lib/legalGuard";
 import { getCurrentMember } from "@/lib/memberAuth";
-import { rateLimit } from "@/lib/rateLimit";
+import { accountKey, rateLimit } from "@/lib/rateLimit";
+import { VERIFY_IP } from "@/lib/rateCaps";
 import { makeVerification, validateVerification } from "@/lib/verifyRules";
 import type { Verification } from "@/lib/types";
 import { verifySchema } from "@/lib/validation/safety";
 import { parseBody } from "@/lib/validation/parse";
 
 export async function POST(req: Request) {
-  const limited = rateLimit(req, { name: "verify", limit: 30, windowMs: 60_000 });
+  const limited = await rateLimit(req, VERIFY_IP);
   if (!limited.ok) return limited.response;
 
   const me = await getCurrentMember();
   if (!me) return NextResponse.json({ ok: false, error: "Sign in first." }, { status: 401 });
+  const denied = legalConsentDenied(me);
+  if (denied) return denied;
+
+  const accountLimited = await rateLimit(req, {
+    name: "verify-acct",
+    limit: 10,
+    windowMs: 60 * 60_000,
+    scope: "account",
+    keyExtra: accountKey(me.id),
+  });
+  if (!accountLimited.ok) return accountLimited.response;
 
   const parsed = await parseBody(req, verifySchema);
   if (!parsed.ok) return parsed.response;
@@ -39,8 +52,6 @@ export async function POST(req: Request) {
     where: { id: me.id },
     data: {
       verificationsJson: JSON.stringify(next),
-      emailVerifiedAt:
-        method === "company-email" ? new Date().toISOString() : me.emailVerifiedAt,
     },
   });
 

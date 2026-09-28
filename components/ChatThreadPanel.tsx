@@ -31,9 +31,9 @@ import {
 import { findPerson, loadDirectory, refreshDirectory } from "@/lib/directory";
 import type { ChatAttachment, GroupChat, MyProfile } from "@/lib/types";
 
-async function settleBookedMeeting(peerIds: string[]) {
+async function settleBookedMeeting(peerIds: string[], sessionId?: string) {
   for (const peerId of peerIds) {
-    const result = await settleBlackMeeting(peerId);
+    const result = await settleBlackMeeting(peerId, sessionId);
     if (result.awarded) {
       window.dispatchEvent(
         new CustomEvent("meetpoint:toast", {
@@ -207,6 +207,8 @@ export default function ChatThreadPanel({ chatId, embedded = false, onBack }: Pr
   useEffect(() => {
     if (searchParams.get("paid") !== "1") return;
     if (paidHandledRef.current === chatId) return;
+    const sessionId = searchParams.get("session_id") || "";
+    if (process.env.NODE_ENV === "production" && !sessionId) return;
     paidHandledRef.current = chatId;
     const c = getChat(chatId);
     if (!c) return;
@@ -217,7 +219,7 @@ export default function ChatThreadPanel({ chatId, embedded = false, onBack }: Pr
       if (updated) {
         lastUpdatedRef.current = updated.updatedAt;
         setChat({ ...updated, messages: [...updated.messages] });
-        void settleBookedMeeting(updated.memberIds);
+        void settleBookedMeeting(updated.memberIds, sessionId || undefined);
       }
       void import("@/lib/notify").then((n) => n.ensureNotifyPermission());
     }

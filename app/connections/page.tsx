@@ -3,12 +3,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import Nav from "@/components/Nav";
 import PageHeader from "@/components/PageHeader";
 import Avatar from "@/components/Avatar";
 import BlackBadge from "@/components/BlackBadge";
 import BlackConnectionBadge from "@/components/BlackConnectionBadge";
 import EmptyState from "@/components/EmptyState";
+import ProfileProgressPrompt from "@/components/ProfileProgressPrompt";
+import { copyInviteLink } from "@/lib/copyInvite";
 import PersonProfileSheet from "@/components/PersonProfileSheet";
 import RateMeeting from "@/components/RateMeeting";
 import StarRating, { cuisineLine } from "@/components/StarRating";
@@ -183,7 +184,6 @@ export default function ConnectionsPage() {
   if (!profile) {
     return (
       <>
-        <Nav />
         <main className="mp-app px-5 pb-10 pt-6 md:px-6">
           <PageHeader title="Circle" />
           <p className="mt-3 text-sm text-muted">Loading your circle…</p>
@@ -196,7 +196,6 @@ export default function ConnectionsPage() {
 
   return (
     <>
-      <Nav />
       <main className="mp-app px-0 pb-10 md:px-6">
         <PageHeader title="Circle" />
         <div className="px-4 pt-2">
@@ -218,12 +217,15 @@ export default function ConnectionsPage() {
         </div>
 
         <div className="px-4 pb-6 pt-4">
+          <ProfileProgressPrompt profile={profile} />
           {empty ? (
             <EmptyState
-              title="Your circle is quiet"
-              body="When someone wants to connect, or you book a table, it shows up here."
+              title="No connections yet"
+              body="Introductions you accept, and tables you book, land here. Start in Discover, or invite someone to Interlink."
               actionHref="/discover"
-              actionLabel="Discover"
+              actionLabel="Discover people"
+              secondaryLabel="Invite someone"
+              onSecondary={() => void copyInviteLink()}
             />
           ) : (
             <div className="space-y-8">

@@ -2,7 +2,9 @@ import type { Metadata, Viewport } from "next";
 import { Outfit } from "next/font/google";
 import AnalyticsBeacon from "@/components/AnalyticsBeacon";
 import AppChrome from "@/components/AppChrome";
+import LegalConsentGate from "@/components/LegalConsentGate";
 import PlausibleScript from "@/components/PlausibleScript";
+import PublicLegalFooter from "@/components/PublicLegalFooter";
 import ToastHost from "@/components/ToastHost";
 import { SITE_DESCRIPTION, SITE_ORIGIN, SITE_TITLE } from "@/lib/site";
 import "./globals.css";
@@ -49,12 +51,19 @@ export default function RootLayout({
       <head>
         <script
           dangerouslySetInnerHTML={{
+            __html: `(function(){try{if(location.pathname==='/verify-email'){var token=new URLSearchParams(location.search).get('token');if(token){sessionStorage.setItem('interlink.emailConfirm',token);}if(location.search){history.replaceState(null,'','/verify-email');}}}catch(e){}})();`,
+          }}
+        />
+        <script
+          dangerouslySetInnerHTML={{
             __html: `(function(){try{var q=location.search;if(/[?&]shot=1/.test(q)){document.documentElement.setAttribute('data-shot','1');return;}var s=sessionStorage;if(s.getItem('interlink.splash.seen')==='1'||s.getItem('conclave.splash.seen')==='1')return;if(location.pathname.indexOf('/story')===0)return;document.documentElement.classList.add('mp-boot-splash');}catch(e){}})();`,
           }}
         />
       </head>
       <body className="min-h-screen antialiased [text-rendering:optimizeLegibility]">
         <AppChrome>{children}</AppChrome>
+        <PublicLegalFooter />
+        <LegalConsentGate />
         <ToastHost />
         <AnalyticsBeacon />
         <PlausibleScript />

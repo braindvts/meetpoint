@@ -13,7 +13,7 @@ test("landing credits BijuuFlow as a sponsor, not a replacement brand", () => {
   assert.match(page, /Interlink/);
   assert.doesNotMatch(page, /Conclave/);
   assert.match(lockup, /Supported by/);
-  assert.match(lockup, /featuredPartnersInOrder/);
+  assert.match(lockup, /publicFeaturedPartners/);
   assert.match(lockup, /target="_blank"/);
   assert.match(lockup, /noopener noreferrer/);
   assert.match(lockup, /alt=\{partner\.logoAlt\}/);
@@ -74,10 +74,11 @@ test("landing spotlight credits Edgeable with an outbound visit link", () => {
   assert.match(spot, /Featured partner/);
   assert.match(spot, /Cloud-first, multi-broker futures trade copier for prop-firm traders\./);
   assert.match(spot, /Visit Edgeable/);
-  assert.match(spot, /href="https:\/\/edgeable\.app"/);
+  assert.match(spot, /publicFeaturedPartners/);
+  assert.match(spot, /partner\.href/);
   assert.match(spot, /target="_blank"/);
   assert.match(spot, /rel="noopener noreferrer"/);
-  assert.match(spot, /edgeable-logo\.png/);
+  assert.match(spot, /id === "edgeable"/);
   assert.match(spot, /mp-scroll-reveal/);
   assert.doesNotMatch(spot, /investment advice/);
   assert.doesNotMatch(spot, /https:\/\/edgeable\.app\//);

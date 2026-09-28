@@ -91,11 +91,17 @@ export async function respondToBlackInvite(opts: {
 }
 
 /** Called after a table with a BLACK member is actually booked. */
-export async function reportBlackMeeting(peerId: string): Promise<{
+export async function reportBlackMeeting(
+  peerId: string,
+  sessionId?: string
+): Promise<{
   ok?: boolean;
   awarded?: boolean;
   reason?: string;
   blackConnections?: BlackConnectionLevel;
 } | null> {
-  return post("/api/black/meeting", { peerId });
+  return post("/api/black/meeting", {
+    peerId,
+    ...(sessionId ? { sessionId } : {}),
+  });
 }

@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/db";
+import { postAuthPath } from "@/lib/appPath";
+import { purgeDemoResidue } from "@/lib/purgeDemo";
+import { rateLimit } from "@/lib/rateLimit";
+import { OAUTH_CALLBACK_IP } from "@/lib/rateCaps";
+import { oauthReauthResponse } from "@/lib/oauthReauthRoute";
 import {
   appUrl,
   clearOAuthStateCookie,
-  consumeOAuthState,
+  consumeOAuthChallenge,
   withSession,
 } from "@/lib/session";
 
@@ -22,6 +28,9 @@ interface LinkedInUser {
 }
 
 export async function GET(req: NextRequest) {
+  const limited = await rateLimit(req, OAUTH_CALLBACK_IP);
+  if (!limited.ok) return NextResponse.redirect(appUrl("/login?error=rate_limited"));
+
   const url = req.nextUrl;
   const code = url.searchParams.get("code");
   const state = url.searchParams.get("state");
@@ -35,8 +44,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(appUrl("/login?error=missing_code"));
   }
 
-  const ok = await consumeOAuthState(state);
-  if (!ok) {
+  const challenge = await consumeOAuthChallenge(state);
+  if (!challenge || challenge.state !== state) {
     return NextResponse.redirect(appUrl("/login?error=invalid_state"));
   }
 
@@ -76,7 +85,36 @@ export async function GET(req: NextRequest) {
       [user.given_name, user.family_name].filter(Boolean).join(" ") ||
       "LinkedIn Member";
 
-    const res = NextResponse.redirect(appUrl("/onboarding?linkedin=1"));
+    const reauthRes = await oauthReauthResponse({
+      intent: challenge.reauth,
+      provider: "linkedin",
+      providerSubject: user.sub,
+      stateNonce: challenge.nonce,
+    });
+    if (reauthRes) return reauthRes;
+
+    await purgeDemoResidue();
+    const email = user.email?.toLowerCase() || null;
+    // Look up an existing row only to choose the post-login page.
+    // This does not write linkedInId, email, or any other field, and it
+    // does not merge the LinkedIn identity into that account.
+    const linked = await prisma.member.findFirst({
+      where: { linkedInId: user.sub },
+      select: { name: true, jobTitle: true },
+    });
+    const sameEmail = !linked && email
+      ? await prisma.member.findFirst({
+          where: { email },
+          select: { name: true, jobTitle: true },
+        })
+      : null;
+    const identitySource = linked || sameEmail;
+    const dest = postAuthPath({
+      requested: challenge.next,
+      hasIdentity: !!(identitySource?.name?.trim() && identitySource?.jobTitle?.trim()),
+      incomplete: "/onboarding?linkedin=1",
+    });
+    const res = NextResponse.redirect(appUrl(dest));
     clearOAuthStateCookie(res);
     return withSession(res, {
       id: user.sub,

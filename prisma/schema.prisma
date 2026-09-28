@@ -28,6 +28,14 @@ model Member {
   ideaTagsJson   String   @default("[]")
   verificationsJson String @default("[]")
   workJson       String   @default("[]")
+  /// Employer or venture. Public. Empty until the member sets it.
+  company        String   @default("")
+  /// Canonical industry label (see lib/interests.ts). Empty until set.
+  industry       String   @default("")
+  /// True for seeded, guest, and bot profiles. Real signups stay false.
+  isSample       Boolean  @default(false)
+  /// seed | guest | bot | sample | empty for a real member
+  sampleKind     String   @default("")
   phone          String?
   black          Boolean  @default(false)
   blackSince     DateTime?
@@ -37,8 +45,16 @@ model Member {
   premierInterval String?
   premierStartedAt String?
   premierTrialEndsAt String?
+  /// Set only when a confirmation link matches this member and account email.
   emailVerifiedAt String?
   meetingsAttended Int    @default(0)
+  /// Set only when the member checks the consent box. Null means not accepted.
+  termsAcceptedAt   DateTime?
+  termsVersion      String?
+  privacyAcceptedAt DateTime?
+  privacyVersion    String?
+  /// Set when the account is anonymized. The row stays for payment and safety records.
+  deletedAt         DateTime?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
@@ -52,6 +68,41 @@ model Member {
   blackInvitesReceived BlackInvite[]     @relation("blackInviteTo")
   blackConnectionsHeld BlackConnection[] @relation("blackHolder")
   blackConnectionsWith BlackConnection[] @relation("blackPeer")
+  interests            MemberInterest[]
+  eventInterests       EventInterest[]
+  emailVerificationTokens EmailVerificationToken[]
+
+  @@index([isSample])
+  @@index([deletedAt])
+}
+
+/// One row per canonical interest a member selected.
+/// Slugs come from lib/interests.ts — not free text.
+/// Custom tags stay on Member.ideaTagsJson and are not rows here.
+model MemberInterest {
+  memberId String
+  slug     String
+  member   Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@id([memberId, slug])
+  @@index([slug])
+}
+
+/// One RSVP per member per catalog event.
+/// Matches the live EventInterest table (see 20260913040000_event_interest):
+/// id, memberId, eventId, status, createdAt, updatedAt.
+/// status is interested | going | passed. Older rows may use saved for interested.
+model EventInterest {
+  id        String   @id @default(cuid())
+  memberId  String
+  eventId   String
+  status    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  member    Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([memberId, eventId])
+  @@index([memberId])
 }
 
 /// An invitation into the BLACK network, always raised inside a private DM.
@@ -97,8 +148,9 @@ model Block {
   blockerId String
   blockedId String
   createdAt DateTime @default(now())
-  blocker   Member   @relation("blocker", fields: [blockerId], references: [id], onDelete: Cascade)
-  blocked   Member   @relation("blocked", fields: [blockedId], references: [id], onDelete: Cascade)
+  /// Restrict: anonymized accounts keep the row, and deleting a member must not erase a block.
+  blocker   Member   @relation("blocker", fields: [blockerId], references: [id], onDelete: Restrict)
+  blocked   Member   @relation("blocked", fields: [blockedId], references: [id], onDelete: Restrict)
 
   @@unique([blockerId, blockedId])
   @@index([blockedId])
@@ -113,6 +165,17 @@ model AnalyticsEvent {
   createdAt DateTime @default(now())
 
   @@index([name, createdAt])
+}
+
+/// Fixed-window counters shared across Vercel serverless isolates.
+/// Keys are route + IP, or route + a hash of the account — never a raw email.
+model RateLimitBucket {
+  key       String   @id
+  count     Int      @default(0)
+  resetAt   DateTime
+  updatedAt DateTime @updatedAt
+
+  @@index([resetAt])
 }
 
 model Connection {
@@ -164,11 +227,12 @@ model Message {
 
 /// Safety report. Production already stores alsoBlocked, category, notes,
 /// and status — keep them on the model so schema sync never DROP them.
+/// reporterId and peerId are not foreign keys, so a member delete cannot cascade these rows away.
 model Report {
   id          String   @id @default(cuid())
   reporterId  String
   peerId      String
-  /// harassment | spam | fake_profile | inappropriate | scam | other
+  /// harassment | spam | fraud | impersonation | inappropriate | suspicious_account | fake_profile | scam | other
   category    String   @default("other")
   reason      String
   /// open | reviewing | resolved | dismissed
@@ -181,4 +245,18 @@ model Report {
   @@index([status, createdAt])
   @@index([peerId, createdAt])
   @@index([reporterId, createdAt])
+}
+
+/// Single-use account-email confirmation. Only the hash is stored.
+model EmailVerificationToken {
+  id        String    @id @default(cuid())
+  memberId  String
+  email     String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  member    Member    @relation(fields: [memberId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([memberId])
 }

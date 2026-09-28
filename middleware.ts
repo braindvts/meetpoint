@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { csrfOriginAllowed } from "@/lib/csrfOrigin";
 
 const MUTATING = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
@@ -16,14 +17,33 @@ function appOrigin(): string | null {
 }
 
 function isAllowedOrigin(origin: string, allowed: string): boolean {
-  if (origin === allowed) return true;
+  if (csrfOriginAllowed(origin, allowed)) return true;
   try {
     const host = new URL(origin).hostname;
-    if (host.endsWith(".vercel.app")) return true;
     if (host === "localhost" || host === "127.0.0.1") return process.env.NODE_ENV !== "production";
   } catch {
     return false;
   }
+  return false;
+}
+
+function sameSecret(got: string, expected: string): boolean {
+  if (!expected || got.length !== expected.length) return false;
+  let diff = 0;
+  for (let i = 0; i < got.length; i++) diff |= got.charCodeAt(i) ^ expected.charCodeAt(i);
+  return diff === 0;
+}
+
+/** CSRF skip only for a real admin or notify secret, not any Authorization header. */
+function serviceAuthBypassesCsrf(req: NextRequest): boolean {
+  const admin = process.env.ADMIN_SECRET?.trim() || "";
+  const notify = process.env.NOTIFY_SECRET?.trim() || "";
+  const auth = req.headers.get("authorization") || "";
+  const bearer = auth.startsWith("Bearer ") ? auth.slice(7).trim() : "";
+  const headerSecret = req.headers.get("x-admin-secret")?.trim() || "";
+  const notifyHeader = req.headers.get("x-conclave-notify")?.trim() || "";
+  if (admin && (sameSecret(bearer, admin) || sameSecret(headerSecret, admin))) return true;
+  if (notify && sameSecret(notifyHeader, notify)) return true;
   return false;
 }
 
@@ -84,11 +104,7 @@ export function middleware(req: NextRequest) {
           ok = false;
         }
       }
-      const hasServiceAuth =
-        !!req.headers.get("authorization") ||
-        !!req.headers.get("x-admin-secret") ||
-        !!req.headers.get("x-conclave-notify");
-      if (!ok && !hasServiceAuth) {
+      if (!ok && !serviceAuthBypassesCsrf(req)) {
         return NextResponse.json(
           { ok: false, error: "Forbidden origin" },
           { status: 403 }

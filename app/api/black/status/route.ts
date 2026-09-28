@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { publicError } from "@/lib/safeError";
 import { prisma } from "@/lib/db";
+import { legalConsentDenied } from "@/lib/legalGuard";
 import { getCurrentMember } from "@/lib/memberAuth";
 import { blackConnectionLevel } from "@/lib/black";
 import {
@@ -17,6 +18,8 @@ export async function GET() {
     await purgeDemoResidue();
     const me = await getCurrentMember();
     if (!me) return NextResponse.json({ ok: false, error: "Sign in first" }, { status: 401 });
+    const denied = legalConsentDenied(me);
+    if (denied) return denied;
 
     const [count, invites] = await Promise.all([
       blackConnectionCount(me.id),

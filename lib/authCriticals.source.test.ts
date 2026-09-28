@@ -34,6 +34,7 @@ test("the tree does not publish an owner mailbox or password", () => {
 test("email signup 409s on any existing member, not only password hashes", () => {
   const src = readFileSync(join(ROOT, "app/api/auth/email/route.ts"), "utf8");
   assert.match(src, /emailSignupTaken\(existing\)/);
+  assert.match(src, /mode:\s*"insensitive"/);
   assert.doesNotMatch(src, /existing\?\.passwordHash/);
   assert.doesNotMatch(src, /existing\s*\?\s*await prisma\.member\.update/);
   assert.doesNotMatch(src, /ensureDemoOwner\(\)/);

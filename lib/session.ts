@@ -1,6 +1,14 @@
 import { createHmac, randomBytes, timingSafeEqual } from "crypto";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { safeAppPath } from "./appPath";
+import { claimOAuthNonceStored } from "./oauthNonceStore";
+import {
+  evaluateOAuthState,
+  type OAuthReauthBind,
+  type OAuthReauthIntent,
+  type OAuthStatePayload,
+} from "./oauthReauth";
 
 export type AuthProvider = "linkedin" | "google" | "apple" | "email";
 
@@ -19,6 +27,7 @@ export interface AuthSession {
 const COOKIE = "meetpoint_session";
 const STATE_COOKIE = "meetpoint_oauth_state";
 const REAUTH_COOKIE = "conclave_reauth";
+const REAUTH_BIND_COOKIE = "meetpoint_reauth_bind";
 
 /** Session lifetime — short-term credentials (7 days). */
 export const SESSION_TTL_SEC = 60 * 60 * 24 * 7;
@@ -34,17 +43,26 @@ function secret(): string {
   return process.env.LINKEDIN_CLIENT_SECRET?.trim() || "meetpoint-dev-secret";
 }
 
-export function signValue(payload: string): string {
-  const sig = createHmac("sha256", secret()).update(payload).digest("base64url");
+/**
+ * Each signed cookie has its own HMAC input (`type|payload`) and a purpose
+ * field that the reader requires. A bind cookie cannot satisfy a reauth
+ * proof, and a session or OAuth state cannot satisfy either.
+ * Email confirmation tokens are random secrets stored as SHA-256 hashes, not
+ * these signatures. Admin access compares ADMIN_SECRET directly.
+ */
+export type SignedTokenType = "session" | "oauth-state" | "reauth-proof" | "reauth-bind" | "member";
+
+export function signValue(type: SignedTokenType, payload: string): string {
+  const sig = createHmac("sha256", secret()).update(`${type}|${payload}`).digest("base64url");
   return `${payload}.${sig}`;
 }
 
-export function verifyValue(token: string): string | null {
+export function verifyValue(type: SignedTokenType, token: string): string | null {
   const i = token.lastIndexOf(".");
   if (i < 0) return null;
   const payload = token.slice(0, i);
   const sig = token.slice(i + 1);
-  const expected = createHmac("sha256", secret()).update(payload).digest("base64url");
+  const expected = createHmac("sha256", secret()).update(`${type}|${payload}`).digest("base64url");
   try {
     const a = Buffer.from(sig);
     const b = Buffer.from(expected);
@@ -55,25 +73,48 @@ export function verifyValue(token: string): string | null {
   }
 }
 
-function withExpiry(session: AuthSession, ttlSec: number): AuthSession {
+function withExpiry(session: AuthSession, ttlSec: number): AuthSession & { purpose: "session" } {
   const iat = Math.floor(Date.now() / 1000);
-  return { ...session, iat, exp: iat + ttlSec };
+  return { ...session, purpose: "session", iat, exp: iat + ttlSec };
 }
 
 export function encodeSession(session: AuthSession): string {
   const full = withExpiry(session, SESSION_TTL_SEC);
-  return signValue(Buffer.from(JSON.stringify(full)).toString("base64url"));
+  return signValue("session", Buffer.from(JSON.stringify(full)).toString("base64url"));
 }
 
 export function decodeSession(token: string): AuthSession | null {
-  const payload = verifyValue(token);
+  const payload = verifyValue("session", token);
   if (!payload) return null;
   try {
-    const session = JSON.parse(
-      Buffer.from(payload, "base64url").toString("utf8")
-    ) as AuthSession;
+    const session = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as AuthSession & {
+      purpose?: string;
+    };
+    if (session.purpose !== "session") return null;
     if (session.exp && Math.floor(Date.now() / 1000) > session.exp) return null;
-    return session;
+    const { purpose: _purpose, ...rest } = session;
+    return rest;
+  } catch {
+    return null;
+  }
+}
+
+export function signMemberCookie(memberId: string): string {
+  const payload = Buffer.from(JSON.stringify({ purpose: "member", memberId })).toString("base64url");
+  return signValue("member", payload);
+}
+
+export function readMemberCookie(token: string): string | null {
+  const payload = verifyValue("member", token);
+  if (!payload) return null;
+  try {
+    const data = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as {
+      purpose?: string;
+      memberId?: string;
+    };
+    if (data.purpose !== "member" || typeof data.memberId !== "string" || !data.memberId) return null;
+    if (data.memberId.length > 80) return null;
+    return data.memberId;
   } catch {
     return null;
   }
@@ -84,6 +125,22 @@ function cookieOpts(maxAge: number) {
     httpOnly: true,
     sameSite: "lax" as const,
     secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge,
+  };
+}
+
+/**
+ * Apple’s callback is a cross-site form POST, which does not include Lax cookies.
+ * The OAuth state and the reauth bind cookie use SameSite=None in production
+ * so that POST can present them. The session cookie stays Lax.
+ */
+export function oauthStateCookieOptions(maxAge: number) {
+  const crossSite = process.env.NODE_ENV === "production";
+  return {
+    httpOnly: true,
+    sameSite: crossSite ? ("none" as const) : ("lax" as const),
+    secure: crossSite,
     path: "/",
     maxAge,
   };
@@ -112,59 +169,197 @@ export async function clearSession(): Promise<void> {
   jar.delete(REAUTH_COOKIE);
 }
 
-export type OAuthChallenge = { state: string; nonce: string };
+export type OAuthChallenge = OAuthStatePayload;
 
-export async function createOAuthState(): Promise<OAuthChallenge & { cookieValue: string }> {
+export async function createOAuthState(
+  nextPath?: string | null,
+  reauth?: { memberId: string; provider: OAuthReauthIntent["provider"] }
+): Promise<OAuthChallenge & { cookieValue: string }> {
   const state = randomBytes(16).toString("hex");
   const nonce = randomBytes(16).toString("hex");
-  return { state, nonce, cookieValue: signValue(JSON.stringify({ state, nonce })) };
+  const next = safeAppPath(nextPath) || undefined;
+  const now = Math.floor(Date.now() / 1000);
+  const exp = now + REAUTH_TTL_SEC;
+  const payload: OAuthStatePayload = {
+    state,
+    nonce,
+    exp,
+    ...(next ? { next } : {}),
+    ...(reauth
+      ? {
+          reauth: {
+            purpose: "reauth" as const,
+            memberId: reauth.memberId,
+            provider: reauth.provider,
+            exp,
+          },
+        }
+      : {}),
+  };
+  const signedBody = JSON.stringify({ purpose: "oauth-state", ...payload });
+  return {
+    ...payload,
+    cookieValue: signValue("oauth-state", signedBody),
+  };
 }
 
 export function applyOAuthStateCookie(res: NextResponse, cookieValue: string): NextResponse {
-  res.cookies.set(STATE_COOKIE, cookieValue, cookieOpts(60 * 10));
+  res.cookies.set(STATE_COOKIE, cookieValue, oauthStateCookieOptions(60 * 10));
   return res;
 }
 
-function parseOAuthChallenge(payload: string): OAuthChallenge | null {
-  try {
-    const parsed = JSON.parse(payload) as Partial<OAuthChallenge>;
-    if (typeof parsed.state === "string" && parsed.state && typeof parsed.nonce === "string") {
-      return { state: parsed.state, nonce: parsed.nonce };
-    }
-  } catch {
-    /* ignore */
-  }
-  return null;
+export function buildReauthBindToken(
+  bind: OAuthReauthBind,
+  nowSec = Math.floor(Date.now() / 1000)
+): string {
+  const payload = Buffer.from(
+    JSON.stringify({ purpose: "reauth-bind", ...bind, iat: nowSec })
+  ).toString("base64url");
+  return signValue("reauth-bind", payload);
 }
 
-/** Read and drop the one-time OAuth state cookie. */
-export async function consumeOAuthChallenge(): Promise<OAuthChallenge | null> {
+export function readReauthBindToken(
+  token: string,
+  nowSec = Math.floor(Date.now() / 1000)
+): OAuthReauthBind | null {
+  const payload = verifyValue("reauth-bind", token);
+  if (!payload) return null;
+  try {
+    const data = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as {
+      purpose?: string;
+      memberId?: string;
+      nonce?: string;
+      exp?: number;
+    };
+    if (data.purpose !== "reauth-bind") return null;
+    if (!data.memberId || !data.nonce || typeof data.exp !== "number") return null;
+    if (nowSec > data.exp) return null;
+    return { memberId: data.memberId, nonce: data.nonce, exp: data.exp };
+  } catch {
+    return null;
+  }
+}
+
+/** Bind the deletion flow to the member who is signed in when it starts. */
+export function applyReauthBindCookie(
+  res: NextResponse,
+  memberId: string,
+  nonce: string
+): NextResponse {
+  const nowSec = Math.floor(Date.now() / 1000);
+  const token = buildReauthBindToken({ memberId, nonce, exp: nowSec + REAUTH_TTL_SEC }, nowSec);
+  res.cookies.set(REAUTH_BIND_COOKIE, token, oauthStateCookieOptions(REAUTH_TTL_SEC));
+  return res;
+}
+
+export async function readReauthBindCookie(): Promise<OAuthReauthBind | null> {
+  const jar = await cookies();
+  const raw = jar.get(REAUTH_BIND_COOKIE)?.value;
+  if (!raw) return null;
+  return readReauthBindToken(raw);
+}
+
+export function clearReauthBindCookie(res: NextResponse): NextResponse {
+  res.cookies.set(REAUTH_BIND_COOKIE, "", { ...oauthStateCookieOptions(0), maxAge: 0 });
+  return res;
+}
+
+function parseOAuthChallenge(payload: string): OAuthStatePayload | null {
+  try {
+    const parsed = JSON.parse(payload) as Partial<OAuthStatePayload> & {
+      purpose?: string;
+      reauth?: Partial<OAuthReauthIntent>;
+    };
+    if (parsed.purpose !== "oauth-state") return null;
+    if (typeof parsed.state !== "string" || !parsed.state) return null;
+    if (typeof parsed.nonce !== "string" || !parsed.nonce) return null;
+    if (typeof parsed.exp !== "number" || !Number.isFinite(parsed.exp)) return null;
+    const next = safeAppPath(typeof parsed.next === "string" ? parsed.next : null) || undefined;
+    let reauth: OAuthReauthIntent | undefined;
+    if (parsed.reauth != null) {
+      const intent = parsed.reauth;
+      const provider = intent.provider;
+      if (
+        intent.purpose !== "reauth" ||
+        (provider !== "google" && provider !== "apple" && provider !== "linkedin") ||
+        typeof intent.memberId !== "string" ||
+        !intent.memberId ||
+        intent.memberId.length > 80 ||
+        typeof intent.exp !== "number"
+      ) {
+        return null;
+      }
+      reauth = { purpose: "reauth", memberId: intent.memberId, provider, exp: intent.exp };
+    }
+    return { state: parsed.state, nonce: parsed.nonce, exp: parsed.exp, next, reauth };
+  } catch {
+    return null;
+  }
+}
+
+/** Read and drop the one-time OAuth state cookie. Rejects a replay or an expired signature. */
+export async function consumeOAuthChallenge(presentedState: string): Promise<OAuthChallenge | null> {
   const jar = await cookies();
   const raw = jar.get(STATE_COOKIE)?.value;
   if (!raw) return null;
   jar.delete(STATE_COOKIE);
-  const payload = verifyValue(raw);
+  const payload = verifyValue("oauth-state", raw);
   if (!payload) return null;
-  return parseOAuthChallenge(payload);
+  const parsed = parseOAuthChallenge(payload);
+  const decision = evaluateOAuthState({
+    payload: parsed,
+    presentedState,
+    nowSec: Math.floor(Date.now() / 1000),
+  });
+  if (!decision.ok) return null;
+  const stored = await claimOAuthNonceStored(decision.payload.nonce, decision.payload.exp);
+  if (!stored) return null;
+  return decision.payload;
 }
 
 export async function consumeOAuthState(state: string): Promise<boolean> {
-  const challenge = await consumeOAuthChallenge();
-  return !!challenge && challenge.state === state;
+  const challenge = await consumeOAuthChallenge(state);
+  return !!challenge;
 }
 
 export function clearOAuthStateCookie(res: NextResponse): NextResponse {
-  res.cookies.set(STATE_COOKIE, "", { ...cookieOpts(0), maxAge: 0 });
+  res.cookies.set(STATE_COOKIE, "", { ...oauthStateCookieOptions(0), maxAge: 0 });
   return res;
 }
 
-/** Issue short-lived re-auth proof after password confirmation. */
-export function withReauth(res: NextResponse, memberId: string): NextResponse {
-  const iat = Math.floor(Date.now() / 1000);
+/** Signed 10-minute proof. The cookie helpers store this value. */
+export function buildReauthToken(memberId: string, nowSec = Math.floor(Date.now() / 1000)): string {
   const payload = Buffer.from(
-    JSON.stringify({ memberId, iat, exp: iat + REAUTH_TTL_SEC })
+    JSON.stringify({ purpose: "reauth-proof", memberId, iat: nowSec, exp: nowSec + REAUTH_TTL_SEC })
   ).toString("base64url");
-  res.cookies.set(REAUTH_COOKIE, signValue(payload), cookieOpts(REAUTH_TTL_SEC));
+  return signValue("reauth-proof", payload);
+}
+
+export function readReauthToken(
+  token: string,
+  memberId: string,
+  nowSec = Math.floor(Date.now() / 1000)
+): boolean {
+  const payload = verifyValue("reauth-proof", token);
+  if (!payload) return false;
+  try {
+    const data = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as {
+      purpose?: string;
+      memberId?: string;
+      exp?: number;
+    };
+    if (data.purpose !== "reauth-proof") return false;
+    if (data.memberId !== memberId) return false;
+    if (!data.exp || nowSec > data.exp) return false;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Issue short-lived re-auth proof after a password or matching OAuth re-login. */
+export function withReauth(res: NextResponse, memberId: string): NextResponse {
+  res.cookies.set(REAUTH_COOKIE, buildReauthToken(memberId), cookieOpts(REAUTH_TTL_SEC));
   return res;
 }
 
@@ -172,19 +367,7 @@ export async function hasRecentReauth(memberId: string): Promise<boolean> {
   const jar = await cookies();
   const raw = jar.get(REAUTH_COOKIE)?.value;
   if (!raw) return false;
-  const payload = verifyValue(raw);
-  if (!payload) return false;
-  try {
-    const data = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as {
-      memberId?: string;
-      exp?: number;
-    };
-    if (data.memberId !== memberId) return false;
-    if (!data.exp || Math.floor(Date.now() / 1000) > data.exp) return false;
-    return true;
-  } catch {
-    return false;
-  }
+  return readReauthToken(raw, memberId);
 }
 
 export function appUrl(path = ""): string {

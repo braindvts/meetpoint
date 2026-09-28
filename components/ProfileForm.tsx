@@ -4,9 +4,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CITIES, cityKey, indexOfCity, nearestCity } from "@/lib/cities";
 import { IDEA_TAGS, POPULAR_TAGS } from "@/lib/data";
+import { canonicalIdeaTag, isAllowedIdeaTag, isCatalogIdeaTag } from "@/lib/ideaTags";
+import { IDEA_TAG_LIMIT, INDUSTRIES, partitionIdeaTags } from "@/lib/interests";
 import { showToast } from "@/lib/notify";
 import { formatPhoneDisplay, isValidPhone } from "@/lib/phone";
-import { saveProfile } from "@/lib/store";
+import { isDemoProfile, loadProfile, saveProfile } from "@/lib/store";
 import { hasRequiredVerifications } from "@/lib/tiers";
 import { makeVerification, validateVerification } from "@/lib/verifyRules";
 import type {
@@ -138,14 +140,19 @@ function TagChip({
 export default function ProfileForm({
   initial,
   focusVerification = false,
+  extrasOnly = false,
 }: {
   initial?: MyProfile | null;
   /** From Discover when Connect is locked — scroll to and highlight Verification. */
   focusVerification?: boolean;
+  /** Credentials, travel, and projects. Identity fields live in the profile editor. */
+  extrasOnly?: boolean;
 }) {
   const router = useRouter();
   const [name, setName] = useState(initial?.name ?? "");
   const [jobTitle, setJobTitle] = useState(initial?.jobTitle ?? "");
+  const [company, setCompany] = useState(initial?.company ?? "");
+  const [industry, setIndustry] = useState(initial?.industry ?? "");
   const [bio, setBio] = useState(initial?.bio ?? "");
   const [photo, setPhoto] = useState(initial?.photo ?? "");
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -156,7 +163,18 @@ export default function ProfileForm({
   });
   const [travel, setTravel] = useState<TravelRange>(initial?.travel ?? "worldwide");
   const [lookingFor, setLookingFor] = useState<LookingFor[]>(initial?.lookingFor ?? []);
-  const [ideaTags, setIdeaTags] = useState<string[]>(initial?.ideaTags ?? []);
+  const [ideaTags, setIdeaTags] = useState<string[]>(() => {
+    const kept: string[] = [];
+    const seen = new Set<string>();
+    for (const raw of initial?.ideaTags ?? []) {
+      const tag = canonicalIdeaTag(raw);
+      if (!tag || seen.has(tag.toLowerCase())) continue;
+      seen.add(tag.toLowerCase());
+      kept.push(tag);
+      if (kept.length >= 12) break;
+    }
+    return kept;
+  });
   const [verifyValues, setVerifyValues] = useState<Partial<Record<VerificationMethod, string>>>(
     () => {
       const next: Partial<Record<VerificationMethod, string>> = {};
@@ -205,9 +223,14 @@ export default function ProfileForm({
   }
 
   function toggleTag(tag: string) {
-    setIdeaTags((tags) =>
-      tags.includes(tag) ? tags.filter((t) => t !== tag) : [...tags, tag]
-    );
+    const canonical = canonicalIdeaTag(tag);
+    setIdeaTags((tags) => {
+      const existing = tags.find((item) => item.toLowerCase() === tag.trim().toLowerCase());
+      if (existing) return tags.filter((item) => item !== existing);
+      if (!canonical || !isAllowedIdeaTag(canonical)) return tags;
+      if (tags.length >= IDEA_TAG_LIMIT) return tags;
+      return [...tags, canonical];
+    });
     clearFieldError("ideaTags");
   }
 
@@ -218,7 +241,6 @@ export default function ProfileForm({
     clearFieldError("lookingFor");
   }
 
-  const customTags = ideaTags.filter((t) => !IDEA_TAGS.includes(t));
   const query = tagSearch.trim();
 
   const searchResults = useMemo(() => {
@@ -228,15 +250,14 @@ export default function ProfileForm({
   }, [query]);
 
   const exactExists =
-    !!query &&
-    [...IDEA_TAGS, ...customTags].some((t) => t.toLowerCase() === query.toLowerCase());
-
-  function addCustomTag() {
-    if (!query || exactExists) return;
-    setIdeaTags((tags) => [...tags, query]);
-    setTagSearch("");
-    clearFieldError("ideaTags");
-  }
+    !!query && IDEA_TAGS.some((t) => t.toLowerCase() === query.toLowerCase());
+  const customToAdd = (() => {
+    if (!query || exactExists) return "";
+    const tag = canonicalIdeaTag(query);
+    if (!tag || isCatalogIdeaTag(tag)) return "";
+    if (ideaTags.some((item) => item.toLowerCase() === tag.toLowerCase())) return "";
+    return tag;
+  })();
 
   async function onPhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -259,23 +280,35 @@ export default function ProfileForm({
     const nextErrors: Partial<Record<string, string>> = {};
     const missing: string[] = [];
 
-    if (!photo) {
+    const latest = extrasOnly ? loadProfile() : null;
+    const nameValue = latest?.name ?? name;
+    const jobTitleValue = latest?.jobTitle ?? jobTitle;
+    const photoValue = latest?.photo ?? photo;
+    const companyValue = latest?.company ?? company;
+    const industryValue = latest?.industry ?? industry;
+    const bioValue = latest?.bio ?? bio;
+    const lookingValue = latest?.lookingFor ?? lookingFor;
+    const tagsValue = latest?.ideaTags ?? ideaTags;
+    const cityValue = latest?.city ?? CITIES[cityIdx];
+
+    if (!photoValue) {
       nextErrors.photo = "Add a real photo of yourself.";
       missing.push("Photo");
     }
-    if (!name.trim()) {
+    if (!nameValue.trim()) {
       nextErrors.name = "Enter your full name.";
       missing.push("Full name");
     }
-    if (!jobTitle.trim()) {
+    if (!jobTitleValue.trim()) {
       nextErrors.jobTitle = "Enter your job or role.";
       missing.push("Job / role");
     }
-    if (ideaTags.length === 0) {
-      nextErrors.ideaTags = "Pick at least one business idea or interest.";
+    const interests = partitionIdeaTags(tagsValue).labels;
+    if (interests.length === 0) {
+      nextErrors.ideaTags = "Add at least one interest.";
       missing.push("Ambitions");
     }
-    if (lookingFor.length === 0) {
+    if (lookingValue.length === 0) {
       nextErrors.lookingFor = "Choose what you’re looking for.";
       missing.push("Looking for");
     }
@@ -339,15 +372,17 @@ export default function ProfileForm({
       .filter((w) => w.title);
 
     const nextProfile: MyProfile = {
-      name: name.trim(),
-      jobTitle: jobTitle.trim(),
-      bio: bio.trim(),
-      photo,
-      city: CITIES[cityIdx],
+      name: nameValue.trim(),
+      jobTitle: jobTitleValue.trim(),
+      company: companyValue.trim(),
+      industry: industryValue.trim(),
+      bio: bioValue.trim(),
+      photo: photoValue,
+      city: cityValue,
       travel,
       meetPreference: "open",
-      lookingFor,
-      ideaTags,
+      lookingFor: lookingValue,
+      ideaTags: interests,
       verifications,
       work: projects,
       phone: phone.trim() ? formatPhoneDisplay(phone) : undefined,
@@ -387,6 +422,11 @@ export default function ProfileForm({
 
     setHighlightVerify(false);
     setSaving(false);
+
+    if (!isDemoProfile(nextProfile) && !synced) {
+      showToast("Couldn’t save to your account. Check your connection and try again.");
+      return;
+    }
 
     if (wasVerified && !nowVerified) {
       showToast(synced ? "Saved — you’re a Member again" : "Saved on this device — you’re a Member again");
@@ -429,6 +469,27 @@ export default function ProfileForm({
         </div>
       )}
 
+      {extrasOnly ? (
+        <label className="block">
+          <span className={labelCls}>Mobile</span>
+          <input
+            className={fieldErrors.phone ? fieldWarn : field}
+            inputMode="tel"
+            autoComplete="tel"
+            value={phone}
+            onChange={(e) => {
+              setPhone(e.target.value);
+              clearFieldError("phone");
+            }}
+            placeholder="(555) 123-4567"
+            aria-invalid={!!fieldErrors.phone}
+          />
+          {fieldErrors.phone && <p className={errCls}>{fieldErrors.phone}</p>}
+        </label>
+      ) : null}
+
+      {!extrasOnly ? (
+      <>
       <Section
         id="section-identity"
         num="01"
@@ -519,6 +580,33 @@ export default function ProfileForm({
               {fieldErrors.jobTitle && <p className={errCls}>{fieldErrors.jobTitle}</p>}
             </label>
             <label className="block">
+              <span className={labelCls}>Company</span>
+              <input
+                className={field}
+                value={company}
+                onChange={(e) => setCompany(e.target.value)}
+                placeholder="Company or venture"
+                maxLength={120}
+              />
+            </label>
+            <label className="block">
+              <span className={labelCls}>Industry</span>
+              <select
+                className={`${field} cursor-pointer appearance-none`}
+                value={industry}
+                onChange={(e) => setIndustry(e.target.value)}
+              >
+                <option value="" className="bg-panel text-ivory">
+                  Select an industry
+                </option>
+                {INDUSTRIES.map((label) => (
+                  <option key={label} value={label} className="bg-panel text-ivory">
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="block">
               <span className={labelCls}>Mobile</span>
               <input
                 className={fieldErrors.phone ? fieldWarn : field}
@@ -544,7 +632,7 @@ export default function ProfileForm({
         id="section-ambitions"
         num="02"
         title="Ambitions"
-        subtitle="What you’re building — pick all that fit, or search your own."
+        subtitle="What you’re building — pick from the list or add your own. Up to 24."
         missing={!!fieldErrors.ideaTags}
         missingLabel={fieldErrors.ideaTags}
       >
@@ -559,12 +647,13 @@ export default function ProfileForm({
                 if (searchResults.length === 1) {
                   toggleTag(searchResults[0]);
                   setTagSearch("");
-                } else if (!exactExists) {
-                  addCustomTag();
+                } else if (customToAdd) {
+                  toggleTag(customToAdd);
+                  setTagSearch("");
                 }
               }
             }}
-            placeholder="Search ideas… or type your own"
+            placeholder="Search interests"
           />
         </div>
 
@@ -574,17 +663,6 @@ export default function ProfileForm({
             <div className="flex flex-wrap gap-1.5">
               {ideaTags.map((tag) => (
                 <TagChip key={tag} tag={tag} selected onClick={() => toggleTag(tag)} remove />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {customTags.length > 0 && (
-          <div className="mb-3">
-            <p className={`mb-1.5 ${labelCls}`}>Your own ideas</p>
-            <div className="flex flex-wrap gap-1.5">
-              {customTags.map((tag) => (
-                <TagChip key={tag} tag={tag} remove onClick={() => toggleTag(tag)} />
               ))}
             </div>
           </div>
@@ -600,17 +678,20 @@ export default function ProfileForm({
                 onClick={() => toggleTag(tag)}
               />
             ))}
-            {!exactExists && (
-              <button
-                type="button"
-                onClick={addCustomTag}
-                className="rounded-lg border border-dashed border-accent/45 px-2 py-1 text-[11px] text-accent-2 transition hover:bg-accent/10 sm:px-3 sm:py-1.5 sm:text-sm"
-              >
-                + Add “{query}”
-              </button>
+            {customToAdd && (
+              <TagChip
+                tag={`Add “${customToAdd}”`}
+                selected={false}
+                onClick={() => {
+                  toggleTag(customToAdd);
+                  setTagSearch("");
+                }}
+              />
             )}
-            {searchResults.length === 0 && exactExists && (
-              <p className="text-xs text-muted">Already selected</p>
+            {searchResults.length === 0 && !customToAdd && (
+              <p className="text-xs text-muted">
+                {exactExists ? "Already selected" : "Use a short tag — no links or markup."}
+              </p>
             )}
           </div>
         ) : (
@@ -677,6 +758,8 @@ export default function ProfileForm({
           ))}
         </div>
       </Section>
+      </>
+      ) : null}
 
       <Section
         id="section-verification"
@@ -792,8 +875,13 @@ export default function ProfileForm({
         </div>
       </Section>
 
-      <Section num="05" title="Place" subtitle="Where you are — and how far you’ll go to meet.">
-        <div className="grid gap-3 sm:grid-cols-2 sm:gap-8">
+      <Section
+        num="05"
+        title={extrasOnly ? "Travel" : "Place"}
+        subtitle={extrasOnly ? "How far you’ll go to meet." : "Where you are — and how far you’ll go to meet."}
+      >
+        <div className={`grid gap-3 ${extrasOnly ? "" : "sm:grid-cols-2 sm:gap-8"}`}>
+          {!extrasOnly ? (
           <div>
             <span className={labelCls}>Your city</span>
             <select
@@ -828,6 +916,7 @@ export default function ProfileForm({
               Use my location
             </button>
           </div>
+          ) : null}
 
           <div>
             <span className={labelCls}>Travel range</span>
@@ -852,6 +941,7 @@ export default function ProfileForm({
         </div>
       </Section>
 
+      {!extrasOnly && (
       <Section
         num="06"
         title="How introductions work"
@@ -865,6 +955,7 @@ export default function ProfileForm({
           </p>
         </div>
       </Section>
+      )}
 
       <Section
         num="07"
@@ -918,6 +1009,7 @@ export default function ProfileForm({
         </div>
       </Section>
 
+      {!extrasOnly && (
       <Section num="08" title="About" subtitle="A short note on what you’re building.">
         <textarea
           className={`${field} min-h-20 resize-none leading-relaxed sm:min-h-28`}
@@ -926,6 +1018,7 @@ export default function ProfileForm({
           placeholder="Owner-operator planning a small fleet. Looking to trade notes with people doing the same…"
         />
       </Section>
+      )}
 
       {error && (
         <p className="rounded-lg border border-ivory/25 bg-ivory/5 px-3 py-2 text-[11px] text-ivory sm:px-4 sm:py-3 sm:text-sm">
@@ -944,9 +1037,11 @@ export default function ProfileForm({
         >
           {saving
             ? "Saving…"
-            : initial?.jobTitle || initial?.ideaTags?.length
-              ? "Save profile"
-              : "Start discovering"}
+            : extrasOnly
+              ? "Save credentials"
+              : initial?.jobTitle || initial?.ideaTags?.length
+                ? "Save profile"
+                : "Start discovering"}
         </button>
       </div>
     </form>

@@ -1,31 +1,26 @@
 import { NextResponse } from "next/server";
-import { publicError } from "@/lib/safeError";
+import { handleAnalyticsPost } from "@/lib/analyticsIngest";
 import { prisma } from "@/lib/db";
+import { hasCurrentLegalConsent } from "@/lib/legal";
 import { getCurrentMember } from "@/lib/memberAuth";
-import { rateLimit } from "@/lib/rateLimit";
-import { parseBody } from "@/lib/validation/parse";
-import { analyticsSchema } from "@/lib/validation/safety";
+import { publicError } from "@/lib/safeError";
 
-/** First-party event ingest (no third-party required). */
+/** First-party event ingest. No third-party tracker. IP is not stored. */
 export async function POST(req: Request) {
-  const limited = rateLimit(req, { name: "analytics", limit: 120, windowMs: 60_000 });
-  if (!limited.ok) return limited.response;
-
   try {
-    const parsed = await parseBody(req, analyticsSchema);
-    if (!parsed.ok) return parsed.response;
-
-    const me = await getCurrentMember().catch(() => null);
-    await prisma.analyticsEvent.create({
-      data: {
-        name: parsed.data.name,
-        path: (parsed.data.path || "").slice(0, 240),
-        memberId: me?.id || null,
-        metaJson: JSON.stringify(parsed.data.meta || {}),
+    const result = await handleAnalyticsPost(req, {
+      memberId: async () => {
+        const me = await getCurrentMember().catch(() => null);
+        return me && hasCurrentLegalConsent(me) ? me.id : null;
+      },
+      create: async (row) => {
+        await prisma.analyticsEvent.create({ data: row });
       },
     });
-
-    return NextResponse.json({ ok: true });
+    return NextResponse.json(result.body, {
+      status: result.status,
+      headers: { "Cache-Control": "no-store" },
+    });
   } catch (e) {
     return publicError(e, "Failed");
   }

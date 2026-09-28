@@ -50,6 +50,7 @@ function MarqueeHalf({
             href={partner.href}
             target="_blank"
             rel="noopener noreferrer"
+            data-partner={partner.id}
             className={`mp-marquee-link${partner.lead ? " mp-marquee-link--lead" : ""}${
               partner.id === "edgeable" ? " mp-partner-edgeable" : ""
             }`}

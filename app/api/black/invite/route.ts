@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { legalConsentDenied } from "@/lib/legalGuard";
 import { getCurrentMember } from "@/lib/memberAuth";
 import { blackConnectionLevel } from "@/lib/black";
 import {
@@ -7,6 +8,7 @@ import {
   blackConnectionCount,
   resolvePairing,
 } from "@/lib/blackServer";
+import { pairIsBlocked } from "@/lib/moderation";
 import { purgeDemoResidue } from "@/lib/purgeDemo";
 import { rateLimit } from "@/lib/rateLimit";
 import { publicError } from "@/lib/safeError";
@@ -23,12 +25,14 @@ import { parseBody } from "@/lib/validation/parse";
 
 export async function POST(req: Request) {
   try {
-    const limited = rateLimit(req, { name: "black-invite", limit: 20, windowMs: 60_000 });
+    const limited = await rateLimit(req, { name: "black-invite", limit: 20, windowMs: 60_000 });
     if (!limited.ok) return limited.response;
 
     await purgeDemoResidue();
     const me = await getCurrentMember();
     if (!me) return NextResponse.json({ ok: false, error: "Sign in first" }, { status: 401 });
+    const denied = legalConsentDenied(me);
+    if (denied) return denied;
 
     const parsed = await parseBody(req, blackInvitePostSchema);
     if (!parsed.ok) return parsed.response;
@@ -46,6 +50,13 @@ export async function POST(req: Request) {
 
     const peer = await prisma.member.findUnique({ where: { id: peerId } });
     if (!peer) return NextResponse.json({ ok: false, error: "Member not found" }, { status: 404 });
+
+    if (await pairIsBlocked(me.id, peerId)) {
+      return NextResponse.json(
+        { ok: false, error: "This member isn’t available." },
+        { status: 403 }
+      );
+    }
 
     // Exactly one side must be BLACK for this to mean anything.
     const pairing = resolvePairing(me, peer);
@@ -122,11 +133,13 @@ export async function POST(req: Request) {
 /** Accept or decline. Only the recipient may respond, and only once. */
 export async function PATCH(req: Request) {
   try {
-    const limited = rateLimit(req, { name: "black-invite-patch", limit: 30, windowMs: 60_000 });
+    const limited = await rateLimit(req, { name: "black-invite-patch", limit: 30, windowMs: 60_000 });
     if (!limited.ok) return limited.response;
 
     const me = await getCurrentMember();
     if (!me) return NextResponse.json({ ok: false, error: "Sign in first" }, { status: 401 });
+    const denied = legalConsentDenied(me);
+    if (denied) return denied;
 
     const parsed = await parseBody(req, blackInvitePatchSchema);
     if (!parsed.ok) return parsed.response;
@@ -140,6 +153,12 @@ export async function PATCH(req: Request) {
     if (invite.toId !== me.id) {
       return NextResponse.json(
         { ok: false, error: "Only the person invited can answer this." },
+        { status: 403 }
+      );
+    }
+    if (await pairIsBlocked(me.id, invite.fromId)) {
+      return NextResponse.json(
+        { ok: false, error: "This member isn’t available." },
         { status: 403 }
       );
     }

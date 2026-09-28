@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import BlackBadge from "@/components/BlackBadge";
-import DemoEnterButton from "@/components/DemoEnterButton";
 import EdgeableSpotlight from "@/components/EdgeableSpotlight";
+import LegalFooter from "@/components/LegalFooter";
 import SponsorLockup from "@/components/SponsorLockup";
 import TierBadge from "@/components/TierBadge";
-import { demoEntryEnabled } from "@/lib/demoFlag";
 import { EVENTS } from "@/lib/events";
 import { SITE_DESCRIPTION, SITE_TITLE } from "@/lib/site";
 
@@ -115,11 +114,6 @@ export default function Landing() {
               See the calendar
             </Link>
           </div>
-          {demoEntryEnabled() && (
-            <div className="mp-reveal mp-reveal-delay-3 mt-5">
-              <DemoEnterButton label="Enter demo" className="text-[13px] text-accent" />
-            </div>
-          )}
           <p className="mp-reveal mp-reveal-delay-4 mt-8 text-[11px] tracking-wide text-muted">
             Website first · Native app when you’re ready
           </p>
@@ -260,6 +254,7 @@ export default function Landing() {
           <p className="text-[11px] text-muted">
             Interlink · Private introductions for ambitious people
           </p>
+          <LegalFooter embedded />
         </div>
       </footer>
     </main>

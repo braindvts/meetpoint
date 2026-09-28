@@ -11,7 +11,9 @@ function RedirectInner() {
   useEffect(() => {
     if (!id) return;
     const paid = searchParams.get("paid") === "1" ? "&paid=1" : "";
-    router.replace(`/chats?c=${encodeURIComponent(id)}${paid}`);
+    const session = searchParams.get("session_id");
+    const sessionQuery = session ? `&session_id=${encodeURIComponent(session)}` : "";
+    router.replace(`/chats?c=${encodeURIComponent(id)}${paid}${sessionQuery}`);
   }, [id, router, searchParams]);
 
   return <main className="min-h-dvh" />;
