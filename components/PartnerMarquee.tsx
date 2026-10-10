@@ -62,7 +62,7 @@ function MarqueeHalf({
             <PartnerMark
               partner={partner}
               alt=""
-              width={partner.id === "edgeable" ? 48 : 28}
+              width={partner.id === "edgeable" ? 31 : 28}
               height={28}
               className={`mp-marquee-mark${
                 partner.invertOnInk ? " mp-marquee-mark--invert" : " mp-marquee-mark--native"

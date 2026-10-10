@@ -60,7 +60,7 @@ export default function SponsorLockup({ className = "" }: Props) {
             <PartnerMark
               partner={partner}
               alt={partner.logoAlt}
-              width={partner.id === "edgeable" ? 48 : 28}
+              width={partner.id === "edgeable" ? 31 : 28}
               height={28}
               className={`mp-sponsor-lockup-mark${partner.invertOnInk ? "" : " mp-sponsor-lockup-mark--native"}`}
             />

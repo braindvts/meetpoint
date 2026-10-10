@@ -62,7 +62,7 @@ test("Edgeable follows ONYX Futures and keeps its own mark and link", () => {
   assert.equal(edgeable?.lead, undefined);
   assert.equal(edgeable?.invertOnInk, undefined);
   assert.equal(edgeable?.href, "https://edgeable.app");
-  assert.equal(edgeable?.logoSrc, "/edgeable-logo.png");
+  assert.equal(edgeable?.logoSrc, "/edgeable-logo.svg");
   assert.equal(edgeable?.logoAlt, "Edgeable");
   assert.equal(ordered.filter((partner) => partner.name === "Edgeable").length, 1);
 });
