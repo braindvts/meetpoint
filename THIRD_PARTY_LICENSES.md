@@ -42,7 +42,7 @@ Transitive packages are pulled in by those dependencies (Next.js, Prisma engines
 | Unsplash URLs in `lib/restaurantPhotos.ts` and some event imagery | Restaurant and event pictures | Unsplash License | Unsplash’s license generally allows commercial use | Unsplash photos are not assigned to Interlink. Do not imply we own them. Keep the Unsplash terms |
 | Files under `public/events/` and `public/social/` | Event and social imagery | Not stated in the repo | Unknown | Confirm the photographer or stock license, or replace them |
 | `public/conclave-instagram.png` and the matching PDF / story image | A social export page | Not stated in the repo | Unknown | The filename still says “conclave”. Ownership is not documented |
-| `public/edgeable-logo.png` and the SVG partner marks | Partner credits | Partner-owned | Pending written permission | Same `pending_written_confirmation` status as the partner config |
+| `public/edgeable-logo.svg` and the other SVG partner marks | Partner credits | Partner-owned | Pending written permission | Same `pending_written_confirmation` status as the partner config |
 
 ## Maps and places
 

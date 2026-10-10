@@ -75,7 +75,7 @@ function PartnerCredit({ partner, index }: { partner: FeaturedPartner; index: nu
           <PartnerMark
             partner={partner}
             alt={partner.logoAlt}
-            width={partner.lead ? 38 : partner.id === "edgeable" ? 48 : 28}
+            width={partner.lead ? 38 : partner.id === "edgeable" ? 31 : 28}
             height={partner.lead ? 37 : 28}
             className={`mp-featured-partner-mark${partner.invertOnInk ? " mp-featured-partner-mark--invert" : ""}`}
           />

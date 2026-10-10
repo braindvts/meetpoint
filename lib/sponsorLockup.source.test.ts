@@ -27,7 +27,7 @@ test("landing credits BijuuFlow as a sponsor, not a replacement brand", () => {
   assert.match(partners, /onyx-logo\.svg/);
   assert.match(partners, /name: "ONYX Futures"/);
   assert.match(partners, /https:\/\/edgeable\.app/);
-  assert.match(partners, /edgeable-logo\.png/);
+  assert.match(partners, /edgeable-logo\.svg/);
   assert.match(partners, /name: "Edgeable"/);
   assert.match(lockup, /mp-partner-onyx/);
   assert.match(lockup, /Futures/);
@@ -55,16 +55,17 @@ test("ONYX Futures mark is the gold eclipse, committed under public/", () => {
   assert.ok(Buffer.byteLength(svg) < 20_000);
 });
 
-test("Edgeable mark is the gold speed bars, committed under public/", () => {
-  const pngPath = join(ROOT, "public/edgeable-logo.png");
-  assert.equal(existsSync(pngPath), true);
-  const png = readFileSync(pngPath);
-  assert.ok(png.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])));
-  assert.equal(png.subarray(12, 16).toString("ascii"), "IHDR");
-  assert.equal(png[25], 6);
-  assert.ok(png.readUInt32BE(16) >= 640);
-  assert.ok(png.readUInt32BE(20) >= 400);
-  assert.ok(png.byteLength < 300_000);
+test("Edgeable mark is the flat two-color mark, committed under public/", () => {
+  const svgPath = join(ROOT, "public/edgeable-logo.svg");
+  assert.equal(existsSync(svgPath), true);
+  const svg = readFileSync(svgPath, "utf8");
+  assert.match(svg, /<svg/);
+  assert.match(svg, /viewBox="3 6 58 52"/);
+  assert.match(svg, /#FF8A1F/);
+  assert.match(svg, /#FFE3C2/);
+  assert.doesNotMatch(svg, /<script|gradient|xlink:href|href=/i);
+  assert.doesNotMatch(svg, /https?:\/\/(?!www\.w3\.org\/)/i);
+  assert.ok(Buffer.byteLength(svg) < 1_000);
 });
 
 test("landing spotlight credits Edgeable with an outbound visit link", () => {

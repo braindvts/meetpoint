@@ -84,7 +84,7 @@ export const FEATURED_PARTNERS: readonly FeaturedPartner[] = [
     id: "edgeable",
     name: "Edgeable",
     href: "https://edgeable.app",
-    logoSrc: "/edgeable-logo.png",
+    logoSrc: "/edgeable-logo.svg",
     logoAlt: "Edgeable",
     permission: "pending_written_confirmation",
     permissionReviewBy: "2026-12-31",

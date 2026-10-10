@@ -21,7 +21,7 @@ export default function EdgeableSpotlight({ className = "" }: { className?: stri
       <PartnerMark
         partner={partner}
         className="mp-edgeable-spot-mark"
-        width={72}
+        width={58}
         height={52}
         alt=""
       />
