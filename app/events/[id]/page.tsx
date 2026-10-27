@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import Nav from "@/components/Nav";
+import { displayTitle } from "@/lib/displayTitle";
 import PageHeader from "@/components/PageHeader";
 import EmptyState from "@/components/EmptyState";
 import Avatar from "@/components/Avatar";
@@ -150,15 +151,14 @@ export default function EventDetailPage() {
           }
         />
 
-        <div className="overflow-hidden rounded-md border border-white/10 bg-[#0a0a0a]">
-          <div className="relative aspect-[16/9] sm:aspect-[2/1]">
+        <div>
+          <div className="aspect-[16/9] overflow-hidden sm:aspect-[2/1]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={event.image}
               alt=""
               className="mp-card-photo h-full w-full object-cover"
             />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#12110f] via-transparent to-transparent" />
           </div>
           <div className="space-y-5 px-4 py-6 sm:px-7 sm:py-8">
             <div className="flex flex-wrap gap-2">
@@ -183,7 +183,7 @@ export default function EventDetailPage() {
             </div>
 
             <h1 className="text-2xl font-medium tracking-tight text-ivory sm:text-3xl">
-              {event.name}
+              {displayTitle(event.name)}
             </h1>
             {match && match.reasons.length > 0 ? (
               <p className="text-sm text-accent/90">

@@ -11,7 +11,7 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error("[conclave]", error);
+    console.error("[interlink]", error);
   }, [error]);
 
   return (
@@ -19,9 +19,9 @@ export default function GlobalError({
       <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-accent">
         Something went wrong
       </p>
-      <h1 className="mt-4 text-2xl font-semibold tracking-tight">The room had a fault.</h1>
+      <h1 className="mt-4 font-display text-4xl font-medium tracking-tight">The page failed to load.</h1>
       <p className="mt-3 max-w-sm text-sm text-muted">
-        Try again. If it keeps happening, refresh or re-enter from login.
+        Try again. If it keeps happening, refresh the page.
       </p>
       <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
         <button

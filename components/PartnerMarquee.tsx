@@ -76,13 +76,5 @@ function MarqueeHalf({
 }
 
 function MarqueeName({ name }: { name: string }) {
-  if (name === "ONYX Futures") {
-    return (
-      <span className="mp-marquee-name font-display">
-        <span className="mp-partner-onyx">ONYX</span>
-        <span className="mp-partner-onyx-sub">Futures</span>
-      </span>
-    );
-  }
   return <span className="mp-marquee-name font-display">{name}</span>;
 }

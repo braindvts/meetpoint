@@ -20,7 +20,7 @@ export default function BlackBadge({ size = "sm", className = "" }: Props) {
       aria-label="BLACK"
     >
       <svg viewBox="0 0 24 24" className={SIZE[size]} aria-hidden>
-        <circle cx="12" cy="12" r="11" fill="#0a0a0a" stroke="#c4b496" strokeWidth="1.25" />
+        <circle cx="12" cy="12" r="11" fill="#1c1915" stroke="#1c1915" strokeWidth="1.25" />
         <path
           d="M7.2 12.3l3.1 3.1 6.5-6.8"
           fill="none"

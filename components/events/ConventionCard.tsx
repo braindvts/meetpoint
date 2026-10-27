@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { displayTitle } from "@/lib/displayTitle";
 import {
   formatEventDate,
   type InterlinkEvent,
@@ -13,28 +14,25 @@ type Props = {
 /** Larger convention / conference card for the conventions strip. */
 export default function ConventionCard({ event }: Props) {
   return (
-    <article className="mp-scroll-card mp-card-motion group relative flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#0a0a0a]">
+    <article className="mp-scroll-card mp-card-motion group relative flex h-full flex-col overflow-hidden border border-line bg-panel">
       <Link href={`/events/${event.slug}`} className="flex flex-1 flex-col">
-        <div className="relative aspect-[2/1] overflow-hidden sm:aspect-[21/9]">
+        <div className="aspect-[2/1] overflow-hidden sm:aspect-[21/9]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={event.image}
             alt=""
             className="mp-card-photo h-full w-full object-cover"
           />
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#12110f] via-[#12110f]/50 to-transparent" />
-          <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6">
-            <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-accent">
-              {event.industry} · Convention
-            </p>
-            <h3 className="mt-1.5 text-xl font-medium tracking-tight text-ivory sm:text-2xl">
-              {event.name}
-            </h3>
-          </div>
         </div>
         <div className="flex flex-1 flex-col gap-3 px-4 py-4 sm:px-6 sm:py-5">
+          <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-accent">
+            {event.industry} · Convention
+          </p>
+          <h3 className="font-display text-2xl font-medium tracking-tight text-ivory sm:text-3xl">
+            {displayTitle(event.name)}
+          </h3>
           <p className="text-[12px] text-muted sm:text-[13px]">
-            {formatEventDate(event.startsAt)} – {formatEventDate(event.endsAt)}
+            {formatEventDate(event.startsAt)} to {formatEventDate(event.endsAt)}
             <span className="text-line"> · </span>
             {event.venue}, {event.city}
           </p>

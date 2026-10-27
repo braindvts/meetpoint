@@ -11,7 +11,7 @@ interface Props {
 
 /**
  * Static partner credit on the loader. Pops in after the wordmark.
- * Logo and name sit open on the ink — no plate. BijuuFlow leads.
+ * Logo and name sit on the field. No plate. BijuuFlow leads.
  */
 export default function FeaturedPartners({ revealed }: Props) {
   const partners = featuredPartnersInOrder();
@@ -23,7 +23,7 @@ export default function FeaturedPartners({ revealed }: Props) {
       aria-label="Supported by our partners"
     >
       <span className="mp-featured-partners-rule" aria-hidden />
-      <p className="mp-featured-partners-kicker">Supported by our partners</p>
+      <p className="mp-featured-partners-kicker">Partners</p>
       <ul className="mp-featured-partners-list">
         {partners.map((partner, index) => (
           <PartnerCredit key={partner.id} partner={partner} index={index} />
@@ -34,14 +34,6 @@ export default function FeaturedPartners({ revealed }: Props) {
 }
 
 function PartnerName({ name }: { name: string }) {
-  if (name === "ONYX Futures") {
-    return (
-      <span className="mp-featured-partner-name font-display">
-        <span className="mp-partner-onyx">ONYX</span>
-        <span className="mp-partner-onyx-sub">Futures</span>
-      </span>
-    );
-  }
   return <span className="mp-featured-partner-name font-display">{name}</span>;
 }
 

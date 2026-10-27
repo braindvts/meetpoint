@@ -7,11 +7,11 @@ import { SITE_DESCRIPTION, SITE_ORIGIN, SITE_TITLE } from "./site";
 const ROOT = join(import.meta.dirname, "..");
 
 test("root metadata titles and describes Interlink for search and social", () => {
-  assert.equal(SITE_TITLE, "Interlink | Professional Business Connections");
+  assert.equal(SITE_TITLE, "Interlink | Private introductions");
   assert.match(SITE_DESCRIPTION, /Interlink/);
   assert.match(SITE_DESCRIPTION, /private network/);
-  assert.match(SITE_DESCRIPTION, /professional introductions/);
-  assert.match(SITE_DESCRIPTION, /dinner-table/);
+  assert.match(SITE_DESCRIPTION, /ambitious people/);
+  assert.match(SITE_DESCRIPTION, /dinner table/);
   assert.equal(SITE_ORIGIN, "https://interlinkgobal.com");
 
   const layout = readFileSync(join(ROOT, "app/layout.tsx"), "utf8");
@@ -28,12 +28,13 @@ test("root metadata titles and describes Interlink for search and social", () =>
 
 test("homepage weaves Interlink through hero and key sections", () => {
   const page = readFileSync(join(ROOT, "app/page.tsx"), "utf8");
-  assert.match(page, /private network for professional introductions/);
+  assert.match(page, /private network for ambitious people/);
+  assert.match(page, /The introduction/);
+  assert.match(page, /ends at dinner/);
   assert.match(page, /Interlink makes the introduction/);
   assert.match(page, /Interlink shows who will be in the room/);
-  assert.match(page, /on Interlink/);
   assert.match(page, /<SponsorLockup/);
-  assert.match(page, /Enter Interlink/);
+  assert.match(page, /Join Interlink/);
   assert.doesNotMatch(page, /Conclave/);
 });
 

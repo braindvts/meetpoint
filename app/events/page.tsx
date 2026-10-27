@@ -248,7 +248,7 @@ export default function EventsPage() {
       onPass: opts?.forYou
         ? () => {
             setRsvp(event.id, "passed");
-            showToast("Passed — we’ll show fewer like this");
+            showToast("Passed. We'll show fewer like this");
             refresh();
           }
         : undefined,
@@ -288,8 +288,8 @@ export default function EventsPage() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={featured[0].image} alt="" className="mp-card-photo" />
             <span className="mp-event-hero-copy">
-              <em>On the floor</em>
-              <strong>{featured[0].name}</strong>
+              <em>Featured</em>
+              <strong>{featured[0].name.replace(/\s*[\u2014\u2013]\s*/g, ", ")}</strong>
               <span>
                 {featured[0].city} · {featured[0].venue}
               </span>
@@ -299,8 +299,8 @@ export default function EventsPage() {
 
         <div className="space-y-3">
           <p className="max-w-2xl text-sm leading-relaxed text-muted sm:text-[15px]">
-            Upcoming dinners, conferences, and conventions — ranked from what
-            you’re into, what you do, and what your profile says you’re seeking.
+            Upcoming dinners, conferences, and conventions. Ranked from your
+            interests, your role, and what you are looking for.
           </p>
           <div className="flex flex-wrap gap-2">
             {ranked.length > 0 ? (
@@ -377,7 +377,7 @@ export default function EventsPage() {
         {!hasActiveFilters && events.length === 0 ? (
           <EmptyState
             title="No events yet"
-            body="The calendar is empty on this server. Check back soon, or ask an operator to publish gatherings."
+            body="Nothing is published on this server yet."
           />
         ) : hasActiveFilters ? (
           <Section
@@ -417,7 +417,7 @@ export default function EventsPage() {
               <Section
                 id="for-you"
                 title="For you"
-                subtitle="Ranked from your interests, role, and what you’re looking for — not the whole catalog."
+                subtitle="Ranked from your interests, role, and what you are looking for."
               >
                 <Grid>
                   {ranked.slice(0, 6).map((m) => (
@@ -440,11 +440,11 @@ export default function EventsPage() {
               </Section>
             ) : null}
 
-            <Section title="Upcoming" id="worldwide" subtitle="Soonest on the calendar — cities worldwide.">
+            <Section title="Upcoming" id="worldwide" subtitle="Soonest on the calendar, cities worldwide.">
               {upcoming.length === 0 ? (
                 <EmptyState
                   title="Nothing upcoming"
-                  body="No published dates yet. Try Popular or Conventions, or check back later."
+                  body="No published dates yet. Try Popular or Conventions."
                 />
               ) : (
                 <Grid>
@@ -468,7 +468,7 @@ export default function EventsPage() {
               title="Near you"
               subtitle={
                 cityHint
-                  ? `Based on ${cityHint} — plus online rooms you can join from anywhere.`
+                  ? `Based on ${cityHint}, plus online rooms you can join from anywhere.`
                   : "Online and in-person gatherings across the network. Set your city on Profile to prioritize nearby rooms."
               }
             >
@@ -523,7 +523,7 @@ export default function EventsPage() {
             <Section
               id="conventions"
               title="Conventions"
-              subtitle="Multi-day floors — see who from your network will be on site."
+              subtitle="Multi-day floors. See who from your network will be on site."
             >
               <div className="grid gap-5 lg:grid-cols-2">
                 {conventions.map((e) => (
@@ -533,7 +533,7 @@ export default function EventsPage() {
               {conventions.length === 0 ? (
                 <EmptyState
                   title="No conventions yet"
-                  body="Check back as the calendar fills — or browse smaller events above."
+                  body="None are published yet. Smaller events are listed above."
                 />
               ) : null}
             </Section>

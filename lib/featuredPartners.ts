@@ -8,17 +8,16 @@ export interface FeaturedPartner {
   /** Shown first and larger. */
   lead?: boolean;
   /**
-   * Black artwork that should be inverted on the ink field.
-   * Marks drawn for a dark ground — Grounded's white tile — stay as authored.
+   * Black artwork that was inverted on a dark field.
+   * Leave unset so the mark keeps its own colors.
    */
   invertOnInk?: boolean;
 }
 
 /**
- * Loading-screen credit. Append a partner to extend the line —
- * order is lead first, then the list as written.
+ * Loading-screen credit. Append a partner to extend the line.
+ * Order is lead first, then the list as written.
  * BijuuFlow leads and uses the same destination and mark as the landing lockup.
- * Later partners follow in list order.
  */
 export const FEATURED_PARTNERS: readonly FeaturedPartner[] = [
   {
@@ -28,21 +27,6 @@ export const FEATURED_PARTNERS: readonly FeaturedPartner[] = [
     logoSrc: "/bijuuflow-logo.svg",
     logoAlt: "BijuuFlow",
     lead: true,
-    invertOnInk: true,
-  },
-  {
-    id: "grounded",
-    name: "Grounded",
-    href: "https://groundedpeptides.com",
-    logoSrc: "/grounded-logo.svg",
-    logoAlt: "Grounded",
-  },
-  {
-    id: "onyx",
-    name: "ONYX Futures",
-    href: "https://onyx-futures.com",
-    logoSrc: "/onyx-logo.svg",
-    logoAlt: "ONYX Futures",
   },
   {
     id: "edgeable",
@@ -65,5 +49,6 @@ export function featuredPartnersInOrder(
  */
 export function partnerMarqueeRepeat(count: number): number {
   if (count <= 0) return 0;
-  return Math.max(4, Math.ceil(12 / count));
+  // Two partners still need a half wider than a desktop viewport.
+  return Math.max(8, Math.ceil(24 / count));
 }

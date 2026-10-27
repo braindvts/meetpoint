@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Outfit } from "next/font/google";
+import { Fraunces, Source_Sans_3 } from "next/font/google";
 import AnalyticsBeacon from "@/components/AnalyticsBeacon";
 import AppChrome from "@/components/AppChrome";
 import PlausibleScript from "@/components/PlausibleScript";
@@ -7,10 +7,17 @@ import ToastHost from "@/components/ToastHost";
 import { SITE_DESCRIPTION, SITE_ORIGIN, SITE_TITLE } from "@/lib/site";
 import "./globals.css";
 
-const outfit = Outfit({
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-fraunces",
+});
+
+const sourceSans = Source_Sans_3({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
-  variable: "--font-outfit",
+  display: "swap",
+  variable: "--font-source",
 });
 
 export const metadata: Metadata = {
@@ -37,7 +44,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#050505",
+  themeColor: "#f4efe4",
   interactiveWidget: "resizes-content",
 };
 
@@ -45,7 +52,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={outfit.variable}>
+    <html lang="en" className={`${fraunces.variable} ${sourceSans.variable}`}>
       <head>
         <script
           dangerouslySetInnerHTML={{

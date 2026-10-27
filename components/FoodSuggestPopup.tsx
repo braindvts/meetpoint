@@ -47,7 +47,7 @@ export default function FoodSuggestPopup({
                 </p>
                 <p className="mt-1 text-[13px] leading-snug text-muted">
                   {suggestions.length} Michelin / five-star spots near you
-                  {suggestions[0] ? ` — including ${suggestions[0].restaurant.name}` : ""}.
+                  {suggestions[0] ? `, including ${suggestions[0].restaurant.name}` : ""}.
                 </p>
               </div>
               <button
@@ -100,7 +100,7 @@ export default function FoodSuggestPopup({
                   Tables nearby
                 </h2>
                 <p className="mt-0.5 text-[11px] text-white/50">
-                  Propose one — everyone agrees, then $5/person to book.
+                  Propose one. Everyone agrees, then $5 a person to book.
                 </p>
               </div>
               <button
@@ -119,31 +119,27 @@ export default function FoodSuggestPopup({
                   key={s.restaurant.id}
                   className="overflow-hidden border border-white/10 bg-white/[0.03]"
                 >
-                  <div className="relative h-20 w-full overflow-hidden bg-black sm:h-24">
+                  <div className="h-20 w-full overflow-hidden bg-panel sm:h-24">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={restaurantPhoto(s.restaurant)}
-                      alt={s.restaurant.name}
+                      alt=""
                       className="h-full w-full object-cover"
                       loading="lazy"
                     />
-                    <div
-                      className="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-black/85 to-transparent"
-                      aria-hidden
-                    />
-                    <p className="absolute bottom-1.5 left-2.5 right-2.5 truncate font-display text-base font-semibold text-white">
-                      {s.restaurant.name}
-                    </p>
                   </div>
                   <div className="px-3 py-2.5">
+                    <p className="truncate font-display text-base font-medium text-ivory">
+                      {s.restaurant.name}
+                    </p>
                     <div className="flex items-center justify-between gap-2">
-                      <p className="text-[11px] text-white/55">
+                      <p className="text-[11px] text-muted">
                         {cuisineLine(s.restaurant.cuisine)}
                       </p>
                       <StarRating restaurant={s.restaurant} className="shrink-0" />
                     </div>
-                    <p className="mt-1 text-[11px] text-white/45">{s.reason}</p>
-                    <p className="mt-1 text-[12px] text-white/55">
+                    <p className="mt-1 text-[11px] text-muted">{s.reason}</p>
+                    <p className="mt-1 text-[12px] text-muted">
                       {s.restaurant.vibe}
                     </p>
                     <button

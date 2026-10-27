@@ -2,7 +2,7 @@ import PartnerMark from "@/components/PartnerMark";
 
 /**
  * Compact featured-partner credit beside the landing marquee.
- * One line of Edgeable's boilerplate — not the full legal note.
+ * One line of Edgeable's boilerplate. Not the full legal note.
  */
 export default function EdgeableSpotlight({ className = "" }: { className?: string }) {
   return (
@@ -18,7 +18,7 @@ export default function EdgeableSpotlight({ className = "" }: { className?: stri
         alt=""
       />
       <div className="mp-edgeable-spot-copy">
-        <p className="mp-edgeable-spot-kicker">Featured partner</p>
+        <p className="mp-edgeable-spot-kicker">Partner</p>
         <p className="mp-edgeable-spot-name font-display">Edgeable</p>
         <p className="mp-edgeable-spot-line">
           Cloud-first, multi-broker futures trade copier for prop-firm traders.

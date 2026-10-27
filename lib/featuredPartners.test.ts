@@ -23,40 +23,19 @@ test("BijuuFlow is the lead featured partner and uses the landing mark", () => {
   assert.equal(ordered.filter((partner) => partner.name === "BijuuFlow").length, 1);
 });
 
-test("Grounded follows BijuuFlow and keeps its own mark and link", () => {
+test("the partner line is BijuuFlow then Edgeable", () => {
   const ordered = featuredPartnersInOrder();
-  const grounded = ordered.find((partner) => partner.id === "grounded");
-  assert.equal(ordered[0]?.id, "bijuuflow");
-  assert.equal(ordered[1]?.id, "grounded");
-  assert.equal(grounded?.name, "Grounded");
-  assert.equal(grounded?.lead, undefined);
-  assert.equal(grounded?.invertOnInk, undefined);
-  assert.equal(grounded?.href, "https://groundedpeptides.com");
-  assert.equal(grounded?.logoSrc, "/grounded-logo.svg");
-  assert.equal(grounded?.logoAlt, "Grounded");
-  assert.equal(ordered.filter((partner) => partner.name === "Grounded").length, 1);
-});
-
-test("ONYX Futures follows Grounded and keeps its own mark and link", () => {
-  const ordered = featuredPartnersInOrder();
-  const onyx = ordered.find((partner) => partner.id === "onyx");
   assert.deepEqual(
     ordered.map((partner) => partner.id),
-    ["bijuuflow", "grounded", "onyx", "edgeable"]
+    ["bijuuflow", "edgeable"]
   );
-  assert.equal(onyx?.name, "ONYX Futures");
-  assert.equal(onyx?.lead, undefined);
-  assert.equal(onyx?.invertOnInk, undefined);
-  assert.equal(onyx?.href, "https://onyx-futures.com");
-  assert.equal(onyx?.logoSrc, "/onyx-logo.svg");
-  assert.equal(onyx?.logoAlt, "ONYX Futures");
-  assert.equal(ordered.filter((partner) => partner.name === "ONYX Futures").length, 1);
+  assert.equal(ordered.length, 2);
 });
 
-test("Edgeable follows ONYX Futures and keeps its own mark and link", () => {
+test("Edgeable follows BijuuFlow and keeps its own mark and link", () => {
   const ordered = featuredPartnersInOrder();
   const edgeable = ordered.find((partner) => partner.id === "edgeable");
-  assert.equal(ordered[3]?.id, "edgeable");
+  assert.equal(ordered[1]?.id, "edgeable");
   assert.equal(edgeable?.name, "Edgeable");
   assert.equal(edgeable?.lead, undefined);
   assert.equal(edgeable?.invertOnInk, undefined);
@@ -68,9 +47,10 @@ test("Edgeable follows ONYX Futures and keeps its own mark and link", () => {
 
 test("marquee repeats the list enough to loop without a gap", () => {
   assert.equal(partnerMarqueeRepeat(0), 0);
-  assert.equal(partnerMarqueeRepeat(3), 4);
-  assert.ok(partnerMarqueeRepeat(1) >= 4);
-  assert.ok(partnerMarqueeRepeat(6) >= 4);
+  assert.equal(partnerMarqueeRepeat(2), 12);
+  assert.equal(partnerMarqueeRepeat(3), 8);
+  assert.ok(partnerMarqueeRepeat(1) >= 8);
+  assert.ok(partnerMarqueeRepeat(6) >= 8);
 });
 
 test("later partners follow the lead without a layout rewrite", () => {
@@ -109,7 +89,7 @@ test("splash shows featured partners on a short minimal loader", () => {
   assert.doesNotMatch(splash, /Linking in|mp-splash-bar|mp-splash-snap/);
   assert.doesNotMatch(plate, /Conclave/);
 
-  assert.match(plate, /Supported by our partners/);
+  assert.match(plate, /Partners/);
   assert.doesNotMatch(plate, /PartnerMarquee|mp-marquee/);
   assert.match(plate, /featuredPartnersInOrder/);
   assert.match(plate, /PartnerMark/);
@@ -117,15 +97,12 @@ test("splash shows featured partners on a short minimal loader", () => {
   assert.match(plate, /stopPropagation/);
   assert.match(plate, /target="_blank"/);
   assert.match(plate, /noopener noreferrer/);
-  assert.match(plate, /mp-partner-onyx/);
-  assert.match(plate, /ONYX Futures/);
-
   assert.match(css, /mp-splash-partners--in/);
   assert.match(css, /splashDraw/);
   assert.match(css, /splashGeomPulse/);
   assert.match(css, /splashPartnerMark/);
   assert.doesNotMatch(css, /splashPartnerFlash|splashPartnerSheen/);
-  assert.match(css, /#d4c4a8/);
+  assert.match(css, /#8e2f2b/);
   assert.match(css, /prefers-reduced-motion:\s*reduce/);
   assert.match(css, /\.mp-featured-partner-mark/);
   assert.match(plate, /mp-featured-partner-link/);
@@ -136,10 +113,9 @@ test("splash shows featured partners on a short minimal loader", () => {
   assert.doesNotMatch(mark, /inset|border|scale\(/);
   assert.match(css, /\.mp-featured-partner-link \{[\s\S]*?border:\s*0;/);
   assert.match(css, /\.mp-featured-partner-link \{[\s\S]*?white-space:\s*nowrap;/);
-  assert.match(css, /\.mp-partner-onyx-sub/);
   assert.match(css, /stroke-dashoffset:\s*0/);
 
-  assert.match(lockup, /Supported by/);
+  assert.match(lockup, /With/);
   assert.match(lockup, /featuredPartnersInOrder/);
   assert.match(lockup, /target="_blank"/);
   assert.match(lockup, /noopener noreferrer/);

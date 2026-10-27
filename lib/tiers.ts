@@ -2,7 +2,7 @@ import { BLACK_EARNED_REQUIREMENTS } from "./black";
 import type { MyProfile, Person, PersonWork, ReputationSummary, Verification } from "./types";
 import { REQUIRED_VERIFICATIONS } from "./types";
 
-/** Interlink standing — only three levels. */
+/** Interlink standing. Only three levels. */
 export type MemberTier = 1 | 2 | 3;
 
 export interface TierDefinition {
@@ -16,20 +16,20 @@ export const TIER_DEFINITIONS: TierDefinition[] = [
   {
     tier: 1,
     name: "Member",
-    meaning: "You’re in the room with your identity profile",
-    howToEarn: "Create your account and finish Identity (photo, name, role, ambitions)",
+    meaning: "Identity on file. You can meet other Members.",
+    howToEarn: "Finish Identity: photo, name, role, ambitions, and what you are looking for.",
   },
   {
     tier: 2,
     name: "Verified",
-    meaning: "Identity backed by business email and LinkedIn",
-    howToEarn: "Optional — add business email and LinkedIn when you’re ready",
+    meaning: "Identity plus a business email and LinkedIn.",
+    howToEarn: "Add both when you want them. You can skip them and stay a Member.",
   },
   {
     tier: 3,
     name: "BLACK",
-    meaning: "Premium verified professional — paid or earned",
-    howToEarn: "Purchase BLACK, or earn it through standing and real dinners",
+    meaning: "Paid or earned. You can meet anyone.",
+    howToEarn: "$50 a month or $500 a year, or about 20 dinners with a strong profile and high ratings.",
   },
 ];
 
@@ -58,7 +58,7 @@ export interface TierInput {
   meetingsAttended: number;
   reputationScore: number;
   profileStrength?: number;
-  /** BLACK standing — paid, earned, or granted. */
+  /** BLACK standing. Paid, earned, or granted. */
   black?: boolean;
 }
 
@@ -91,7 +91,7 @@ export function missingRequiredVerifications(
 }
 
 /**
- * Identity basics only — enough to be a Member and use the room.
+ * Identity basics only. Enough to be a Member and use the room.
  * Verifications are NOT required here.
  */
 export function isProfileComplete(profile: Pick<
@@ -120,7 +120,7 @@ function workList(profile: Pick<MyProfile, "work"> | Person): PersonWork[] {
   return [];
 }
 
-/** 0–100 based on credentials, projects, links, bio. */
+/** 0 to 100 based on credentials, projects, links, bio. */
 export function scoreProfileStrength(
   profile: Pick<MyProfile, "verifications" | "bio" | "phone" | "work" | "ideaTags" | "lookingFor">
 ): ProfileStrength {
@@ -208,19 +208,19 @@ export function nextTierProgress(input: TierInput): {
 } {
   const current = computeMemberTier(input);
   if (current === 3) {
-    return { current, next: null, hint: "BLACK standing. You set the standard." };
+    return { current, next: null, hint: "BLACK. You can meet anyone." };
   }
   if (current === 1) {
     return {
       current,
       next: TIER_DEFINITIONS[1],
-      hint: "You’re a Member. Add business email and LinkedIn anytime to become Verified.",
+      hint: "You are a Member. Add a business email and LinkedIn when you want Verified.",
     };
   }
   return {
     current,
     next: TIER_DEFINITIONS[2],
-    hint: "Purchase BLACK, or earn it through exceptional dinners and a full profile.",
+    hint: "Buy BLACK, or earn it with real dinners and a full profile.",
   };
 }
 
@@ -276,7 +276,7 @@ export function reputationScoreForMeetings(meetingsAttended: number): number {
   return 100;
 }
 
-/** Short level name only — no “Tier N ·” prefix. */
+/** Short level name only. No tier number prefix. */
 export function formatTierLabel(tier: MemberTier): string {
   return tierDefinition(tier).name;
 }

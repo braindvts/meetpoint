@@ -71,7 +71,7 @@ function lastPreview(chat: GroupChat): { at: string; text: string } {
   return { at, text: prefix + last.text };
 }
 
-/** Compact icon — opens group composer with people you’re connected to. */
+/** Compact icon. Opens the group composer with people you are connected to. */
 function GroupChatIconButton({
   onClick,
   className = "",
@@ -209,7 +209,7 @@ function ChatsInner() {
       .filter((p): p is Person => !!p);
   }, [connections, directory]);
 
-  /** Only threads the user has opened — never every connection. */
+  /** Only threads the user has opened. Not every connection. */
   const rows = useMemo(() => {
     void unreadTick;
     void muteTick;
@@ -370,7 +370,7 @@ function ChatsInner() {
               <div className="px-2 py-8">
                 <EmptyState
                   title="No chats yet"
-                  body="Open Interlinks to message someone you’re connected to, or use the group icon to start a group."
+                  body="Open Interlinks to message someone you are connected to, or use the group icon to start a group."
                 />
               </div>
             ) : filteredRows.length === 0 ? (

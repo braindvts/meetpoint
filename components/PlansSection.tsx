@@ -23,7 +23,7 @@ interface Props {
 }
 
 /**
- * Plans: BLACK first, then Free. No Premier — Verified unlocks higher intros.
+ * Plans: BLACK first, then Free. No Premier. Verified is what lets you meet further.
  */
 export default function PlansSection({
   profile,
@@ -90,36 +90,34 @@ export default function PlansSection({
   }
 
   return (
-    <section className="mp-scroll-reveal mb-6 border border-line/50 bg-panel/40 p-3 sm:mb-10 sm:p-5">
-      <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-        <p className="text-[9px] font-semibold uppercase tracking-[0.22em] text-accent sm:text-[11px]">
-          Plans
-        </p>
-        <p className="text-[10px] text-muted sm:text-xs">
-          {isBlack ? "BLACK active" : verified ? "Verified · Free" : "Free Member"}
+    <section className="mb-8">
+      <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2 border-b border-line pb-3">
+        <p className="font-display text-2xl text-ivory">Plans</p>
+        <p className="text-[12px] text-muted">
+          {isBlack ? "BLACK active" : verified ? "Verified, free" : "Free Member"}
         </p>
       </div>
 
-      <div className="space-y-2.5">
-        <div className="black-centurion px-3.5 py-4 sm:px-4 sm:py-4">
-          <div className="relative z-[1]">
+      <div>
+        <div className="border-b border-line py-4">
+          <div>
             <div className="flex items-start justify-between gap-3">
               <div>
                 <div className="flex items-center gap-2.5">
                   <BlackBadge size="sm" />
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-accent/80">
-                      Top of the room
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accent">
+                      Membership
                     </p>
-                    <p className="text-[17px] font-semibold tracking-tight text-ivory">BLACK</p>
+                    <p className="font-display text-[1.7rem] text-ivory">BLACK</p>
                   </div>
                 </div>
-                <p className="mt-2 text-[12px] leading-snug text-muted">
-                  Meet anyone · {formatBlackPrice("month")} or {formatBlackPrice("year")}
+                <p className="mt-2 text-[13px] leading-snug text-muted">
+                  Meet anyone. {formatBlackPrice("month")} or {formatBlackPrice("year")}.
                 </p>
               </div>
               {isBlack ? (
-                <span className="shrink-0 border border-accent/30 px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.14em] text-ivory">
+                <span className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.14em] text-accent">
                   Active
                 </span>
               ) : null}
@@ -139,16 +137,16 @@ export default function PlansSection({
                     ) : null}
                   </div>
                 ) : (
-                  <p className="text-[11px] text-[#8a8a8a]">
-                    Invite peers from a private chat to award BLACK CONNECTION — never BLACK.
+                  <p className="text-[11px] text-muted">
+                    Invite peers from a private chat to award BLACK CONNECTION. That is not BLACK.
                   </p>
                 )}
               </div>
             ) : (
               <div className="mt-3 space-y-2">
                 {!verified ? (
-                  <p className="text-[11px] text-[#c4b59a]">
-                    Get Verified first (email + LinkedIn), then unlock BLACK.
+                  <p className="text-[11px] text-accent">
+                    Get Verified first. Add a business email and LinkedIn. Then you can buy BLACK.
                   </p>
                 ) : null}
                 <div className="grid grid-cols-2 gap-2">
@@ -179,22 +177,22 @@ export default function PlansSection({
                     {busy === "earned" ? "Claiming…" : "Claim earned BLACK"}
                   </button>
                 ) : (
-                  <p className="text-[10px] text-[#7a7a7a]">
+                  <p className="text-[10px] text-muted">
                     Or earn it: {req.meetings}+ dinners · strong profile · top ratings
                   </p>
                 )}
-                {error ? <p className="text-[11px] text-red-300/90">{error}</p> : null}
+                {error ? <p className="text-[11px] text-accent">{error}</p> : null}
               </div>
             )}
           </div>
         </div>
 
-        <div className="border border-line/60 bg-ink/40 px-3.5 py-3 sm:px-4 sm:py-3.5">
+        <div className="py-4">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-[15px] font-semibold text-ivory">Free</p>
-              <p className="mt-0.5 text-[12px] leading-snug text-muted">
-                $0 · Member ↔ Member intros. Get Verified to meet anyone.
+              <p className="font-display text-[1.7rem] text-ivory">Free</p>
+              <p className="mt-1 text-[13px] leading-snug text-muted">
+                $0. Introductions between Members. Get Verified to meet anyone.
               </p>
             </div>
             {!isBlack ? (

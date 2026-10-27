@@ -12,7 +12,7 @@ test("landing credits BijuuFlow as a sponsor, not a replacement brand", () => {
   assert.match(page, /<SponsorLockup/);
   assert.match(page, /Interlink/);
   assert.doesNotMatch(page, /Conclave/);
-  assert.match(lockup, /Supported by/);
+  assert.match(lockup, />With</);
   assert.match(lockup, /featuredPartnersInOrder/);
   assert.match(lockup, /target="_blank"/);
   assert.match(lockup, /noopener noreferrer/);
@@ -20,17 +20,9 @@ test("landing credits BijuuFlow as a sponsor, not a replacement brand", () => {
   assert.match(partners, /https:\/\/bijuuflow\.com\/terminal/);
   assert.match(partners, /bijuuflow-logo\.svg/);
   assert.match(partners, /name: "BijuuFlow"/);
-  assert.match(partners, /https:\/\/groundedpeptides\.com/);
-  assert.match(partners, /grounded-logo\.svg/);
-  assert.match(partners, /name: "Grounded"/);
-  assert.match(partners, /https:\/\/onyx-futures\.com/);
-  assert.match(partners, /onyx-logo\.svg/);
-  assert.match(partners, /name: "ONYX Futures"/);
   assert.match(partners, /https:\/\/edgeable\.app/);
   assert.match(partners, /edgeable-logo\.png/);
   assert.match(partners, /name: "Edgeable"/);
-  assert.match(lockup, /mp-partner-onyx/);
-  assert.match(lockup, /Futures/);
   assert.doesNotMatch(lockup, /Conclave/);
   assert.doesNotMatch(partners, /Conclave/);
 });
@@ -42,17 +34,6 @@ test("BijuuFlow mark is committed under public/ as a compact SVG", () => {
   assert.match(svg, /<svg/);
   assert.match(svg, /<path/);
   assert.ok(Buffer.byteLength(svg) < 100_000);
-});
-
-test("ONYX Futures mark is the gold eclipse, committed under public/", () => {
-  const svgPath = join(ROOT, "public/onyx-logo.svg");
-  assert.equal(existsSync(svgPath), true);
-  const svg = readFileSync(svgPath, "utf8");
-  assert.match(svg, /<svg/);
-  assert.match(svg, /#E2B03D|#D49A1F/);
-  assert.match(svg, /#0B0B0B/);
-  assert.doesNotMatch(svg, /<rect/);
-  assert.ok(Buffer.byteLength(svg) < 20_000);
 });
 
 test("Edgeable mark is the gold speed bars, committed under public/", () => {
@@ -71,7 +52,7 @@ test("landing spotlight credits Edgeable with an outbound visit link", () => {
   const page = readFileSync(join(ROOT, "app/page.tsx"), "utf8");
   const spot = readFileSync(join(ROOT, "components/EdgeableSpotlight.tsx"), "utf8");
   assert.match(page, /<SponsorLockup[\s\S]*<EdgeableSpotlight/);
-  assert.match(spot, /Featured partner/);
+  assert.match(spot, /mp-edgeable-spot-kicker">Partner/);
   assert.match(spot, /Cloud-first, multi-broker futures trade copier for prop-firm traders\./);
   assert.match(spot, /Visit Edgeable/);
   assert.match(spot, /href="https:\/\/edgeable\.app"/);
@@ -81,16 +62,4 @@ test("landing spotlight credits Edgeable with an outbound visit link", () => {
   assert.match(spot, /mp-scroll-reveal/);
   assert.doesNotMatch(spot, /investment advice/);
   assert.doesNotMatch(spot, /https:\/\/edgeable\.app\//);
-});
-
-test("Grounded mark is the header tile, committed under public/", () => {
-  const svgPath = join(ROOT, "public/grounded-logo.svg");
-  assert.equal(existsSync(svgPath), true);
-  const svg = readFileSync(svgPath, "utf8");
-  assert.match(svg, /<svg/);
-  assert.match(svg, /#FFFFFF/);
-  assert.match(svg, /#06101F/);
-  assert.match(svg, /#3B82F6/);
-  assert.doesNotMatch(svg, /<rect[^>]*stroke/);
-  assert.ok(Buffer.byteLength(svg) < 100_000);
 });

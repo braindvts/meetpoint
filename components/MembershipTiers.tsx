@@ -14,19 +14,15 @@ export default function MembershipTiers({ input, missing, missingHint }: Props) 
   const progress = nextTierProgress(input);
 
   return (
-    <section className="mp-scroll-reveal mb-5 border border-line/50 bg-panel/40 p-3 sm:mb-10 sm:p-5">
-      <div className="flex flex-wrap items-end justify-between gap-3">
+    <section className="mb-8">
+      <div className="flex flex-wrap items-end justify-between gap-3 border-b border-line pb-3">
         <div>
-          <p className="text-[9px] font-semibold uppercase tracking-[0.22em] text-accent sm:text-[11px] sm:tracking-[0.32em]">
-            Standing
-          </p>
-          <p className="mt-1 max-w-sm text-[12px] text-muted">
-            Who you are in the room — not a rank ladder.
-          </p>
+          <p className="font-display text-2xl text-ivory">Standing</p>
+          <p className="mt-1 max-w-sm text-[13px] text-muted">Member, Verified, or BLACK.</p>
         </div>
         <div className="flex items-center gap-2">
           <TierBadge tier={progress.current} size="sm" />
-          <p className="max-w-[16rem] text-[11px] text-muted sm:max-w-none">
+          <p className="max-w-[16rem] text-[12px] text-muted sm:max-w-none">
             {progress.hint}
             {typeof input.profileStrength === "number"
               ? ` · Profile ${input.profileStrength}/100`
@@ -35,18 +31,13 @@ export default function MembershipTiers({ input, missing, missingHint }: Props) 
         </div>
       </div>
 
-      <div className="mp-scroll-stagger mt-4 grid gap-2.5 sm:grid-cols-3">
+      <div className="mp-standing">
         {TIER_DEFINITIONS.map((t) => {
           const active = progress.current === t.tier;
           const black = t.tier === 3;
           return (
-            <div
-              key={t.tier}
-              className={`mp-place flex min-h-[7.5rem] flex-col border px-3.5 py-3.5 ${TIER_CARD[t.tier].row} ${
-                active ? "is-yours border-ivory/25" : ""
-              }`}
-            >
-              <div className="flex items-center justify-between gap-2">
+            <article key={t.tier} className={active ? "bg-panel/60" : ""}>
+              <div>
                 {black ? (
                   <span className="inline-flex items-center gap-2">
                     <BlackBadge size="sm" />
@@ -56,25 +47,21 @@ export default function MembershipTiers({ input, missing, missingHint }: Props) 
                   <TierBadge tier={t.tier} size="sm" />
                 )}
                 {active ? (
-                  <span className="text-[9px] font-medium uppercase tracking-[0.16em] text-muted">
+                  <p className="mt-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-accent">
                     Yours
-                  </span>
+                  </p>
                 ) : null}
               </div>
-              <p
-                className={`mt-3 text-[14px] font-semibold tracking-tight ${
-                  black ? "text-ivory" : TIER_CARD[t.tier].label
-                }`}
-              >
-                {t.name}
-              </p>
-              <p className="mt-1.5 text-[11px] leading-relaxed text-muted">{t.howToEarn}</p>
-            </div>
+              <div>
+                <h3 className={black ? "text-ivory" : TIER_CARD[t.tier].label}>{t.name}</h3>
+                <p className="mt-1 text-[13px] leading-relaxed text-muted">{t.howToEarn}</p>
+              </div>
+            </article>
           );
         })}
       </div>
       {missing && missing.length > 0 && progress.current < 3 && (
-        <p className="mt-3 text-[11px] leading-relaxed text-muted">
+        <p className="mt-3 text-[12px] leading-relaxed text-muted">
           {missingHint ? `${missingHint}: ` : "Still open: "}
           {missing.slice(0, 4).join(" · ")}.
         </p>

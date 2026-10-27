@@ -46,7 +46,24 @@ export default function TierBadge({ tier, size = "sm" }: Props) {
       className={`${style.mark} ${scale}`}
       title={formatTierLabel(resolved)}
     >
+      {resolved === 2 ? <VerifiedCheck /> : null}
       {formatTierLabel(resolved)}
     </span>
+  );
+}
+
+function VerifiedCheck() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" aria-hidden>
+      <circle cx="12" cy="12" r="9.25" fill="none" stroke="currentColor" strokeWidth="1.6" />
+      <path
+        d="M7.4 12.4l3 3 6.2-6.6"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }

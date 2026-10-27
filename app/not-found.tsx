@@ -6,9 +6,9 @@ export default function NotFound() {
       <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-accent">
         Interlink
       </p>
-      <h1 className="mt-4 text-2xl font-semibold tracking-tight">This page isn’t here.</h1>
+      <h1 className="mt-4 font-display text-4xl font-medium tracking-tight">This page is not here.</h1>
       <p className="mt-3 max-w-sm text-sm text-muted">
-        The link may be outdated. Head back to Discover, Events, or Chats.
+        The link may be old. Head back to Discover, Events, or Chats.
       </p>
       <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
         <Link

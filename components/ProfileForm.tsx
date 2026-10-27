@@ -446,30 +446,32 @@ export default function ProfileForm({
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className={`group relative aspect-[3/4] w-full max-w-[280px] overflow-hidden border bg-panel transition sm:max-w-none ${
+              className={`group w-full max-w-[280px] border bg-panel text-left transition sm:max-w-none ${
                 fieldErrors.photo
                   ? "border-accent ring-1 ring-accent/40"
                   : "border-accent/35 hover:border-accent"
               }`}
             >
-              {photo ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={photo}
-                  alt="Your profile photo"
-                  className="h-full w-full object-cover object-top"
-                />
-              ) : (
-                <span className="grid h-full place-items-center px-4 text-center">
-                  <span>
-                    <span className="block font-display text-4xl italic text-muted/60">+</span>
-                    <span className="mt-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">
-                      Add your photo
+              <span className="block aspect-[3/4] overflow-hidden">
+                {photo ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={photo}
+                    alt="Your profile photo"
+                    className="h-full w-full object-cover object-top"
+                  />
+                ) : (
+                  <span className="grid h-full place-items-center px-4 text-center">
+                    <span>
+                      <span className="block font-display text-4xl italic text-muted/60">+</span>
+                      <span className="mt-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">
+                        Add your photo
+                      </span>
                     </span>
                   </span>
-                </span>
-              )}
-              <span className="absolute inset-x-0 bottom-0 bg-ink/75 py-2 text-center text-[10px] font-semibold uppercase tracking-[0.16em] text-accent-2">
+                )}
+              </span>
+              <span className="block border-t border-line py-2 text-center text-[10px] font-semibold uppercase tracking-[0.16em] text-accent-2">
                 {photo ? "Change photo" : "Upload photo"}
               </span>
             </button>

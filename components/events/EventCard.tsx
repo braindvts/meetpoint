@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { displayTitle } from "@/lib/displayTitle";
 import {
   CATEGORY_LABEL,
   formatEventDate,
@@ -38,39 +39,28 @@ export default function EventCard({
 
   return (
     <article
-      className={`mp-card-motion group relative overflow-hidden rounded-2xl border border-white/10 bg-[#0a0a0a] ${
+      className={`mp-card-motion group relative overflow-hidden border border-line bg-panel ${
         compact ? "" : "mp-scroll-card"
       }`}
     >
       <Link href={`/events/${event.slug}`} className="block">
-        <div className="relative aspect-[16/10] overflow-hidden">
+        <div className="aspect-[16/10] overflow-hidden">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={event.image}
             alt=""
             className="mp-card-photo h-full w-full object-cover"
           />
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#12110f] via-[#12110f]/35 to-transparent" />
-          <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
-            <span className="rounded-md border border-accent/30 bg-ink/70 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.12em] text-accent backdrop-blur-sm">
-              {CATEGORY_LABEL[event.category]}
-            </span>
-            {event.exclusive ? (
-              <span className="rounded-md border border-ivory/20 bg-ink/70 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.12em] text-ivory/90 backdrop-blur-sm">
-                Exclusive
-              </span>
-            ) : null}
-            {event.format === "online" ? (
-              <span className="rounded-md border border-line bg-ink/70 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.12em] text-muted backdrop-blur-sm">
-                Online
-              </span>
-            ) : null}
-          </div>
         </div>
         <div className="space-y-2.5 px-4 pb-4 pt-3 sm:px-5 sm:pb-5">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-accent">
+            {CATEGORY_LABEL[event.category]}
+            {event.exclusive ? " · Exclusive" : ""}
+            {event.format === "online" ? " · Online" : ""}
+          </p>
           <div className="flex items-start justify-between gap-3">
             <h3 className="text-[1.05rem] font-medium leading-snug tracking-tight text-ivory sm:text-lg">
-              {event.name}
+              {displayTitle(event.name)}
             </h3>
           </div>
           <p className="text-[12px] leading-relaxed text-muted sm:text-[13px]">
