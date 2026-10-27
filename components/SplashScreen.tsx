@@ -35,7 +35,7 @@ function markSeen() {
 }
 
 /**
- * Minimal loader — one champagne mark, a wordmark type-in, open partner credit.
+ * Minimal loader. Diamond, wordmark, then partners.
  * No sound. Replay with ?splash=1. Click anywhere to skip.
  */
 export default function SplashScreen() {
@@ -131,10 +131,6 @@ export default function SplashScreen() {
         }, 280);
       }}
     >
-      <div className="pointer-events-none absolute inset-0" aria-hidden>
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(212,196,168,0.075),transparent_56%)]" />
-      </div>
-
       <div className="mp-splash-seal relative flex flex-col items-center px-6 text-center">
         <svg className="mp-splash-geom" viewBox="0 0 80 80" aria-hidden>
           <polygon
@@ -155,7 +151,7 @@ export default function SplashScreen() {
           />
         </svg>
 
-        <h1 className="mp-splash-type relative mt-8 font-display text-[clamp(1.65rem,6.4vw,3.15rem)] font-medium leading-none tracking-[0.28em] text-accent">
+        <h1 className="mp-splash-type mp-splash-word relative mt-8 font-display text-[clamp(1.7rem,6.2vw,3.2rem)] font-medium leading-none tracking-[0.18em] text-accent-2">
           {LETTERS.map((ch, i) => (
             <span
               key={`${ch}-${i}`}

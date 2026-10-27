@@ -6,7 +6,7 @@
  */
 export const SITE_ORIGIN = "https://interlinkgobal.com";
 
-export const SITE_TITLE = "Interlink | Professional Business Connections";
+export const SITE_TITLE = "Interlink | Private introductions";
 
 export const SITE_DESCRIPTION =
-  "Interlink is a private network for professional introductions that lead to real business meetings — dinner-table networking, not a feed.";
+  "Interlink is a private network for ambitious people. Introductions end at a real dinner table or a business meeting.";

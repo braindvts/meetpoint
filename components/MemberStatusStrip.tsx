@@ -32,7 +32,7 @@ export default function MemberStatusStrip({ profile, tier }: Props) {
     <div className="mb-5 flex flex-wrap items-center gap-2">
       <span
         className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted"
-        title="Free standing — get Verified to meet anyone"
+        title="Free. Get Verified to meet anyone"
       >
         Free
       </span>

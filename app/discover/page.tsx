@@ -278,7 +278,7 @@ export default function DiscoverPage() {
                 What you’re looking for
               </p>
               <p className="mt-1 text-[12px] text-muted">
-                Change this anytime — Discover updates to match.
+                Change this anytime. Discover updates to match.
               </p>
               <div className="mt-2.5 flex flex-wrap gap-1.5">
                 {LOOKING_FOR_OPTIONS.map((item) => {
@@ -365,8 +365,7 @@ export default function DiscoverPage() {
               body={
                 visiblePeople.length === 0 ? (
                   <>
-                    No other members yet. Share Interlink — profiles appear here when they join this
-                    same app.
+                    No other members yet. Share Interlink. Profiles show up here when someone joins.
                   </>
                 ) : profile.lookingFor?.length === 0 ? (
                   <>

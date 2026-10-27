@@ -195,25 +195,25 @@ export default function PersonProfileSheet({
               : "border-white/10 bg-[#0a0a0a]"
           }`}
         >
-          {/* Drag handle only — does not cover the photo / block scroll */}
-          <div
-            className="absolute inset-x-0 top-0 z-20 flex h-11 touch-none items-start justify-center pt-2.5 sm:hidden"
-            onPointerDown={onHandlePointerDown}
-            onPointerMove={onHandlePointerMove}
-            onPointerUp={onHandlePointerUp}
-            onPointerCancel={onHandlePointerUp}
-            aria-label="Swipe down to close"
-          >
-            <span className="h-0.5 w-8 bg-white/40" />
+          <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-2.5">
+            <div
+              className="flex h-8 flex-1 touch-none items-center sm:hidden"
+              onPointerDown={onHandlePointerDown}
+              onPointerMove={onHandlePointerMove}
+              onPointerUp={onHandlePointerUp}
+              onPointerCancel={onHandlePointerUp}
+              aria-label="Swipe down to close"
+            >
+              <span className="mx-auto h-0.5 w-8 bg-line" />
+            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              className="ml-auto text-[11px] font-semibold uppercase tracking-[0.14em] text-ivory"
+            >
+              Close
+            </button>
           </div>
-
-          <button
-            type="button"
-            onClick={onClose}
-            className="absolute right-3 top-3 z-20 rounded-lg border border-white/15 bg-black/70 px-2.5 py-1 text-[11px] uppercase tracking-[0.12em] text-white/85 sm:right-4 sm:top-4"
-          >
-            Close
-          </button>
 
           {/* ONE scroll: photo scrolls away with the rest of the profile */}
           <div
@@ -221,7 +221,7 @@ export default function PersonProfileSheet({
             className="min-h-0 flex-1 overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch]"
             style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-y" }}
           >
-            <div className="relative aspect-[4/5] max-h-[48dvh] w-full bg-black sm:max-h-[380px]">
+            <div className="aspect-[4/5] max-h-[48dvh] w-full bg-panel sm:max-h-[380px]">
               {person.photoUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -237,45 +237,33 @@ export default function PersonProfileSheet({
                   <Avatar src={undefined} name={person.name} sizeCls="h-28 w-28" />
                 </div>
               )}
-              <div
-                className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/70 to-transparent px-4 pb-4 pt-20"
-                aria-hidden
-              />
-              {black && (
-                <div
-                  className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,transparent_55%,rgba(0,0,0,0.35)_100%)]"
-                  aria-hidden
-                />
-              )}
-              <div className="absolute inset-x-0 bottom-0 px-4 pb-4">
-                {owner && (
-                  <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-accent">
-                    Owner
-                  </p>
-                )}
-                <div className="flex flex-wrap items-center gap-2">
-                  <h2 className="text-2xl font-semibold tracking-tight text-white">
-                    {person.name}
-                  </h2>
-                  <NameMarks
-                    black={black}
-                    trusted={(person.blackConnections ?? 0) > 0}
-                    trustedCount={person.blackConnections}
-                    size="md"
-                  />
-                </div>
-                <p className="mt-1 text-[14px] font-medium text-accent-2">{person.jobTitle}</p>
-                <div className="mt-2 flex flex-wrap items-center gap-2">
-                  {!black ? <TierBadge tier={tier} size="md" /> : null}
-                  {tierCopy && (
-                    <span className="text-[11px] text-white/55">{tierCopy.meaning}</span>
-                  )}
-                </div>
-              </div>
             </div>
 
-            <div className={`px-4 pb-6 pt-4 sm:px-5 ${black ? "bg-black" : ""}`}>
-              <p className="text-[15px] leading-relaxed text-ivory/85">{person.bio}</p>
+            <div className="px-4 pb-6 pt-4 sm:px-5">
+              {owner && (
+                <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-accent">
+                  Owner
+                </p>
+              )}
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-display text-3xl font-medium tracking-tight text-ivory">
+                  {person.name}
+                </h2>
+                <NameMarks
+                  black={black}
+                  trusted={(person.blackConnections ?? 0) > 0}
+                  trustedCount={person.blackConnections}
+                  size="md"
+                />
+              </div>
+              <p className="mt-1 text-[14px] font-medium text-accent-2">{person.jobTitle}</p>
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                {!black ? <TierBadge tier={tier} size="md" /> : null}
+                {tierCopy && (
+                  <span className="text-[12px] text-muted">{tierCopy.meaning}</span>
+                )}
+              </div>
+              <p className="mt-4 text-[15px] leading-relaxed text-ivory/85">{person.bio}</p>
 
               <p className="mt-3 text-[13px] text-muted">
                 {person.city.name}, {person.city.country}
